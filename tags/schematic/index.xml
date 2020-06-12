@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>schematic | Nitin Gupta</title>
+    <link>/tags/schematic/</link>
+      <atom:link href="/tags/schematic/index.xml" rel="self" type="application/rss+xml" />
+    <description>schematic</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Fri, 22 Jul 2016 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>schematic</title>
+      <link>/tags/schematic/</link>
+    </image>
+    
+    <item>
+      <title>Building blocks of systematic investment strategies</title>
+      <link>/investing/building-blocks-of-investment-strategies/</link>
+      <pubDate>Fri, 22 Jul 2016 00:00:00 +0000</pubDate>
+      <guid>/investing/building-blocks-of-investment-strategies/</guid>
+      <description>
+
+
+&lt;p&gt;It is important to understand the building blocks of systematic investing strategies before learning how to build them. Here is a schematic from the book, &lt;a href=&#34;https://www.amazon.com/Inside-Black-Box-Quantitative-Frequency-ebook/dp/B00BZ9WAVW/ref=sr_1_1?s=books&amp;amp;ie=UTF8&amp;amp;qid=1487389686&amp;amp;sr=1-1&amp;amp;keywords=rishi+narang&#34;&gt;Inside the Black Box - The Simple Truth about Quantitative Trading&lt;/a&gt; by Rishi Narang, that provides a good way to visualize these building blocks and how they fit together in a system.&lt;/p&gt;
+&lt;center&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;buildingblocks.png&#34; alt=&#34;The Black Box Revealed&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;The Black Box Revealed&lt;/p&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;p&gt;The author had aptly titled it - The Black Box Revealed, since that is how most people perceive it to be from the outside. From this schematic, it is easier to understand and visualize how a system is built with a systematic approach.&lt;/p&gt;
+&lt;p&gt;Here are the components of the system:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Data - Encapsulates the processes of raw data collection, cleaning and preparation in tidy form to be used by the models.&lt;/li&gt;
+&lt;li&gt;Alpha Model - Describes the core strategy, product universe (stocks, ETFs, futures) and the rules to be implemented.&lt;/li&gt;
+&lt;li&gt;Risk Model - Describes position sizes or how capital/risk is allocated. This is just as much important as the alpha model itself.&lt;/li&gt;
+&lt;li&gt;Transaction Cost Model - Describes the transaction costs by product. These may be theoretical numbers while backtesting the strategy using historical data and later adjusted based on live execution data.&lt;/li&gt;
+&lt;li&gt;Portfolio Construction Model - Describes how a portfolio is constructed after putting together positions by product across one or more rules of the core strategy.&lt;/li&gt;
+&lt;li&gt;Execution Model - Encapsulates a live trading system. Describes the tactical implementation of the core strategy.&lt;/li&gt;
+&lt;li&gt;Research - Sound research forms the underpinning of all models and is driven by quantitative and statistical analysis.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The interactions shown are typical, although there could be more depending upon the implementation. More than one model could also be combined together, depending upon how the strategy is formulated. Nonetheless, for most practitioners looking to build a complete system from scratch, this is a pretty good blueprint.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

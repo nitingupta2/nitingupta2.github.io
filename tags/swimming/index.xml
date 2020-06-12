@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>swimming | Nitin Gupta</title>
+    <link>/tags/swimming/</link>
+      <atom:link href="/tags/swimming/index.xml" rel="self" type="application/rss+xml" />
+    <description>swimming</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 15 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>swimming</title>
+      <link>/tags/swimming/</link>
+    </image>
+    
+    <item>
+      <title>How Much Do Swimmers Improve in a Season?</title>
+      <link>/post/how-much-do-swimmers-improve-in-a-season/</link>
+      <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
+      <guid>/post/how-much-do-swimmers-improve-in-a-season/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;In my &lt;a href=&#34;../a-deep-dive-in-analyzing-swimming-data/&#34;&gt;previous post&lt;/a&gt;, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But how much impact does practice and coaching have? As I mentioned in my previous post, coaches do not keep a record of attendance during practice. There are daily hour long practice sessions during the summers. But even though it isn’t known how regular the kids are in attending practice, the number of meets that a kid participates in during the season, can be a good proxy. Afterall, it’s highly unlikely that a kid participates in meets while mostly skipping practice.&lt;/p&gt;
+&lt;p&gt;To judge improvement in a stroke, we’d like to see whether a kid got enough opportunities to practice as well as participate in meets. The summer league lasts for about 2 months. So, a reasonable start would be to take the data of kids whose first and last meet participations in a stroke were spaced at least 4 weeks apart.&lt;/p&gt;
+&lt;p&gt;Let’s see the distribution of the number of meets those kids participate in a season:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/number_of_meets-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Seems like, for every stroke, most kids participate in 4 or more meets in a season. So we’ll select it as a threshold to judge improvement. Then, for each kid who participates in 4 or more meets in a season, the improvement will be the difference between the first and the last swim times of the season.&lt;/p&gt;
+&lt;div id=&#34;estimating-improvement&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Estimating Improvement&lt;/h2&gt;
+&lt;p&gt;Here are the distributions of improvement in swim times by age:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/improvement_by_age-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see wide variance among 6 to 10 year olds. But as the kids grow older, the variance reduces.&lt;/p&gt;
+&lt;p&gt;In Breaststroke and Butterfly, there aren’t any 6 year old boys who satisfy the criteria for inclusion. So, instead of looking at improvement by age, it would be better to categorize it by age groups. We could classify kids into 3 age groups, younger kids (6-10), pre-teens and early teens (11-14) and mid to late teens (15-18).&lt;/p&gt;
+&lt;p&gt;Let’s see a similar plot by age groups:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/improvement_by_age_groups-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;is-improvement-significant&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Is Improvement Significant?&lt;/h2&gt;
+&lt;p&gt;Now that we know the distribution of improvement in swim times, the question arises, is it statistically significant? In other words, does practice and coaching have a significant effect within a short season? It is hard to tell from the plot of distributions itself. Within each age group and stroke, we have a paired sample of swim times, where for the same swimmer, we know their first and last swim times of a season. By using statistical tests, we could quantify mean improvements and determine whether or not they are significant.&lt;/p&gt;
+&lt;div id=&#34;frequentist-method&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Frequentist Method&lt;/h3&gt;
+&lt;p&gt;In traditional statistics, a statistical test known as dependent-samples t test can be used to evaluate whether there is a significant difference between the means of first and last swim times of a season. The null hypothesis is that any change in mean swim times is due to random chance.&lt;/p&gt;
+&lt;p&gt;Let’s run this test on the sample of Freestyle swim times of 15-18 year old boys.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+    Paired t-test
+
+data:  first_time_of_season and last_time_of_season
+t = 1.8, df = 31, p-value = 0.08
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.03343  0.52031
+sample estimates:
+mean of the differences 
+                 0.2434 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The mean improvement is about 0.24 seconds, but the 95% confidence interval includes 0, which means we cannot reject the null hypothesis.&lt;/p&gt;
+&lt;p&gt;Let’s look at the mean improvement and 95% confidence intervals for all the age groups, plotted below:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/t_test-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking at the plot, we could say girls of all age groups show a statistically significant improvement in swim times in all the strokes. But for boys, the picture is not so clear cut. Boys aged 6-10 and 11-14 show all around statistically significant improvement. But, as seen before, in Freestyle and also in Butterfly, boys aged 15-18 do not. In both the latter cases, confidence intervals include zero. Point estimates are shown with a hollow circle.&lt;/p&gt;
+&lt;p&gt;But look closely at the p values. Even though the improvements in Backstroke and Breaststroke among 15-18 year old boys appear to be statistically significant, it is only because of the arbitrary choice of 95% confidence level, which has become a de facto standard in published research. With p values of 0.01 and 0.028, we wouldn’t reject the null hypothesis under a 99% confidence level.&lt;/p&gt;
+&lt;p&gt;If this were a study to be published by a researcher in an academic journal, there would be a temptation to run multiple experiments with different filter criteria and attempt to produce final results according to their own bias; a.k.a. &lt;em&gt;p-hacking&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Under the null hypothesis, we’d draw the conclusion that 15-18 year old boys do not show any statistically significant improvement in a season. We might interpret that the hard work they put in practice is barely enough to maintain their time during a season. With a biased view, we might even question whether they’re putting in as much hard work as the girls of their age.&lt;/p&gt;
+&lt;p&gt;But, would either of these conclusions be correct? Afterall, girls of all age groups and most boys show statistically significant improvement. So, why would 15-18 year old boys be any different?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bayesian-method&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Bayesian Method&lt;/h3&gt;
+&lt;p&gt;This is where a Bayesian approach works best. Instead of determining whether the mean difference between the first and last swim times of the season is zero, which is uninformative, the Bayesian way is to determine how much have mean swim times improved, with associated probabilities.&lt;/p&gt;
+&lt;p&gt;Let’s see the results from a Bayesian counterpart to the t test, on a sample of Freestyle swim times of 15-18 year old boys.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+    Bayesian estimation supersedes the t test (BEST) - paired samples
+
+data: first_time_of_season and last_time_of_season, n = 32
+
+  Estimates [95% credible interval]
+mean paired difference: 0.24 [-0.026, 0.50]
+sd of the paired differences: 0.70 [0.45, 0.96]
+
+The mean difference is more than 0 by a probability of 0.96 
+and less than 0 by a probability of 0.04 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Instead of p-values, this Bayesian test provides an actual probability of improvement in swim times. We get estimates for mean and standard deviation of swim time improvements, along with credible or high density intervals. The probability that the mean improvement is more than zero is 95.9%, though the estimate is less precise and the 95% confidence interval includes zero.&lt;/p&gt;
+&lt;p&gt;Let’s run the Bayesian test for all strokes and age groups in both genders:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/bayes_t_test_plot-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking at the distributions, we can see that 15-18 year old boys show a very small improvement in their Freestyle and Butterfly times, but the estimate is less precise and the confidence intervals include zero (those distributions are shaded with a light blue color). Nevertheless the probability of mean improvement being greater than zero is in the high 90s, which from a practical standpoint, is convincing enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;With a reasonable set of filters, we created sample datasets by age groups to determine whether kids show significant improvement in swim times within a short summer season. We applied Bayesian testing which turns out to be more informative than traditional statistical testing. For all intents and purposes, we can conclude that kids of all age groups show improvement in their swim times, even within a short summer season.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file with code for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/how-much-do-swimmers-improve-in-a-season/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A Deep Dive in Analyzing Swimming Data</title>
+      <link>/post/a-deep-dive-in-analyzing-swimming-data/</link>
+      <pubDate>Sun, 30 Sep 2018 00:00:00 +0000</pubDate>
+      <guid>/post/a-deep-dive-in-analyzing-swimming-data/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length. The team schedules are packed with practices and events which are intense but thoroughly enjoyable.&lt;/p&gt;
+&lt;p&gt;This is one sport where progress can be measured on almost daily basis. While most young kids take it up as a hobby, older kids seem to be very competitive and quite mindful of their swim times. Besides her own results this year, I was curious to know how my daughter did compared to a larger cohort of kids her own age. And what could we expect, if she keeps at it in the years to come?&lt;/p&gt;
+&lt;p&gt;Luckily, I found past several years of her team’s results to analyze. Gathering this data, cleaning and transforming it for analysis was a huge challenge onto itself. Not something I intend to discuss in this post. But I digress.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the number of kids by age and gender in this dataset.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/boys_girls-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The pyramid plot above shows the number of competitors from ages 6 to 18 throughout the years. Seems like 6 to 8 are the most popular ages for kids to begin competitive swimming. There are some late joiners by age 10, after which we see a steady decline in the number of kids competing.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the ages when swimmers compete in each stroke.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/first_competed-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can observe a few things here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Everyone starts with Freestyle swimming. The participation rate is close to 100% for both genders. But towards the late teens, some boys seem to give up Freestyle to specialize in other strokes.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Girls seem to learn Backstroke a little faster than boys, and a wide majority of girls keep swimming Backstroke until their late teens.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Girls catch up with learning Breaststroke much more quickly than boys, and a majority of them keep at it until their late teens, where as some boys choose to specialize in either Backstroke or Butterfly.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Learning Butterfly appears to be a much bigger challenge for both genders. Relatively fewer kids compete in it early on. Boys in their early teens appear to participate at a faster clip than girls. But towards the late teens, girls appear to participate more consistently.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;steep-learning-curve&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Steep Learning Curve&lt;/h2&gt;
+&lt;p&gt;There’s a steep learning curve in swimming. Each stroke has its own level of difficulty and challenges but once the basics are learned, rapid progress could be made. However, there’s a huge difference between knowing how to swim a stroke, and swimming it well. It requires both speed and precision.&lt;/p&gt;
+&lt;p&gt;Swimming also happens to be one of the most unforgiving sports. In other sports, minor violations result in fouls or penalties; disqualifications or ejections are rare and usually result from violent or reckless behavior. But in swimming, the moment a competitor violates a rule, it results in disqualification. Even in summer leagues, the swim officials are trained and expected to follow USA Swimming standards. So, a 6 year old is to be judged the same way as an adult at USA Swimming events.&lt;/p&gt;
+&lt;p&gt;To get an idea, here are some ways of getting disqualified:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Freestyle: As the name suggests, everything is legal except the following:
+&lt;ul&gt;
+&lt;li&gt;Walking on the bottom of the pool.&lt;/li&gt;
+&lt;li&gt;Stopping and pushing off of the bottom of the pool.&lt;/li&gt;
+&lt;li&gt;Pulling on a lane line for an assist.&lt;/li&gt;
+&lt;li&gt;Not touching the wall before turning or at finish.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Backstroke
+&lt;ul&gt;
+&lt;li&gt;Not swimming on back off the wall.&lt;/li&gt;
+&lt;li&gt;Delaying initiating a turn.&lt;/li&gt;
+&lt;li&gt;Pulling on a lane line for an assist.&lt;/li&gt;
+&lt;li&gt;Not touching the wall before turning or at finish.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Breaststroke
+&lt;ul&gt;
+&lt;li&gt;Pulling hands beyond hips.&lt;/li&gt;
+&lt;li&gt;Non-simultaneous or single hand touch at the turn or finish.&lt;/li&gt;
+&lt;li&gt;Doing alternating kicks (as in Freestyle) or dolphin kicks (as in Butterfly).&lt;/li&gt;
+&lt;li&gt;Not being on breast after leaving the wall.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Butterfly
+&lt;ul&gt;
+&lt;li&gt;Arms underwater during the recovery phase of stroke.&lt;/li&gt;
+&lt;li&gt;Non-simulatenous arm movements during strokes.&lt;/li&gt;
+&lt;li&gt;Non-simultaneous or single hand touch at the turn or finish.&lt;/li&gt;
+&lt;li&gt;Doing alternating kicks (as in Freestyle) or Breaststroke kicks.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;From what I observed throughout the season, in a majority of cases, rule violations are not deliberate. They happen inadvertently.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the total number of disqualifications by age, gender and stroke in the dataset:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The absolute numbers of DQs are a proxy for the level of difficulty of each stroke. Most kids learn each stroke in this order from Freestyle to Butterfly. However, as seen in the previous plot, the level of participation in Butterfly is far less as compared to other strokes. For instance, the level of participation in Freestyle and Backstroke is consistently at ~ 80% or above. About 80% of 7 year olds attempt to swim Breaststroke, where as only ~ 33% of 7 year old boys and ~ 48% of 7 year old girls attempt Butterfly in comparison. Hence the absolute numbers of disqualifications merely reflect the total number of unique competitors at that age.&lt;/p&gt;
+&lt;p&gt;A better way to look at this is to compute the number of DQs per person, as shown below.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs_per_person-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here, we can see the number of disqualifications per person reduce as the kids get better with age.
+In Freestyle, Backstroke and Breaststroke races, kids upto 8 years swim only 1 lap. In Butterfly, kids upto 10 years swim only 1 lap.
+In all other age brackets, kids swim 2 laps, which means they turn after touching the opposite end of the pool. Learning to execute a legal turn without compromising pace is both an art and a science. We can see its challenges in Backstroke at age 9 and in Butterfly at age 11, when the kids start swimming 2 laps in a race. The number of disqualifications per person increase after decreasing upto the prior year when the kids are swimming only 1 lap.&lt;/p&gt;
+&lt;p&gt;Consistently swimming a legal backstroke appears to remain a challenge until the mid-teens. It is indicative of the failures in executing legal turns. Backstroke could be thought of as swimming Freestyle on the back. Arm and leg movements have no constraints as long as the body is on the back. But the biggest challenge is the swimmers cannot see the wall in the direction they are swimming. Their eyes are always facing up. They train to spot a row of flags hung 5 meters from the wall over the pool and count the number of strokes they need to reach the wall from that point. While some inexperienced swimmers touch the wall with their hands and push off again on the back, it compromises their speed. The quickest way to turn is to flip on the belly while approaching a turn and push off against the wall with the feet so that the body regains its position on the back. This needs to be done in one smooth series of motions. As soon as the body flips on the belly, only a single or double hand pull is allowed to initiate the turn. If the swimmer does multiple strokes, they’re disqualified. If the swimmer turns too soon, it’s likely they’ll miss touching the wall. No sculling is allowed to reach the wall. Therefore, again a swimmer gets disqualified. We can see these mistakes happen well into the teenage years.&lt;/p&gt;
+&lt;p&gt;For every boy competing in Breaststroke at age 6, there has been more than 1 disqualification, which means 6 year old boys face multiple disqualifications in a season. Their level of participation is at 40%. It shows how challenging it is to learn Breaststroke. 6 year old girls appear to do a bit better. The good thing is that kids are persistent in learning Breaststroke from an early age. So, not only does the level of participation increase with age, but also the number of disqualifications per person decrease dramatically. But again, at age 9 when the kids start swimming 2 laps, the rate of improvement slows down. Other than the Breaststroke technique, kids have to remember to touch the wall with both hands simultaneously and then turn back on their breast. Most kids become very good with practice, but even a slight lapse of concentration results in disqualification.&lt;/p&gt;
+&lt;p&gt;Similarly, Butterfly is a bigger challenge in the early years. With every stroke, the arms have to break the surface of the water during recovery. Many young swimmers find it hard to have the upper body strength to do it consistently. As the kids grow, their strength improves and it becomes less hard.
+Once again, we see a surge of DQs at age 11, when the kids start swimming 2 laps. As with Breaststroke, kids have to remember to touch the wall with both hands simultaneously and then turn back without doing any flutter or alternate kicks.&lt;/p&gt;
+&lt;p&gt;Overall, girls seem to improve more consistently than boys.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;swim-times&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Swim Times&lt;/h2&gt;
+&lt;p&gt;Now, here is what I was most curious about before doing this analysis. Shown below are the distributions of swim times by age, gender and stroke. I have excluded the races in yards to focus only on the races in meters, which is the international standard.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/distribution_swim_times-1.png&#34; width=&#34;960&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;To provide a reference point, I have added the current 50 Short Course Meters world records for each stroke and gender. As expected, the distributions of swim times are heavily skewed towards the right. In the plots, I have truncated the outliers exceeding 80 seconds.&lt;/p&gt;
+&lt;p&gt;On average, we see consistent improvement with age across the board. In nearly every plot, we see multi-modal distributions with multiple peaks that separate the best swimmers from merely good and the rest of the pack. As the kids progress to swimming 50 meters, i.e. 2 laps of the 25m length, the distributions during the early years once again become wider with heavier skews and fatter right tails. Not only does the difference in swim speed, but also the time taken to turn contributes to a large variance in swim times.&lt;/p&gt;
+&lt;p&gt;The variance reduces in later years and the distributions tend to become more normal. I reckon this is due to two reasons:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Kids get stronger with age and better with practice.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A survivorship bias comes in play. As we’ve seen in the first plot, the number of competitors decrease with age. Basically the kids who have consistently done well are the ones who continue to swim beyond the early years. There might be some kids who swim just for fun or to hang out with their friends. But chances are, those who cannot compete effectively in any stroke would drop out.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Nevertheless, we see higher variance in strokes that are more technical, i.e. Backstroke, Breaststroke and Butterfly, as compared to Freestyle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;mean-times&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Mean Times&lt;/h2&gt;
+&lt;p&gt;Looking at the plots of distributions, we can observe a very interesting thing as the kids grow older. Note, all the plots are drawn to the same scale. But the distributions of the boys’ swim times curve more to the left than those of girls. It is evident that on average, boys continue to improve well into the late teens, where as the rate of improvement of girls slows down. Why does that happen?&lt;/p&gt;
+&lt;p&gt;Let’s see the mean times to swim 50 Short Course Meters by age.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;What’s really interesting is that on average, boys and girls are doing just about the same until age 12. Thereafter, boys start pulling apart. Why? Do teenage boys work harder than teenage girls to improve? Hardly the case. On the contrary, we have seen evidence that girls learn and improve more consistently than boys. So what’s happening here? I am no expert in biology, but this is the about the age where puberty begins. Among other things, boys tend to grow taller and more muscular than girls at this stage. No wonder they start swimming faster than girls!
+This might be among the few instances where the impact of puberty on both sexes, could be measurably observed.&lt;/p&gt;
+&lt;p&gt;In both genders, the trajectory of improvement is non-linear with age. Kids show dramatic improvement until they reach their teens. Thereafter, the rate of improvement slows down. There’s a physical limit to how fast a human could swim, so we could expect the curves to reach their minima at some point during the 20s - 30s when the swimmers reach the pinnacle of physical strength and performance. When the swimmers are past their prime, we could expect them to start slowing down.&lt;/p&gt;
+&lt;p&gt;USA Swimming has race data for swimmers ranging from ages 5 to 50. I sampled data for 50 Short Course Meters Freestyle races to explore.&lt;/p&gt;
+&lt;p&gt;Here are the curves drawn using USA Swimming data:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times_USA_Swimming-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The USA Swimming sample data produces a similar set of curves. The effects of puberty on average swim times are exhibited in this dataset too. Boys and girls have nearly the same average swim times until age 12, but from age 13 onwards, boys start swimming faster than girls.&lt;/p&gt;
+&lt;p&gt;Another interesting observation is that after age 18, the rate of improvement accelerates once again for both male and female swimmers. Both curves show a big shift towards the left. Yet again, survivorship bias appears to come into play. These aren’t recreational swimmers. Rather they are kids who continue to swim in college teams, and then compete in national and international events. Superior coaching and facilities at the top level, probably are big factors contributing to this dramatic improvement.&lt;/p&gt;
+&lt;p&gt;Judging by the averages, male swimmers reach their prime in their early 20s and maintain their peak form until their early 30s. In comparison, female swimmers do not hit their prime until their late 20s, and have a much shorter peak span than males.&lt;/p&gt;
+&lt;p&gt;The average times start deteriorating by the mid 30s for both males and females. Unfortunately, the data is very sparse for swimmers 35 years and older. To reduce noise, I excluded the data for every age where there are fewer than 10 records. So it’s hard to see the trajectory well into the 40s.&lt;/p&gt;
+&lt;p&gt;Here are plots of all swim times in this dataset with best fitting curves for both genders:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/improvement_curves-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;From this study, we gain some interesting insights into the world of competitive swimming from the early years:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Most kids join swim teams between 6 and 8. More and more kids drop out during the teenage years.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;After Freestyle, kids learn to swim Backstroke before they learn Breaststroke and Butterfly. Butterfly remains a challenging stroke to learn well into the teens.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Persistence pays off and kids who don’t give up improve by leaps and bounds from 6 to 10.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Boys and girls improve at the same rate until the onset of puberty. Then boys start gaining a big advantage.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;On average, boys reach peak performance in the early 20s itself. On the flip side, they require all the hard work just to maintain it until the 30s. Girls reach peak performance only by the late 20s. On the brighter side, this is a big motivation to continue working hard well into adulthood.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file with code for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/a-deep-dive-in-analyzing-swimming-data/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>xgboost | Nitin Gupta</title>
+    <link>/tags/xgboost/</link>
+      <atom:link href="/tags/xgboost/index.xml" rel="self" type="application/rss+xml" />
+    <description>xgboost</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>xgboost</title>
+      <link>/tags/xgboost/</link>
+    </image>
+    
+    <item>
+      <title>Ames Housing - Part 2 - Building Models</title>
+      <link>/casestudies/ames-housing-part2-models/</link>
+      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>/casestudies/ames-housing-part2-models/</guid>
+      <description>
+
+
+&lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we did an exploratory data analysis of the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In this post, we will build linear and non-linear models and see how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties.&lt;/p&gt;
+&lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
+&lt;p&gt;Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed &lt;code&gt;SalePrice&lt;/code&gt; will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;steps-for-building-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Steps for Building Models&lt;/h2&gt;
+&lt;p&gt;Here are the steps for building models and determining the best hyperparameter combinations by K-fold cross validation:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Define linear and non-linear models.&lt;/li&gt;
+&lt;li&gt;For each model, create a grid of hyperparameter combinations that are equally spaced.&lt;/li&gt;
+&lt;li&gt;For each hyperparameter combination, fit a model on the training set and make predictions on the validation set. Repeat the process for all folds.&lt;/li&gt;
+&lt;li&gt;Determine root mean squared errors (RMSE) and choose the best hyperparameter combination that corresponds to the minimum RMSE.&lt;/li&gt;
+&lt;li&gt;Train each model with its best hyperparameter combination on the entire training set.&lt;/li&gt;
+&lt;li&gt;Calculate RMSE of the each finalized model on the testing set.&lt;/li&gt;
+&lt;li&gt;Finally, choose the best model that gives the least RMSE.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;partitioning-training-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
+&lt;p&gt;We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.&lt;/p&gt;
+&lt;p&gt;Let’s look at the distribution of the target variable across all folds:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Linear Models&lt;/h2&gt;
+&lt;div id=&#34;ordinary-least-squares-regression&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Ordinary Least Squares Regression&lt;/h3&gt;
+&lt;p&gt;Before creating any new features or indulging in more complex modelling methods, we will cross validate a simple linear model on the training data to establish a benchmark. If more complex approaches do not have a significant improvement in the model validation metrics, then they are not worthwhile to be pursued.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
+
+Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1468&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;This is the simplest and fastest model with no hyperparameters to tune.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;regularized-linear-model&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Regularized Linear Model&lt;/h3&gt;
+&lt;p&gt;We will use &lt;code&gt;glmnet&lt;/code&gt; that uses LASSO and Ridge Regression with regularization. We will do a grid search of the following hyperparameters that minimize RMSE:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;penalty&lt;/code&gt;: The total amount of regularization in the model.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mixture&lt;/code&gt;: The proportion of L1 regularization in the model.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
+
+Main Arguments:
+  penalty = tune()
+  mixture = tune()
+
+Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+    penalty mixture mean_rmse
+      &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
+ 1 4.83e- 3  0.922      0.127
+ 2 3.79e- 2  0.0518     0.129
+ 3 1.36e- 3  0.659      0.132
+ 4 1.60e- 3  0.431      0.133
+ 5 3.50e- 3  0.177      0.133
+ 6 4.17e- 2  0.288      0.133
+ 7 5.67e- 4  0.970      0.133
+ 8 6.79e- 9  0.0193     0.138
+ 9 4.32e-10  0.337      0.138
+10 1.95e- 6  0.991      0.138&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;After hyperparameter tuning with cross validation, &lt;code&gt;glmnet&lt;/code&gt; gives the best RMSE of 0.127 with penalty = 0.0048 and mixture = 0.9216.&lt;/li&gt;
+&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation takes under a minute to execute.&lt;/li&gt;
+&lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;non-linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Non-linear Models&lt;/h2&gt;
+&lt;p&gt;Next, we will train a couple of tree-based algorithms, which are not very sensitive to outliers and skewed data.&lt;/p&gt;
+&lt;div id=&#34;randomforest&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;em&gt;randomForest&lt;/em&gt;&lt;/h3&gt;
+&lt;p&gt;In each ensemble, we have 1000 trees and do a grid search of the following hyperparameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mtry&lt;/code&gt;: The number of predictors to randomly sample at each split.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of data points in a node required to further split the node.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Random Forest Model Specification (regression)
+
+Main Arguments:
+  mtry = tune()
+  trees = 1000
+  min_n = tune()
+
+Engine-Specific Arguments:
+  objective = reg:squarederror
+
+Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+   min_n  mtry mean_rmse
+   &amp;lt;int&amp;gt; &amp;lt;int&amp;gt;     &amp;lt;dbl&amp;gt;
+ 1     4    85     0.134
+ 2     3   140     0.135
+ 3    14    90     0.135
+ 4     6    45     0.136
+ 5     9   138     0.136
+ 6    13   158     0.137
+ 7     9   183     0.137
+ 8    19    56     0.138
+ 9    21   130     0.138
+10     5   218     0.138&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.134 with mtry = 85 and min_n = 4.&lt;/li&gt;
+&lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt; cross validation takes much longer to execute than &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here a plot of the &lt;code&gt;randomForest&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;em&gt;xgboost&lt;/em&gt;&lt;/h3&gt;
+&lt;p&gt;In each ensemble we have 1000 trees and do a grid search of the following hyperparameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of data points in a node required to further split the node.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tree_depth&lt;/code&gt;: The maximum depth or the number of splits of the tree.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;learn_rate&lt;/code&gt;: The rate at which the boosting algorithm adapts from one iteration to another.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;Boosted Tree Model Specification (regression)
+
+Main Arguments:
+  trees = 1000
+  min_n = tune()
+  tree_depth = tune()
+  learn_rate = tune()
+
+Engine-Specific Arguments:
+  objective = reg:squarederror
+
+Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 4
+   min_n tree_depth learn_rate mean_rmse
+   &amp;lt;int&amp;gt;      &amp;lt;int&amp;gt;      &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
+ 1    13          3  0.0309        0.124
+ 2    40          4  0.0350        0.126
+ 3     6          8  0.0469        0.126
+ 4    34         15  0.0172        0.127
+ 5    28         10  0.0336        0.128
+ 6    20         14  0.00348       0.389
+ 7    22          7  0.000953      4.46 
+ 8     3          2  0.000528      6.81 
+ 9    10         12  0.000401      7.73 
+10    34          3  0.0000802    10.6  &lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.124 with min_n = 13, tree_depth = 3 and learn_rate = 0.0309.&lt;/li&gt;
+&lt;li&gt;Gives the best RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;However, &lt;code&gt;xgboost&lt;/code&gt; cross validation takes longer to execute than that of &lt;code&gt;glmnet&lt;/code&gt;, but is faster than that of &lt;code&gt;randomForest&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
+&lt;!-- &lt;center&gt; --&gt;
+&lt;!-- ```{r plot_xgboost} --&gt;
+&lt;!-- library(plotly) --&gt;
+&lt;!-- plot_ly(param_grid_xgboost, x = ~min_n, y = ~tree_depth, z = ~learn_rate) %&gt;% --&gt;
+&lt;!--   add_markers() %&gt;% --&gt;
+&lt;!--   layout(font = list(family = &#34;Roboto Condensed&#34;), --&gt;
+&lt;!--          title = list(text = &#34;Scatterplot of min_n, tree_depth and learn_rate&#34;, font = list(size = 22)), --&gt;
+&lt;!--          scene = list(xaxis = list(title = &#39;min_n&#39;), --&gt;
+&lt;!--                       yaxis = list(title = &#39;tree_depth&#39;), --&gt;
+&lt;!--                       zaxis = list(title = &#39;learn_rate&#39;))) --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- &lt;/center&gt; --&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;finalizing-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Finalizing Models&lt;/h2&gt;
+&lt;p&gt;For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Both &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; models do a fantastic job of predicting log(SalePrice) with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees.&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;glmnet&lt;/code&gt; model shows a couple of outliers with Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; whose predicted values are far in excess of their actual values. Even properties whose &lt;code&gt;SalePrice&lt;/code&gt; is at the lower end, show a wide dispersion in prediced values.&lt;/li&gt;
+&lt;li&gt;But the true performance can only be measured on unseen testing data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Performance on Test Data&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
+  model        test_rmse cv_rmse
+  &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
+1 glmnet           0.129   0.127
+2 randomForest     0.139   0.134
+3 xgboost          0.128   0.124&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.&lt;/li&gt;
+&lt;li&gt;Records with Ids &lt;strong&gt;1537&lt;/strong&gt; and &lt;strong&gt;2217&lt;/strong&gt; are outliers, as none of the models are able to predict close to actual values.&lt;/li&gt;
+&lt;li&gt;Looking at the test RMSE, we could finalize &lt;code&gt;xgboost&lt;/code&gt; as the model that generalizes very well on this dataset.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;feature-importance&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Feature Importance&lt;/h2&gt;
+&lt;p&gt;Even though &lt;code&gt;xgboost&lt;/code&gt; is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the top 10 most important features of our finalized &lt;code&gt;xgboost&lt;/code&gt; model:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.&lt;/li&gt;
+&lt;li&gt;This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;new-property-premium&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;New Property Premium&lt;/h2&gt;
+&lt;p&gt;Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is &lt;code&gt;PropertyAge&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;So, how would the predicted &lt;code&gt;SalePrice&lt;/code&gt; differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?&lt;/p&gt;
+&lt;p&gt;We could pick a couple of properties at random, change &lt;code&gt;PropertyAge&lt;/code&gt; and see its impact on &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Diamonds - Part 3 - A polished gem - Building Non-linear Models</title>
+      <link>/casestudies/diamonds-part3-non-linear-models/</link>
+      <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>/casestudies/diamonds-part3-non-linear-models/</guid>
+      <description>
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;Diamonds - Part 1 - In the rough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/&#34;&gt;Diamonds - Part 2 - A cut above - Building Linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In a couple of previous posts, we tried to understand what attributes of diamonds are important to determine their prices. We showed that &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; are the most important predictors of &lt;code&gt;price&lt;/code&gt;. We arrived at this conclusion after doing a detailed exploratory data analysis. Finally we fit linear models to predict prices and determined the best model from the metrics.&lt;/p&gt;
+&lt;p&gt;In this post, we will use non-linear regression models to predict diamond prices and compare them with those from linear models.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;training-non-linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Training Non-linear Models&lt;/h2&gt;
+&lt;p&gt;We’ll follow some of the same steps as we did for linear models, while transforming some predictors:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Partition the dataset into training and testing sets in the proportion 75% and 25% respectively.&lt;/li&gt;
+&lt;li&gt;Stratify the partitioning by &lt;code&gt;clarity&lt;/code&gt;, so both training and testing sets have the same distributions of this feature.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;cut&lt;/code&gt; have ordered categories from lowest to highest grades. The &lt;code&gt;randomForest&lt;/code&gt; method requires no change in representing this data before training the models, however &lt;code&gt;xgboost&lt;/code&gt; and &lt;code&gt;keras&lt;/code&gt; methods require all the predictors to be in numerical form. &lt;a href=&#34;https://statmodeling.stat.columbia.edu/2009/10/06/coding_ordinal/&#34;&gt;Two methods&lt;/a&gt; could be used for transforming the categorical data:
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Use one-hot encoding to convert categorical data to sparse data with 0s and 1s. This way, each category in &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;cut&lt;/code&gt; is converted to a new predictor in binary form. A disadvantage of this method is that it treates ordered categorical data the same as unordered categorical data, so the ordinality is lost in transformation. However, non-linear models should be able to infer the ordinality as our training sample is sufficiently large.&lt;/li&gt;
+&lt;li&gt;Represent the ordinal categories from lowest to highest grades in integer form. However, this creates a linear gradation from one category to another, which may not be a suitable choice here.&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;li&gt;Center and scale all values in the training set and build a matrix of predictors.&lt;/li&gt;
+&lt;li&gt;Fit a non-linear model with the training set.&lt;/li&gt;
+&lt;li&gt;Make predictions on the testing set and determine model metrics.&lt;/li&gt;
+&lt;li&gt;Wrap all the steps above inside a function in which the model formula, and a seed could be passed that randomizes the partition of training and testing sets.&lt;/li&gt;
+&lt;li&gt;Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here are the average metrics for all the models trained with &lt;code&gt;keras&lt;/code&gt;, &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; regression methods:&lt;/p&gt;
+&lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;border-top: 2px solid grey;&#34;&gt;
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+mae
+&lt;/th&gt;
+&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+rmse
+&lt;/th&gt;
+&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+rsq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34;&gt;
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ .
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+360.55
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+262.35
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+280.49
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+989.71
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+529.28
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+540.76
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.93
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+860.29
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+816.1
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+815.76
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1499.2
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1427.25
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+1427.35
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.86
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.87
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.87
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+590.32
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+548.67
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+544.48
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1040.69
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1006.61
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+992.46
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.93
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.94
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.94
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity + color
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+358.85
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+305.17
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+306.86
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+645.4
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+571.73
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+575.3
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.97
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity + color + cut
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+347.99
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+285.96
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
+282.38
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+626.78
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+545.02
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
+541.63
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Looking at the r-squared terms, it is remarkable how well all the models have been able to infer the complex relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt;. To fit linear models, we needed to transform &lt;code&gt;price&lt;/code&gt; to logarithmic terms and take the cube root of &lt;code&gt;carat&lt;/code&gt;. The neural network as well as the decision tree based models do this all on their own. The root mean squared error is in $ terms so it is easier to interpret. Considering the mean and standard deviation of &lt;code&gt;price&lt;/code&gt; in the dataset is about $4000, the root mean squared errors of the models are very low.&lt;/p&gt;
+&lt;p&gt;Exploratory data analysis adds value here, as the models with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; give excellent results. Including &lt;code&gt;cut&lt;/code&gt; in the models does not provide any significant benefits and results in overfitted models.&lt;/p&gt;
+&lt;p&gt;Even the base models with all predictors: &lt;strong&gt;price ~ .&lt;/strong&gt; (where some of them are confounders), do a very good job of explaning the variance. Decision tree and neural network models are unaffected by multi-collinearity. We can use local model interpretations to determine the most important predictors from these models.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;local-interpretable-model-agnostic-explanations&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Local Interpretable Model-agnostic Explanations&lt;/h2&gt;
+&lt;p&gt;LIME is a method for explaining black-box machine learning models. It can help visualize and explain individual predictions. It makes the assumption that every complex model is linear on a local scale. So it is possible to fit a simple model around a single observation that will behave how the global model behaves at that locality. The simple model can be used to explain the predictions of the more complex model locally.&lt;/p&gt;
+&lt;p&gt;The generalized algorithm LIME applies is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Given an observation, permute it to create replicated feature data with slight value modifications.&lt;/li&gt;
+&lt;li&gt;Compute similarity distance measure between original observation and permuted observations.&lt;/li&gt;
+&lt;li&gt;Apply selected machine learning model to predict outcomes of permuted data.&lt;/li&gt;
+&lt;li&gt;Select m number of features to best describe predicted outcomes.&lt;/li&gt;
+&lt;li&gt;Fit a simple model to the permuted data, explaining the complex model outcome with m features from the permuted data weighted by its similarity to the original observation .&lt;/li&gt;
+&lt;li&gt;Use the resulting feature weights to explain local behavior.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The features by importance that best explain the predictions in these 6 random samples are &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are co-linear with &lt;code&gt;carat&lt;/code&gt;, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
+&lt;p&gt;Finally, here are the scatterplots of actual v/s predicted &lt;code&gt;price&lt;/code&gt; from the best model on the testing set, using the 3 regression methods:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar &lt;strong&gt;r-squared&lt;/strong&gt; and &lt;strong&gt;rmse&lt;/strong&gt; values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.&lt;/p&gt;
+&lt;p&gt;As in the case with linear models, the variance in predicted diamond prices increases with &lt;code&gt;price&lt;/code&gt;. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between &lt;code&gt;price&lt;/code&gt; and its predictors, they also predict prices within a reasonable range.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;All the 3 non-linear regression methods can infer the complex relationship between &lt;code&gt;price&lt;/code&gt;, &lt;code&gt;carat&lt;/code&gt; and other predictors, without the need for feature engineering.&lt;/li&gt;
+&lt;li&gt;Exploratory Data Analysis is useful in removing the redundant features from the training dataset, resulting in both faster execution, as well as much better metrics.&lt;/li&gt;
+&lt;li&gt;In terms of time taken to train the models, &lt;code&gt;keras&lt;/code&gt; neural network models execute the fastest by virtue of being able to use GPUs.&lt;/li&gt;
+&lt;li&gt;Among the decision-tree based methods, &lt;code&gt;xgboost&lt;/code&gt; models train much faster than &lt;code&gt;randomForest&lt;/code&gt; models.&lt;/li&gt;
+&lt;li&gt;Multiple CPUs can be used to run &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; methods. RAM is the only limiting constraint, when trained on a local machine.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

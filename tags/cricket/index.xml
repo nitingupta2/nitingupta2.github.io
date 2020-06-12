@@ -1,0 +1,1554 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cricket | Nitin Gupta</title>
+    <link>/tags/cricket/</link>
+      <atom:link href="/tags/cricket/index.xml" rel="self" type="application/rss+xml" />
+    <description>cricket</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Thu, 16 Feb 2017 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>cricket</title>
+      <link>/tags/cricket/</link>
+    </image>
+    
+    <item>
+      <title>Best batsmen in cricket at present</title>
+      <link>/post/best-batsmen-in-cricket-at-present/</link>
+      <pubDate>Thu, 16 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/best-batsmen-in-cricket-at-present/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my &lt;a href=&#34;../top-batsmen-in-cricket/&#34;&gt;last post&lt;/a&gt;, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.&lt;/p&gt;
+&lt;p&gt;I got a list of 42 batsmen who have consistently performed well throughout their career. Now the question is how could we select the best of the best who have had the most well-rounded performances. A post on &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; has been a strong inspiration to arrive at the answers below.&lt;/p&gt;
+&lt;div id=&#34;best-batsmen-at-present&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Best batsmen at present&lt;/h3&gt;
+&lt;p&gt;To select current best batsmen we filter the list of top batsmen to include only the batsmen who are actively playing in all the 3 formats of the game.&lt;/p&gt;
+&lt;p&gt;This leaves us with only 6 batsmen who are currently playing in all the formats. They are AB de Villiers, HM Amla, JE Root, KS Williamson, SPD Smith, V Kohli. No surprises there as these batsmen are widely considered to be the best among the active players today. But instead of subjectively handpicking them, we arrived at this conclusion by applying some reasonable filters.&lt;/p&gt;
+&lt;p&gt;But how well-rounded are these players? To determine this I’ve defined the following criteria and metrics:&lt;/p&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;51%&#34; /&gt;
+&lt;col width=&#34;30%&#34; /&gt;
+&lt;col width=&#34;17%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Criteria&lt;/th&gt;
+&lt;th&gt;Metric&lt;/th&gt;
+&lt;th&gt;Label&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Consistency of scoring runs&lt;/td&gt;
+&lt;td&gt;Career batting average&lt;/td&gt;
+&lt;td&gt;SCORING CONSISTENCY&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Ability to score quickly&lt;/td&gt;
+&lt;td&gt;Strike Rate&lt;/td&gt;
+&lt;td&gt;STRIKE RATE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Ability to score big (number of 100s + number of 50s scored)&lt;/td&gt;
+&lt;td&gt;Big scores per innings&lt;/td&gt;
+&lt;td&gt;BIG SCORING RATE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Overall contribution to the matches played&lt;/td&gt;
+&lt;td&gt;Team Win-Loss Ratio&lt;/td&gt;
+&lt;td&gt;WIN RATIO&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Direct contribution to matches won&lt;/td&gt;
+&lt;td&gt;Batting average in winning matches&lt;/td&gt;
+&lt;td&gt;WIN CONTRIBUTION&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Every metric defined here is a ratio instead of an absolute number. So it is useful to evaluate relative ability.&lt;/p&gt;
+&lt;p&gt;Among the 42 top batsmen selected before, I calculate percentile scores of these metrics for each batsman grouped by the format of the game. This means we have a score ranging from 0-100 for each metric, where each batsman in the list has been scored relative to the best batsman in each criteria.&lt;/p&gt;
+&lt;p&gt;Let’s see the percentile scores for the 6 champion batsmen in our final list.&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:56:45 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Percentile Scores
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Format
+&lt;/th&gt;
+&lt;th&gt;
+Country
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+PercAverage
+&lt;/th&gt;
+&lt;th&gt;
+PercStrikeRate
+&lt;/th&gt;
+&lt;th&gt;
+PercInningsPerBigScore
+&lt;/th&gt;
+&lt;th&gt;
+PercWinRatio
+&lt;/th&gt;
+&lt;th&gt;
+PercAverageInWins
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+27
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+61
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+47
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+72
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+73
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+88
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+40
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+22
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+74
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+90
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+79
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+59
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+62
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+62
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+54
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+70
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+81
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+73
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+70
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+69
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+69
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+71
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+77
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+63
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+13
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+37
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+91
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+14
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+56
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+52
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+79
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+64
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+17
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+65
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+84
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Here we can see how each champion scored relative to the rest of the elite group. AB de Villiers has the best career batting average and strike rate in ODIs so he gets a score of 100 in SCORING CONSISTENCY &amp;amp; STRIKE RATE. All other batsmen are scored relative to AB in these 2 criteria. With his astounding batting average of 99.94 in Tests, Sir Don Bradman gets a score of 100 in SCORING CONSISTENCY in Tests. And being at number 5 in all time highest batting averages in Tests, Steve Smith gets a high score of 91 in this criteria, relative to Sir Don.&lt;/p&gt;
+&lt;p&gt;This is all well and good, but how do we see the forest from trees? It is very difficult to make sense of high dimensional data in a table or in a single bar plot. This is where the visualization technique shown in the &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; article shines. We build a wagon wheel with segments denoting each metric and within each segment, the data is binned by quartiles.&lt;/p&gt;
+&lt;p&gt;Here’s how a wagon wheel would look like for each batsman. Each segment would be filled depending upon the percentile score in each criteria.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;So let’s see how the wagon wheels of our champions look like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/player_facets_Tests.png&#34; /&gt;
+&lt;img src=&#34;/img/player_facets_ODIs.png&#34; /&gt;
+&lt;img src=&#34;/img/player_facets_T20Is.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see that Steve Smith is the most well-rounded batsman in Tests. His WIN RATIO is lacking relative to the illustrious company he’s in, but overall his performance in Tests is phenomenal. Joe Root comes second but others have a bit more catching up to do.&lt;/p&gt;
+&lt;p&gt;In One Day Internationals, Hashim Amla dominates in all spheres with AB de Villiers and Virat Kohli not far behind. Joe Root seems to contribute in most matches won by England but it appears the English team loses a fair bit in ODIs. Hence the WIN RATIO of Root is a bit lacking.&lt;/p&gt;
+&lt;p&gt;Virat Kohli is the undisputed king in the T20 Internationals format with Kane Williamson in second place. Steve Smith’s performance so far leaves much to be desired in this format.&lt;/p&gt;
+&lt;p&gt;The beauty of this visualization technique is that several dimensions in the data are compressed in a single facetted plot, in a visually appealing way. A glance at the plot reveals the relative best, both overall and in each metric.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Top batsmen in cricket</title>
+      <link>/post/top-batsmen-in-cricket/</link>
+      <pubDate>Sat, 11 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/top-batsmen-in-cricket/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;In a &lt;a href=&#34;../a-brief-history-of-cricket/&#34;&gt;previous post&lt;/a&gt;, I used data from &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt; and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.&lt;/p&gt;
+&lt;div id=&#34;distribution-of-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distribution of matches played by all players&lt;/h3&gt;
+&lt;p&gt;Let’s take a look at the summary statistics of number of matches played by all players in each format of the game.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Number of matches played by all players in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00    2.00    7.00   17.27   21.00  200.00 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00    4.00   16.00   42.56   53.00  463.00 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    1.0     2.0     7.0    13.9    18.5    98.0 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesPlayed-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The distribution appears to be heavily skewed towards the right. In simple terms, there are a handful of players who go on to play 100+ Tests and 200+ ODIs. A majority of the players have played very few matches. The mean and median are hardly indicative of players who established themselves in their teams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;distribution-of-innings-to-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distribution of innings to matches played by all players&lt;/h3&gt;
+&lt;p&gt;A cricket team has 11 players, out of which 5 or 6 are specialist batsmen, 1 or 2 are all-rounders (could bat and bowl well) and the rest are specialist bowlers. The wicketkeeper also has to be a good batsman. The batsmen play up in the order in a match and get to bat before the bowlers do.&lt;/p&gt;
+&lt;p&gt;Here I will introduce another measure to distinguish batsmen from bowlers - ratio of innings played relative to number of matches played. In many matches a bowler doesn’t get a chance to bat, unless the top order batsmen and all-rounders fail, i.e. are out. Hence the ratio of innings to matches of specialist bowlers will be low.&lt;/p&gt;
+&lt;p&gt;Here are the summary statistics of this ratio. The ratio is greater than 1 in Tests because each player could play upto 2 innings. The peaks in each plot are indicative of batsmen who have batted in the top 3 and have gotten a chance to bat in nearly every innings of every match they played.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Ratio of innings to matches of all players in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+  0.250   1.429   1.667   1.623   1.923   2.000      19 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+ 0.1250  0.5714  0.8421  0.7670  1.0000  1.0000      62 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+0.05556 0.50000 0.85714 0.73084 1.00000 1.00000      73 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/inningsToMatches-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;distinguish-batsmen-from-bowlers&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distinguish batsmen from bowlers&lt;/h3&gt;
+&lt;p&gt;To identify true batsmen in the dataset, I use 2 filters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Number of matches played should be above the 75th percentile&lt;/li&gt;
+&lt;li&gt;Ratio of innings to matches played should be above the 25th percentile&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The first filter eliminates newcomers and players who have had very short-lived careers. The second filter eliminates specialist bowlers from the dataset.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the distribution of these metrics for these batsmen. These numbers appear more reasonable.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-2.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-averages-of-batsmen&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Career averages of batsmen&lt;/h3&gt;
+&lt;p&gt;Let’s take a look at the career batting averages of batsmen in each format. We see a few low averaging players left in the dataset who are potentially specialist bowlers. But without resorting to hand-picking, the two empirical filters chosen earlier did a good job of eliminating specialist bowlers from the dataset.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Career batting averages of batsmen in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   4.84   24.84   33.59   33.11   42.13   99.94 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   6.63   23.11   29.71   29.55   35.88   55.03 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   4.10   18.15   21.91   23.27   28.44   53.40 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/careerAverages-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;top-batsmen&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Top batsmen&lt;/h3&gt;
+&lt;p&gt;The hallmark of a top batsman is consistency in scoring runs. From the distribution of career averages, it could be seen that very few batsmen have managed to score at an average of 50 or more runs in their career. So keeping things simple, this would be my sole criteria for selecting top batsmen amongst the rest. All batsmen who have averaged 50 or more in &lt;strong&gt;any&lt;/strong&gt; format would be included in my list of top batsmen.&lt;/p&gt;
+&lt;p&gt;This gives us a unique list of 42 elite batsmen who are legendary in their achievements.&lt;/p&gt;
+&lt;p&gt;Let’s take a look how they compare by various stats.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;div id=&#34;career-span&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career Span&lt;/h4&gt;
+&lt;p&gt;The career span of these elite batsmen is plotted in the order in which they debuted in their international career. Career spans of batsmen who are still actively playing in any format are labeled with blue color.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareCareerSpan-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Summary of career spans in years of top batsmen
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   5.00   11.00   16.00   14.71   18.75   24.00 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Sachin Tendulkar and George Headley have had the longest career spans of 24 years each. But the international career of Headley along with that of almost all of the early era greats were interrupted by world wars. So even though they resumed their careers after the end of the wars, they were able to play relatively few matches (more on this below).&lt;/p&gt;
+&lt;p&gt;Graeme Pollock has had the shortest career of 7 years amongst all retired players. Being a South African, his career was cut short when ICC suspended South Africa from competing internationally in 1970 because of apartheid.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-matches-played&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Number of matches played&lt;/h4&gt;
+&lt;p&gt;Among the many records in Tendulkar’s name, the number of Tests and ODIs played are at the forefront. He played a single T20I, because he, Dravid and other senior members of the then Indian team used to withdraw their names for team selection in T20Is. His records of playing in 200 Tests and 463 ODIs are a testament to his brilliance, his passion for the game and his fitness over the years. Among the active players only AB de Villiers and Hashim Amla are at the halfway mark relatively to Tendulkar’s mark in Tests. But both AB and Amla are already well into their prime years. Younis Khan is on the verge of riding into the sunset. The rest of the pack including Virat Kohli, Kane Williamson, Steve Smith have a looong way to catch up.&lt;/p&gt;
+&lt;p&gt;It could be observed how few matches did the early era greats play relatively. Not only were few teams competing at the time, but also interruptions by world wars.&lt;/p&gt;
+&lt;p&gt;Michael Bevan established himself as an ODI specialist and played only 18 tests. Cheteshwar Pujara appears to have barely made the cutoffs for this list. He is a Tests specialist.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareTopBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-runs-scored&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career runs scored&lt;/h4&gt;
+&lt;p&gt;Once again Tendulkar’s records here are at the top. It is highly unlikely that any other batsman could ever come close in the next 5-10 years.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareRuns-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-batting-averages&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career batting averages&lt;/h4&gt;
+&lt;p&gt;First and foremost is Sir Don Bradman’s career batting average record of 99.94 in Tests. He is widely regarded to be the greatest batsman of all time. This is one record that’s impossible to beat. The second batsman on this list is Graeme Pollock at 60.97. Steve Smith is the only active batsman who is anywhere close to second, a phenomenal achievement in its own right.&lt;/p&gt;
+&lt;p&gt;Secondly, it becomes clear why each batsman was selected for this list, a batting average of 50 or more in any single format. Though most batsmen have a Tests average above 50, Jonathan Trott, MS Dhoni and Michael Bevan made it by virtue of their superlative averages in the ODIs.&lt;/p&gt;
+&lt;p&gt;Virat Kohli is the only batsman who has averaged above 50 in all the 3 formats.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareAverage-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;hundreds-scored-in-career&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Hundreds scored in career&lt;/h4&gt;
+&lt;p&gt;Once again Tendulkar leads in the standings with 51 hundreds in Tests and 49 hundreds in ODIs. Sir Don’s record Test average of 99.94, Tendulkar’s records of number of matches played, runs scored and hundreds scored in career are some of the records that are going to be next to impossible to beat.&lt;/p&gt;
+&lt;p&gt;Surprisingly none of the batsmen on this list have scored a hundred in T20Is. There are a few other batsmen who have scored hundreds in T20Is but none of them were consistent enough to make it to this list.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareHundreds-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;highest-scores-in-an-innings&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Highest scores in an innings&lt;/h4&gt;
+&lt;p&gt;Here we see the great Brian Lara at the top of the Tests table with a highest score of 400 not out. I remember Sir Garfield Sobers’ score of 365 not out was one of the longest standing records in Test cricket until Lara surpassed it. Only Matthew Hayden was able to come any closer to Lara.&lt;/p&gt;
+&lt;p&gt;In ODIs, it was apt that the champion, Sachin Tendulkar was the first one to score a double hundred. A few other batsmen have scored 200+ scores in ODIs since, but none have had the consistency that Tendulkar had.&lt;/p&gt;
+&lt;p&gt;In T20Is, as mentioned above none of these batsman scored a hundred. Though a few have come close. I expect some of the active players to reach this milestone in the near future.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareHighestScores-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A brief history of cricket</title>
+      <link>/post/a-brief-history-of-cricket/</link>
+      <pubDate>Wed, 08 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/a-brief-history-of-cricket/</guid>
+      <description>
+
+
+&lt;p&gt;Since early childhood, I have been a big fan of cricket. Some of my earliest childhood memories are watching the game along with my loved ones in India. As much as I can recall, the first series I saw was between India and the West Indies during the early 80s, on a black and white TV set. Watching Sunil Gavaskar play the fearsome West Indian fast bowlers with aplomb, made me his fan…until a kid named Sachin Tendulkar arrived in 1989.&lt;/p&gt;
+&lt;p&gt;As the saying goes…In India, cricket is religion and Tendulkar is God! Even after his retirement in 2013, Tendulkar is still the most loved sportsperson or celebrity in India. A billion people passionately follow the game and voice their opinion on matters of team selection, players’ performances, umpiring…you name it. Armchair analysts abound, especially if the Indian cricket team loses a consequential match or a series.&lt;/p&gt;
+&lt;p&gt;I was excited to find that detailed records and stats on all cricket players were available on &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt;. The database covers all formats of the game:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tests - Test matches (80 overs a day, each team playing upto 2 innings in 5 days)&lt;/li&gt;
+&lt;li&gt;ODIs - One-Day Internationals (50 overs an innings)&lt;/li&gt;
+&lt;li&gt;T20Is - Twenty20 Internationals (20 overs an innings)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this post, I’ve tried to examine a brief history of the game using the debut years and career spans of players.&lt;/p&gt;
+&lt;p&gt;Here’s a sample of batting data:&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:54:44 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Batting records of players who have represented Australia in ODIs
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+Span
+&lt;/th&gt;
+&lt;th&gt;
+Mat
+&lt;/th&gt;
+&lt;th&gt;
+Inns
+&lt;/th&gt;
+&lt;th&gt;
+NO
+&lt;/th&gt;
+&lt;th&gt;
+Runs
+&lt;/th&gt;
+&lt;th&gt;
+HS
+&lt;/th&gt;
+&lt;th&gt;
+Ave
+&lt;/th&gt;
+&lt;th&gt;
+BF
+&lt;/th&gt;
+&lt;th&gt;
+SR
+&lt;/th&gt;
+&lt;th&gt;
+100
+&lt;/th&gt;
+&lt;th&gt;
+50
+&lt;/th&gt;
+&lt;th&gt;
+0
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+RT Ponting
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1995-2012
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+374
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+364
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+39
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+13589
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+164
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+41.81
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16944
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+80.19
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AC Gilchrist
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1996-2008
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+286
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+278
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9595
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+172
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+35.93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9902
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+96.89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+55
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ME Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1988-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+244
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+236
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8500
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+173
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+39.35
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11053
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76.9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MJ Clarke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2003-2015
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+245
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+223
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7981
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+130
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44.58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10104
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+78.98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SR Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1986-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+325
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+288
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7569
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+120*
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32.90
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9971
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75.91
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MG Bevan
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1994-2004
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+232
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+196
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6912
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+108*
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+53.58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9320
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+74.16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Here’s a sample of bowling data:&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:54:44 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Bowling records of players who have represented Australia in ODIs
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+Span
+&lt;/th&gt;
+&lt;th&gt;
+Mat
+&lt;/th&gt;
+&lt;th&gt;
+Inns
+&lt;/th&gt;
+&lt;th&gt;
+Balls
+&lt;/th&gt;
+&lt;th&gt;
+Runs
+&lt;/th&gt;
+&lt;th&gt;
+Wkts
+&lt;/th&gt;
+&lt;th&gt;
+BBI
+&lt;/th&gt;
+&lt;th&gt;
+Ave
+&lt;/th&gt;
+&lt;th&gt;
+Econ
+&lt;/th&gt;
+&lt;th&gt;
+SR
+&lt;/th&gt;
+&lt;th&gt;
+4
+&lt;/th&gt;
+&lt;th&gt;
+5
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+B Lee
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2000-2012
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+221
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+217
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11185
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8877
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+380
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/22
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+23.36
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29.4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+14
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+GD McGrath
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1993-2007
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+249
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+247
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12928
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8354
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+380
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7/15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+21.98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3.87
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+34.0
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SK Warne
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1993-2003
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+193
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+190
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10600
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7514
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+291
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/33
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25.82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.25
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36.4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MG Johnson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2005-2015
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+153
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+150
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7489
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6038
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+239
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6/31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25.26
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31.3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+CJ McDermott
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1985-1996
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7461
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5018
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+203
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+24.71
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.03
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36.7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SR Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1986-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+325
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+207
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8883
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6761
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+195
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4/33
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+34.67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.56
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45.5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+0
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Currently there are 10 international teams which have &lt;a href=&#34;https://en.wikipedia.org/wiki/List_of_International_Cricket_Council_members&#34;&gt;full-membership&lt;/a&gt; of the International Cricket Council - Australia, Bangladesh, England, India, New Zealand, Pakistan, South Africa, Sri Lanka, West Indies and Zimbabwe. I downloaded batting and bowling data for all of these 10 teams in all 3 formats. The dataset is rich with features and appears to cover the entire history of international cricket.&lt;/p&gt;
+&lt;p&gt;Major props to the folks at Statsguru for maintaining a clean dataset. Both batting and bowling datasets have the same number of players, as should be the case. So there wasn’t much data wrangling needed.&lt;/p&gt;
+&lt;p&gt;Here are what the abbreviations mean:&lt;/p&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;10%&#34; /&gt;
+&lt;col width=&#34;89%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Term&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Span&lt;/td&gt;
+&lt;td&gt;Separate into debut year and last year of career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Mat&lt;/td&gt;
+&lt;td&gt;Matches played in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Inns&lt;/td&gt;
+&lt;td&gt;Innings played in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;NO&lt;/td&gt;
+&lt;td&gt;Number of times not out in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;HS&lt;/td&gt;
+&lt;td&gt;Highest batting score in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Ave&lt;/td&gt;
+&lt;td&gt;Career Average, batting: Runs/(Innings - NotOuts), bowling: Runs/Wickets&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;BF&lt;/td&gt;
+&lt;td&gt;Balls Faced&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;SR&lt;/td&gt;
+&lt;td&gt;Strike Rate, batting: Runs/Balls Faced, bowling: Balls/Wickets&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;BBI&lt;/td&gt;
+&lt;td&gt;Best bowling performance in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Balls&lt;/td&gt;
+&lt;td&gt;Number of balls bowled in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Wkts&lt;/td&gt;
+&lt;td&gt;Number of wickets in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Econ&lt;/td&gt;
+&lt;td&gt;Bowling economy rate: Runs per over (Overs bowled = Balls bowled/6)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;100&lt;/td&gt;
+&lt;td&gt;Number of hundreds scored in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;50&lt;/td&gt;
+&lt;td&gt;Number of fifties scored in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;Number of times the bowler took 4 wickets in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;Number of times the bowler took 5 or more wickets in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div id=&#34;when-did-each-country-first-play-internationally&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;When did each country first play internationally?&lt;/h3&gt;
+&lt;p&gt;From the earliest debut years of players, it could be seen when each format was started and when each country started playing in a format. Australia and England have been the pioneering nations in each format. The earliest Tests were played between Australia and England in 1877. South Africa joined the fray in 1889. For the next 40 years, these were the only 3 international teams, until West Indies, India and New Zealand started playing in quick succession. In 1970 South Africa was suspended from playing international cricket by the ICC because of prevailing apartheid in the nation. As a result, the international career of some very promising South Africans like Graeme Pollock and Barry Richards ended abruptly. Later on some other players emigrated to England and Australia to get a chance to play internationally. This ban was lifted by the ICC in 1991. The newly formed South African team under Clive Rice was given a warm welcome in India, when they visited to play ODIs. South Africa resumed playing tests in 1992.&lt;/p&gt;
+&lt;p&gt;Sri Lanka, Zimbabwe and Bangladesh were Associate members with ODI status before they were elected as full members to be eligible to play Tests.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/earliestDebutByCountry-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-players-who-have-represented-their-country-internationally&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Number of players who have represented their country internationally&lt;/h3&gt;
+&lt;p&gt;Even though Australia and England started playing Tests together in 1877, there have been far more players representing the England team in Tests, when looking at the entire history. This suggests a lot more turnover in the English team.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/numberOfPlayersByCountry-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-players-who-debuted-internationally-by-year&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Number of players who debuted internationally by year&lt;/h3&gt;
+&lt;p&gt;This plot shows the number of distinct players debuting each year. So, for instance, if a player debuted in Tests, ODIs and T20Is team in the same year, then that is counted as 1. Few things could be noted here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The gaps in Australia, England and India facets show the years interrupted by the 2 world wars.&lt;/li&gt;
+&lt;li&gt;As noted earlier, there’s a big gap in the South Africa facet, when the country was suspended from 1970-1991.&lt;/li&gt;
+&lt;li&gt;The gaps in Bangladesh, Sri Lanka and Zimbabwe are because each country was an associate member of the ICC and was only competing in ICC ODI tournaments until the country got its full member status.&lt;/li&gt;
+&lt;li&gt;There’s been a steady increase in the number of players debuting in Australia, England, India, Pakistan and West Indies, in the last decade or so. This suggests a trend of having specialist players in the team for each format. Top teams like Australia, England and India have adopted this trend. Some players are selected as Test match specialists, while the others are selected to only play in ODIs and T20Is.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/img/cricket_facets.png&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-spans-of-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Career spans of players&lt;/h3&gt;
+&lt;p&gt;To examine the career spans of players, I filtered the dataset to only keep the players who haven’t been active in 2016-2017. Then I eliminated quick failures whose career didn’t last for more than 2 years. This meant the players left in the dataset were given enough opportunities to succeed at the international level. Then I examined the median career span by debut year.&lt;/p&gt;
+&lt;p&gt;It appears a median player used to play between 6 to 10 years before retiring. Although there was more dispersion in Tests, it was clearly the norm in ODIs. 1908 was an extreme outlier year in Tests because only 1 player qualified the inclusion criteria. This was Sir Jack Hobbs of England, an early master of the game who played for 23 years. 1909 was another extreme outlier year where only 3 players were included. These were the legends Warren Bardsley of Australia (18 years), Frank Woolley of England (26 years) and Bill Whitty of Australia (4 years).&lt;/p&gt;
+&lt;p&gt;An outlier in the ODIs plot corresponds to the year 1989. This was the year when some modern day legends made their debut. Most notably Sachin Tendulkar from India who played for 24 years. Saeed Anwar, Waqar Younis &amp;amp; Mushtaq Ahmed from Pakistan who each played for 15 years and Sanath Jayasuriya from Sri Lanka who played for 23 years. Alec Stewart and Nasser Hussain from England also debuted in 1989. They had checkered records in ODIs but overall their careers lasted for 15 years.&lt;/p&gt;
+&lt;p&gt;An astonishing trend appears to have started with the players debuting after the early 90s. Career spans of players peaked with those debuting during early 90s. Since then the median career span started dropping year by year. This could be seen across all formats. Although the median career span would change for more recent years as active players playing from early 2000s retire in future, nevertheless this trend is persistent from early 90s.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/medianCareerSpan-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;matches-played-by-debut-years&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Matches played by debut years&lt;/h3&gt;
+&lt;p&gt;The same downwards trends from early 90s could also be observed in the median number of matches played by debut year. This isn’t surprising as the number of matches played is directly correlated with career span. An upward trend from early 30s could be observed in Test matches played. This is explained by the addition of West Indies, New Zealand and India as full members of the ICC from late 20s. Every international player started playing more matches as the number of competing teams doubled to 6.&lt;/p&gt;
+&lt;p&gt;A big upward trend could be seen in ODIs from its inception. Until the beginning of ODIs, cricket was only played in Tests format that was characteristically very laid back. Both teams got a chance to bat upto 2 innings alternately over 5 days. More often than not the matches would end in a draw with no win/loss result. The introduction of 60 overs a side ODIs (later reduced to 50 overs a side) format was to be played in a single day. The team batting first would set a target score. Then the team batting second would chase this target. This ensured guaranteed results although there have been few occasions where the ODIs have resulted in ties at the same score. Naturally this format was more palatable to spectators and TV audiences that contributed to a rapid growth in its popularity. The ODIs format is still the most popular format till date.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/matchesByDebutYear-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In the next couple of posts I will analyze batting performances.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

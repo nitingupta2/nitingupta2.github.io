@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
+Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
+AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest pointData SummariesA preliminary visual summary of the whole dataset shows all the features and their types.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/casestudies/diamonds-part1-eda/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin="anonymous">
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/casestudies/diamonds-part1-eda/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="/casestudies/diamonds-part1-eda/">
+  <meta property="og:title" content="Diamonds - Part 1 - In the rough - An Exploratory Data Analysis | Nitin Gupta">
+  <meta property="og:description" content="In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
+Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
+AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest pointData SummariesA preliminary visual summary of the whole dataset shows all the features and their types."><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2016-12-20T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2016-12-20T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Diamonds - Part 1 - In the rough - An Exploratory Data Analysis | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 20, 2016
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>In this case study, we will explore the <code>diamonds</code> dataset, then build linear and non-linear regression models to predict the price of diamonds.</p>
+<div id="data-description" class="section level2">
+<h2>Data Description</h2>
+<p>The <code>diamonds</code> dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Attribute</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">price</td>
+<td align="left">price in 2008 USD</td>
+</tr>
+<tr class="even">
+<td align="left">carat</td>
+<td align="left">weight of a diamond (1 carat = 0.2 gms)</td>
+</tr>
+<tr class="odd">
+<td align="left">cut</td>
+<td align="left">quality of the cut (Fair, Good, Very Good, Premium, Ideal)</td>
+</tr>
+<tr class="even">
+<td align="left">color</td>
+<td align="left">diamond color from D (best) to J (worst)</td>
+</tr>
+<tr class="odd">
+<td align="left">clarity</td>
+<td align="left">a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))</td>
+</tr>
+<tr class="even">
+<td align="left">x</td>
+<td align="left">length in mm</td>
+</tr>
+<tr class="odd">
+<td align="left">y</td>
+<td align="left">width in mm</td>
+</tr>
+<tr class="even">
+<td align="left">z</td>
+<td align="left">depth in mm</td>
+</tr>
+<tr class="odd">
+<td align="left">depth</td>
+<td align="left">total depth percentage = z/mean(x, y)</td>
+</tr>
+<tr class="even">
+<td align="left">table</td>
+<td align="left">width of the top of diamond relative to widest point</td>
+</tr>
+</tbody>
+</table>
+<center>
+<p><img src="xyz.png" /></p>
+<p><img src="color.png" /></p>
+<p><img src="clarity.png" /></p>
+</center>
+</div>
+<div id="data-summaries" class="section level2">
+<h2>Data Summaries</h2>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png" width="672" /></p>
+<p>A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.</p>
+<p>Let’s examine each feature numerically:</p>
+<pre><code>dfInput 
+
+ 10  Variables      53940  Observations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+price 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0    11602        1     3933     4012      544      646      950     2401     5324     9821    13107 
+
+lowest :   326   327   334   335   336, highest: 18803 18804 18806 18818 18823
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+carat 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      273    0.999   0.7979   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
+
+lowest : 0.20 0.21 0.22 0.23 0.24, highest: 4.00 4.01 4.13 4.50 5.01
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+cut 
+       n  missing distinct 
+   53940        0        5 
+
+lowest : Fair      Good      Very Good Premium   Ideal    , highest: Fair      Good      Very Good Premium   Ideal    
+                                                            
+Value           Fair      Good Very Good   Premium     Ideal
+Frequency       1610      4906     12082     13791     21551
+Proportion     0.030     0.091     0.224     0.256     0.400
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+color 
+       n  missing distinct 
+   53940        0        7 
+
+lowest : J I H G F, highest: H G F E D
+                                                    
+Value          J     I     H     G     F     E     D
+Frequency   2808  5422  8304 11292  9542  9797  6775
+Proportion 0.052 0.101 0.154 0.209 0.177 0.182 0.126
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+clarity 
+       n  missing distinct 
+   53940        0        8 
+
+lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+                                                          
+Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
+Frequency    741  9194 13065 12258  8171  5066  3655  1790
+Proportion 0.014 0.170 0.242 0.227 0.151 0.094 0.068 0.033
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+depth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      184    0.999    61.75    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
+
+lowest : 43.0 44.0 50.8 51.0 52.2, highest: 72.2 72.9 73.6 78.2 79.0
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+table 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      127     0.98    57.46    2.448       54       55       56       57       59       60       61 
+
+lowest : 43.0 44.0 49.0 50.0 50.1, highest: 71.0 73.0 76.0 79.0 95.0
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+x 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      554        1    5.731    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
+
+lowest :  0.00  3.73  3.74  3.76  3.77, highest: 10.01 10.02 10.14 10.23 10.74
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+y 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      552        1    5.735    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
+
+lowest :  0.00  3.68  3.71  3.72  3.73, highest: 10.10 10.16 10.54 31.80 58.90
+                                                                                                                      
+Value        0.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   7.5   8.0   8.5   9.0   9.5  10.0  10.5  32.0  59.0
+Frequency      7     5  1731 12305  7817  5994  6742  9260  4298  3402  1635   652    69    14     6     1     1     1
+Proportion 0.000 0.000 0.032 0.228 0.145 0.111 0.125 0.172 0.080 0.063 0.030 0.012 0.001 0.000 0.000 0.000 0.000 0.000
+
+For the frequency table, variable is rounded to the nearest 0.5
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+z 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      375        1    3.539   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
+
+lowest :  0.00  1.07  1.41  1.53  2.06, highest:  6.43  6.72  6.98  8.06 31.80
+                                                                                                          
+Value        0.0   1.0   1.5   2.0   2.5   3.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   8.0  32.0
+Frequency     20     1     2     3  8807 13809  9474 13682  5525  2352   237    20     5     1     1     1
+Proportion 0.000 0.000 0.000 0.000 0.163 0.256 0.176 0.254 0.102 0.044 0.004 0.000 0.000 0.000 0.000 0.000
+
+For the frequency table, variable is rounded to the nearest 0.5
+----------------------------------------------------------------------------------------------------------------------------------------------------------------</code></pre>
+<ul>
+<li><code>price</code>: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.</li>
+<li><code>carat</code>: The average carat weight is ~ 0.8. About 75% of the diamonds are under 1 carat. The top 5 values show presence of many outliers on the high end.</li>
+<li><code>cut</code>: About 40% of the diamonds are of <em>Ideal</em> cut. Only 3% are <em>Fair</em> cut. So there is a lot of imbalance in the categories.</li>
+<li><code>color</code>: Most of the diamonds are rated <em>E</em> to <em>H</em> color. Relatively fewer are rated <em>J</em> color.</li>
+<li><code>clarity</code>: Most of the diamonds are rated <em>SI2</em> to <em>VS1</em> clarity. About 1% are rated the worst <em>I1</em> clarity, where as only ~ 3% are rated <em>IF</em>.</li>
+<li><code>depth</code>: Most of the depth values are between 60 and 64. There are outliers on both low end and high end.</li>
+<li><code>table</code>: Most of the table values are between 54 and 65. There are outliers on both ends.</li>
+<li><code>x</code>: Denotes the dimension along the x-axis. Most values are between 4 and 8. There are some 0 values too which means they were not recorded.</li>
+<li><code>y</code>: Denotes the dimension along the y-axis. Most values are between 3.5 and 8. There are 7 records where the values are 0.</li>
+<li><code>z</code>: Denotes the dimension along the z-axis. Most values are between 2.5 and 8.5. There are 20 records where the values are 0.</li>
+</ul>
+</div>
+<div id="univariate-analysis" class="section level2">
+<h2>Univariate Analysis</h2>
+<p>Let us look at each feature in the dataset in detail.</p>
+<div id="numerical-features" class="section level4">
+<h4>Numerical Features</h4>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png" width="672" /></p>
+<p>The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png" width="672" /></p>
+<p>Excluding outliers, the range of values are more reasonable. We can see that <code>carat</code> and <code>price</code> are heavily right skewed.</p>
+<p>Let’s plot the distribution of <code>price</code> in log scale:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png" width="672" /></p>
+<p>Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
+one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.</p>
+</div>
+<div id="categorical-features" class="section level4">
+<h4>Categorical Features</h4>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png" width="672" /></p>
+<p>The categorical imbalance in <code>cut</code> and <code>clarity</code> can be clearly noticed.</p>
+</div>
+</div>
+<div id="bivariate-analysis" class="section level2">
+<h2>Bivariate Analysis</h2>
+<p>Let’s examine the relationship of <code>price</code> with other features.</p>
+<div id="numerical-numerical" class="section level4">
+<h4>Numerical-numerical</h4>
+<p>First and foremost, let’s do a correlation analysis to see how <code>price</code> is correlated with other numerical features:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png" width="672" /></p>
+<p>We can see that <code>price</code> is very strongly correlated with <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> dimensions. If a predictive linear regression model is built,
+some of these features would act as confounders. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code> so they are not so interesting for
+predictive modelling.</p>
+<p>Now let’s see the scatter plots:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" width="672" /></p>
+<p>After removing outliers, it could be noted that <code>price</code> increases exponentially with <code>carat</code>, as well as <code>x</code>, <code>y</code> and <code>z</code> dimensions. So <code>price</code> should be plotted with a log tranformation. Let’s do that:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png" width="672" /></p>
+<p>Now, the relationship between <code>log(price)</code> appears to be linear with <code>x</code>, <code>y</code> and <code>z</code>. But, not so much with <code>carat</code>. Variance in <code>price</code> tends to
+increase both by <code>carat</code> and its dimensions. Log transforming <code>carat</code> wouldn’t help because <code>carat</code> does not have a wide range.
+We will find ways to deal with this when we do Feature Engineering.</p>
+</div>
+<div id="numerical-categorical" class="section level4">
+<h4>Numerical-Categorical</h4>
+<p>Let’s examine <code>price</code> with respect to the categorical features in the dataset:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png" width="960" /></p>
+<p>The boxplots above are plotted with truncated <code>price</code> axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of <code>cut</code>, <code>color</code> and <code>clarity</code>. This is very odd.</p>
+<ul>
+<li>The median <code>price</code> declines monotonically from <em>Fair</em> <code>cut</code> to <em>Ideal</em> <code>cut</code>.</li>
+<li>In terms of <code>color</code>, the median <code>price</code> decreases from <em>J</em> (worst) to <em>G</em> (mid-grade), then increases and finally decreases for <em>D</em> (best).</li>
+<li>The median <code>price</code> increases when <code>clarity</code> improves from <em>I1</em> to <em>SI2</em>, and then decreases monotonically to <em>IF</em> grade.</li>
+</ul>
+</div>
+</div>
+<div id="multivariate-analysis" class="section level2">
+<h2>Multivariate Analysis</h2>
+<p>So far, we have determined <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> have the strongest relationship with <code>price.</code> Different grades of <code>cut</code>, <code>color</code> and <code>clarity</code> also seem to have some impact on median <code>price</code>. So let’s make some scatter plots to see these relationships:</p>
+<div id="numerical-numerical-categorical" class="section level4">
+<h4>Numerical-Numerical-Categorical</h4>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" width="960" /></p>
+<p>Although there is a lot of overlap, but there is a clear trend of <code>price</code> increasing with <code>clarity</code>, at a given <code>carat</code> weight. The same pattern could also be observed in the plot with increasing grades of <code>color</code>, though not to the same extent. There is no evidence of any relationship between <code>price</code> and <code>carat</code> with <code>cut</code>.</p>
+<p>We can conclude both <code>color</code> and <code>clarity</code> explain some variance in <code>price</code> at a given <code>carat</code> weight.</p>
+<p>To be sure of any interaction between <code>table</code> and <code>depth</code>, with <code>color</code> and <code>clarity</code>, let’s plot these:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png" width="1152" /></p>
+<p>There is no pattern in the interaction of <code>price</code> v/s <code>depth</code> and <code>table</code> values when plotted by <code>color</code> and <code>clarity</code>. So, these features do not have any predictive ability to determine <code>price</code>.</p>
+</div>
+<div id="categorical-categorical-numerical" class="section level4">
+<h4>Categorical-Categorical-Numerical</h4>
+<p>We want to see if there is any interaction of <code>clarity</code> with <code>cut</code> and <code>color</code>, that could provide any additional explanatory power to predict <code>price</code>:</p>
+<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" width="672" /></p>
+<p>The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of <code>color</code> and <code>clarity</code>, <code>price</code> tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best <code>color</code> and <code>clarity</code> should be the highest. Nevertheless this counter-trend persists in the dataset.</p>
+<p>With respect to <code>cut</code> and <code>clarity</code>, the mean prices do not show any discernable pattern.</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>To summarize, here’s what we found interesting in this dataset, after doing an exploratory data analysis:</p>
+<ul>
+<li><code>price</code> is heavily right-skewed, and when log tranformed, has a bimodal distribution which implies there is demand in 2 different price ranges.</li>
+<li><code>carat</code> about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight.</li>
+<li><code>cut</code> is imbalanced with about 40% of the diamonds rated <em>Ideal</em>.</li>
+<li><code>color</code> is imbalanced with about 5% of the diamonds rated <em>J</em>.</li>
+<li><code>clarity</code> is imbalanced at the extremes, with only 1.5% of the diamonds rated <em>I1</em> and 3.3% of the diamonds rated <em>IF</em>.</li>
+<li><code>price</code> is strongly correlated with <code>carat</code> and <code>x</code>, <code>y</code>, <code>z</code> dimensions of the diamonds. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code>.</li>
+<li>Both <code>clarity</code> and <code>color</code> appear to explain some variance in <code>price</code> for a given <code>carat</code> weight.</li>
+</ul>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/eda/">eda</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
+      <h6 class="card-subtitle">Founder</h6>
+      <p class="card-text">Quantitative Data Technologies</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

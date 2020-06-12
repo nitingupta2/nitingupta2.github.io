@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>keras | Nitin Gupta</title>
+    <link>/tags/keras/</link>
+      <atom:link href="/tags/keras/index.xml" rel="self" type="application/rss+xml" />
+    <description>keras</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Thu, 22 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>keras</title>
+      <link>/tags/keras/</link>
+    </image>
+    
+    <item>
+      <title>Diamonds - Part 3 - A polished gem - Building Non-linear Models</title>
+      <link>/casestudies/diamonds-part3-non-linear-models/</link>
+      <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>/casestudies/diamonds-part3-non-linear-models/</guid>
+      <description>
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;Diamonds - Part 1 - In the rough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/&#34;&gt;Diamonds - Part 2 - A cut above - Building Linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In a couple of previous posts, we tried to understand what attributes of diamonds are important to determine their prices. We showed that &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; are the most important predictors of &lt;code&gt;price&lt;/code&gt;. We arrived at this conclusion after doing a detailed exploratory data analysis. Finally we fit linear models to predict prices and determined the best model from the metrics.&lt;/p&gt;
+&lt;p&gt;In this post, we will use non-linear regression models to predict diamond prices and compare them with those from linear models.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;training-non-linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Training Non-linear Models&lt;/h2&gt;
+&lt;p&gt;We’ll follow some of the same steps as we did for linear models, while transforming some predictors:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Partition the dataset into training and testing sets in the proportion 75% and 25% respectively.&lt;/li&gt;
+&lt;li&gt;Stratify the partitioning by &lt;code&gt;clarity&lt;/code&gt;, so both training and testing sets have the same distributions of this feature.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;cut&lt;/code&gt; have ordered categories from lowest to highest grades. The &lt;code&gt;randomForest&lt;/code&gt; method requires no change in representing this data before training the models, however &lt;code&gt;xgboost&lt;/code&gt; and &lt;code&gt;keras&lt;/code&gt; methods require all the predictors to be in numerical form. &lt;a href=&#34;https://statmodeling.stat.columbia.edu/2009/10/06/coding_ordinal/&#34;&gt;Two methods&lt;/a&gt; could be used for transforming the categorical data:
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Use one-hot encoding to convert categorical data to sparse data with 0s and 1s. This way, each category in &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;cut&lt;/code&gt; is converted to a new predictor in binary form. A disadvantage of this method is that it treates ordered categorical data the same as unordered categorical data, so the ordinality is lost in transformation. However, non-linear models should be able to infer the ordinality as our training sample is sufficiently large.&lt;/li&gt;
+&lt;li&gt;Represent the ordinal categories from lowest to highest grades in integer form. However, this creates a linear gradation from one category to another, which may not be a suitable choice here.&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;li&gt;Center and scale all values in the training set and build a matrix of predictors.&lt;/li&gt;
+&lt;li&gt;Fit a non-linear model with the training set.&lt;/li&gt;
+&lt;li&gt;Make predictions on the testing set and determine model metrics.&lt;/li&gt;
+&lt;li&gt;Wrap all the steps above inside a function in which the model formula, and a seed could be passed that randomizes the partition of training and testing sets.&lt;/li&gt;
+&lt;li&gt;Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here are the average metrics for all the models trained with &lt;code&gt;keras&lt;/code&gt;, &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; regression methods:&lt;/p&gt;
+&lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;border-top: 2px solid grey;&#34;&gt;
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+mae
+&lt;/th&gt;
+&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+rmse
+&lt;/th&gt;
+&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
+rsq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34;&gt;
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+keras
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+randomForest
+&lt;/th&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+xgboost
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ .
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+360.55
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+262.35
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+280.49
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+989.71
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+529.28
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+540.76
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.93
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+860.29
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+816.1
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+815.76
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1499.2
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1427.25
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+1427.35
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.86
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.87
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.87
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+590.32
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+548.67
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+544.48
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1040.69
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+1006.61
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+992.46
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.93
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.94
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.94
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity + color
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+358.85
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+305.17
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+306.86
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+645.4
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+571.73
+&lt;/td&gt;
+&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
+575.3
+&lt;/td&gt;
+&lt;td style colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.97
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: left;&#34;&gt;
+price ~ carat + clarity + color + cut
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+347.99
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+285.96
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
+282.38
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+626.78
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+545.02
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
+541.63
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
+ 
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
+0.98
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Looking at the r-squared terms, it is remarkable how well all the models have been able to infer the complex relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt;. To fit linear models, we needed to transform &lt;code&gt;price&lt;/code&gt; to logarithmic terms and take the cube root of &lt;code&gt;carat&lt;/code&gt;. The neural network as well as the decision tree based models do this all on their own. The root mean squared error is in $ terms so it is easier to interpret. Considering the mean and standard deviation of &lt;code&gt;price&lt;/code&gt; in the dataset is about $4000, the root mean squared errors of the models are very low.&lt;/p&gt;
+&lt;p&gt;Exploratory data analysis adds value here, as the models with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; give excellent results. Including &lt;code&gt;cut&lt;/code&gt; in the models does not provide any significant benefits and results in overfitted models.&lt;/p&gt;
+&lt;p&gt;Even the base models with all predictors: &lt;strong&gt;price ~ .&lt;/strong&gt; (where some of them are confounders), do a very good job of explaning the variance. Decision tree and neural network models are unaffected by multi-collinearity. We can use local model interpretations to determine the most important predictors from these models.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;local-interpretable-model-agnostic-explanations&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Local Interpretable Model-agnostic Explanations&lt;/h2&gt;
+&lt;p&gt;LIME is a method for explaining black-box machine learning models. It can help visualize and explain individual predictions. It makes the assumption that every complex model is linear on a local scale. So it is possible to fit a simple model around a single observation that will behave how the global model behaves at that locality. The simple model can be used to explain the predictions of the more complex model locally.&lt;/p&gt;
+&lt;p&gt;The generalized algorithm LIME applies is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Given an observation, permute it to create replicated feature data with slight value modifications.&lt;/li&gt;
+&lt;li&gt;Compute similarity distance measure between original observation and permuted observations.&lt;/li&gt;
+&lt;li&gt;Apply selected machine learning model to predict outcomes of permuted data.&lt;/li&gt;
+&lt;li&gt;Select m number of features to best describe predicted outcomes.&lt;/li&gt;
+&lt;li&gt;Fit a simple model to the permuted data, explaining the complex model outcome with m features from the permuted data weighted by its similarity to the original observation .&lt;/li&gt;
+&lt;li&gt;Use the resulting feature weights to explain local behavior.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The features by importance that best explain the predictions in these 6 random samples are &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are co-linear with &lt;code&gt;carat&lt;/code&gt;, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
+&lt;p&gt;Finally, here are the scatterplots of actual v/s predicted &lt;code&gt;price&lt;/code&gt; from the best model on the testing set, using the 3 regression methods:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar &lt;strong&gt;r-squared&lt;/strong&gt; and &lt;strong&gt;rmse&lt;/strong&gt; values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.&lt;/p&gt;
+&lt;p&gt;As in the case with linear models, the variance in predicted diamond prices increases with &lt;code&gt;price&lt;/code&gt;. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between &lt;code&gt;price&lt;/code&gt; and its predictors, they also predict prices within a reasonable range.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;All the 3 non-linear regression methods can infer the complex relationship between &lt;code&gt;price&lt;/code&gt;, &lt;code&gt;carat&lt;/code&gt; and other predictors, without the need for feature engineering.&lt;/li&gt;
+&lt;li&gt;Exploratory Data Analysis is useful in removing the redundant features from the training dataset, resulting in both faster execution, as well as much better metrics.&lt;/li&gt;
+&lt;li&gt;In terms of time taken to train the models, &lt;code&gt;keras&lt;/code&gt; neural network models execute the fastest by virtue of being able to use GPUs.&lt;/li&gt;
+&lt;li&gt;Among the decision-tree based methods, &lt;code&gt;xgboost&lt;/code&gt; models train much faster than &lt;code&gt;randomForest&lt;/code&gt; models.&lt;/li&gt;
+&lt;li&gt;Multiple CPUs can be used to run &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; methods. RAM is the only limiting constraint, when trained on a local machine.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

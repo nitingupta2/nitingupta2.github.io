@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/building-a-predictive-typing-model/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin="anonymous">
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/building-a-predictive-typing-model/">
+
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="/post/building-a-predictive-typing-model/">
+  <meta property="og:title" content="Building a Predictive Typing Model | Nitin Gupta">
+  <meta property="og:description" content="Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues."><meta property="og:image" content="/post/building-a-predictive-typing-model/featured.png">
+  <meta property="twitter:image" content="/post/building-a-predictive-typing-model/featured.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2017-04-15T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2017-04-15T00:00:00&#43;00:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/building-a-predictive-typing-model/"
+  },
+  "headline": "Building a Predictive Typing Model",
+  
+  "image": [
+    "/post/building-a-predictive-typing-model/featured.png"
+  ],
+  
+  "datePublished": "2017-04-15T00:00:00Z",
+  "dateModified": "2017-04-15T00:00:00Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Nitin Gupta"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nitin Gupta",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/img/icon-512.png"
+    }
+  },
+  "description": "Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Building a Predictive Typing Model | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Building a Predictive Typing Model</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Apr 15, 2017
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    15 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/datascience/">datascience</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues.</p>
+<p>But, how does predictive typing work? Basically, it’s a predictive typing model built using an ngram with <a href="https://en.wikipedia.org/wiki/Katz%27s_back-off_model">backoff prediction model</a>. Makes complete sense, right? Well, it’s less complicated than it sounds, and actually not hard to understand, as we shall see further.</p>
+<div id="corpus" class="section level2">
+<h2>Corpus</h2>
+<p>To begin, we need a large corpus of text with a wide-ranging vocabulary. The first name that comes to mind is that of William Shakespeare. Shakespeare wrote a number of plays and poems that are classics in the English language. These plays and poems are available in the public domain and are easily accessible through a number of sources, (see <a href="http://www.gutenberg.org/browse/authors/s#a65">here</a> and <a href="http://shakespeare.mit.edu/">here</a>).
+By some <a href="http://www1.cmc.edu/pages/faculty/welliott/Shakespeare%20Vocabulary%20Chapter%20911.pdf">accounts</a>, Shakespeare’s vocabulary ranged from 15,000-30,000 words, which makes it excellent to use it for our corpus.</p>
+<p><a href="https://github.com/ropenscilabs/gutenbergr">David Robinson’s</a> <code>gutenbergr</code> package makes it easy to download ‘The Complete Works Of Shakespeare’, from Project Gutenberg’s website. The downloaded dataset is a data frame with text appearing in rows along with the gutenberg id.</p>
+<pre class="r"><code>dfRaw &lt;- gutenberg_download(100)
+knitr::kable(head(dfRaw, 12))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">gutenberg_id</th>
+<th align="left">text</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">Shakespeare</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left"><em>This Etext has certain copyright implications you should read!</em></td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">&lt;&lt;THIS ELECTRONIC VERSION OF THE COMPLETE WORKS OF WILLIAM</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">SHAKESPEARE IS COPYRIGHT 1990-1993 BY WORLD LIBRARY, INC., AND IS</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">PROVIDED BY PROJECT GUTENBERG ETEXT OF ILLINOIS BENEDICTINE COLLEGE</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">WITH PERMISSION. ELECTRONIC AND MACHINE READABLE COPIES MAY BE</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">DISTRIBUTED SO LONG AS SUCH COPIES (1) ARE FOR YOUR OR OTHERS</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">PERSONAL USE ONLY, AND (2) ARE NOT DISTRIBUTED OR USED</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">COMMERCIALLY. PROHIBITED COMMERCIAL DISTRIBUTION INCLUDES BY ANY</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">SERVICE THAT CHARGES FOR DOWNLOAD TIME OR FOR MEMBERSHIP.&gt;&gt;</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(dfRaw[sample(nrow(dfRaw), 6),])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">gutenberg_id</th>
+<th align="left">text</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">Assure yourselves, will never be unkind.</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">Like one besotted on your sweet delights.</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">And spurn in pieces posts of adamant;</td>
+</tr>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">Whereto, when they shall know what men are rich,</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">TITUS. Marcus, even thou hast struck upon my crest,</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-preparation" class="section level2">
+<h2>Data Preparation</h2>
+<p>The copyright notice appears multiple times throughout the text. Fortunately, it doesn’t prevent us from using this data for non-commercial purposes. The first step is to merge the entire text and remove the copyright notices that are helpfully within &lt;&lt; … &gt;&gt;. Secondly, in plays, the characters and their relationships and titles are defined with ‘DRAMATIS PERSONAE’. These lines have to be removed too.</p>
+<p>After doing some quick cleaning, the text is reconverted to a data frame.</p>
+<pre class="r"><code>complete_works &lt;- str_c(dfRaw$text, collapse = &quot;.&quot;)
+complete_works &lt;- str_split(complete_works, &quot;&lt;&lt;[^&gt;]*&gt;&gt;&quot;)[[1]]
+complete_works &lt;- complete_works[!(str_detect(complete_works, &quot;Dramatis Personae|DRAMATIS PERSONAE&quot;))]
+complete_works &lt;- str_replace_all(complete_works, &quot;\\[|\\]&quot;, &quot;.&quot;)
+
+dfContent &lt;- as_tibble(complete_works) %&gt;% slice(3:n())
+rm(complete_works)</code></pre>
+<p>Finally, we parse the content into sentences. The <code>tidytext</code> package by <a href="http://varianceexplained.org/">David Robinson</a> and <a href="http://juliasilge.com/">Julia Silge</a>, is most useful in doing this within the tidyverse framework.</p>
+<p>Here’s what the function does below:</p>
+<ul>
+<li>Replaces all ‘logical’ sentence break delimiters by a period for easier tokenization by sentence</li>
+<li>Removes extra periods and spaces</li>
+<li>Tokenizes into sentences</li>
+<li>Removes all sentences containing ACT or SCENE</li>
+<li>Removes all digits from sentences</li>
+<li>Finally adds line numbers to each row (more on the importance of this later…)</li>
+</ul>
+<p>A sample of 10 sentences is shown below.</p>
+<pre class="r"><code>getSentences &lt;- function(dfContent) {
+    df &lt;- dfContent %&gt;% 
+        mutate(value = str_replace_all(value, &quot;;|:|!|\\?| \\-|\\- | \\- &quot;, &quot;\\. &quot;)) %&gt;% 
+        mutate(value = str_replace_all(value, &quot;[\\.]+&quot;, &quot;\\.&quot;)) %&gt;% 
+        mutate(value = str_replace_all(value, &quot;[[:space:]]+&quot;, &quot; &quot;)) %&gt;% 
+        unnest_tokens(sentence, value, token = &quot;sentences&quot;, to_lower = FALSE) %&gt;% 
+        dplyr::filter(!str_detect(sentence, &quot;Act|ACT|Scene|SCENE&quot;)) %&gt;% 
+        mutate(sentence = str_replace_all(sentence, &quot;[0-9]&quot;,&quot;&quot;)) %&gt;% 
+        mutate(lineNumber = row_number()) %&gt;% 
+        select(lineNumber, everything())
+}
+
+dfSentences &lt;- getSentences(dfContent)
+knitr::kable(dfSentences[sample(nrow(dfSentences), 10),])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">lineNumber</th>
+<th align="left">sentence</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">55991</td>
+<td align="left">That with the King here resteth in his tent. .</td>
+</tr>
+<tr class="even">
+<td align="right">16097</td>
+<td align="left">You are a merry man, sir. fare you well.</td>
+</tr>
+<tr class="odd">
+<td align="right">9717</td>
+<td align="left">He did ask favour.</td>
+</tr>
+<tr class="even">
+<td align="right">100749</td>
+<td align="left">To the health of our general. .</td>
+</tr>
+<tr class="odd">
+<td align="right">40908</td>
+<td align="left">You are, I think, assur’d I love you not.</td>
+</tr>
+<tr class="even">
+<td align="right">117828</td>
+<td align="left">Laurence. and another Watchman.</td>
+</tr>
+<tr class="odd">
+<td align="right">19243</td>
+<td align="left">Ere now denied the asker, and now again,.</td>
+</tr>
+<tr class="even">
+<td align="right">145024</td>
+<td align="left">I swear to do this, though a present death.</td>
+</tr>
+<tr class="odd">
+<td align="right">70942</td>
+<td align="left">Stocking his messenger.</td>
+</tr>
+<tr class="even">
+<td align="right">122957</td>
+<td align="left">For bringing wood in slowly.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="creating-ngrams" class="section level2">
+<h2>Creating ngrams</h2>
+<p>“ngrams are a contiguous sequence of n items from a given sequence of text…” - <a href="https://en.wikipedia.org/wiki/N-gram">Wikipedia</a></p>
+<p>In this case, ngrams would be a contiguous sequence of n words. In the simplest form, an ngram of size 1 is a single word.
+An ngram of size 2 or more is a set of words that appear one after the other in a sequence.</p>
+<p>For instance, given a sentence - <strong>how are you doing?</strong></p>
+<ul>
+<li>There are 4 Unigrams: how, are, you, doing</li>
+<li>There are 3 Bigrams: how are, are you, you doing</li>
+<li>There are 2 Trigrams: how are you, are you doing</li>
+<li>There is 1 Quadrigram: how are you doing</li>
+</ul>
+<p>So, using the data frame of clean sentences that we parsed, the next step is to create ngrams.
+Once again this is made simple using the <strong>unnest_tokens</strong> function from the <code>tidytext</code> package. And this is where grouping by line numbers is important because we want ngrams to be created by sequence of words, only within the same line. We do not want ngrams connected by a sentence break.</p>
+<pre class="r"><code>getNgrams &lt;- function(dfSentences, n) {
+    dfNgrams &lt;- dfSentences %&gt;% 
+        group_by(lineNumber) %&gt;% 
+        unnest_tokens(word, sentence, token = &quot;ngrams&quot;, n = n) %&gt;% 
+        ungroup() %&gt;% 
+        count(word, sort = TRUE) %&gt;% 
+        rename(freq = n)
+}</code></pre>
+<div id="all-words" class="section level3">
+<h3>All Words</h3>
+<pre class="r"><code>df1grams &lt;- getNgrams(dfSentences, 1)
+dim(df1grams)
+[1] 26453     2
+wordsOfFreq1 &lt;- df1grams %&gt;% group_by(freq) %&gt;% summarise(n = sum(freq)) %&gt;% dplyr::filter(freq == 1) %&gt;% .$n</code></pre>
+<p>There are 26453 words in the corpus, that shows how vast Shakespeare’s vocabulary was. Let’s see a wordcloud of top 100 words. No surprise, the most commonly used words are: <strong><em>the, and, i, to, of</em></strong>. Excluding these commonly used ‘stop words’, in the second wordcloud, we can see the words Shakespeare used most frequently. We can see a lot of references to royalty and nobility, present specially in Shakespearean tragedies. Some names are mentioned quite frequently - Richard, John, Caesar, Brutus and Henry. Some English counties or <a href="https://en.wikipedia.org/wiki/Shire">shires</a> are mentioned quite often - Warwick, York and Gloucester.</p>
+<p><img src="/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png" width="768" /></p>
+</div>
+<div id="unigrams" class="section level3">
+<h3>Unigrams</h3>
+<p>Let’s see a plot of the distribution of words in corpus by usage.</p>
+<p><img src="/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png" width="672" /></p>
+<p>Here’s a strategy for building ngram tables:</p>
+<ul>
+<li>There is a long tail of 10522 words in the corpus that appear exactly once. Replace all words appearing just once, by <strong>UNK</strong> as a placeholder for a word not known from the corpus. There are a couple of motivations behind this:
+<ul>
+<li>It reduces the size of ngram tables.</li>
+<li>More importantly, when an unknown word is encountered, the model knows how to tackle it before predicting the next set of words.</li>
+</ul></li>
+<li>Re-summarise and rearrange the table by frequency.</li>
+<li>Assign an index to each word.</li>
+<li>Convert to data.table format. Some of the biggest benefits of this approach are:
+<ul>
+<li>Rows could be assigned and referenced by a key. This makes it extremely simple to look up a row value.</li>
+<li>Lookup by a key is very fast compared to matching character strings.</li>
+<li>When we create tables for bigrams and higher order ngrams, we can replace the words by their corresponding integer indexes. It saves a lot of memory as compared to creating tibbles with character strings.</li>
+</ul></li>
+</ul>
+<pre class="r"><code>vTopUnigrams &lt;- df1grams %&gt;% dplyr::filter(freq &gt;= 2) %&gt;% .$word
+df1grams &lt;- df1grams %&gt;% 
+    mutate(word = ifelse(word %in% vTopUnigrams, word, &quot;UNK&quot;)) %&gt;% 
+    group_by(word) %&gt;% 
+    summarise(freq = sum(freq)) %&gt;% 
+    arrange(desc(freq)) %&gt;% 
+    mutate(index1 = row_number()) %&gt;% 
+    select(index1, freq, word)
+
+dt1grams &lt;- as.data.table(df1grams)
+# set key to word
+dt1grams &lt;- dt1grams[,.(index1,freq),key=word]
+# create another table with key=index1
+dt1gramsByIndex &lt;- dt1grams[,.(word,freq),key=index1]
+# print dimensions
+dim(dt1grams)
+[1] 15932     3</code></pre>
+<p>Here are the top 10 unigrams. <strong>UNK</strong> replaces the long tail of words appearing once.
+Finally, we are left with 15932 unigrams in our table.</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 14:58:51 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+index1
+</th>
+<th>
+word
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+26821
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+2
+</td>
+<td align="center">
+and
+</td>
+<td align="center">
+25670
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+3
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+20473
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+4
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+19377
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+5
+</td>
+<td align="center">
+of
+</td>
+<td align="center">
+16954
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+6
+</td>
+<td align="center">
+a
+</td>
+<td align="center">
+14351
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+7
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+13568
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+8
+</td>
+<td align="center">
+my
+</td>
+<td align="center">
+12449
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+9
+</td>
+<td align="center">
+in
+</td>
+<td align="center">
+10881
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+10
+</td>
+<td align="center">
+that
+</td>
+<td align="center">
+10869
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+</div>
+<div id="bigrams" class="section level3">
+<h3>Bigrams</h3>
+<p>A data table of bigrams is created where the index of the first word is the lookup key. The second word cannot be <strong>UNK</strong> since it is a word used for making predictions from the bigram table.</p>
+<pre class="r"><code>df2grams &lt;- getNgrams(dfSentences, 2) %&gt;% 
+    separate(word, c(&quot;word1&quot;, &quot;word2&quot;), sep = &quot; &quot;) %&gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &quot;UNK&quot;)) %&gt;% 
+    dplyr::filter(word2 %in% vTopUnigrams) %&gt;% 
+    group_by(word1, word2) %&gt;% 
+    summarise(freq = sum(freq)) %&gt;% 
+    arrange(desc(freq))
+
+dt2grams &lt;- as.data.table(df2grams)
+dt2grams$index1 &lt;- dt1grams[dt2grams$word1]$index1
+dt2grams$index2 &lt;- dt1grams[dt2grams$word2]$index1
+dt2grams &lt;- dt2grams[,.(index1,index2,freq)]
+setkey(dt2grams, index1)
+
+# print dimensions
+dim(dt2grams)
+[1] 254884      3</code></pre>
+<p>Here are the top 10 bigrams:</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 14:59:03 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+word1
+</th>
+<th>
+word2
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+30512
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+1846
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+my
+</td>
+<td align="center">
+lord
+</td>
+<td align="center">
+1640
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+in
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+1611
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+have
+</td>
+<td align="center">
+1603
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+will
+</td>
+<td align="center">
+1553
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+of
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+1417
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+1380
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+it
+</td>
+<td align="center">
+is
+</td>
+<td align="center">
+1066
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+be
+</td>
+<td align="center">
+973
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+</div>
+<div id="trigrams" class="section level3">
+<h3>Trigrams</h3>
+<p>Similarly, a data table of trigrams is created where indexes of the first and second words form the lookup key.
+The third word cannot be <strong>UNK</strong> since it is a word used for making predictions from the trigram table.</p>
+<pre class="r"><code>df3grams &lt;- getNgrams(dfSentences, 3) %&gt;% 
+    separate(word, c(&quot;word1&quot;, &quot;word2&quot;, &quot;word3&quot;), sep = &quot; &quot;) %&gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &quot;UNK&quot;)) %&gt;% 
+    mutate(word2 = ifelse(word2 %in% vTopUnigrams, word2, &quot;UNK&quot;)) %&gt;% 
+    dplyr::filter(word3 %in% vTopUnigrams) %&gt;% 
+    group_by(word1, word2, word3) %&gt;% 
+    summarise(freq = sum(freq)) %&gt;% 
+    arrange(desc(freq))
+
+dt3grams &lt;- as.data.table(df3grams)
+dt3grams$index1 &lt;- dt1grams[dt3grams$word1]$index1
+dt3grams$index2 &lt;- dt1grams[dt3grams$word2]$index1
+dt3grams$index3 &lt;- dt1grams[dt3grams$word3]$index1
+dt3grams &lt;- dt3grams[,.(index1,index2,index3,freq)]
+setkey(dt3grams, index1,index2)
+
+# print dimensions
+dim(dt3grams)
+[1] 476098      4</code></pre>
+<p>From the top 10 trigrams, we can get an idea how <strong>UNK</strong> will be useful in this context. <strong><em>the UNK of</em></strong> is one of the most frequently used word sequences in the trigram table, which implies that if we encounter an unknown word after ‘the’, then ‘of’ is the most likely word to be predicted from the trigram table.</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 14:59:27 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+word1
+</th>
+<th>
+word2
+</th>
+<th>
+word3
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+38526
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+pray
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+238
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+will
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+213
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+know
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+159
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+do
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+157
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+UNK
+</td>
+<td align="center">
+of
+</td>
+<td align="center">
+155
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+duke
+</td>
+<td align="center">
+of
+</td>
+<td align="center">
+141
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+139
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+a
+</td>
+<td align="center">
+138
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+would
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+127
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+</div>
+<div id="quadrigrams" class="section level3">
+<h3>Quadrigrams</h3>
+<p>Here are the top 10 quadrigrams:</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 14:59:54 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+word1
+</th>
+<th>
+word2
+</th>
+<th>
+word3
+</th>
+<th>
+word4
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+47569
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+with
+</td>
+<td align="center">
+all
+</td>
+<td align="center">
+my
+</td>
+<td align="center">
+heart
+</td>
+<td align="center">
+46
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+know
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+what
+</td>
+<td align="center">
+38
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+give
+</td>
+<td align="center">
+me
+</td>
+<td align="center">
+your
+</td>
+<td align="center">
+hand
+</td>
+<td align="center">
+31
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+do
+</td>
+<td align="center">
+beseech
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+31
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+give
+</td>
+<td align="center">
+me
+</td>
+<td align="center">
+thy
+</td>
+<td align="center">
+hand
+</td>
+<td align="center">
+30
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+the
+</td>
+<td align="center">
+duke
+</td>
+<td align="center">
+of
+</td>
+<td align="center">
+york
+</td>
+<td align="center">
+29
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+do
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+know
+</td>
+<td align="center">
+28
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+would
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+have
+</td>
+<td align="center">
+27
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+ay
+</td>
+<td align="center">
+my
+</td>
+<td align="center">
+good
+</td>
+<td align="center">
+lord
+</td>
+<td align="center">
+25
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+</div>
+<div id="pentagrams" class="section level3">
+<h3>Pentagrams</h3>
+<p>Here are the top 10 pentagrams:</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 15:00:17 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+word1
+</th>
+<th>
+word2
+</th>
+<th>
+word3
+</th>
+<th>
+word4
+</th>
+<th>
+word5
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+</td>
+<td align="center">
+60534
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+glad
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+see
+</td>
+<td align="center">
+15
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+thank
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+for
+</td>
+<td align="center">
+your
+</td>
+<td align="center">
+12
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+had
+</td>
+<td align="center">
+rather
+</td>
+<td align="center">
+be
+</td>
+<td align="center">
+a
+</td>
+<td align="center">
+9
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+glad
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+see
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+8
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+as
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+am
+</td>
+<td align="center">
+a
+</td>
+<td align="center">
+gentleman
+</td>
+<td align="center">
+8
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+for
+</td>
+<td align="center">
+mine
+</td>
+<td align="center">
+own
+</td>
+<td align="center">
+part
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+8
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+pray
+</td>
+<td align="center">
+you
+</td>
+<td align="center">
+tell
+</td>
+<td align="center">
+me
+</td>
+<td align="center">
+8
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+know
+</td>
+<td align="center">
+not
+</td>
+<td align="center">
+what
+</td>
+<td align="center">
+to
+</td>
+<td align="center">
+say
+</td>
+<td align="center">
+8
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+and
+</td>
+<td align="center">
+so
+</td>
+<td align="center">
+i
+</td>
+<td align="center">
+take
+</td>
+<td align="center">
+my
+</td>
+<td align="center">
+7
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+<p>These ngram tables comprise all the information needed for the prediction model.</p>
+</div>
+<div id="memory-usage-comparison" class="section level3">
+<h3>Memory Usage Comparison</h3>
+<p>As mentioned above, storing words as integer indexes in a data table is far more efficient as compared to a data frame with character strings.
+For instance, here’s how a pentagram data table looks like that contains just the integer indexes of the words:</p>
+<center>
+<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
+<!-- Thu Jun 11 15:00:17 2020 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+index1
+</th>
+<th>
+index2
+</th>
+<th>
+index3
+</th>
+<th>
+index4
+</th>
+<th>
+index5
+</th>
+<th>
+freq
+</th>
+</tr>
+<tr>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+9049
+</td>
+<td align="center">
+5
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+2
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+9049
+</td>
+<td align="center">
+5
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+3
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+4
+</td>
+<td align="center">
+2
+</td>
+<td align="center">
+9384
+</td>
+<td align="center">
+12918
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+4
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+4
+</td>
+<td align="center">
+687
+</td>
+<td align="center">
+31
+</td>
+<td align="center">
+4758
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+5
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+5
+</td>
+<td align="center">
+31
+</td>
+<td align="center">
+6421
+</td>
+<td align="center">
+29
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+6
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+9
+</td>
+<td align="center">
+183
+</td>
+<td align="center">
+2
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+7
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+11
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+46
+</td>
+<td align="center">
+15
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+8
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+11
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+57
+</td>
+<td align="center">
+16
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+9
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+11
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1267
+</td>
+<td align="center">
+11402
+</td>
+<td align="center">
+1
+</td>
+</tr>
+<tr>
+<td align="center">
+10
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+11
+</td>
+<td align="center">
+1
+</td>
+<td align="center">
+1403
+</td>
+<td align="center">
+10842
+</td>
+<td align="center">
+1
+</td>
+</tr>
+</table>
+</center>
+<p><br></p>
+<p>In a comparison of memory needed for all ngram tables, we see a difference of a factor of 5 between the two approaches.</p>
+<pre class="r"><code>print(object.size(df1grams)+object.size(df2grams)+object.size(df3grams)+
+          object.size(df4grams)+object.size(df5grams), units = &quot;auto&quot;)
+158 Mb
+
+print(object.size(dt1grams)+object.size(dt1gramsByIndex)+object.size(dt2grams)+object.size(dt3grams)+
+          object.size(dt4grams)+object.size(dt5grams), units = &quot;auto&quot;)
+30.4 Mb</code></pre>
+</div>
+</div>
+<div id="ngram-with-backoff-prediction-algorithm" class="section level2">
+<h2>Ngram With Backoff Prediction Algorithm</h2>
+<p>So, given the ngram data tables, here’s how the prediction algorithm works:</p>
+<ul>
+<li>Sanitize the input text as done above</li>
+<li>Parse the text into sentences</li>
+<li>Determine the words in the last sentence of the input text. Use upto the last 4 words from the input text.</li>
+<li>The word predictions are done starting from the ngram table containing the longest sequence of words, provided the input text contains atleast n-1 words. So, if the last 4 words from the input text match the first 4 words in the pentagram table, then the fifth word is chosen, that has the highest frequency of occurance after those 4 words. If more than one word prediction is desired, then the fifth words with the next highest frequency of occurance are also chosen.</li>
+<li>If no matches or fewer than desired number of matches are found in the pentagram table, then the algorithm backoffs to the quadrigram table using the last 3 words typed, then to the trigram table using the last 2 words typed, then to the bigram table using the last word typed and finally to the unigram table, until the desired number of word predictions are returned.</li>
+</ul>
+<p>Let’s see how this works concretely with some test cases:</p>
+<div id="test-cases" class="section level3">
+<h3>Test Cases</h3>
+<p>The first test is to confirm whether the word predictions from the unigram table, match with what we expect.
+The top 10 unigram table contains 3 words beginning with the letter ‘t’ - <code>the</code>(1), <code>to</code>(4), <code>that</code>(10). And sure enough, this is what we get from our prediction function.</p>
+<pre class="r"><code>predictNextWords(&quot;t&quot;)
+[1] &quot;Predictions from 1grams: the,to,that,this,thou&quot;
+[1] &quot;Top 3 Final Predictions: the,to,that&quot;</code></pre>
+<p>From the bigram table, we could see that <code>i am</code>, <code>i have</code> and <code>i will</code> are among the top 10. So, the next test is to confirm these.</p>
+<pre class="r"><code>predictNextWords(&quot;i &quot;)
+[1] &quot;Predictions from 2grams: am,have,will,do,would&quot;
+[1] &quot;Top 3 Final Predictions: am,have,will&quot;</code></pre>
+<p>Narrowing down to words that begin with letter ‘h’ gives us:</p>
+<pre class="r"><code>predictNextWords(&quot;i h&quot;)
+[1] &quot;Predictions from 2grams: have,had,hope,hear,heard&quot;
+[1] &quot;Top 3 Final Predictions: have,had,hope&quot;</code></pre>
+<p>Let’s predict some trigrams. <code>i am not</code> and <code>i am a</code> are among the top 10 trigrams, so that’s what we expect to see.</p>
+<pre class="r"><code>predictNextWords(&quot;i am &quot;)
+[1] &quot;Predictions from 3grams: not,a,sure,glad,the&quot;
+[1] &quot;Top 3 Final Predictions: not,a,sure&quot;</code></pre>
+<p>Now let’s examine the <strong>UNK</strong> feature. We know that <code>the UNK of</code> is number 5 most common sequence in the trigram table so we should expect to see ‘of’ as the first prediction if the input text has an unknown word after ‘the’. So let’s input some gibberish after ‘the’ to make sure this word doesn’t exist in our vocabulary:</p>
+<pre class="r"><code>predictNextWords(&quot;the sjdhsbhbfh &quot;)
+[1] &quot;Predictions from 3grams: of,and,in,that,the&quot;
+[1] &quot;Top 3 Final Predictions: of,and,in&quot;</code></pre>
+<p>Now that the <em>known</em> test cases are working well, let’s see the backoff algorithm in action:</p>
+<pre class="r"><code>predictNextWords(&quot;to be or not &quot;)
+[1] &quot;Predictions from 5grams: to&quot;
+[1] &quot;Predictions from 4grams: to&quot;
+[1] &quot;Predictions from 3grams: to,at,i,allow&#39;d,arriv&#39;d&quot;
+[1] &quot;Top 3 Final Predictions: to,at,i&quot;
+predictNextWords(&quot;to be or not to &quot;)
+[1] &quot;Predictions from 5grams: be&quot;
+[1] &quot;Predictions from 4grams: be,crack&quot;
+[1] &quot;Predictions from 3grams: be,crack,the,have,me,do&quot;
+[1] &quot;Top 3 Final Predictions: be,crack,the&quot;
+predictNextWords(&quot;be or not to &quot;)
+[1] &quot;Predictions from 5grams: be&quot;
+[1] &quot;Predictions from 4grams: be,crack&quot;
+[1] &quot;Predictions from 3grams: be,crack,the,have,me,do&quot;
+[1] &quot;Top 3 Final Predictions: be,crack,the&quot;
+predictNextWords(&quot;to be or not to be &quot;)
+[1] &quot;Predictions from 5grams: that&quot;
+[1] &quot;Predictions from 4grams: that,found,gone,endur&#39;d,endured,seen&quot;
+[1] &quot;Top 3 Final Predictions: that,found,gone&quot;
+predictNextWords(&quot;to be or not to be, that &quot;)
+[1] &quot;Predictions from 5grams: is&quot;
+[1] &quot;Predictions from 4grams: is,which&quot;
+[1] &quot;Predictions from 3grams: is,which,you,he,i,thou,can&quot;
+[1] &quot;Top 3 Final Predictions: is,which,you&quot;
+predictNextWords(&quot;to be or not to be, that is &quot;)
+[1] &quot;Predictions from 5grams: the&quot;
+[1] &quot;Predictions from 4grams: the&quot;
+[1] &quot;Predictions from 3grams: the,not,my,to,a&quot;
+[1] &quot;Top 3 Final Predictions: the,not,my&quot;
+predictNextWords(&quot;to be or not to be, that is the &quot;)
+[1] &quot;Predictions from 5grams: question&quot;
+[1] &quot;Predictions from 4grams: question,very,way,humour,best,brief&quot;
+[1] &quot;Top 3 Final Predictions: question,very,way&quot;
+predictNextWords(&quot;be that is the &quot;)
+[1] &quot;Predictions from 5grams: question&quot;
+[1] &quot;Predictions from 4grams: question,very,way,humour,best,brief&quot;
+[1] &quot;Top 3 Final Predictions: question,very,way&quot;</code></pre>
+<p>Using one of the most well known speeches from Hamlet, we can see that the algorithm gets the first word prediction from the pentagram table. But since we are looking for the next 3 words, the algorithm backoffs to predictions from quadrigram and trigram tables, until it has atleast 3 words. In this case, the pentagram table gives us the best match that we are looking for. We can also observe that once we have atleast 4 words in our input text, the words prior to those do not matter for the next word predictions.</p>
+<p><br></p>
+<p>Let’s see another example:</p>
+<pre class="r"><code>predictNextWords(&quot;What a lovely day &quot;)
+[1] &quot;Predictions from 5grams: &quot;
+[1] &quot;Predictions from 4grams: &quot;
+[1] &quot;Predictions from 3grams: &quot;
+[1] &quot;Predictions from 2grams: and,to,is,of,i&quot;
+[1] &quot;Top 3 Final Predictions: and,to,is&quot;
+predictNextWords(&quot;a lovely day &quot;)
+[1] &quot;Predictions from 4grams: &quot;
+[1] &quot;Predictions from 3grams: &quot;
+[1] &quot;Predictions from 2grams: and,to,is,of,i&quot;
+[1] &quot;Top 3 Final Predictions: and,to,is&quot;
+predictNextWords(&quot;lovely day &quot;)
+[1] &quot;Predictions from 3grams: &quot;
+[1] &quot;Predictions from 2grams: and,to,is,of,i&quot;
+[1] &quot;Top 3 Final Predictions: and,to,is&quot;
+predictNextWords(&quot;day &quot;)
+[1] &quot;Predictions from 2grams: and,to,is,of,i&quot;
+[1] &quot;Top 3 Final Predictions: and,to,is&quot;</code></pre>
+<p>Here we see that even though there are enough words to start matching from the higher ngram tables, the matches are gotten only from the bigram table using ‘day’ as the first word.</p>
+<p><br></p>
+<p>Another one:</p>
+<pre class="r"><code>predictNextWords(&quot;Beware the ides of &quot;)
+[1] &quot;Predictions from 5grams: march&quot;
+[1] &quot;Predictions from 4grams: march&quot;
+[1] &quot;Predictions from 3grams: march&quot;
+[1] &quot;Predictions from 2grams: march,the,my,his,a,this&quot;
+[1] &quot;Top 3 Final Predictions: march,the,my&quot;
+predictNextWords(&quot;Beware the ides of mar&quot;)
+[1] &quot;Predictions from 5grams: march&quot;
+[1] &quot;Predictions from 4grams: march&quot;
+[1] &quot;Predictions from 3grams: march&quot;
+[1] &quot;Predictions from 2grams: march,marriage,marcius,marcus,mars&quot;
+[1] &quot;Top 3 Final Predictions: march,marriage,marcius&quot;
+predictNextWords(&quot;Beware the ides of march&quot;)
+[1] &quot;Predictions from 5grams: march&quot;
+[1] &quot;Predictions from 4grams: march&quot;
+[1] &quot;Predictions from 3grams: march&quot;
+[1] &quot;Predictions from 2grams: march,marching&quot;
+[1] &quot;Predictions from 1grams: march,marching,march&#39;d,marches,marchioness&quot;
+[1] &quot;Top 3 Final Predictions: march,marching,march&#39;d&quot;</code></pre>
+</div>
+</div>
+<div id="shiny-app" class="section level2">
+<h2>Shiny App</h2>
+<p>Finally, here’s a <a href="https://nitingupta2.shinyapps.io/ptmapp">Shiny app</a> that demos this predictive typing model.</p>
+<hr />
+<p><em>The R markdown file for this post is available <a href="https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/building-a-predictive-typing-model/">here</a></em>.</p>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/shinyapps/">shinyapps</a>
+  
+  <a class="badge badge-light" href="/tags/tidytext/">tidytext</a>
+  
+  <a class="badge badge-light" href="/tags/data.table/">data.table</a>
+  
+  <a class="badge badge-light" href="/tags/models/">models</a>
+  
+  <a class="badge badge-light" href="/tags/predictive/">predictive</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
+      <h6 class="card-subtitle">Founder</h6>
+      <p class="card-text">Quantitative Data Technologies</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/ames-housing-part2-models/">Ames Housing - Part 2 - Building Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+      
+      <li><a href="/post/best-batsmen-in-cricket-at-present/">Best batsmen in cricket at present</a></li>
+      
+      <li><a href="/post/top-batsmen-in-cricket/">Top batsmen in cricket</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price. To some extent, clarity also appeared to provide some predictive ability.
+In this post, we will build linear models and see how well they predict the price of diamonds.
+Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict price:">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/casestudies/diamonds-part2-linear-models/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin="anonymous">
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/casestudies/diamonds-part2-linear-models/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="/casestudies/diamonds-part2-linear-models/">
+  <meta property="og:title" content="Diamonds - Part 2 - A cut above - Building Linear Models | Nitin Gupta">
+  <meta property="og:description" content="In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price. To some extent, clarity also appeared to provide some predictive ability.
+In this post, we will build linear models and see how well they predict the price of diamonds.
+Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict price:"><meta property="og:image" content="/img/icon-192.png">
+  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2016-12-21T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2016-12-21T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Diamonds - Part 2 - A cut above - Building Linear Models | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Diamonds - Part 2 - A cut above - Building Linear Models</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 21, 2016
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>In a <a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">previous post</a> in this series, we did an exploratory data analysis of the <code>diamonds</code> dataset and found that <code>carat</code>, <code>x</code>, <code>y</code>, <code>z</code> were strongly correlated with <code>price</code>. To some extent, <code>clarity</code> also appeared to provide some predictive ability.</p>
+<p>In this post, we will build linear models and see how well they predict the <code>price</code> of diamonds.</p>
+<p>Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict <code>price</code>:</p>
+<pre><code>
+Call:
+lm(formula = price ~ ., data = diamonds)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-21376   -592   -183    376  10694 
+
+Coefficients:
+            Estimate Std. Error t value             Pr(&gt;|t|)    
+(Intercept)  5753.76     396.63   14.51 &lt; 0.0000000000000002 ***
+carat       11256.98      48.63  231.49 &lt; 0.0000000000000002 ***
+cut.L         584.46      22.48   26.00 &lt; 0.0000000000000002 ***
+cut.Q        -301.91      17.99  -16.78 &lt; 0.0000000000000002 ***
+cut.C         148.03      15.48    9.56 &lt; 0.0000000000000002 ***
+cut^4         -20.79      12.38   -1.68               0.0929 .  
+color.L     -1952.16      17.34 -112.57 &lt; 0.0000000000000002 ***
+color.Q      -672.05      15.78  -42.60 &lt; 0.0000000000000002 ***
+color.C      -165.28      14.72  -11.22 &lt; 0.0000000000000002 ***
+color^4        38.20      13.53    2.82               0.0047 ** 
+color^5       -95.79      12.78   -7.50    0.000000000000066 ***
+color^6       -48.47      11.61   -4.17    0.000030090737193 ***
+clarity.L    4097.43      30.26  135.41 &lt; 0.0000000000000002 ***
+clarity.Q   -1925.00      28.23  -68.20 &lt; 0.0000000000000002 ***
+clarity.C     982.20      24.15   40.67 &lt; 0.0000000000000002 ***
+clarity^4    -364.92      19.29  -18.92 &lt; 0.0000000000000002 ***
+clarity^5     233.56      15.75   14.83 &lt; 0.0000000000000002 ***
+clarity^6       6.88      13.72    0.50               0.6157    
+clarity^7      90.64      12.10    7.49    0.000000000000071 ***
+depth         -63.81       4.53  -14.07 &lt; 0.0000000000000002 ***
+table         -26.47       2.91   -9.09 &lt; 0.0000000000000002 ***
+x           -1008.26      32.90  -30.65 &lt; 0.0000000000000002 ***
+y               9.61      19.33    0.50               0.6192    
+z             -50.12      33.49   -1.50               0.1345    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 1130 on 53916 degrees of freedom
+Multiple R-squared:  0.92,  Adjusted R-squared:  0.92 
+F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &lt;0.0000000000000002</code></pre>
+<pre><code># A tibble: 3 x 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard    1130.   
+2 rsq     standard       0.920
+3 mae     standard     740.   </code></pre>
+<p>The model summary shows it is an overfitted model. Among other things, we know that <code>depth</code> and <code>table</code> have no impact on <code>price</code>, yet these are shown to be highly significant. Root Mean Squared Error (rmse) and other metrics are also shown above.</p>
+<p>Let’s make a plot of actual v/s predicted prices to visualize how well this base model performs.</p>
+<p><img src="/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png" width="768" /></p>
+<p>If the predictions are good, the points should lie close to a straight line drawn at 45 degrees. We can see this base model does a poor job of predicting prices. Worst of all, the model predicts negative prices on the lower end.
+It shows that <code>price</code> has to be log transformed to avoid these absurdities.</p>
+<div id="feature-engineering" class="section level2">
+<h2>Feature Engineering</h2>
+<p>We know the price of a diamond is strongly correlated with its size. All things equal, the larger the diamond, the greater its price.</p>
+<p>As a first approximation, we can assume a diamond is a cuboid with dimensions <code>x</code>, <code>y</code> and <code>z</code>. Then, we can compute its <code>volume</code> as x * y * z.
+As these 3 dimensions are highly correlated, we can compute a geometrical average dimension by taking the cube root of <code>volume</code>, and retain a linear relationship with <code>log(price)</code>.</p>
+<p>Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:</p>
+<p>$ density = mass/volume $</p>
+<p>We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.</p>
+<p><img src="/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png" width="672" /></p>
+<p>Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
+Keep in mind there are 20 <code>z</code> values that are 0. In 7 of these records both <code>x</code> and <code>y</code> are 0 too, which means these values were not recorded reliably.</p>
+<pre><code># A tibble: 20 x 10
+   carat cut       color clarity depth table price     x     y     z
+   &lt;dbl&gt; &lt;ord&gt;     &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1  1    Premium   G     SI2      59.1    59  3142  6.55  6.48     0
+ 2  1.01 Premium   H     I1       58.1    59  3167  6.66  6.6      0
+ 3  1.1  Premium   G     SI2      63      59  3696  6.5   6.47     0
+ 4  1.01 Premium   F     SI2      59.2    58  3837  6.5   6.47     0
+ 5  1.5  Good      G     I1       64      61  4731  7.15  7.04     0
+ 6  1.07 Ideal     F     SI2      61.6    56  4954  0     6.62     0
+ 7  1    Very Good H     VS2      63.3    53  5139  0     0        0
+ 8  1.15 Ideal     G     VS2      59.2    56  5564  6.88  6.83     0
+ 9  1.14 Fair      G     VS1      57.5    67  6381  0     0        0
+10  2.18 Premium   H     SI2      59.4    61 12631  8.49  8.45     0
+11  1.56 Ideal     G     VS2      62.2    54 12800  0     0        0
+12  2.25 Premium   I     SI1      61.3    58 15397  8.52  8.42     0
+13  1.2  Premium   D     VVS1     62.1    59 15686  0     0        0
+14  2.2  Premium   H     SI1      61.2    59 17265  8.42  8.37     0
+15  2.25 Premium   H     SI2      62.8    59 18034  0     0        0
+16  2.02 Premium   H     VS2      62.7    53 18207  8.02  7.95     0
+17  2.8  Good      G     SI2      63.8    58 18788  8.9   8.85     0
+18  0.71 Good      F     SI2      64.1    60  2130  0     0        0
+19  0.71 Good      F     SI2      64.1    60  2130  0     0        0
+20  1.12 Premium   G     I1       60.4    59  2383  6.71  6.67     0</code></pre>
+<p>In all of these records, the <code>carat</code> values were recorded reliably and are probably more accurate than the dimensions.
+Hence, we might prefer the density method of generating this feature.</p>
+<p>Furthermore, since density is a constant, dividing by a constant to calculate volume isn’t really necessary. Instead, a cube root transformation could be applied to <code>carat</code> itself for the purposes of predictive modelling that would result in a linear relationship between <span class="math inline">\(log(price)\)</span> and <span class="math inline">\(carat^{1/3}\)</span>.
+It is the reason why we’re fitting a linear model because the model is linear in its parameters.</p>
+</div>
+<div id="training-linear-models" class="section level2">
+<h2>Training Linear Models</h2>
+<p>Here are the steps for building linear models and computing metrics:</p>
+<ul>
+<li>Partition the dataset into training and testing sets in the proportion 75% and 25% respectively.</li>
+<li>Since <code>clarity</code> is one of the main predictors, stratify the partitioning by <code>clarity</code>, so both training and testing sets have the same distributions of this feature.</li>
+<li>Fit a linear model with the training set.</li>
+<li>Make predictions on the testing set and determine model metrics.</li>
+<li>Wrap all the steps above inside a function in which the model formula and a seed could be passed. Since the seed determines the random partitioning, it helps to minimize vagaries in partitioning the training and testing sets before fitting models.</li>
+<li>Run multiple iterations of a model with different seeds, and compute its average metrics, that would reflect the results on unseen data.</li>
+</ul>
+<p>Here’s a sample split of training and testing set, stratified by <code>clarity</code>. As we can see, the training and testing sets have similar distributions.</p>
+<pre><code>dfTrain$clarity 
+       n  missing distinct 
+   40457        0        8 
+
+lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+                                                          
+Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
+Frequency    552  6895  9826  9222  6125  3780  2722  1335
+Proportion 0.014 0.170 0.243 0.228 0.151 0.093 0.067 0.033</code></pre>
+<pre><code>dfTest$clarity 
+       n  missing distinct 
+   13483        0        8 
+
+lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+                                                          
+Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
+Frequency    189  2299  3239  3036  2046  1286   933   455
+Proportion 0.014 0.171 0.240 0.225 0.152 0.095 0.069 0.034</code></pre>
+<p>After running 5 iterations of each model with a different seed, here are the average metrics:</p>
+<pre><code># A tibble: 5 x 4
+  model                                                 rmse   rsq   mae
+  &lt;chr&gt;                                                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 log(price) ~ .                                      11055. 0.670  570.
+2 log(price) ~ I(carat^(1/3))                          2893. 0.687 1039.
+3 log(price) ~ I(carat^(1/3)) + clarity                2312. 0.807  881.
+4 log(price) ~ I(carat^(1/3)) + clarity + color        1870. 0.870  631.
+5 log(price) ~ I(carat^(1/3)) + clarity + color + cut  1848. 0.875  625.</code></pre>
+<p>The first model with all predictors is an overfitted one.</p>
+<p>The model with <code>carat</code>, <code>clarity</code> and <code>color</code> provides the best combination of root mean squared error and r-squared, that explains the most variance.
+This is our final model.
+Including <code>cut</code> in the model has diminishing benefits, and tends to overfit the data.</p>
+<p>Here’s the summary of our final model:</p>
+<pre><code>
+Call:
+lm(formula = model_formula, data = dfTrain)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.6022 -0.1034  0.0145  0.1066  1.7941 
+
+Coefficients:
+                Estimate Std. Error t value             Pr(&gt;|t|)    
+(Intercept)     2.147009   0.004993  429.99 &lt; 0.0000000000000002 ***
+I(carat^(1/3))  6.246412   0.005365 1164.27 &lt; 0.0000000000000002 ***
+clarity.L       0.922295   0.005036  183.15 &lt; 0.0000000000000002 ***
+clarity.Q      -0.295539   0.004734  -62.43 &lt; 0.0000000000000002 ***
+clarity.C       0.166979   0.004068   41.05 &lt; 0.0000000000000002 ***
+clarity^4      -0.068591   0.003260  -21.04 &lt; 0.0000000000000002 ***
+clarity^5       0.032833   0.002669   12.30 &lt; 0.0000000000000002 ***
+clarity^6      -0.001904   0.002325   -0.82              0.41288    
+clarity^7       0.025508   0.002049   12.45 &lt; 0.0000000000000002 ***
+color.L        -0.488882   0.002927 -167.05 &lt; 0.0000000000000002 ***
+color.Q        -0.117319   0.002680  -43.78 &lt; 0.0000000000000002 ***
+color.C        -0.012230   0.002497   -4.90           0.00000098 ***
+color^4         0.019007   0.002288    8.31 &lt; 0.0000000000000002 ***
+color^5        -0.008110   0.002159   -3.76              0.00017 ***
+color^6        -0.000396   0.001967   -0.20              0.84055    
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.166 on 40442 degrees of freedom
+Multiple R-squared:  0.973, Adjusted R-squared:  0.973 
+F-statistic: 1.05e+05 on 14 and 40442 DF,  p-value: &lt;0.0000000000000002</code></pre>
+<p><img src="/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png" width="672" /></p>
+<p>Here’s a scatterplot of actual v/s predicted log(price) from our final model on the testing set:</p>
+<p><img src="/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png" width="672" /></p>
+<p>The points lie close to the 45 degress line. However, on the high end, there are many outliers where actual and predicted values have very high variance.
+Nevertheless, this is as good as it gets.</p>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/models/">models</a>
+  
+  <a class="badge badge-light" href="/tags/regression/">regression</a>
+  
+  <a class="badge badge-light" href="/tags/linear/">linear</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
+      <h6 class="card-subtitle">Founder</h6>
+      <p class="card-text">Quantitative Data Technologies</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/investing/building-blocks-of-investment-strategies/">Building blocks of systematic investment strategies</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

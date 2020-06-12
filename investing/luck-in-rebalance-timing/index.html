@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="An important and often overlooked topic was raised by Corey Hoffstein at NewFound Research. Here are his first couple of tweets on that topic:
+Indeed, this is about rebalance timing and how little attention it gets. Within the construct of a systematic strategy, this is a part of the Execution Model.
+The Black Box Revealed
+Courtesy: Inside the Black Box - The Simple Truth about Quantitative Trading by Rishi Narang">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/investing/luck-in-rebalance-timing/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin="anonymous">
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/investing/luck-in-rebalance-timing/">
+
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="/investing/luck-in-rebalance-timing/">
+  <meta property="og:title" content="Luck in Rebalance Timing | Nitin Gupta">
+  <meta property="og:description" content="An important and often overlooked topic was raised by Corey Hoffstein at NewFound Research. Here are his first couple of tweets on that topic:
+Indeed, this is about rebalance timing and how little attention it gets. Within the construct of a systematic strategy, this is a part of the Execution Model.
+The Black Box Revealed
+Courtesy: Inside the Black Box - The Simple Truth about Quantitative Trading by Rishi Narang"><meta property="og:image" content="/investing/luck-in-rebalance-timing/featured.png">
+  <meta property="twitter:image" content="/investing/luck-in-rebalance-timing/featured.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2017-05-29T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2017-05-29T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Luck in Rebalance Timing | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Luck in Rebalance Timing</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    May 29, 2017
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/investing/">investing</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<p>An important and often overlooked topic was raised by Corey Hoffstein at NewFound Research. Here are his first couple of tweets on that topic:</p>
+<center>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+<a href="https://twitter.com/choffstein/status/867445823889694720"></a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</center>
+<p>Indeed, this is about rebalance timing and how little attention it gets. Within the construct of a systematic strategy, this is a part of the Execution Model.</p>
+<center>
+<div class="figure">
+<img src="buildingblocks_shaded.png" alt="The Black Box Revealed" />
+<p class="caption">The Black Box Revealed</p>
+</div>
+<p>Courtesy: <a href="https://www.amazon.com/Inside-Black-Box-Quantitative-Frequency-ebook/dp/B00BZ9WAVW/ref=sr_1_1?s=books&amp;ie=UTF8&amp;qid=1487389686&amp;sr=1-1&amp;keywords=rishi+narang">Inside the Black Box - The Simple Truth about Quantitative Trading</a> by Rishi Narang</p>
+</center>
+<p>Unless it’s an intraday trading model, when it comes to portfolio rebalancing, a common convention is to rebalance at the beginning of a new month. Perhaps, these are some of the reasons behind this convention:</p>
+<ol style="list-style-type: decimal">
+<li>In published literature, a monthly period is commonly used for portfolio rebalancing. Hence it has become a sort of common convention to follow.</li>
+<li>Most of the researchers are adept in using Excel, but less so in programming languages. While doing a backtest in Excel, it is easier to manipulate monthly data and do performance analysis, as opposed doing it with daily data.</li>
+<li>In some cases, investible products for some asset classes have not existed beyond a couple of decades at best. So longer backtests are often done using theoretical indices which are often available only in monthly format. Hence it forces the choice of a monthly rebalancing cycle. This implies rebalancing at the beginning of a new month.</li>
+</ol>
+<p>But should this be accepted just on the basis of a common convention? If a monthly rebalancing cycle is adopted, does it matter which day of the month is chosen for rebalance? Are there any major differences between portfolios rebalanced on the first business day of a month, as opposed to other days? Are these differences just completely random in nature?</p>
+<p>These are some of the questions that need to be answered.</p>
+<div id="strategy" class="section level3">
+<h3>Strategy</h3>
+<p>To answer these questions, I used one of the most basic market timing strategies:</p>
+<p><em>Go long S&amp;P500 when it trades above its 200 days simple moving average (SMA), otherwise exit and invest in T-Bills.</em></p>
+<p>There is nothing magical about using a 200 days SMA. Other periods in the same ballpark work just as well, as shown by Meb Faber in his <a href="https://papers.ssrn.com/sol3/Papers.cfm?abstract_id=962461">QTAA paper</a>. I used this simple strategy to illustrate the effect of rebalance timing on portfolio performance.</p>
+<p>I put together a historical daily total returns dataset of SPDR S&amp;P 500 ETF (SPY), spliced together with historical daily total returns data of Vanguard 500 Index fund (VFINX), prior to Feb. 1993. This data was sourced from Yahoo! Finance, prior to their API fiasco earlier this month. Both of these products closely track the S&amp;P500 Total Returns Index. This provides 37+ years of historical daily total returns data going back to the beginning of 1980.</p>
+</div>
+<div id="methodology" class="section level3">
+<h3>Methodology</h3>
+<p>To test the effect of rebalance timing, I constructed 21 portfolio series, assuming 21 business days in a month. The first portfolio series is rebalanced on the first business day of a month, using the trading signal as of the end of the previous month. In short, signal @ t, rebalance @ t+1. If there are fewer than 21 business days in a month, say for instance 19 days, then portfolio series 20 and 21 are rebalanced on the first business day of the next month. A transaction cost of 10 bps is applied on each trade.</p>
+<p>Here are the results:</p>
+<p><img src="/investing/luck-in-rebalance-timing/index_files/figure-html/result1-1.png" width="672" /></p>
+<p>The impact of luck could be observed in drawdowns as well as returns. The worst drawdown of series 13 is just a little more than half of series 14. Nevertheless, their annualized returns are almost the same. In all the cases, except series 13, the worst drawdown happened after the crash of 1987. Ironically, series 13 is the lucky one here ;). As Corey mentioned in his tweets, for an investment manager this is a difference between getting hired and fired.</p>
+<p>At the moment, series 1, gives the best return. As we progress to series 9, the returns decrease quite significantly. There is a difference of over 2% in their annualized returns. Here are their performance summaries:</p>
+<table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
+<thead>
+<tr>
+<td colspan="3" style="text-align: left;">
+Table 1: Best and worst rebalance series
+</td>
+</tr>
+<tr>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey;">
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Best
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Worst
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="3" style="font-weight: 900;">
+ALL Years
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Return
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.68%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.63%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Std Dev
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.09%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.87%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Sharpe (Rf=4.22%)
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.55
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.35
+</td>
+</tr>
+<tr>
+<td style="border-bottom: 2px solid grey; text-align: left;">
+  Jan 1981 - Apr 2017 Worst Drawdown
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-23.59%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-26.20%
+</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s take a look at how the best (blue) and the worst (red) series have fared relative to the other 19 series in the entire historical period:</p>
+<p><img src="/investing/luck-in-rebalance-timing/index_files/figure-html/best_worst_plot-1.png" width="672" /></p>
+<p>So, turns out the current best performed worse than the median for most of the historical period. But since 2003, it really took off and has managed to avoid many whipsaws that appear to have affected other series. But will it continue to do better? The impact of luck is quite obvious here. Quite surprisingly, the worst series has been at or near the worst throughout the historical period. Perhaps a longer backtest or one with a different investment strategy would be useful to investigate this further.</p>
+</div>
+<div id="mitigating-the-impact-of-luck" class="section level3">
+<h3>Mitigating the impact of luck</h3>
+<p>So how could the impact of luck be mitigated without resorting to more frequent rebalancing, and thus incurring higher portfolio turnover costs?</p>
+<p>Here are a couple of ideas:</p>
+<ol style="list-style-type: decimal">
+<li><p>Create four weekly portfolio series staggered by a week, where each series is rebalanced at the interval of 4 weeks. This way, at any given time, only ~ 25% of the capital is exposed to whipsaw risk. But a practical challenge here is to ensure that each series remains balanced relative to others. Say for instance, no single series should have a weight greater than a third of the entire portfolio. This could be managed by leveraging / deleveraging at rebalance time.</p></li>
+<li><p>Stick with rebalancing at the beginning of a new month (t+1). But instead of taking the signal at the last day of the prior month (t), take the median (or mean) of the daily signals in the prior month. This is similar to Corey’s idea of signal smoothing with 21 days SMA of signals.</p></li>
+</ol>
+<p>Let’s see how these methods compare to the best and worst portfolios:</p>
+<p><img src="/investing/luck-in-rebalance-timing/index_files/figure-html/final_performance_plot-1.png" width="672" /></p>
+<p>The three methods with overlapping portfolios and signal smoothing are denoted by <em>Weekly_avg, Signal_median, Signal_avg</em>. We can observe that all of these methods have similar performance profiles in the historical period, with minor differences in shorter time periods. They perform much better than the <em>Worst</em> portfolio series, in all time periods. And during most of the historical period, they have even performed better than the current <em>Best</em> series.</p>
+<table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
+<thead>
+<tr>
+<td colspan="7" style="text-align: left;">
+Table 2: Comparison of rebalance methods
+</td>
+</tr>
+<tr>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey;">
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+SP500TR
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Best
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Worst
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Weekly_avg
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Signal_median
+</th>
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: right;">
+Signal_avg
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="7" style="font-weight: 900;">
+ALL Years
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Return
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.07%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.68%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.63%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.99%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.19%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.26%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Std Dev
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+14.85%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.09%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.87%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.01%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.45%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.11%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Annualized Sharpe (Rf=4.22%)
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.44
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.55
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.35
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.50
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.49
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.51
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  Jan 1981 - Apr 2017 Worst Drawdown
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-50.95%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-23.59%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-26.20%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-21.42%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-26.87%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-26.87%
+</td>
+</tr>
+<tr>
+<td colspan="7" style="font-weight: 900;">
+20 Years
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 1997 - Apr 2017 Annualized Return
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+7.52%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.18%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+7.58%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.15%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.07%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.17%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 1997 - Apr 2017 Annualized Std Dev
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+15.17%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.02%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.98%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.09%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.38%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.98%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 1997 - Apr 2017 Annualized Sharpe (Rf=2.04%)
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.35
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.80
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.49
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.59
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.66
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.70
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 1997 - Apr 2017 Worst Drawdown
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-50.95%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-15.28%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-17.37%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-16.18%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-15.28%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-15.28%
+</td>
+</tr>
+<tr>
+<td colspan="7" style="font-weight: 900;">
+10 Years
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2007 - Apr 2017 Annualized Return
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+7.00%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.02%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+6.93%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+7.65%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+7.50%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.40%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2007 - Apr 2017 Annualized Std Dev
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+15.25%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.18%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.62%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.86%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.74%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.41%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2007 - Apr 2017 Annualized Sharpe (Rf=0.52%)
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.42
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.03
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.60
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.72
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.71
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+0.83
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2007 - Apr 2017 Worst Drawdown
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-50.95%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-10.06%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-17.37%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-16.18%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-14.77%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+-12.00%
+</td>
+</tr>
+<tr>
+<td colspan="7" style="font-weight: 900;">
+5 Years
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2012 - Apr 2017 Annualized Return
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+13.36%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+11.91%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.08%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.84%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.12%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.58%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2012 - Apr 2017 Annualized Std Dev
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+10.19%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.77%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.55%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.82%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+9.29%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+8.98%
+</td>
+</tr>
+<tr>
+<td style="text-align: left;">
+  May 2012 - Apr 2017 Annualized Sharpe (Rf=0.15%)
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.29
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.34
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.04
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.21
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.07
+</td>
+<td style="padding-left: .5em; padding-right: .5em; text-align: right;">
+1.16
+</td>
+</tr>
+<tr>
+<td style="border-bottom: 2px solid grey; text-align: left;">
+  May 2012 - Apr 2017 Worst Drawdown
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-8.36%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-7.64%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-14.78%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-9.88%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-14.77%
+</td>
+<td style="padding-left: .5em; padding-right: .5em; border-bottom: 2px solid grey; text-align: right;">
+-12.00%
+</td>
+</tr>
+</tbody>
+</table>
+<p>As we can see, relatively simple solutions work well to mitigate the impact of luck in rebalance timing.</p>
+<hr />
+<p><strong>Disclaimer</strong></p>
+<p><em>All content displayed here is for informational purposes only and is not guaranteed to be accurate, complete or up-to-date. Nothing herein should be considered investment advice or recommendation to buy, sell or hold any securities.</em></p>
+<hr />
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rfinance/">rfinance</a>
+  
+  <a class="badge badge-light" href="/tags/models/">models</a>
+  
+  <a class="badge badge-light" href="/tags/rebalance/">rebalance</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
+      <h6 class="card-subtitle">Founder</h6>
+      <p class="card-text">Quantitative Data Technologies</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/building-a-predictive-typing-model/">Building a Predictive Typing Model</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part2-models/">Ames Housing - Part 2 - Building Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+      
+      <li><a href="/investing/building-blocks-of-investment-strategies/">Building blocks of systematic investment strategies</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

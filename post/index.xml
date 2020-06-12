@@ -1,0 +1,3949 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts | Nitin Gupta</title>
+    <link>/post/</link>
+      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <description>Posts</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 15 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>Posts</title>
+      <link>/post/</link>
+    </image>
+    
+    <item>
+      <title>How Much Do Swimmers Improve in a Season?</title>
+      <link>/post/how-much-do-swimmers-improve-in-a-season/</link>
+      <pubDate>Mon, 15 Oct 2018 00:00:00 +0000</pubDate>
+      <guid>/post/how-much-do-swimmers-improve-in-a-season/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;In my &lt;a href=&#34;../a-deep-dive-in-analyzing-swimming-data/&#34;&gt;previous post&lt;/a&gt;, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But how much impact does practice and coaching have? As I mentioned in my previous post, coaches do not keep a record of attendance during practice. There are daily hour long practice sessions during the summers. But even though it isn’t known how regular the kids are in attending practice, the number of meets that a kid participates in during the season, can be a good proxy. Afterall, it’s highly unlikely that a kid participates in meets while mostly skipping practice.&lt;/p&gt;
+&lt;p&gt;To judge improvement in a stroke, we’d like to see whether a kid got enough opportunities to practice as well as participate in meets. The summer league lasts for about 2 months. So, a reasonable start would be to take the data of kids whose first and last meet participations in a stroke were spaced at least 4 weeks apart.&lt;/p&gt;
+&lt;p&gt;Let’s see the distribution of the number of meets those kids participate in a season:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/number_of_meets-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Seems like, for every stroke, most kids participate in 4 or more meets in a season. So we’ll select it as a threshold to judge improvement. Then, for each kid who participates in 4 or more meets in a season, the improvement will be the difference between the first and the last swim times of the season.&lt;/p&gt;
+&lt;div id=&#34;estimating-improvement&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Estimating Improvement&lt;/h2&gt;
+&lt;p&gt;Here are the distributions of improvement in swim times by age:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/improvement_by_age-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see wide variance among 6 to 10 year olds. But as the kids grow older, the variance reduces.&lt;/p&gt;
+&lt;p&gt;In Breaststroke and Butterfly, there aren’t any 6 year old boys who satisfy the criteria for inclusion. So, instead of looking at improvement by age, it would be better to categorize it by age groups. We could classify kids into 3 age groups, younger kids (6-10), pre-teens and early teens (11-14) and mid to late teens (15-18).&lt;/p&gt;
+&lt;p&gt;Let’s see a similar plot by age groups:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/improvement_by_age_groups-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;is-improvement-significant&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Is Improvement Significant?&lt;/h2&gt;
+&lt;p&gt;Now that we know the distribution of improvement in swim times, the question arises, is it statistically significant? In other words, does practice and coaching have a significant effect within a short season? It is hard to tell from the plot of distributions itself. Within each age group and stroke, we have a paired sample of swim times, where for the same swimmer, we know their first and last swim times of a season. By using statistical tests, we could quantify mean improvements and determine whether or not they are significant.&lt;/p&gt;
+&lt;div id=&#34;frequentist-method&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Frequentist Method&lt;/h3&gt;
+&lt;p&gt;In traditional statistics, a statistical test known as dependent-samples t test can be used to evaluate whether there is a significant difference between the means of first and last swim times of a season. The null hypothesis is that any change in mean swim times is due to random chance.&lt;/p&gt;
+&lt;p&gt;Let’s run this test on the sample of Freestyle swim times of 15-18 year old boys.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+    Paired t-test
+
+data:  first_time_of_season and last_time_of_season
+t = 1.8, df = 31, p-value = 0.08
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.03343  0.52031
+sample estimates:
+mean of the differences 
+                 0.2434 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The mean improvement is about 0.24 seconds, but the 95% confidence interval includes 0, which means we cannot reject the null hypothesis.&lt;/p&gt;
+&lt;p&gt;Let’s look at the mean improvement and 95% confidence intervals for all the age groups, plotted below:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/t_test-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking at the plot, we could say girls of all age groups show a statistically significant improvement in swim times in all the strokes. But for boys, the picture is not so clear cut. Boys aged 6-10 and 11-14 show all around statistically significant improvement. But, as seen before, in Freestyle and also in Butterfly, boys aged 15-18 do not. In both the latter cases, confidence intervals include zero. Point estimates are shown with a hollow circle.&lt;/p&gt;
+&lt;p&gt;But look closely at the p values. Even though the improvements in Backstroke and Breaststroke among 15-18 year old boys appear to be statistically significant, it is only because of the arbitrary choice of 95% confidence level, which has become a de facto standard in published research. With p values of 0.01 and 0.028, we wouldn’t reject the null hypothesis under a 99% confidence level.&lt;/p&gt;
+&lt;p&gt;If this were a study to be published by a researcher in an academic journal, there would be a temptation to run multiple experiments with different filter criteria and attempt to produce final results according to their own bias; a.k.a. &lt;em&gt;p-hacking&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Under the null hypothesis, we’d draw the conclusion that 15-18 year old boys do not show any statistically significant improvement in a season. We might interpret that the hard work they put in practice is barely enough to maintain their time during a season. With a biased view, we might even question whether they’re putting in as much hard work as the girls of their age.&lt;/p&gt;
+&lt;p&gt;But, would either of these conclusions be correct? Afterall, girls of all age groups and most boys show statistically significant improvement. So, why would 15-18 year old boys be any different?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bayesian-method&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Bayesian Method&lt;/h3&gt;
+&lt;p&gt;This is where a Bayesian approach works best. Instead of determining whether the mean difference between the first and last swim times of the season is zero, which is uninformative, the Bayesian way is to determine how much have mean swim times improved, with associated probabilities.&lt;/p&gt;
+&lt;p&gt;Let’s see the results from a Bayesian counterpart to the t test, on a sample of Freestyle swim times of 15-18 year old boys.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+    Bayesian estimation supersedes the t test (BEST) - paired samples
+
+data: first_time_of_season and last_time_of_season, n = 32
+
+  Estimates [95% credible interval]
+mean paired difference: 0.24 [-0.026, 0.50]
+sd of the paired differences: 0.70 [0.45, 0.96]
+
+The mean difference is more than 0 by a probability of 0.96 
+and less than 0 by a probability of 0.04 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Instead of p-values, this Bayesian test provides an actual probability of improvement in swim times. We get estimates for mean and standard deviation of swim time improvements, along with credible or high density intervals. The probability that the mean improvement is more than zero is 95.9%, though the estimate is less precise and the 95% confidence interval includes zero.&lt;/p&gt;
+&lt;p&gt;Let’s run the Bayesian test for all strokes and age groups in both genders:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/bayes_t_test_plot-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Looking at the distributions, we can see that 15-18 year old boys show a very small improvement in their Freestyle and Butterfly times, but the estimate is less precise and the confidence intervals include zero (those distributions are shaded with a light blue color). Nevertheless the probability of mean improvement being greater than zero is in the high 90s, which from a practical standpoint, is convincing enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;With a reasonable set of filters, we created sample datasets by age groups to determine whether kids show significant improvement in swim times within a short summer season. We applied Bayesian testing which turns out to be more informative than traditional statistical testing. For all intents and purposes, we can conclude that kids of all age groups show improvement in their swim times, even within a short summer season.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file with code for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/how-much-do-swimmers-improve-in-a-season/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A Deep Dive in Analyzing Swimming Data</title>
+      <link>/post/a-deep-dive-in-analyzing-swimming-data/</link>
+      <pubDate>Sun, 30 Sep 2018 00:00:00 +0000</pubDate>
+      <guid>/post/a-deep-dive-in-analyzing-swimming-data/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length. The team schedules are packed with practices and events which are intense but thoroughly enjoyable.&lt;/p&gt;
+&lt;p&gt;This is one sport where progress can be measured on almost daily basis. While most young kids take it up as a hobby, older kids seem to be very competitive and quite mindful of their swim times. Besides her own results this year, I was curious to know how my daughter did compared to a larger cohort of kids her own age. And what could we expect, if she keeps at it in the years to come?&lt;/p&gt;
+&lt;p&gt;Luckily, I found past several years of her team’s results to analyze. Gathering this data, cleaning and transforming it for analysis was a huge challenge onto itself. Not something I intend to discuss in this post. But I digress.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the number of kids by age and gender in this dataset.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/boys_girls-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The pyramid plot above shows the number of competitors from ages 6 to 18 throughout the years. Seems like 6 to 8 are the most popular ages for kids to begin competitive swimming. There are some late joiners by age 10, after which we see a steady decline in the number of kids competing.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the ages when swimmers compete in each stroke.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/first_competed-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can observe a few things here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Everyone starts with Freestyle swimming. The participation rate is close to 100% for both genders. But towards the late teens, some boys seem to give up Freestyle to specialize in other strokes.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Girls seem to learn Backstroke a little faster than boys, and a wide majority of girls keep swimming Backstroke until their late teens.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Girls catch up with learning Breaststroke much more quickly than boys, and a majority of them keep at it until their late teens, where as some boys choose to specialize in either Backstroke or Butterfly.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Learning Butterfly appears to be a much bigger challenge for both genders. Relatively fewer kids compete in it early on. Boys in their early teens appear to participate at a faster clip than girls. But towards the late teens, girls appear to participate more consistently.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;steep-learning-curve&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Steep Learning Curve&lt;/h2&gt;
+&lt;p&gt;There’s a steep learning curve in swimming. Each stroke has its own level of difficulty and challenges but once the basics are learned, rapid progress could be made. However, there’s a huge difference between knowing how to swim a stroke, and swimming it well. It requires both speed and precision.&lt;/p&gt;
+&lt;p&gt;Swimming also happens to be one of the most unforgiving sports. In other sports, minor violations result in fouls or penalties; disqualifications or ejections are rare and usually result from violent or reckless behavior. But in swimming, the moment a competitor violates a rule, it results in disqualification. Even in summer leagues, the swim officials are trained and expected to follow USA Swimming standards. So, a 6 year old is to be judged the same way as an adult at USA Swimming events.&lt;/p&gt;
+&lt;p&gt;To get an idea, here are some ways of getting disqualified:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Freestyle: As the name suggests, everything is legal except the following:
+&lt;ul&gt;
+&lt;li&gt;Walking on the bottom of the pool.&lt;/li&gt;
+&lt;li&gt;Stopping and pushing off of the bottom of the pool.&lt;/li&gt;
+&lt;li&gt;Pulling on a lane line for an assist.&lt;/li&gt;
+&lt;li&gt;Not touching the wall before turning or at finish.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Backstroke
+&lt;ul&gt;
+&lt;li&gt;Not swimming on back off the wall.&lt;/li&gt;
+&lt;li&gt;Delaying initiating a turn.&lt;/li&gt;
+&lt;li&gt;Pulling on a lane line for an assist.&lt;/li&gt;
+&lt;li&gt;Not touching the wall before turning or at finish.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Breaststroke
+&lt;ul&gt;
+&lt;li&gt;Pulling hands beyond hips.&lt;/li&gt;
+&lt;li&gt;Non-simultaneous or single hand touch at the turn or finish.&lt;/li&gt;
+&lt;li&gt;Doing alternating kicks (as in Freestyle) or dolphin kicks (as in Butterfly).&lt;/li&gt;
+&lt;li&gt;Not being on breast after leaving the wall.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Butterfly
+&lt;ul&gt;
+&lt;li&gt;Arms underwater during the recovery phase of stroke.&lt;/li&gt;
+&lt;li&gt;Non-simulatenous arm movements during strokes.&lt;/li&gt;
+&lt;li&gt;Non-simultaneous or single hand touch at the turn or finish.&lt;/li&gt;
+&lt;li&gt;Doing alternating kicks (as in Freestyle) or Breaststroke kicks.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;From what I observed throughout the season, in a majority of cases, rule violations are not deliberate. They happen inadvertently.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the total number of disqualifications by age, gender and stroke in the dataset:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The absolute numbers of DQs are a proxy for the level of difficulty of each stroke. Most kids learn each stroke in this order from Freestyle to Butterfly. However, as seen in the previous plot, the level of participation in Butterfly is far less as compared to other strokes. For instance, the level of participation in Freestyle and Backstroke is consistently at ~ 80% or above. About 80% of 7 year olds attempt to swim Breaststroke, where as only ~ 33% of 7 year old boys and ~ 48% of 7 year old girls attempt Butterfly in comparison. Hence the absolute numbers of disqualifications merely reflect the total number of unique competitors at that age.&lt;/p&gt;
+&lt;p&gt;A better way to look at this is to compute the number of DQs per person, as shown below.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs_per_person-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here, we can see the number of disqualifications per person reduce as the kids get better with age.
+In Freestyle, Backstroke and Breaststroke races, kids upto 8 years swim only 1 lap. In Butterfly, kids upto 10 years swim only 1 lap.
+In all other age brackets, kids swim 2 laps, which means they turn after touching the opposite end of the pool. Learning to execute a legal turn without compromising pace is both an art and a science. We can see its challenges in Backstroke at age 9 and in Butterfly at age 11, when the kids start swimming 2 laps in a race. The number of disqualifications per person increase after decreasing upto the prior year when the kids are swimming only 1 lap.&lt;/p&gt;
+&lt;p&gt;Consistently swimming a legal backstroke appears to remain a challenge until the mid-teens. It is indicative of the failures in executing legal turns. Backstroke could be thought of as swimming Freestyle on the back. Arm and leg movements have no constraints as long as the body is on the back. But the biggest challenge is the swimmers cannot see the wall in the direction they are swimming. Their eyes are always facing up. They train to spot a row of flags hung 5 meters from the wall over the pool and count the number of strokes they need to reach the wall from that point. While some inexperienced swimmers touch the wall with their hands and push off again on the back, it compromises their speed. The quickest way to turn is to flip on the belly while approaching a turn and push off against the wall with the feet so that the body regains its position on the back. This needs to be done in one smooth series of motions. As soon as the body flips on the belly, only a single or double hand pull is allowed to initiate the turn. If the swimmer does multiple strokes, they’re disqualified. If the swimmer turns too soon, it’s likely they’ll miss touching the wall. No sculling is allowed to reach the wall. Therefore, again a swimmer gets disqualified. We can see these mistakes happen well into the teenage years.&lt;/p&gt;
+&lt;p&gt;For every boy competing in Breaststroke at age 6, there has been more than 1 disqualification, which means 6 year old boys face multiple disqualifications in a season. Their level of participation is at 40%. It shows how challenging it is to learn Breaststroke. 6 year old girls appear to do a bit better. The good thing is that kids are persistent in learning Breaststroke from an early age. So, not only does the level of participation increase with age, but also the number of disqualifications per person decrease dramatically. But again, at age 9 when the kids start swimming 2 laps, the rate of improvement slows down. Other than the Breaststroke technique, kids have to remember to touch the wall with both hands simultaneously and then turn back on their breast. Most kids become very good with practice, but even a slight lapse of concentration results in disqualification.&lt;/p&gt;
+&lt;p&gt;Similarly, Butterfly is a bigger challenge in the early years. With every stroke, the arms have to break the surface of the water during recovery. Many young swimmers find it hard to have the upper body strength to do it consistently. As the kids grow, their strength improves and it becomes less hard.
+Once again, we see a surge of DQs at age 11, when the kids start swimming 2 laps. As with Breaststroke, kids have to remember to touch the wall with both hands simultaneously and then turn back without doing any flutter or alternate kicks.&lt;/p&gt;
+&lt;p&gt;Overall, girls seem to improve more consistently than boys.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;swim-times&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Swim Times&lt;/h2&gt;
+&lt;p&gt;Now, here is what I was most curious about before doing this analysis. Shown below are the distributions of swim times by age, gender and stroke. I have excluded the races in yards to focus only on the races in meters, which is the international standard.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/distribution_swim_times-1.png&#34; width=&#34;960&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;To provide a reference point, I have added the current 50 Short Course Meters world records for each stroke and gender. As expected, the distributions of swim times are heavily skewed towards the right. In the plots, I have truncated the outliers exceeding 80 seconds.&lt;/p&gt;
+&lt;p&gt;On average, we see consistent improvement with age across the board. In nearly every plot, we see multi-modal distributions with multiple peaks that separate the best swimmers from merely good and the rest of the pack. As the kids progress to swimming 50 meters, i.e. 2 laps of the 25m length, the distributions during the early years once again become wider with heavier skews and fatter right tails. Not only does the difference in swim speed, but also the time taken to turn contributes to a large variance in swim times.&lt;/p&gt;
+&lt;p&gt;The variance reduces in later years and the distributions tend to become more normal. I reckon this is due to two reasons:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Kids get stronger with age and better with practice.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A survivorship bias comes in play. As we’ve seen in the first plot, the number of competitors decrease with age. Basically the kids who have consistently done well are the ones who continue to swim beyond the early years. There might be some kids who swim just for fun or to hang out with their friends. But chances are, those who cannot compete effectively in any stroke would drop out.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Nevertheless, we see higher variance in strokes that are more technical, i.e. Backstroke, Breaststroke and Butterfly, as compared to Freestyle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;mean-times&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Mean Times&lt;/h2&gt;
+&lt;p&gt;Looking at the plots of distributions, we can observe a very interesting thing as the kids grow older. Note, all the plots are drawn to the same scale. But the distributions of the boys’ swim times curve more to the left than those of girls. It is evident that on average, boys continue to improve well into the late teens, where as the rate of improvement of girls slows down. Why does that happen?&lt;/p&gt;
+&lt;p&gt;Let’s see the mean times to swim 50 Short Course Meters by age.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;What’s really interesting is that on average, boys and girls are doing just about the same until age 12. Thereafter, boys start pulling apart. Why? Do teenage boys work harder than teenage girls to improve? Hardly the case. On the contrary, we have seen evidence that girls learn and improve more consistently than boys. So what’s happening here? I am no expert in biology, but this is the about the age where puberty begins. Among other things, boys tend to grow taller and more muscular than girls at this stage. No wonder they start swimming faster than girls!
+This might be among the few instances where the impact of puberty on both sexes, could be measurably observed.&lt;/p&gt;
+&lt;p&gt;In both genders, the trajectory of improvement is non-linear with age. Kids show dramatic improvement until they reach their teens. Thereafter, the rate of improvement slows down. There’s a physical limit to how fast a human could swim, so we could expect the curves to reach their minima at some point during the 20s - 30s when the swimmers reach the pinnacle of physical strength and performance. When the swimmers are past their prime, we could expect them to start slowing down.&lt;/p&gt;
+&lt;p&gt;USA Swimming has race data for swimmers ranging from ages 5 to 50. I sampled data for 50 Short Course Meters Freestyle races to explore.&lt;/p&gt;
+&lt;p&gt;Here are the curves drawn using USA Swimming data:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times_USA_Swimming-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The USA Swimming sample data produces a similar set of curves. The effects of puberty on average swim times are exhibited in this dataset too. Boys and girls have nearly the same average swim times until age 12, but from age 13 onwards, boys start swimming faster than girls.&lt;/p&gt;
+&lt;p&gt;Another interesting observation is that after age 18, the rate of improvement accelerates once again for both male and female swimmers. Both curves show a big shift towards the left. Yet again, survivorship bias appears to come into play. These aren’t recreational swimmers. Rather they are kids who continue to swim in college teams, and then compete in national and international events. Superior coaching and facilities at the top level, probably are big factors contributing to this dramatic improvement.&lt;/p&gt;
+&lt;p&gt;Judging by the averages, male swimmers reach their prime in their early 20s and maintain their peak form until their early 30s. In comparison, female swimmers do not hit their prime until their late 20s, and have a much shorter peak span than males.&lt;/p&gt;
+&lt;p&gt;The average times start deteriorating by the mid 30s for both males and females. Unfortunately, the data is very sparse for swimmers 35 years and older. To reduce noise, I excluded the data for every age where there are fewer than 10 records. So it’s hard to see the trajectory well into the 40s.&lt;/p&gt;
+&lt;p&gt;Here are plots of all swim times in this dataset with best fitting curves for both genders:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/improvement_curves-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;From this study, we gain some interesting insights into the world of competitive swimming from the early years:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Most kids join swim teams between 6 and 8. More and more kids drop out during the teenage years.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;After Freestyle, kids learn to swim Backstroke before they learn Breaststroke and Butterfly. Butterfly remains a challenging stroke to learn well into the teens.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Persistence pays off and kids who don’t give up improve by leaps and bounds from 6 to 10.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Boys and girls improve at the same rate until the onset of puberty. Then boys start gaining a big advantage.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;On average, boys reach peak performance in the early 20s itself. On the flip side, they require all the hard work just to maintain it until the 30s. Girls reach peak performance only by the late 20s. On the brighter side, this is a big motivation to continue working hard well into adulthood.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file with code for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/a-deep-dive-in-analyzing-swimming-data/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How would you bet? Lessons from a Biased Coin Flipping Experiment</title>
+      <link>/post/biased-coin-flipping-experiment/</link>
+      <pubDate>Thu, 03 Aug 2017 00:00:00 +0000</pubDate>
+      <guid>/post/biased-coin-flipping-experiment/</guid>
+      <description>
+
+
+&lt;p&gt;Recently I listened to a podcast featuring Victor Haghani of &lt;a href=&#34;https://elmfunds.com/&#34;&gt;Elm Partners&lt;/a&gt;, who described a fascinating coin-flipping experiment. The experiment was designed to be played for 30 minutes by participants in groups of 2-15 in university classrooms or office conference rooms, without consulting each other or the internet or other resources. To conduct the experiment, a &lt;a href=&#34;http://coinflipbet.herokuapp.com/&#34;&gt;custom web app&lt;/a&gt; was built for placing bets on a simulated coin with a 60% chance of coming up heads. Participants used their personal laptops or work computers to play. They were offered a stake of &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt; to begin, with a promise of a check worth the final balance (subject to a caveat) in their game account. No out-of-pocket betting or any gimmicks. But they had to agree to remain in the room for 30 minutes.&lt;/p&gt;
+&lt;p&gt;Even though the experiment in no longer active, the &lt;a href=&#34;http://coinflipbet.herokuapp.com/&#34;&gt;game URL&lt;/a&gt; is still active. Before reading any further, I strongly encourage readers to play the game and decide how they would bet and what outcomes they should expect? &lt;strong&gt;&lt;em&gt;SPOILERS AHEAD&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;div id=&#34;what-would-be-an-optimal-betting-strategy&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;What would be an optimal betting strategy?&lt;/h3&gt;
+&lt;p&gt;The details of the experiment are described in a &lt;a href=&#34;https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2856963&#34;&gt;paper&lt;/a&gt; that would be very accessible to anyone with a rudimentary understanding of probability.&lt;/p&gt;
+&lt;p&gt;The probability of heads is reported to be 60%, which means that if the game’s virtual coin is flipped sufficiently large number of times, the number of heads should converge to 60% of the total outcomes. Since each flip is independent of all prior flips, there is a positive expectancy in betting on heads only. The expected gain in betting an amount &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; on heads is &lt;span class=&#34;math inline&#34;&gt;\(0.6x - 0.4x = 0.2x\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;But how should one bet? Intuitively it is apparent that betting too large would be counter-productive because if we lose, the balance would deplete quickly. A string of consecutive losses would quickly lead to bankruptcy. On the other hand, betting too little isn’t going to be very productive either, even though we know the odds of betting on heads are favorable.&lt;/p&gt;
+&lt;p&gt;So, somewhere along the spectrum between betting too little or too large, there is an optimal betting strategy. In 1955 John Kelly working at Bell Labs published a formula that showed how to maximize wealth while betting on games with favorable odds. Even though this formula has been known to professional gamblers for decades, to my knowledge, it is not a part of any high school or undergraduate curriculum on probability and statistics. I know this personally, having a background in science and engineering.&lt;/p&gt;
+&lt;p&gt;When the Kelly formula is applied to a game like this with binary (heads/tails) outcomes, it suggests betting a constant fraction of the existing balance, denoted by &lt;span class=&#34;math inline&#34;&gt;\(2*p - 1\)&lt;/span&gt;, where p is the probability of the favorable outcome. Clearly, the outcome would be favorable only if p &amp;gt; 0.5.&lt;/p&gt;
+&lt;p&gt;Given that the probability of heads in this game is 0.6, the optimal bet size is &lt;span class=&#34;math inline&#34;&gt;\(2*0.6-1 = 0.2\)&lt;/span&gt; or 20% of the existing balance at each flip. This optimality could be demonstrated by simulation.&lt;/p&gt;
+&lt;p&gt;In the original experiment, 61 participants flipped virtual coins 7253 times. So during the course of a 30 min game,
+a virtual coin was flipped ~ 120 times on average.&lt;/p&gt;
+&lt;p&gt;I generated a sample set of 1000 games. In each game, a virtual coin is flipped 120 times with a 0.6 probability of getting heads.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Assuming there are no constraints in the game and the upside is unbounded, the boxplots show the range of outcomes resulting from a constant percentage bet on heads on each flip.&lt;/p&gt;
+&lt;p&gt;Few things stand out from this plot:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Since the lowest balance could only be 0 and the maximum is unbounded, the median provides a better measure of the central tendency of the betting outcomes. The mean is highly skewed by extreme outcomes on the upside. The median provides a balance between those who got extremely lucky and those who weren’t so much. The median balance is the highest while maintaining a constant 20% bet, which is exactly what the Kelly formula suggests.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you played the game and didn’t discover the maximum payout, it should be very evident looking at this plot that the game can’t be offered practically without an upper limit. In this sample, the final balance reaches ~ &lt;span class=&#34;math inline&#34;&gt;\(\$55\)&lt;/span&gt; million in a game with 120 flips betting 50% on heads, even though this would be far from an ideal betting strategy. In theory, if someone got extremely lucky they could flip 120 heads in succession and bet 100% each time to get a final balance of &lt;span class=&#34;math inline&#34;&gt;\(25*1.2^{120} = \$79.4\)&lt;/span&gt; billion; although this would be extremely unlikely.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;While betting 40% of the balance, odds are low that you would make more than the starting balance of &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;While betting 60% or more of the balance, you are almost guaranteed to end up below the starting balance of &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;While betting 80% or more of the balance, you are almost guaranteed to go bankrupt&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The plots of median final balance and the percentage of games which lead to bankruptcy at each constant proportional bet are shown below, These plots make it clear why the Kelly formula provides the optimal betting strategy. The risk with respect to reward is well-balanced.&lt;/p&gt;
+&lt;p&gt;The Kelly formula assumes log utility of wealth. With a constant proportional bet of 20% with a 60% chance of heads, the expected utility for each flip is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math inline&#34;&gt;\(0.6*log(1.2) + 0.4*log(0.8) = 0.020136\)&lt;/span&gt;, which means that each flip gives a dollar equivalent increase in utility of &lt;span class=&#34;math inline&#34;&gt;\(exp(0.020136)\)&lt;/span&gt; =1.0203401 or ~ 2%&lt;/p&gt;
+&lt;p&gt;So, 120 flips starting at &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;, leads to &lt;span class=&#34;math inline&#34;&gt;\(\$25*(1.0203401^{120}) = \$280.1\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Alternatively, in 120 flips, if 60% or 72 were heads, the median outcome could be calculated by &lt;span class=&#34;math inline&#34;&gt;\(\$25*(1.2^{72})*(0.8^{48}) = \$280.1\)&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Both of these values correspond to the peak of the median final balance determined from simulation.
+The median values for other constant proportional bets could be calculated in the same manner.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/median_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;!-- Furthermore, we can demonstrate that the optimal bet level is only dependent upon the favorability of odds. It is independent of the starting balance and the number of flips. --&gt;
+&lt;!-- ```{r Kelly_criterion, cache=TRUE, results=&#39;hide&#39;} --&gt;
+&lt;!-- dfParam &lt;- crossing(InitialBalance = c(25L, 50L), --&gt;
+&lt;!--                     NumFlips = c(20L, 50L, 80L, 120L), --&gt;
+&lt;!--                     ProbHeads = c(0.6, 0.65)) --&gt;
+&lt;!-- ifileKelly &lt;- &#34;C:/Backups/Website/nitingupta2.github.io/content/post/final_balance_Kelly.rds&#34; --&gt;
+&lt;!-- if(file.exists(ifileKelly)) { --&gt;
+&lt;!--     dfFinalBalance &lt;- read_rds(ifileKelly) --&gt;
+&lt;!-- } else { --&gt;
+&lt;!--     dfFinalBalance &lt;- NULL --&gt;
+&lt;!--     for(i in 1:nrow(dfParam)) { --&gt;
+&lt;!--         cat(&#34;\nGetting final profits for param combination: &#34;, i) --&gt;
+&lt;!--         initial_balance &lt;- dfParam[[&#34;InitialBalance&#34;]][i] --&gt;
+&lt;!--         n_flips &lt;- dfParam[[&#34;NumFlips&#34;]][i] --&gt;
+&lt;!--         p_heads &lt;- dfParam[[&#34;ProbHeads&#34;]][i] --&gt;
+&lt;!--         set.seed(100) --&gt;
+&lt;!--         lCoinFlips &lt;- rerun(n_games, getCoinFlips(n_flips, p_heads)) %&gt;% set_names(paste0(&#34;Game_&#34;, 1:n_games)) --&gt;
+&lt;!--         lBalanceSeries &lt;- map(vBetFraction, .f = ~ getTotalBalanceSeries(lCoinFlips, initial_balance, .x)) %&gt;%  --&gt;
+&lt;!--             set_names(paste0(&#34;Bet_&#34;, vBetFraction*100)) --&gt;
+&lt;!--         dfFinalBalance &lt;- map_df(lBalanceSeries, .f = ~ .x[1L+n_flips,]) %&gt;%  --&gt;
+&lt;!--             mutate(BetFraction = vBetFraction, --&gt;
+&lt;!--                    InitialBalance = initial_balance, --&gt;
+&lt;!--                    NumFlips = n_flips, --&gt;
+&lt;!--                    ProbHeads = p_heads) %&gt;%  --&gt;
+&lt;!--             bind_rows(dfFinalBalance) --&gt;
+&lt;!--     } --&gt;
+&lt;!--     dfFinalBalance &lt;- dfFinalBalance %&gt;% select(InitialBalance, NumFlips, ProbHeads, BetFraction, everything()) --&gt;
+&lt;!--     write_rds(dfFinalBalance, ifileKelly) --&gt;
+&lt;!-- } --&gt;
+&lt;!-- ``` --&gt;
+&lt;!-- ```{r plot_optimal, fig.align=&#39;center&#39;, fig.width=10} --&gt;
+&lt;!-- dfMedianBalanceOpt &lt;- bind_cols(dfFinalBalance %&gt;% select(c(1:4)), --&gt;
+&lt;!--                                 MedianBalance = dfFinalBalance %&gt;% select(starts_with(&#34;Game&#34;)) %&gt;% apply(1, median)) %&gt;%  --&gt;
+&lt;!--     mutate(InitialBalanceText = paste0(&#34;Starting balance = $&#34;, InitialBalance)) %&gt;%  --&gt;
+&lt;!--     mutate(ProbHeadsText = paste0(&#34;Probability of heads = &#34;, ProbHeads)) --&gt;
+&lt;!-- dfAnnText &lt;- dfMedianBalanceOpt %&gt;%  --&gt;
+&lt;!--     dplyr::filter(NumFlips == max(NumFlips)) %&gt;%  --&gt;
+&lt;!--     group_by(InitialBalance, ProbHeads, NumFlips) %&gt;%  --&gt;
+&lt;!--     mutate(OptimalBet = BetFraction,  --&gt;
+&lt;!--            MaxBalance = max(MedianBalance)) %&gt;%  --&gt;
+&lt;!--     ungroup() %&gt;%  --&gt;
+&lt;!--     dplyr::filter(MedianBalance &gt; (MaxBalance - 1e-12)) %&gt;%  --&gt;
+&lt;!--     mutate(AnnotateText = paste0(&#34;Optimal bet = &#34;,OptimalBet*100, &#34;%&#34;)) --&gt;
+&lt;!-- ggplot(dfMedianBalanceOpt, aes(x = BetFraction, y = MedianBalance)) +  --&gt;
+&lt;!--     geom_line(aes(color = factor(NumFlips)), size = 0.7) + --&gt;
+&lt;!--     scale_x_continuous(breaks = seq(0, 1, 0.2), labels = scales::percent) + --&gt;
+&lt;!--     scale_y_continuous(label = scales::dollar) + --&gt;
+&lt;!--     scale_color_viridis(name = &#34;Number of coin flips&#34;, discrete = T, option = &#34;C&#34;, direction = -1) + --&gt;
+&lt;!--     facet_grid(ProbHeadsText ~ InitialBalanceText, scales = &#34;free&#34;) + --&gt;
+&lt;!--     geom_text(data = dfAnnText, aes(label = AnnotateText), x=Inf, y=Inf, vjust=1, hjust=1, size = 3.5) + --&gt;
+&lt;!--     labs(x = &#34;Constant bet on heads on each flip&#34;, --&gt;
+&lt;!--          y = &#34;Median final balance&#34;) + --&gt;
+&lt;!--     theme(strip.text = element_text(face = &#34;bold&#34;)) --&gt;
+&lt;!-- ``` --&gt;
+&lt;/div&gt;
+&lt;div id=&#34;simulating-the-game-play&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Simulating the game play&lt;/h3&gt;
+&lt;p&gt;If you’ve read this far, you understand this game can’t be offered without an upper limit on the final payout. If you played the game and bet wisely or were just plain lucky, you would’ve discovered that the maximum payout is &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;. So the objective changes mid-game from growing to preserving existing balance. Once the maximum payout balance is reached, it is foolhardy to keep betting large sums no matter what betting strategy you have chosen.&lt;/p&gt;
+&lt;p&gt;Secondly, the UI design of the app doesn’t have a mechanism to choose a constant percentage bet level. So, if you were following a systematic betting strategy like Kelly, then you would have to do mental calculations to determine the exact dollar amount. While this is not hard to do, I believe most people would just round up or down to the nearest dollar amount. Also it takes less time to input a whole dollar amount than dollars and cents. So even though the minimum bet size in the game is 1 cent, effectively it would be &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions_constrained-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Under these constraints and assumptions, the plot shows bimodal distributions at all bet levels. During the game, the objective changes to maximizing the chances of ending a game above the maximum payout of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;. Here we can see that the Kelly formula turned out to be a close approximation to optimal, even though the optimal level is determined only in hindsight. Fewer bankruptcies result at higher bet levels than in unconstrained games. I made the assumption that the participants who got lucky early on betting big, decided to bet just &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt; on all subsequent bets after discovering the maximum payout.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/maximum_payout_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;how-did-the-participants-do-in-the-experiment&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;How did the participants do in the experiment?&lt;/h3&gt;
+&lt;p&gt;Not very well to say the least. There’s an excellent discussion in the paper, but here are the salient points:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Only 21% of the participants reached the maximum payout of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;51% of the participants neither went bust nor reached the maximum payout. Their average final balance was &lt;span class=&#34;math inline&#34;&gt;\(\$75\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;33% of the participants ended up below the starting balance of &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;28% of the participants went bust and received no payout&lt;/li&gt;
+&lt;li&gt;Average payout across all participants was &lt;span class=&#34;math inline&#34;&gt;\(\$91\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;Only 5 among the 61 participants had heard of the Kelly criterion. Out of those, only 1 managed to barely double his stake while the other broke even after 100 flips&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;betting-patterns&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Betting Patterns&lt;/h3&gt;
+&lt;p&gt;Betting patterns were found to be quite erratic.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;18 participants bet all-in on one flip&lt;/li&gt;
+&lt;li&gt;Some bet too small and then too big&lt;/li&gt;
+&lt;li&gt;Many participants adopted a &lt;a href=&#34;https://en.wikipedia.org/wiki/Martingale_%28betting_system%29&#34;&gt;Martingale strategy&lt;/a&gt; where the losing bets are doubled up to recover past losses&lt;/li&gt;
+&lt;li&gt;Some bet small constant wagers to minimize chances of ruin and end up with a positive balance&lt;/li&gt;
+&lt;li&gt;41 participants (67%!!) bet on tails at some point during the game play. 29 of them bet on tails 5 or more times&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Despite how terrible some of these betting strategies may have been, hitting the maximum payout limit might have saved some of them from ending up bankrupt. Well, assuming these participants were not foolish enough to keep betting high after knowing they couldn’t get more than &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Let’s see how some of these betting patterns work in simulation.&lt;/p&gt;
+&lt;div id=&#34;all-in-betting&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;All-in Betting&lt;/h4&gt;
+&lt;p&gt;18 out of 61 participants reportedly bet 100% on a single flip. Assuming they continued this betting pattern, majority of these participants would’ve lost everything after their second bet. Those who reached the maximum payout would’ve had to win first 4 flips in succession. Assuming they kept their wits beyond that point, only 13% of such participants would’ve ended up with a balance of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/all_in_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;betting-too-small-and-then-too-big&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Betting too small and then too big&lt;/h4&gt;
+&lt;p&gt;Some participants bet too small and then too big. It appears they were over-cautious at first, but when they built a sizeable balance, they threw caution to the wind. Some form of &lt;a href=&#34;https://en.wikipedia.org/wiki/Wealth_effect&#34;&gt;wealth effect&lt;/a&gt; or &lt;a href=&#34;http://www.investopedia.com/terms/h/house-money-effect.asp&#34;&gt;house money effect&lt;/a&gt; came into play.&lt;/p&gt;
+&lt;p&gt;To simulate this strategy, I assumed such participants bet 5% until they accumulated a balance of &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt;, after which they started betting 30%. If their balance fell below &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt; again, they got spooked and adopted the 5% conservative bet again.&lt;/p&gt;
+&lt;p&gt;The simulated results are quite interesting. Although none of the participants would’ve been bankrupted (assuming they adopted the ultra safe 5% bets when their balance was lower), only ~ 10% of them would’ve made &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/small_big_betting_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;martingale-betting&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Martingale betting&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Martingale_%28betting_system%29&#34;&gt;Martingale&lt;/a&gt; bettors keep doubling up their bets after every loss. For instance, if they bet &lt;span class=&#34;math inline&#34;&gt;\(\$2\)&lt;/span&gt; and lost, their next bet would be &lt;span class=&#34;math inline&#34;&gt;\(\$4\)&lt;/span&gt;, and the next one &lt;span class=&#34;math inline&#34;&gt;\(\$8\)&lt;/span&gt; if they lost again. Their idea is to recover the former loss(es) and make profits equal to the original stake. Most often this strategy starts with betting small and doubles up on the previous bet even in successive losses. This idea mostly stems from &lt;a href=&#34;https://en.wikipedia.org/wiki/Gambler%27s_fallacy&#34;&gt;gambler’s fallacy&lt;/a&gt;. So if a Martingale bettor was betting on heads but the coin flipped tails several times in succession, their belief is the next flip would be heads and they’ll recover everything they’ve lost thus far. After all mean reversion should come into play, right?.&lt;/p&gt;
+&lt;p&gt;But mean reversion could take much longer to manifest. The coin has no memory of the past flips. Every flip is independent of the prior flips. Even with a biased coin like in this game, it could very well happen that it flips tails 20 times in succession and then flips heads 30 times in succession. The probability of heads converges to 0.6 only &lt;strong&gt;&lt;em&gt;in the long run&lt;/em&gt;&lt;/strong&gt;. After losing 20 bets in succession starting with &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt;,
+a Martingale bettor would need to bet ~ $1.05 million to recover past losses.&lt;/p&gt;
+&lt;p&gt;To simulate this betting strategy, I assumed a minimum bet size of &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt; as long as the balance is &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt; or lower i.e. 4% to start. The minimum bet is readjusted proportionally as the balance increases or decreases in multiples of
+&lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;. So it goes up to &lt;span class=&#34;math inline&#34;&gt;\(\$2\)&lt;/span&gt; when the balance is above &lt;span class=&#34;math inline&#34;&gt;\(\$50\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\$4\)&lt;/span&gt; when the balance is above &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt;. The previous losing bet is doubled up in succession.&lt;/p&gt;
+&lt;p&gt;The simulated results show 42% of the bettors going bankrupt with this strategy.
+Only 38% of the bettors would’ve ended up with &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/martingale_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;betting-on-tails&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Betting on tails&lt;/h4&gt;
+&lt;p&gt;There were 41 participants who bet on tails at some point during the game. 29 of them bet on tails more than 5 times in the game. 13 of them bet on tails more than 25% of the time. These participants were more likely to make that bet after a string of consecutive heads. As the authors state in the paper &lt;em&gt;“…some combination of the illusion of control, law of small number bias, gambler’s fallacy or hot hand fallacy was at work”&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Let’s assume, these participants bet on heads, until a string of ‘X’ heads, after which they kept betting on tails until they got one, after which they bet on heads again repeating the same process. What would be the value of ‘X’ for the participants to bet on tails more than 25% of the time?
+We could get a sense from the simulated game data.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Heads_Threshold_2 Heads_Threshold_3 Heads_Threshold_4 Heads_Threshold_5 Heads_Threshold_6 
+             0.35              0.21              0.12              0.07              0.04 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It turns out most of these participants were expecting tails after a string of 3 or more heads. Assuming they followed this heuristic, even while making the optimal 20% bet, the simulated results show ~ 7% of the participants going bankrupt and only 25% of them ending up with &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/betting_tails_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;comparison-of-betting-strategies&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Comparison of Betting Strategies&lt;/h3&gt;
+&lt;p&gt;The plot below shows the performance of the betting strategies modelled above, with respect to a game optimal strategy of betting 20% of the balance. Most of them end up with a much higher proportion of participants going bankrupt in the game. No strategy comes anywhere close to the game optimal strategy, when it comes to the number of participants reaching the maximum payout offered in the game.&lt;/p&gt;
+&lt;p&gt;In fact, discovering the maximum payout of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; would’ve helped some of the participants employing these wayward betting strategies into adopting more conservative approaches in the latter part of their game. But if the game was designed to payout a fraction of the final balance, some more interesting outcomes might emerge. For instance, the maximum balance in the game could be raised to 2500 and the actual payout could be a tenth of that
+(&lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; still). The evidence from simulated results suggests the outcomes in that case to be much worse.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/betting_comparison-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;how-did-i-play-the-game&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;How did I play the game?&lt;/h3&gt;
+&lt;p&gt;To be sure, I was &lt;em&gt;not&lt;/em&gt; a part of the cohort of 61 participants who played this game in person and were paid for participation. The &lt;a href=&#34;http://coinflipbet.herokuapp.com/&#34;&gt;game URL&lt;/a&gt; is still active, even though there’s no actual payout offered any more. I found it after listening to the &lt;a href=&#34;https://chatwithtraders.com/ep-129-victor-haghani/&#34;&gt;podcast&lt;/a&gt; and reading the &lt;a href=&#34;https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2856963&#34;&gt;paper&lt;/a&gt;. So, unfortunately I already knew the optimal strategy before trying. In my gameplay, I reached the maximum payout by the 16th minute. I ended up with a balance of &lt;span class=&#34;math inline&#34;&gt;\(\$270\)&lt;/span&gt;, flipping the virtual coin a total of 122 times.&lt;/p&gt;
+&lt;p&gt;I did however, get some loved ones to play the game uninformed and then tell me their betting strategies. In a sample of n = 4, they reported everything from Martingale betting, betting 10 cents per flip, finding patterns in flip sequences and even betting on tails because of said patterns. In other words, I got a microcosm of results in the paper.&lt;/p&gt;
+&lt;p&gt;I would have bet erratically myself, had I not known the optimal strategy. A smaller proportion than optimal at first and then perhaps too big.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;Despite being offered favorable odds, most participants adopted strategies subject to their own biases and ended up with poor to suboptimal outcomes. Having a background in quantitative fields didn’t seem to help most of them. Through simulations we can explore outcomes of some of these biases, but actual gameplay involves much more complexity. Most participants would’ve been swayed by a combination of biases at different points during their gameplay.&lt;/p&gt;
+&lt;p&gt;Even though betting a constant proportion is an optimal strategy for this game, and has been known since 1955, there persists a gap in education where even the most quantitatively oriented people like myself have no idea about it. Experiments like this have tremendous educational value and should be part of the curriculum in both high schools and colleges. I firmly agree with the thoughts echoed in the paper.&lt;/p&gt;
+&lt;p&gt;In a broader context, this experiment shares similarities with investing. Often the same biases come into play while investing. Even though the outcomes in investing are continuous in nature, and uncertainities abound, a systematic strategy could spell the difference between attaining financial objectives or not. It shows the importance and benefits of sticking to a well-thought-out systematic plan that is devoid of all biases.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/biased-coin-flipping-experiment/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Text Analysis of Amazon Shareholder Letters</title>
+      <link>/post/text-analysis-of-amazon-shareholder-letters/</link>
+      <pubDate>Fri, 28 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>/post/text-analysis-of-amazon-shareholder-letters/</guid>
+      <description>
+
+
+&lt;p&gt;Amazon is led by its charismatic founder and CEO, Jeff Bezos, who is widely hailed as one of the top visionaries of this era. At the end of the fiscal year in March, Amazon publishes a letter to shareholders written by Bezos, in which he summarises his thoughts, business and management philosophy. While reading these letters, among other things that strikes is Bezos’ clarity of thought, expressed in a concise and easy to comprehend way. It is a very rare quality possessed by very few business leaders. Few other names that come to mind are Warren Buffett, Charlie Munger, Elon Musk and late Steve Jobs.&lt;/p&gt;
+&lt;p&gt;The first &lt;strong&gt;1997 Letter to Shareholders&lt;/strong&gt; was published at the conclusion of the first fiscal year of Amazon as a public company. In that letter, Jeff Bezos outlined his vision for Amazon and what kind of company he wanted it to be. Obsessing over customers and offering compelling value, is a core principle he laid out in that letter. Focussing on long term investment decisions, company growth and profitability, is how he envisioned Amazon to thrive. The remarkable thing is that in the last 20+ years, Amazon has executed right along these principles and has become, as of this post, the fourth largest company in the United States by market cap. In the first shareholder letter, Bezos said it is Day 1 for the internet and Amazon. He echoes the same thoughts in the most recent &lt;strong&gt;2016 Letter to Shareholders&lt;/strong&gt;, published earlier this month. In other words, he believes, Amazon still functions as a startup, though now it’s the biggest one. In every shareholder letter, Bezos appends the first shareholder letter of 1997, which shows how he has stayed true to his vision.&lt;/p&gt;
+&lt;p&gt;In this post, I’ll do a text analysis of Amazon Shareholder Letters from 1997 to 2016.&lt;/p&gt;
+&lt;p&gt;These letters are in pdf format and could be downloaded from Amazon’s &lt;a href=&#34;http://phx.corporate-ir.net/phoenix.zhtml?c=97664&amp;amp;p=irol-reportsannual&#34;&gt;investor relations website&lt;/a&gt;. I have put them in a zipped file &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/text-analysis-of-amazon-shareholder-letters/&#34;&gt;here&lt;/a&gt;. The first step is to combine the text and remove the 1997 letter from every subsequent letter, and do some additional cleaning. Since ‘Day 1’ and ‘Day 2’ are often used phrases in the letters, I decided to alter the numbers 1 and 2 to &lt;em&gt;one&lt;/em&gt; and &lt;em&gt;two&lt;/em&gt; and remove all other numbers from the letters.&lt;/p&gt;
+&lt;div id=&#34;how-does-bezos-start-these-letters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;How does Bezos start these letters?&lt;/h3&gt;
+&lt;p&gt;We see that the letters are typically addressed to shareholders/shareowners. In 1998, they were addressed to shareholders, customers and employees. 2016 has been a marked departure in his approach. While the earlier letters were mixed with facts and opinion, the 2016 letter constructs a short narrative of why companies decline. He reminds employees about the pitfalls of ‘Day 2’ and beckons them to remain in ‘Day 1’ mode for the next couple of decades.&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 15:14:14 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+year
+&lt;/th&gt;
+&lt;th&gt;
+first_line
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1997
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1998
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders, customers, and employees.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1999
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2000
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2001
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2003
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2004
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2005
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2006
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareholders.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2007
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2008
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+13
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2009
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+14
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2010
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2011
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2012
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+17
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2013
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2014
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+19
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2015
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+To our shareowners.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2016
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+“Jeff, what does Day two look like?”
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;words-per-letter&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Words per Letter&lt;/h3&gt;
+&lt;p&gt;We can see that Bezos doesn’t write very long letters. The mean word count is around 1700 words. But from 2013-2015, his letters were more than twice as long.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/words_per_letter-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;top-words&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Top Words&lt;/h3&gt;
+&lt;p&gt;After excluding the commonly used ‘stop words’, a wordcloud of top 100 words is shown below. A remarkable thing to note is how much more &lt;em&gt;customers&lt;/em&gt; are emphasized in the letters. Besides the company name, other terms that gain prominence are &lt;em&gt;business, sales, service, experience, cash,&lt;/em&gt; and &lt;em&gt;shareholders&lt;/em&gt;. Also note the frequent mention of words related to some products and services - &lt;em&gt;Kindle, Prime, AWS, Marketplace, Fulfillment&lt;/em&gt;. Bezos has been talking about ‘Day 1’ right from the first to the latest letter, hence we find both &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;one&lt;/em&gt; in the mix as well.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/wordcloud-1.png&#34; width=&#34;528&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;words-commonly-associated-with-customers&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Words Commonly Associated with ‘customers’&lt;/h3&gt;
+&lt;p&gt;I tokenized the text into bigrams (sequence of two words occuring together) and excluded all instances containing commonly used ‘stop words’. Since we know &lt;em&gt;customer&lt;/em&gt; or &lt;em&gt;customers&lt;/em&gt; are the most common words, let’s examine which words appear the most with them.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/customer_network-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The arrows point towards the second word in the bigram. And n denotes the frequency of occurance. We can see that ‘customer experience’ has the strongest focus. It has been mentioned 47 times in all the letters, followed by ‘customer service’ and ‘customer satisfaction’.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;dominant-themes&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Dominant Themes&lt;/h3&gt;
+&lt;p&gt;For each bigram and year pair, I calculate its tf-idf statistic, which measures how important a bigram is to a document in a collection of documents.&lt;/p&gt;
+&lt;p&gt;Plotting the top 10 terms by this statistic every year, reveals what was on Bezos’ mind every year that was not so common with all other years.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/unique_bigrams-1.png&#34; width=&#34;1152&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In most of the cases, the top 10 tf-idf terms neatly summarise the important points mentioned in the letters. What’s really interesting is, we could get a sense of almost all major products and services offered by Amazon and when they were introduced or became popular. Beginning in 1998 with the launch of music and video stores (it means CDs and DVDs for you millennials out there :), to Prime Instant Video in 2013 and so many more. 2004 was all about explaining why free cash flow is important than earnings. 2010 was focussed on advancing machine learning and building advanced technology capabilities.
+The latest one from 2016 pertains to the Day 1 and Day 2 narrative and the quick decision making philosophy at a juggernaut like Amazon.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;network-of-common-bigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Network of Common Bigrams&lt;/h3&gt;
+&lt;p&gt;These are bigrams that appear in 5 or more letters. In a nutshell. they show what has been most important to Amazon.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/bigram_network-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;sentiment-analysis&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Sentiment Analysis&lt;/h3&gt;
+&lt;p&gt;For computing sentiment scores, I use 2 lexicons from the &lt;code&gt;tidytext&lt;/code&gt; package:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;&lt;em&gt;bing&lt;/em&gt;&lt;/strong&gt; : A general purpose lexicon created by &lt;a href=&#34;https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html&#34;&gt;Bing Liu et. al.&lt;/a&gt;, containing a dictionary of words classified into 2 categories, &lt;em&gt;positive&lt;/em&gt; and &lt;em&gt;negative&lt;/em&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;&lt;em&gt;loughran&lt;/em&gt;&lt;/strong&gt; : Developed by &lt;a href=&#34;https://doi.org/10.1111/j.1540-6261.2010.01625.x&#34;&gt;Tim Loughran and Bill McDonald&lt;/a&gt; based on analyses of financial reports, it contains a dictionary of words classified into 6 categories - &lt;em&gt;constraining, litiguous, negative, positive, superflous, uncertainity&lt;/em&gt;. (As of this writing, this lexicon is available only in the &lt;a href=&#34;http://github.com/juliasilge/tidytext&#34;&gt;dev version&lt;/a&gt; of &lt;code&gt;tidytext&lt;/code&gt;)&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I restrict the usage to only positive and negative sentiment words from the &lt;strong&gt;&lt;em&gt;loughran&lt;/em&gt;&lt;/strong&gt; lexicon. Words not found in these lexicons are classified as neutral.&lt;/p&gt;
+&lt;p&gt;Let’s look at the top 10 most common words which drive the positive and negative sentiment in these letters.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment_words-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;strong&gt;bing&lt;/strong&gt; lexicon treats &lt;em&gt;free&lt;/em&gt; and &lt;em&gt;fulfillment&lt;/em&gt; as positive words, and &lt;em&gt;cloud&lt;/em&gt; as a negative word. But these are mostly used in business terms by Amazon. &lt;em&gt;free&lt;/em&gt; is used in the context of ‘free super saver shipping’ or ‘free shipping’, &lt;em&gt;fulfillment&lt;/em&gt; is used in terms of ‘fulfillment center(s)’ and &lt;em&gt;cloud&lt;/em&gt; in terms of ‘cloud service(s)’. None of these could be interpretted as positive or negative so it is best to remove these terms from our word dictionary before calculating the net sentiment scores.&lt;/p&gt;
+&lt;p&gt;I define a net sentiment score as the sum of all positive terms, less the sum of all negative terms, divided by the sum of all positive, negative and neutral terms. The plot below shows the net sentiment scores by year, alongside the annual returns of Amazon stock. Amazon stock had a return of 966% in 1998, which distorts its plot, so I limited the annual returns plot to within 200% range.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can observe the sentiment in these letters has remained quite positive, even in the wake of Amazon stock dropping more than 80% after the dot-com bubble bust. Judging from the sentiment scores of these letters, Bezos doesn’t seem to be swayed by Amazon stock performance at all. The annual returns have almost 0 correlation to the yearly sentiment scores.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/text-analysis-of-amazon-shareholder-letters/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Building a Predictive Typing Model</title>
+      <link>/post/building-a-predictive-typing-model/</link>
+      <pubDate>Sat, 15 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>/post/building-a-predictive-typing-model/</guid>
+      <description>
+
+
+&lt;p&gt;Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues.&lt;/p&gt;
+&lt;p&gt;But, how does predictive typing work? Basically, it’s a predictive typing model built using an ngram with &lt;a href=&#34;https://en.wikipedia.org/wiki/Katz%27s_back-off_model&#34;&gt;backoff prediction model&lt;/a&gt;. Makes complete sense, right? Well, it’s less complicated than it sounds, and actually not hard to understand, as we shall see further.&lt;/p&gt;
+&lt;div id=&#34;corpus&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Corpus&lt;/h2&gt;
+&lt;p&gt;To begin, we need a large corpus of text with a wide-ranging vocabulary. The first name that comes to mind is that of William Shakespeare. Shakespeare wrote a number of plays and poems that are classics in the English language. These plays and poems are available in the public domain and are easily accessible through a number of sources, (see &lt;a href=&#34;http://www.gutenberg.org/browse/authors/s#a65&#34;&gt;here&lt;/a&gt; and &lt;a href=&#34;http://shakespeare.mit.edu/&#34;&gt;here&lt;/a&gt;).
+By some &lt;a href=&#34;http://www1.cmc.edu/pages/faculty/welliott/Shakespeare%20Vocabulary%20Chapter%20911.pdf&#34;&gt;accounts&lt;/a&gt;, Shakespeare’s vocabulary ranged from 15,000-30,000 words, which makes it excellent to use it for our corpus.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ropenscilabs/gutenbergr&#34;&gt;David Robinson’s&lt;/a&gt; &lt;code&gt;gutenbergr&lt;/code&gt; package makes it easy to download ‘The Complete Works Of Shakespeare’, from Project Gutenberg’s website. The downloaded dataset is a data frame with text appearing in rows along with the gutenberg id.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRaw &amp;lt;- gutenberg_download(100)
+knitr::kable(head(dfRaw, 12))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;gutenberg_id&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;text&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Shakespeare&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;em&gt;This Etext has certain copyright implications you should read!&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;lt;&amp;lt;THIS ELECTRONIC VERSION OF THE COMPLETE WORKS OF WILLIAM&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;SHAKESPEARE IS COPYRIGHT 1990-1993 BY WORLD LIBRARY, INC., AND IS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;PROVIDED BY PROJECT GUTENBERG ETEXT OF ILLINOIS BENEDICTINE COLLEGE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;WITH PERMISSION. ELECTRONIC AND MACHINE READABLE COPIES MAY BE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;DISTRIBUTED SO LONG AS SUCH COPIES (1) ARE FOR YOUR OR OTHERS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;PERSONAL USE ONLY, AND (2) ARE NOT DISTRIBUTED OR USED&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;COMMERCIALLY. PROHIBITED COMMERCIAL DISTRIBUTION INCLUDES BY ANY&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;SERVICE THAT CHARGES FOR DOWNLOAD TIME OR FOR MEMBERSHIP.&amp;gt;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::kable(dfRaw[sample(nrow(dfRaw), 6),])&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;gutenberg_id&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;text&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Assure yourselves, will never be unkind.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Like one besotted on your sweet delights.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;And spurn in pieces posts of adamant;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Whereto, when they shall know what men are rich,&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TITUS. Marcus, even thou hast struck upon my crest,&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-preparation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Preparation&lt;/h2&gt;
+&lt;p&gt;The copyright notice appears multiple times throughout the text. Fortunately, it doesn’t prevent us from using this data for non-commercial purposes. The first step is to merge the entire text and remove the copyright notices that are helpfully within &amp;lt;&amp;lt; … &amp;gt;&amp;gt;. Secondly, in plays, the characters and their relationships and titles are defined with ‘DRAMATIS PERSONAE’. These lines have to be removed too.&lt;/p&gt;
+&lt;p&gt;After doing some quick cleaning, the text is reconverted to a data frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;complete_works &amp;lt;- str_c(dfRaw$text, collapse = &amp;quot;.&amp;quot;)
+complete_works &amp;lt;- str_split(complete_works, &amp;quot;&amp;lt;&amp;lt;[^&amp;gt;]*&amp;gt;&amp;gt;&amp;quot;)[[1]]
+complete_works &amp;lt;- complete_works[!(str_detect(complete_works, &amp;quot;Dramatis Personae|DRAMATIS PERSONAE&amp;quot;))]
+complete_works &amp;lt;- str_replace_all(complete_works, &amp;quot;\\[|\\]&amp;quot;, &amp;quot;.&amp;quot;)
+
+dfContent &amp;lt;- as_tibble(complete_works) %&amp;gt;% slice(3:n())
+rm(complete_works)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, we parse the content into sentences. The &lt;code&gt;tidytext&lt;/code&gt; package by &lt;a href=&#34;http://varianceexplained.org/&#34;&gt;David Robinson&lt;/a&gt; and &lt;a href=&#34;http://juliasilge.com/&#34;&gt;Julia Silge&lt;/a&gt;, is most useful in doing this within the tidyverse framework.&lt;/p&gt;
+&lt;p&gt;Here’s what the function does below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Replaces all ‘logical’ sentence break delimiters by a period for easier tokenization by sentence&lt;/li&gt;
+&lt;li&gt;Removes extra periods and spaces&lt;/li&gt;
+&lt;li&gt;Tokenizes into sentences&lt;/li&gt;
+&lt;li&gt;Removes all sentences containing ACT or SCENE&lt;/li&gt;
+&lt;li&gt;Removes all digits from sentences&lt;/li&gt;
+&lt;li&gt;Finally adds line numbers to each row (more on the importance of this later…)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A sample of 10 sentences is shown below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getSentences &amp;lt;- function(dfContent) {
+    df &amp;lt;- dfContent %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;;|:|!|\\?| \\-|\\- | \\- &amp;quot;, &amp;quot;\\. &amp;quot;)) %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;[\\.]+&amp;quot;, &amp;quot;\\.&amp;quot;)) %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;[[:space:]]+&amp;quot;, &amp;quot; &amp;quot;)) %&amp;gt;% 
+        unnest_tokens(sentence, value, token = &amp;quot;sentences&amp;quot;, to_lower = FALSE) %&amp;gt;% 
+        dplyr::filter(!str_detect(sentence, &amp;quot;Act|ACT|Scene|SCENE&amp;quot;)) %&amp;gt;% 
+        mutate(sentence = str_replace_all(sentence, &amp;quot;[0-9]&amp;quot;,&amp;quot;&amp;quot;)) %&amp;gt;% 
+        mutate(lineNumber = row_number()) %&amp;gt;% 
+        select(lineNumber, everything())
+}
+
+dfSentences &amp;lt;- getSentences(dfContent)
+knitr::kable(dfSentences[sample(nrow(dfSentences), 10),])&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;lineNumber&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;sentence&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;55991&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;That with the King here resteth in his tent. .&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;16097&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;You are a merry man, sir. fare you well.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;9717&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;He did ask favour.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100749&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;To the health of our general. .&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;40908&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;You are, I think, assur’d I love you not.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;117828&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Laurence. and another Watchman.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;19243&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ere now denied the asker, and now again,.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;145024&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;I swear to do this, though a present death.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;70942&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Stocking his messenger.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;122957&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;For bringing wood in slowly.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;creating-ngrams&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Creating ngrams&lt;/h2&gt;
+&lt;p&gt;“ngrams are a contiguous sequence of n items from a given sequence of text…” - &lt;a href=&#34;https://en.wikipedia.org/wiki/N-gram&#34;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;In this case, ngrams would be a contiguous sequence of n words. In the simplest form, an ngram of size 1 is a single word.
+An ngram of size 2 or more is a set of words that appear one after the other in a sequence.&lt;/p&gt;
+&lt;p&gt;For instance, given a sentence - &lt;strong&gt;how are you doing?&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There are 4 Unigrams: how, are, you, doing&lt;/li&gt;
+&lt;li&gt;There are 3 Bigrams: how are, are you, you doing&lt;/li&gt;
+&lt;li&gt;There are 2 Trigrams: how are you, are you doing&lt;/li&gt;
+&lt;li&gt;There is 1 Quadrigram: how are you doing&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So, using the data frame of clean sentences that we parsed, the next step is to create ngrams.
+Once again this is made simple using the &lt;strong&gt;unnest_tokens&lt;/strong&gt; function from the &lt;code&gt;tidytext&lt;/code&gt; package. And this is where grouping by line numbers is important because we want ngrams to be created by sequence of words, only within the same line. We do not want ngrams connected by a sentence break.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getNgrams &amp;lt;- function(dfSentences, n) {
+    dfNgrams &amp;lt;- dfSentences %&amp;gt;% 
+        group_by(lineNumber) %&amp;gt;% 
+        unnest_tokens(word, sentence, token = &amp;quot;ngrams&amp;quot;, n = n) %&amp;gt;% 
+        ungroup() %&amp;gt;% 
+        count(word, sort = TRUE) %&amp;gt;% 
+        rename(freq = n)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;all-words&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;All Words&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df1grams &amp;lt;- getNgrams(dfSentences, 1)
+dim(df1grams)
+[1] 26453     2
+wordsOfFreq1 &amp;lt;- df1grams %&amp;gt;% group_by(freq) %&amp;gt;% summarise(n = sum(freq)) %&amp;gt;% dplyr::filter(freq == 1) %&amp;gt;% .$n&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are 26453 words in the corpus, that shows how vast Shakespeare’s vocabulary was. Let’s see a wordcloud of top 100 words. No surprise, the most commonly used words are: &lt;strong&gt;&lt;em&gt;the, and, i, to, of&lt;/em&gt;&lt;/strong&gt;. Excluding these commonly used ‘stop words’, in the second wordcloud, we can see the words Shakespeare used most frequently. We can see a lot of references to royalty and nobility, present specially in Shakespearean tragedies. Some names are mentioned quite frequently - Richard, John, Caesar, Brutus and Henry. Some English counties or &lt;a href=&#34;https://en.wikipedia.org/wiki/Shire&#34;&gt;shires&lt;/a&gt; are mentioned quite often - Warwick, York and Gloucester.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;unigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Unigrams&lt;/h3&gt;
+&lt;p&gt;Let’s see a plot of the distribution of words in corpus by usage.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here’s a strategy for building ngram tables:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is a long tail of 10522 words in the corpus that appear exactly once. Replace all words appearing just once, by &lt;strong&gt;UNK&lt;/strong&gt; as a placeholder for a word not known from the corpus. There are a couple of motivations behind this:
+&lt;ul&gt;
+&lt;li&gt;It reduces the size of ngram tables.&lt;/li&gt;
+&lt;li&gt;More importantly, when an unknown word is encountered, the model knows how to tackle it before predicting the next set of words.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Re-summarise and rearrange the table by frequency.&lt;/li&gt;
+&lt;li&gt;Assign an index to each word.&lt;/li&gt;
+&lt;li&gt;Convert to data.table format. Some of the biggest benefits of this approach are:
+&lt;ul&gt;
+&lt;li&gt;Rows could be assigned and referenced by a key. This makes it extremely simple to look up a row value.&lt;/li&gt;
+&lt;li&gt;Lookup by a key is very fast compared to matching character strings.&lt;/li&gt;
+&lt;li&gt;When we create tables for bigrams and higher order ngrams, we can replace the words by their corresponding integer indexes. It saves a lot of memory as compared to creating tibbles with character strings.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTopUnigrams &amp;lt;- df1grams %&amp;gt;% dplyr::filter(freq &amp;gt;= 2) %&amp;gt;% .$word
+df1grams &amp;lt;- df1grams %&amp;gt;% 
+    mutate(word = ifelse(word %in% vTopUnigrams, word, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    group_by(word) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq)) %&amp;gt;% 
+    mutate(index1 = row_number()) %&amp;gt;% 
+    select(index1, freq, word)
+
+dt1grams &amp;lt;- as.data.table(df1grams)
+# set key to word
+dt1grams &amp;lt;- dt1grams[,.(index1,freq),key=word]
+# create another table with key=index1
+dt1gramsByIndex &amp;lt;- dt1grams[,.(word,freq),key=index1]
+# print dimensions
+dim(dt1grams)
+[1] 15932     3&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here are the top 10 unigrams. &lt;strong&gt;UNK&lt;/strong&gt; replaces the long tail of words appearing once.
+Finally, we are left with 15932 unigrams in our table.&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:58:51 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+index1
+&lt;/th&gt;
+&lt;th&gt;
+word
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+26821
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+and
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25670
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20473
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19377
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16954
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+14351
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+13568
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12449
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+in
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10881
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+that
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10869
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Bigrams&lt;/h3&gt;
+&lt;p&gt;A data table of bigrams is created where the index of the first word is the lookup key. The second word cannot be &lt;strong&gt;UNK&lt;/strong&gt; since it is a word used for making predictions from the bigram table.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df2grams &amp;lt;- getNgrams(dfSentences, 2) %&amp;gt;% 
+    separate(word, c(&amp;quot;word1&amp;quot;, &amp;quot;word2&amp;quot;), sep = &amp;quot; &amp;quot;) %&amp;gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    dplyr::filter(word2 %in% vTopUnigrams) %&amp;gt;% 
+    group_by(word1, word2) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq))
+
+dt2grams &amp;lt;- as.data.table(df2grams)
+dt2grams$index1 &amp;lt;- dt1grams[dt2grams$word1]$index1
+dt2grams$index2 &amp;lt;- dt1grams[dt2grams$word2]$index1
+dt2grams &amp;lt;- dt2grams[,.(index1,index2,freq)]
+setkey(dt2grams, index1)
+
+# print dimensions
+dim(dt2grams)
+[1] 254884      3&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here are the top 10 bigrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:03 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30512
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1846
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+lord
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1640
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+in
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1611
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+have
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1603
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+will
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1553
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1417
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1380
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+it
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1066
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+be
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+973
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;trigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Trigrams&lt;/h3&gt;
+&lt;p&gt;Similarly, a data table of trigrams is created where indexes of the first and second words form the lookup key.
+The third word cannot be &lt;strong&gt;UNK&lt;/strong&gt; since it is a word used for making predictions from the trigram table.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df3grams &amp;lt;- getNgrams(dfSentences, 3) %&amp;gt;% 
+    separate(word, c(&amp;quot;word1&amp;quot;, &amp;quot;word2&amp;quot;, &amp;quot;word3&amp;quot;), sep = &amp;quot; &amp;quot;) %&amp;gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    mutate(word2 = ifelse(word2 %in% vTopUnigrams, word2, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    dplyr::filter(word3 %in% vTopUnigrams) %&amp;gt;% 
+    group_by(word1, word2, word3) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq))
+
+dt3grams &amp;lt;- as.data.table(df3grams)
+dt3grams$index1 &amp;lt;- dt1grams[dt3grams$word1]$index1
+dt3grams$index2 &amp;lt;- dt1grams[dt3grams$word2]$index1
+dt3grams$index3 &amp;lt;- dt1grams[dt3grams$word3]$index1
+dt3grams &amp;lt;- dt3grams[,.(index1,index2,index3,freq)]
+setkey(dt3grams, index1,index2)
+
+# print dimensions
+dim(dt3grams)
+[1] 476098      4&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the top 10 trigrams, we can get an idea how &lt;strong&gt;UNK&lt;/strong&gt; will be useful in this context. &lt;strong&gt;&lt;em&gt;the UNK of&lt;/em&gt;&lt;/strong&gt; is one of the most frequently used word sequences in the trigram table, which implies that if we encounter an unknown word after ‘the’, then ‘of’ is the most likely word to be predicted from the trigram table.&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:27 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+38526
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+pray
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+238
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+will
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+213
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+159
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+157
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+UNK
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+155
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+duke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+141
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+139
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+would
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+127
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;quadrigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Quadrigrams&lt;/h3&gt;
+&lt;p&gt;Here are the top 10 quadrigrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:54 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+word4
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+47569
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+with
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+all
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+heart
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+what
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+38
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+give
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+your
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+hand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+beseech
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+give
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+thy
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+hand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+duke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+york
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+28
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+would
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+have
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+27
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ay
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+good
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+lord
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;pentagrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Pentagrams&lt;/h3&gt;
+&lt;p&gt;Here are the top 10 pentagrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 15:00:17 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+word4
+&lt;/th&gt;
+&lt;th&gt;
+word5
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+60534
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+glad
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+see
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+thank
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+for
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+your
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+had
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+rather
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+be
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+glad
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+see
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+as
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+gentleman
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+for
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+mine
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+own
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+part
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+pray
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+tell
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+what
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+say
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+and
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+so
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+take
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;These ngram tables comprise all the information needed for the prediction model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;memory-usage-comparison&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Memory Usage Comparison&lt;/h3&gt;
+&lt;p&gt;As mentioned above, storing words as integer indexes in a data table is far more efficient as compared to a data frame with character strings.
+For instance, here’s how a pentagram data table looks like that contains just the integer indexes of the words:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 15:00:17 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+index1
+&lt;/th&gt;
+&lt;th&gt;
+index2
+&lt;/th&gt;
+&lt;th&gt;
+index3
+&lt;/th&gt;
+&lt;th&gt;
+index4
+&lt;/th&gt;
+&lt;th&gt;
+index5
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9049
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9049
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9384
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12918
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+687
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4758
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6421
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+183
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1267
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11402
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1403
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10842
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;In a comparison of memory needed for all ngram tables, we see a difference of a factor of 5 between the two approaches.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(object.size(df1grams)+object.size(df2grams)+object.size(df3grams)+
+          object.size(df4grams)+object.size(df5grams), units = &amp;quot;auto&amp;quot;)
+158 Mb
+
+print(object.size(dt1grams)+object.size(dt1gramsByIndex)+object.size(dt2grams)+object.size(dt3grams)+
+          object.size(dt4grams)+object.size(dt5grams), units = &amp;quot;auto&amp;quot;)
+30.4 Mb&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;ngram-with-backoff-prediction-algorithm&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Ngram With Backoff Prediction Algorithm&lt;/h2&gt;
+&lt;p&gt;So, given the ngram data tables, here’s how the prediction algorithm works:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Sanitize the input text as done above&lt;/li&gt;
+&lt;li&gt;Parse the text into sentences&lt;/li&gt;
+&lt;li&gt;Determine the words in the last sentence of the input text. Use upto the last 4 words from the input text.&lt;/li&gt;
+&lt;li&gt;The word predictions are done starting from the ngram table containing the longest sequence of words, provided the input text contains atleast n-1 words. So, if the last 4 words from the input text match the first 4 words in the pentagram table, then the fifth word is chosen, that has the highest frequency of occurance after those 4 words. If more than one word prediction is desired, then the fifth words with the next highest frequency of occurance are also chosen.&lt;/li&gt;
+&lt;li&gt;If no matches or fewer than desired number of matches are found in the pentagram table, then the algorithm backoffs to the quadrigram table using the last 3 words typed, then to the trigram table using the last 2 words typed, then to the bigram table using the last word typed and finally to the unigram table, until the desired number of word predictions are returned.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s see how this works concretely with some test cases:&lt;/p&gt;
+&lt;div id=&#34;test-cases&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Test Cases&lt;/h3&gt;
+&lt;p&gt;The first test is to confirm whether the word predictions from the unigram table, match with what we expect.
+The top 10 unigram table contains 3 words beginning with the letter ‘t’ - &lt;code&gt;the&lt;/code&gt;(1), &lt;code&gt;to&lt;/code&gt;(4), &lt;code&gt;that&lt;/code&gt;(10). And sure enough, this is what we get from our prediction function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;t&amp;quot;)
+[1] &amp;quot;Predictions from 1grams: the,to,that,this,thou&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: the,to,that&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the bigram table, we could see that &lt;code&gt;i am&lt;/code&gt;, &lt;code&gt;i have&lt;/code&gt; and &lt;code&gt;i will&lt;/code&gt; are among the top 10. So, the next test is to confirm these.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i &amp;quot;)
+[1] &amp;quot;Predictions from 2grams: am,have,will,do,would&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: am,have,will&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Narrowing down to words that begin with letter ‘h’ gives us:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i h&amp;quot;)
+[1] &amp;quot;Predictions from 2grams: have,had,hope,hear,heard&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: have,had,hope&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s predict some trigrams. &lt;code&gt;i am not&lt;/code&gt; and &lt;code&gt;i am a&lt;/code&gt; are among the top 10 trigrams, so that’s what we expect to see.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i am &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: not,a,sure,glad,the&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: not,a,sure&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now let’s examine the &lt;strong&gt;UNK&lt;/strong&gt; feature. We know that &lt;code&gt;the UNK of&lt;/code&gt; is number 5 most common sequence in the trigram table so we should expect to see ‘of’ as the first prediction if the input text has an unknown word after ‘the’. So let’s input some gibberish after ‘the’ to make sure this word doesn’t exist in our vocabulary:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;the sjdhsbhbfh &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: of,and,in,that,the&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: of,and,in&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now that the &lt;em&gt;known&lt;/em&gt; test cases are working well, let’s see the backoff algorithm in action:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;to be or not &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: to&amp;quot;
+[1] &amp;quot;Predictions from 4grams: to&amp;quot;
+[1] &amp;quot;Predictions from 3grams: to,at,i,allow&amp;#39;d,arriv&amp;#39;d&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: to,at,i&amp;quot;
+predictNextWords(&amp;quot;to be or not to &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: be&amp;quot;
+[1] &amp;quot;Predictions from 4grams: be,crack&amp;quot;
+[1] &amp;quot;Predictions from 3grams: be,crack,the,have,me,do&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: be,crack,the&amp;quot;
+predictNextWords(&amp;quot;be or not to &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: be&amp;quot;
+[1] &amp;quot;Predictions from 4grams: be,crack&amp;quot;
+[1] &amp;quot;Predictions from 3grams: be,crack,the,have,me,do&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: be,crack,the&amp;quot;
+predictNextWords(&amp;quot;to be or not to be &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: that&amp;quot;
+[1] &amp;quot;Predictions from 4grams: that,found,gone,endur&amp;#39;d,endured,seen&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: that,found,gone&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: is&amp;quot;
+[1] &amp;quot;Predictions from 4grams: is,which&amp;quot;
+[1] &amp;quot;Predictions from 3grams: is,which,you,he,i,thou,can&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: is,which,you&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that is &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: the&amp;quot;
+[1] &amp;quot;Predictions from 4grams: the&amp;quot;
+[1] &amp;quot;Predictions from 3grams: the,not,my,to,a&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: the,not,my&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that is the &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: question&amp;quot;
+[1] &amp;quot;Predictions from 4grams: question,very,way,humour,best,brief&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: question,very,way&amp;quot;
+predictNextWords(&amp;quot;be that is the &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: question&amp;quot;
+[1] &amp;quot;Predictions from 4grams: question,very,way,humour,best,brief&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: question,very,way&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using one of the most well known speeches from Hamlet, we can see that the algorithm gets the first word prediction from the pentagram table. But since we are looking for the next 3 words, the algorithm backoffs to predictions from quadrigram and trigram tables, until it has atleast 3 words. In this case, the pentagram table gives us the best match that we are looking for. We can also observe that once we have atleast 4 words in our input text, the words prior to those do not matter for the next word predictions.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Let’s see another example:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;What a lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: &amp;quot;
+[1] &amp;quot;Predictions from 4grams: &amp;quot;
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;a lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 4grams: &amp;quot;
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;day &amp;quot;)
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see that even though there are enough words to start matching from the higher ngram tables, the matches are gotten only from the bigram table using ‘day’ as the first word.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Another one:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;Beware the ides of &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,the,my,his,a,this&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,the,my&amp;quot;
+predictNextWords(&amp;quot;Beware the ides of mar&amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,marriage,marcius,marcus,mars&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,marriage,marcius&amp;quot;
+predictNextWords(&amp;quot;Beware the ides of march&amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,marching&amp;quot;
+[1] &amp;quot;Predictions from 1grams: march,marching,march&amp;#39;d,marches,marchioness&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,marching,march&amp;#39;d&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;shiny-app&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Shiny App&lt;/h2&gt;
+&lt;p&gt;Finally, here’s a &lt;a href=&#34;https://nitingupta2.shinyapps.io/ptmapp&#34;&gt;Shiny app&lt;/a&gt; that demos this predictive typing model.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/building-a-predictive-typing-model/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Best batsmen in cricket at present</title>
+      <link>/post/best-batsmen-in-cricket-at-present/</link>
+      <pubDate>Thu, 16 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/best-batsmen-in-cricket-at-present/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my &lt;a href=&#34;../top-batsmen-in-cricket/&#34;&gt;last post&lt;/a&gt;, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.&lt;/p&gt;
+&lt;p&gt;I got a list of 42 batsmen who have consistently performed well throughout their career. Now the question is how could we select the best of the best who have had the most well-rounded performances. A post on &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; has been a strong inspiration to arrive at the answers below.&lt;/p&gt;
+&lt;div id=&#34;best-batsmen-at-present&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Best batsmen at present&lt;/h3&gt;
+&lt;p&gt;To select current best batsmen we filter the list of top batsmen to include only the batsmen who are actively playing in all the 3 formats of the game.&lt;/p&gt;
+&lt;p&gt;This leaves us with only 6 batsmen who are currently playing in all the formats. They are AB de Villiers, HM Amla, JE Root, KS Williamson, SPD Smith, V Kohli. No surprises there as these batsmen are widely considered to be the best among the active players today. But instead of subjectively handpicking them, we arrived at this conclusion by applying some reasonable filters.&lt;/p&gt;
+&lt;p&gt;But how well-rounded are these players? To determine this I’ve defined the following criteria and metrics:&lt;/p&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;51%&#34; /&gt;
+&lt;col width=&#34;30%&#34; /&gt;
+&lt;col width=&#34;17%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Criteria&lt;/th&gt;
+&lt;th&gt;Metric&lt;/th&gt;
+&lt;th&gt;Label&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Consistency of scoring runs&lt;/td&gt;
+&lt;td&gt;Career batting average&lt;/td&gt;
+&lt;td&gt;SCORING CONSISTENCY&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Ability to score quickly&lt;/td&gt;
+&lt;td&gt;Strike Rate&lt;/td&gt;
+&lt;td&gt;STRIKE RATE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Ability to score big (number of 100s + number of 50s scored)&lt;/td&gt;
+&lt;td&gt;Big scores per innings&lt;/td&gt;
+&lt;td&gt;BIG SCORING RATE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Overall contribution to the matches played&lt;/td&gt;
+&lt;td&gt;Team Win-Loss Ratio&lt;/td&gt;
+&lt;td&gt;WIN RATIO&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Direct contribution to matches won&lt;/td&gt;
+&lt;td&gt;Batting average in winning matches&lt;/td&gt;
+&lt;td&gt;WIN CONTRIBUTION&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Every metric defined here is a ratio instead of an absolute number. So it is useful to evaluate relative ability.&lt;/p&gt;
+&lt;p&gt;Among the 42 top batsmen selected before, I calculate percentile scores of these metrics for each batsman grouped by the format of the game. This means we have a score ranging from 0-100 for each metric, where each batsman in the list has been scored relative to the best batsman in each criteria.&lt;/p&gt;
+&lt;p&gt;Let’s see the percentile scores for the 6 champion batsmen in our final list.&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:56:45 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Percentile Scores
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Format
+&lt;/th&gt;
+&lt;th&gt;
+Country
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+PercAverage
+&lt;/th&gt;
+&lt;th&gt;
+PercStrikeRate
+&lt;/th&gt;
+&lt;th&gt;
+PercInningsPerBigScore
+&lt;/th&gt;
+&lt;th&gt;
+PercWinRatio
+&lt;/th&gt;
+&lt;th&gt;
+PercAverageInWins
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+27
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+61
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+47
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+72
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AB de Villiers
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+73
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+88
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+40
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+22
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+74
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+90
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+79
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+South Africa
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+HM Amla
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+59
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+62
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+62
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+54
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+70
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+81
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+73
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+England
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+JE Root
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+70
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+69
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+69
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+New Zealand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+KS Williamson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+71
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+77
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+63
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+13
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+86
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+37
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+91
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+14
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+56
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+52
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Australia
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SPD Smith
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+Tests
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+79
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+64
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+17
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ODIs
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+65
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+97
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+T20Is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+India
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+V Kohli
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+100
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+84
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+94
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Here we can see how each champion scored relative to the rest of the elite group. AB de Villiers has the best career batting average and strike rate in ODIs so he gets a score of 100 in SCORING CONSISTENCY &amp;amp; STRIKE RATE. All other batsmen are scored relative to AB in these 2 criteria. With his astounding batting average of 99.94 in Tests, Sir Don Bradman gets a score of 100 in SCORING CONSISTENCY in Tests. And being at number 5 in all time highest batting averages in Tests, Steve Smith gets a high score of 91 in this criteria, relative to Sir Don.&lt;/p&gt;
+&lt;p&gt;This is all well and good, but how do we see the forest from trees? It is very difficult to make sense of high dimensional data in a table or in a single bar plot. This is where the visualization technique shown in the &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; article shines. We build a wagon wheel with segments denoting each metric and within each segment, the data is binned by quartiles.&lt;/p&gt;
+&lt;p&gt;Here’s how a wagon wheel would look like for each batsman. Each segment would be filled depending upon the percentile score in each criteria.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;So let’s see how the wagon wheels of our champions look like:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/player_facets_Tests.png&#34; /&gt;
+&lt;img src=&#34;/img/player_facets_ODIs.png&#34; /&gt;
+&lt;img src=&#34;/img/player_facets_T20Is.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see that Steve Smith is the most well-rounded batsman in Tests. His WIN RATIO is lacking relative to the illustrious company he’s in, but overall his performance in Tests is phenomenal. Joe Root comes second but others have a bit more catching up to do.&lt;/p&gt;
+&lt;p&gt;In One Day Internationals, Hashim Amla dominates in all spheres with AB de Villiers and Virat Kohli not far behind. Joe Root seems to contribute in most matches won by England but it appears the English team loses a fair bit in ODIs. Hence the WIN RATIO of Root is a bit lacking.&lt;/p&gt;
+&lt;p&gt;Virat Kohli is the undisputed king in the T20 Internationals format with Kane Williamson in second place. Steve Smith’s performance so far leaves much to be desired in this format.&lt;/p&gt;
+&lt;p&gt;The beauty of this visualization technique is that several dimensions in the data are compressed in a single facetted plot, in a visually appealing way. A glance at the plot reveals the relative best, both overall and in each metric.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Top batsmen in cricket</title>
+      <link>/post/top-batsmen-in-cricket/</link>
+      <pubDate>Sat, 11 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/top-batsmen-in-cricket/</guid>
+      <description>
+
+
+&lt;hr&gt;
+&lt;p&gt;In a &lt;a href=&#34;../a-brief-history-of-cricket/&#34;&gt;previous post&lt;/a&gt;, I used data from &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt; and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.&lt;/p&gt;
+&lt;div id=&#34;distribution-of-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distribution of matches played by all players&lt;/h3&gt;
+&lt;p&gt;Let’s take a look at the summary statistics of number of matches played by all players in each format of the game.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Number of matches played by all players in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00    2.00    7.00   17.27   21.00  200.00 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1.00    4.00   16.00   42.56   53.00  463.00 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    1.0     2.0     7.0    13.9    18.5    98.0 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesPlayed-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The distribution appears to be heavily skewed towards the right. In simple terms, there are a handful of players who go on to play 100+ Tests and 200+ ODIs. A majority of the players have played very few matches. The mean and median are hardly indicative of players who established themselves in their teams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;distribution-of-innings-to-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distribution of innings to matches played by all players&lt;/h3&gt;
+&lt;p&gt;A cricket team has 11 players, out of which 5 or 6 are specialist batsmen, 1 or 2 are all-rounders (could bat and bowl well) and the rest are specialist bowlers. The wicketkeeper also has to be a good batsman. The batsmen play up in the order in a match and get to bat before the bowlers do.&lt;/p&gt;
+&lt;p&gt;Here I will introduce another measure to distinguish batsmen from bowlers - ratio of innings played relative to number of matches played. In many matches a bowler doesn’t get a chance to bat, unless the top order batsmen and all-rounders fail, i.e. are out. Hence the ratio of innings to matches of specialist bowlers will be low.&lt;/p&gt;
+&lt;p&gt;Here are the summary statistics of this ratio. The ratio is greater than 1 in Tests because each player could play upto 2 innings. The peaks in each plot are indicative of batsmen who have batted in the top 3 and have gotten a chance to bat in nearly every innings of every match they played.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Ratio of innings to matches of all players in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+  0.250   1.429   1.667   1.623   1.923   2.000      19 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+ 0.1250  0.5714  0.8421  0.7670  1.0000  1.0000      62 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+0.05556 0.50000 0.85714 0.73084 1.00000 1.00000      73 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/inningsToMatches-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;distinguish-batsmen-from-bowlers&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Distinguish batsmen from bowlers&lt;/h3&gt;
+&lt;p&gt;To identify true batsmen in the dataset, I use 2 filters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Number of matches played should be above the 75th percentile&lt;/li&gt;
+&lt;li&gt;Ratio of innings to matches played should be above the 25th percentile&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The first filter eliminates newcomers and players who have had very short-lived careers. The second filter eliminates specialist bowlers from the dataset.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at the distribution of these metrics for these batsmen. These numbers appear more reasonable.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-2.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-averages-of-batsmen&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Career averages of batsmen&lt;/h3&gt;
+&lt;p&gt;Let’s take a look at the career batting averages of batsmen in each format. We see a few low averaging players left in the dataset who are potentially specialist bowlers. But without resorting to hand-picking, the two empirical filters chosen earlier did a good job of eliminating specialist bowlers from the dataset.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Career batting averages of batsmen in each format
+Format: Tests
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   4.84   24.84   33.59   33.11   42.13   99.94 
+--------------------------------------------------------------------------- 
+Format: ODIs
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   6.63   23.11   29.71   29.55   35.88   55.03 
+--------------------------------------------------------------------------- 
+Format: T20Is
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   4.10   18.15   21.91   23.27   28.44   53.40 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/careerAverages-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;top-batsmen&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Top batsmen&lt;/h3&gt;
+&lt;p&gt;The hallmark of a top batsman is consistency in scoring runs. From the distribution of career averages, it could be seen that very few batsmen have managed to score at an average of 50 or more runs in their career. So keeping things simple, this would be my sole criteria for selecting top batsmen amongst the rest. All batsmen who have averaged 50 or more in &lt;strong&gt;any&lt;/strong&gt; format would be included in my list of top batsmen.&lt;/p&gt;
+&lt;p&gt;This gives us a unique list of 42 elite batsmen who are legendary in their achievements.&lt;/p&gt;
+&lt;p&gt;Let’s take a look how they compare by various stats.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;div id=&#34;career-span&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career Span&lt;/h4&gt;
+&lt;p&gt;The career span of these elite batsmen is plotted in the order in which they debuted in their international career. Career spans of batsmen who are still actively playing in any format are labeled with blue color.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareCareerSpan-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Summary of career spans in years of top batsmen
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   5.00   11.00   16.00   14.71   18.75   24.00 &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Sachin Tendulkar and George Headley have had the longest career spans of 24 years each. But the international career of Headley along with that of almost all of the early era greats were interrupted by world wars. So even though they resumed their careers after the end of the wars, they were able to play relatively few matches (more on this below).&lt;/p&gt;
+&lt;p&gt;Graeme Pollock has had the shortest career of 7 years amongst all retired players. Being a South African, his career was cut short when ICC suspended South Africa from competing internationally in 1970 because of apartheid.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-matches-played&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Number of matches played&lt;/h4&gt;
+&lt;p&gt;Among the many records in Tendulkar’s name, the number of Tests and ODIs played are at the forefront. He played a single T20I, because he, Dravid and other senior members of the then Indian team used to withdraw their names for team selection in T20Is. His records of playing in 200 Tests and 463 ODIs are a testament to his brilliance, his passion for the game and his fitness over the years. Among the active players only AB de Villiers and Hashim Amla are at the halfway mark relatively to Tendulkar’s mark in Tests. But both AB and Amla are already well into their prime years. Younis Khan is on the verge of riding into the sunset. The rest of the pack including Virat Kohli, Kane Williamson, Steve Smith have a looong way to catch up.&lt;/p&gt;
+&lt;p&gt;It could be observed how few matches did the early era greats play relatively. Not only were few teams competing at the time, but also interruptions by world wars.&lt;/p&gt;
+&lt;p&gt;Michael Bevan established himself as an ODI specialist and played only 18 tests. Cheteshwar Pujara appears to have barely made the cutoffs for this list. He is a Tests specialist.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareTopBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-runs-scored&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career runs scored&lt;/h4&gt;
+&lt;p&gt;Once again Tendulkar’s records here are at the top. It is highly unlikely that any other batsman could ever come close in the next 5-10 years.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareRuns-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-batting-averages&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Career batting averages&lt;/h4&gt;
+&lt;p&gt;First and foremost is Sir Don Bradman’s career batting average record of 99.94 in Tests. He is widely regarded to be the greatest batsman of all time. This is one record that’s impossible to beat. The second batsman on this list is Graeme Pollock at 60.97. Steve Smith is the only active batsman who is anywhere close to second, a phenomenal achievement in its own right.&lt;/p&gt;
+&lt;p&gt;Secondly, it becomes clear why each batsman was selected for this list, a batting average of 50 or more in any single format. Though most batsmen have a Tests average above 50, Jonathan Trott, MS Dhoni and Michael Bevan made it by virtue of their superlative averages in the ODIs.&lt;/p&gt;
+&lt;p&gt;Virat Kohli is the only batsman who has averaged above 50 in all the 3 formats.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareAverage-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;hundreds-scored-in-career&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Hundreds scored in career&lt;/h4&gt;
+&lt;p&gt;Once again Tendulkar leads in the standings with 51 hundreds in Tests and 49 hundreds in ODIs. Sir Don’s record Test average of 99.94, Tendulkar’s records of number of matches played, runs scored and hundreds scored in career are some of the records that are going to be next to impossible to beat.&lt;/p&gt;
+&lt;p&gt;Surprisingly none of the batsmen on this list have scored a hundred in T20Is. There are a few other batsmen who have scored hundreds in T20Is but none of them were consistent enough to make it to this list.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareHundreds-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;highest-scores-in-an-innings&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Highest scores in an innings&lt;/h4&gt;
+&lt;p&gt;Here we see the great Brian Lara at the top of the Tests table with a highest score of 400 not out. I remember Sir Garfield Sobers’ score of 365 not out was one of the longest standing records in Test cricket until Lara surpassed it. Only Matthew Hayden was able to come any closer to Lara.&lt;/p&gt;
+&lt;p&gt;In ODIs, it was apt that the champion, Sachin Tendulkar was the first one to score a double hundred. A few other batsmen have scored 200+ scores in ODIs since, but none have had the consistency that Tendulkar had.&lt;/p&gt;
+&lt;p&gt;In T20Is, as mentioned above none of these batsman scored a hundred. Though a few have come close. I expect some of the active players to reach this milestone in the near future.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/top-batsmen-in-cricket/index_files/figure-html/compareHighestScores-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>A brief history of cricket</title>
+      <link>/post/a-brief-history-of-cricket/</link>
+      <pubDate>Wed, 08 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>/post/a-brief-history-of-cricket/</guid>
+      <description>
+
+
+&lt;p&gt;Since early childhood, I have been a big fan of cricket. Some of my earliest childhood memories are watching the game along with my loved ones in India. As much as I can recall, the first series I saw was between India and the West Indies during the early 80s, on a black and white TV set. Watching Sunil Gavaskar play the fearsome West Indian fast bowlers with aplomb, made me his fan…until a kid named Sachin Tendulkar arrived in 1989.&lt;/p&gt;
+&lt;p&gt;As the saying goes…In India, cricket is religion and Tendulkar is God! Even after his retirement in 2013, Tendulkar is still the most loved sportsperson or celebrity in India. A billion people passionately follow the game and voice their opinion on matters of team selection, players’ performances, umpiring…you name it. Armchair analysts abound, especially if the Indian cricket team loses a consequential match or a series.&lt;/p&gt;
+&lt;p&gt;I was excited to find that detailed records and stats on all cricket players were available on &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt;. The database covers all formats of the game:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tests - Test matches (80 overs a day, each team playing upto 2 innings in 5 days)&lt;/li&gt;
+&lt;li&gt;ODIs - One-Day Internationals (50 overs an innings)&lt;/li&gt;
+&lt;li&gt;T20Is - Twenty20 Internationals (20 overs an innings)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this post, I’ve tried to examine a brief history of the game using the debut years and career spans of players.&lt;/p&gt;
+&lt;p&gt;Here’s a sample of batting data:&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:54:44 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Batting records of players who have represented Australia in ODIs
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+Span
+&lt;/th&gt;
+&lt;th&gt;
+Mat
+&lt;/th&gt;
+&lt;th&gt;
+Inns
+&lt;/th&gt;
+&lt;th&gt;
+NO
+&lt;/th&gt;
+&lt;th&gt;
+Runs
+&lt;/th&gt;
+&lt;th&gt;
+HS
+&lt;/th&gt;
+&lt;th&gt;
+Ave
+&lt;/th&gt;
+&lt;th&gt;
+BF
+&lt;/th&gt;
+&lt;th&gt;
+SR
+&lt;/th&gt;
+&lt;th&gt;
+100
+&lt;/th&gt;
+&lt;th&gt;
+50
+&lt;/th&gt;
+&lt;th&gt;
+0
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+RT Ponting
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1995-2012
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+374
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+364
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+39
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+13589
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+164
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+41.81
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16944
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+80.19
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+AC Gilchrist
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1996-2008
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+286
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+278
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9595
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+172
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+35.93
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9902
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+96.89
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+55
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ME Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1988-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+244
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+236
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8500
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+173
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+39.35
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11053
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+76.9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+18
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+50
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MJ Clarke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2003-2015
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+245
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+223
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7981
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+130
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+44.58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10104
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+78.98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SR Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1986-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+325
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+288
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7569
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+120*
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+32.90
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9971
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+75.91
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MG Bevan
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1994-2004
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+232
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+196
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6912
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+108*
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+53.58
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9320
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+74.16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Here’s a sample of bowling data:&lt;/p&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:54:44 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;caption align=&#34;bottom&#34;&gt;
+Bowling records of players who have represented Australia in ODIs
+&lt;/caption&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+Player
+&lt;/th&gt;
+&lt;th&gt;
+Span
+&lt;/th&gt;
+&lt;th&gt;
+Mat
+&lt;/th&gt;
+&lt;th&gt;
+Inns
+&lt;/th&gt;
+&lt;th&gt;
+Balls
+&lt;/th&gt;
+&lt;th&gt;
+Runs
+&lt;/th&gt;
+&lt;th&gt;
+Wkts
+&lt;/th&gt;
+&lt;th&gt;
+BBI
+&lt;/th&gt;
+&lt;th&gt;
+Ave
+&lt;/th&gt;
+&lt;th&gt;
+Econ
+&lt;/th&gt;
+&lt;th&gt;
+SR
+&lt;/th&gt;
+&lt;th&gt;
+4
+&lt;/th&gt;
+&lt;th&gt;
+5
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+B Lee
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2000-2012
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+221
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+217
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11185
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8877
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+380
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/22
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+23.36
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.76
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29.4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+14
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+GD McGrath
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1993-2007
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+249
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+247
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12928
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8354
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+380
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7/15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+21.98
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3.87
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+34.0
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SK Warne
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1993-2003
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+193
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+190
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10600
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7514
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+291
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/33
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25.82
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.25
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36.4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+MG Johnson
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2005-2015
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+153
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+150
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7489
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6038
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+239
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6/31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25.26
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.83
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31.3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+CJ McDermott
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1985-1996
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7461
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5018
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+203
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5/44
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+24.71
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.03
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+36.7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+SR Waugh
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1986-2002
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+325
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+207
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8883
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6761
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+195
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4/33
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+34.67
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4.56
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+45.5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+0
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Currently there are 10 international teams which have &lt;a href=&#34;https://en.wikipedia.org/wiki/List_of_International_Cricket_Council_members&#34;&gt;full-membership&lt;/a&gt; of the International Cricket Council - Australia, Bangladesh, England, India, New Zealand, Pakistan, South Africa, Sri Lanka, West Indies and Zimbabwe. I downloaded batting and bowling data for all of these 10 teams in all 3 formats. The dataset is rich with features and appears to cover the entire history of international cricket.&lt;/p&gt;
+&lt;p&gt;Major props to the folks at Statsguru for maintaining a clean dataset. Both batting and bowling datasets have the same number of players, as should be the case. So there wasn’t much data wrangling needed.&lt;/p&gt;
+&lt;p&gt;Here are what the abbreviations mean:&lt;/p&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;10%&#34; /&gt;
+&lt;col width=&#34;89%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th&gt;Term&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Span&lt;/td&gt;
+&lt;td&gt;Separate into debut year and last year of career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Mat&lt;/td&gt;
+&lt;td&gt;Matches played in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Inns&lt;/td&gt;
+&lt;td&gt;Innings played in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;NO&lt;/td&gt;
+&lt;td&gt;Number of times not out in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;HS&lt;/td&gt;
+&lt;td&gt;Highest batting score in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Ave&lt;/td&gt;
+&lt;td&gt;Career Average, batting: Runs/(Innings - NotOuts), bowling: Runs/Wickets&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;BF&lt;/td&gt;
+&lt;td&gt;Balls Faced&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;SR&lt;/td&gt;
+&lt;td&gt;Strike Rate, batting: Runs/Balls Faced, bowling: Balls/Wickets&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;BBI&lt;/td&gt;
+&lt;td&gt;Best bowling performance in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Balls&lt;/td&gt;
+&lt;td&gt;Number of balls bowled in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;Wkts&lt;/td&gt;
+&lt;td&gt;Number of wickets in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;Econ&lt;/td&gt;
+&lt;td&gt;Bowling economy rate: Runs per over (Overs bowled = Balls bowled/6)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;100&lt;/td&gt;
+&lt;td&gt;Number of hundreds scored in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;50&lt;/td&gt;
+&lt;td&gt;Number of fifties scored in career&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;Number of times the bowler took 4 wickets in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;Number of times the bowler took 5 or more wickets in an innings&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div id=&#34;when-did-each-country-first-play-internationally&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;When did each country first play internationally?&lt;/h3&gt;
+&lt;p&gt;From the earliest debut years of players, it could be seen when each format was started and when each country started playing in a format. Australia and England have been the pioneering nations in each format. The earliest Tests were played between Australia and England in 1877. South Africa joined the fray in 1889. For the next 40 years, these were the only 3 international teams, until West Indies, India and New Zealand started playing in quick succession. In 1970 South Africa was suspended from playing international cricket by the ICC because of prevailing apartheid in the nation. As a result, the international career of some very promising South Africans like Graeme Pollock and Barry Richards ended abruptly. Later on some other players emigrated to England and Australia to get a chance to play internationally. This ban was lifted by the ICC in 1991. The newly formed South African team under Clive Rice was given a warm welcome in India, when they visited to play ODIs. South Africa resumed playing tests in 1992.&lt;/p&gt;
+&lt;p&gt;Sri Lanka, Zimbabwe and Bangladesh were Associate members with ODI status before they were elected as full members to be eligible to play Tests.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/earliestDebutByCountry-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-players-who-have-represented-their-country-internationally&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Number of players who have represented their country internationally&lt;/h3&gt;
+&lt;p&gt;Even though Australia and England started playing Tests together in 1877, there have been far more players representing the England team in Tests, when looking at the entire history. This suggests a lot more turnover in the English team.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/numberOfPlayersByCountry-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;number-of-players-who-debuted-internationally-by-year&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Number of players who debuted internationally by year&lt;/h3&gt;
+&lt;p&gt;This plot shows the number of distinct players debuting each year. So, for instance, if a player debuted in Tests, ODIs and T20Is team in the same year, then that is counted as 1. Few things could be noted here:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The gaps in Australia, England and India facets show the years interrupted by the 2 world wars.&lt;/li&gt;
+&lt;li&gt;As noted earlier, there’s a big gap in the South Africa facet, when the country was suspended from 1970-1991.&lt;/li&gt;
+&lt;li&gt;The gaps in Bangladesh, Sri Lanka and Zimbabwe are because each country was an associate member of the ICC and was only competing in ICC ODI tournaments until the country got its full member status.&lt;/li&gt;
+&lt;li&gt;There’s been a steady increase in the number of players debuting in Australia, England, India, Pakistan and West Indies, in the last decade or so. This suggests a trend of having specialist players in the team for each format. Top teams like Australia, England and India have adopted this trend. Some players are selected as Test match specialists, while the others are selected to only play in ODIs and T20Is.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/img/cricket_facets.png&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;career-spans-of-players&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Career spans of players&lt;/h3&gt;
+&lt;p&gt;To examine the career spans of players, I filtered the dataset to only keep the players who haven’t been active in 2016-2017. Then I eliminated quick failures whose career didn’t last for more than 2 years. This meant the players left in the dataset were given enough opportunities to succeed at the international level. Then I examined the median career span by debut year.&lt;/p&gt;
+&lt;p&gt;It appears a median player used to play between 6 to 10 years before retiring. Although there was more dispersion in Tests, it was clearly the norm in ODIs. 1908 was an extreme outlier year in Tests because only 1 player qualified the inclusion criteria. This was Sir Jack Hobbs of England, an early master of the game who played for 23 years. 1909 was another extreme outlier year where only 3 players were included. These were the legends Warren Bardsley of Australia (18 years), Frank Woolley of England (26 years) and Bill Whitty of Australia (4 years).&lt;/p&gt;
+&lt;p&gt;An outlier in the ODIs plot corresponds to the year 1989. This was the year when some modern day legends made their debut. Most notably Sachin Tendulkar from India who played for 24 years. Saeed Anwar, Waqar Younis &amp;amp; Mushtaq Ahmed from Pakistan who each played for 15 years and Sanath Jayasuriya from Sri Lanka who played for 23 years. Alec Stewart and Nasser Hussain from England also debuted in 1989. They had checkered records in ODIs but overall their careers lasted for 15 years.&lt;/p&gt;
+&lt;p&gt;An astonishing trend appears to have started with the players debuting after the early 90s. Career spans of players peaked with those debuting during early 90s. Since then the median career span started dropping year by year. This could be seen across all formats. Although the median career span would change for more recent years as active players playing from early 2000s retire in future, nevertheless this trend is persistent from early 90s.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/medianCareerSpan-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;matches-played-by-debut-years&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Matches played by debut years&lt;/h3&gt;
+&lt;p&gt;The same downwards trends from early 90s could also be observed in the median number of matches played by debut year. This isn’t surprising as the number of matches played is directly correlated with career span. An upward trend from early 30s could be observed in Test matches played. This is explained by the addition of West Indies, New Zealand and India as full members of the ICC from late 20s. Every international player started playing more matches as the number of competing teams doubled to 6.&lt;/p&gt;
+&lt;p&gt;A big upward trend could be seen in ODIs from its inception. Until the beginning of ODIs, cricket was only played in Tests format that was characteristically very laid back. Both teams got a chance to bat upto 2 innings alternately over 5 days. More often than not the matches would end in a draw with no win/loss result. The introduction of 60 overs a side ODIs (later reduced to 50 overs a side) format was to be played in a single day. The team batting first would set a target score. Then the team batting second would chase this target. This ensured guaranteed results although there have been few occasions where the ODIs have resulted in ties at the same score. Naturally this format was more palatable to spectators and TV audiences that contributed to a rapid growth in its popularity. The ODIs format is still the most popular format till date.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/a-brief-history-of-cricket/index_files/figure-html/matchesByDebutYear-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;In the next couple of posts I will analyze batting performances.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

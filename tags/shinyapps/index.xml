@@ -1,0 +1,1724 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>shinyapps | Nitin Gupta</title>
+    <link>/tags/shinyapps/</link>
+      <atom:link href="/tags/shinyapps/index.xml" rel="self" type="application/rss+xml" />
+    <description>shinyapps</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sat, 15 Apr 2017 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>shinyapps</title>
+      <link>/tags/shinyapps/</link>
+    </image>
+    
+    <item>
+      <title>Building a Predictive Typing Model</title>
+      <link>/post/building-a-predictive-typing-model/</link>
+      <pubDate>Sat, 15 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>/post/building-a-predictive-typing-model/</guid>
+      <description>
+
+
+&lt;p&gt;Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the user might want to type. Typically, upto 3 words are predicted, which are displayed in a row at the top of the keyboard. Given that typing on a glass pane without tactile feedback, could be very frustrating at times, the smart keyboard goes a long way in alleviating these issues.&lt;/p&gt;
+&lt;p&gt;But, how does predictive typing work? Basically, it’s a predictive typing model built using an ngram with &lt;a href=&#34;https://en.wikipedia.org/wiki/Katz%27s_back-off_model&#34;&gt;backoff prediction model&lt;/a&gt;. Makes complete sense, right? Well, it’s less complicated than it sounds, and actually not hard to understand, as we shall see further.&lt;/p&gt;
+&lt;div id=&#34;corpus&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Corpus&lt;/h2&gt;
+&lt;p&gt;To begin, we need a large corpus of text with a wide-ranging vocabulary. The first name that comes to mind is that of William Shakespeare. Shakespeare wrote a number of plays and poems that are classics in the English language. These plays and poems are available in the public domain and are easily accessible through a number of sources, (see &lt;a href=&#34;http://www.gutenberg.org/browse/authors/s#a65&#34;&gt;here&lt;/a&gt; and &lt;a href=&#34;http://shakespeare.mit.edu/&#34;&gt;here&lt;/a&gt;).
+By some &lt;a href=&#34;http://www1.cmc.edu/pages/faculty/welliott/Shakespeare%20Vocabulary%20Chapter%20911.pdf&#34;&gt;accounts&lt;/a&gt;, Shakespeare’s vocabulary ranged from 15,000-30,000 words, which makes it excellent to use it for our corpus.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/ropenscilabs/gutenbergr&#34;&gt;David Robinson’s&lt;/a&gt; &lt;code&gt;gutenbergr&lt;/code&gt; package makes it easy to download ‘The Complete Works Of Shakespeare’, from Project Gutenberg’s website. The downloaded dataset is a data frame with text appearing in rows along with the gutenberg id.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRaw &amp;lt;- gutenberg_download(100)
+knitr::kable(head(dfRaw, 12))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;gutenberg_id&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;text&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Shakespeare&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;em&gt;This Etext has certain copyright implications you should read!&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;lt;&amp;lt;THIS ELECTRONIC VERSION OF THE COMPLETE WORKS OF WILLIAM&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;SHAKESPEARE IS COPYRIGHT 1990-1993 BY WORLD LIBRARY, INC., AND IS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;PROVIDED BY PROJECT GUTENBERG ETEXT OF ILLINOIS BENEDICTINE COLLEGE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;WITH PERMISSION. ELECTRONIC AND MACHINE READABLE COPIES MAY BE&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;DISTRIBUTED SO LONG AS SUCH COPIES (1) ARE FOR YOUR OR OTHERS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;PERSONAL USE ONLY, AND (2) ARE NOT DISTRIBUTED OR USED&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;COMMERCIALLY. PROHIBITED COMMERCIAL DISTRIBUTION INCLUDES BY ANY&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;SERVICE THAT CHARGES FOR DOWNLOAD TIME OR FOR MEMBERSHIP.&amp;gt;&amp;gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::kable(dfRaw[sample(nrow(dfRaw), 6),])&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;gutenberg_id&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;text&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Assure yourselves, will never be unkind.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Like one besotted on your sweet delights.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;And spurn in pieces posts of adamant;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Whereto, when they shall know what men are rich,&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TITUS. Marcus, even thou hast struck upon my crest,&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-preparation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Preparation&lt;/h2&gt;
+&lt;p&gt;The copyright notice appears multiple times throughout the text. Fortunately, it doesn’t prevent us from using this data for non-commercial purposes. The first step is to merge the entire text and remove the copyright notices that are helpfully within &amp;lt;&amp;lt; … &amp;gt;&amp;gt;. Secondly, in plays, the characters and their relationships and titles are defined with ‘DRAMATIS PERSONAE’. These lines have to be removed too.&lt;/p&gt;
+&lt;p&gt;After doing some quick cleaning, the text is reconverted to a data frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;complete_works &amp;lt;- str_c(dfRaw$text, collapse = &amp;quot;.&amp;quot;)
+complete_works &amp;lt;- str_split(complete_works, &amp;quot;&amp;lt;&amp;lt;[^&amp;gt;]*&amp;gt;&amp;gt;&amp;quot;)[[1]]
+complete_works &amp;lt;- complete_works[!(str_detect(complete_works, &amp;quot;Dramatis Personae|DRAMATIS PERSONAE&amp;quot;))]
+complete_works &amp;lt;- str_replace_all(complete_works, &amp;quot;\\[|\\]&amp;quot;, &amp;quot;.&amp;quot;)
+
+dfContent &amp;lt;- as_tibble(complete_works) %&amp;gt;% slice(3:n())
+rm(complete_works)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, we parse the content into sentences. The &lt;code&gt;tidytext&lt;/code&gt; package by &lt;a href=&#34;http://varianceexplained.org/&#34;&gt;David Robinson&lt;/a&gt; and &lt;a href=&#34;http://juliasilge.com/&#34;&gt;Julia Silge&lt;/a&gt;, is most useful in doing this within the tidyverse framework.&lt;/p&gt;
+&lt;p&gt;Here’s what the function does below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Replaces all ‘logical’ sentence break delimiters by a period for easier tokenization by sentence&lt;/li&gt;
+&lt;li&gt;Removes extra periods and spaces&lt;/li&gt;
+&lt;li&gt;Tokenizes into sentences&lt;/li&gt;
+&lt;li&gt;Removes all sentences containing ACT or SCENE&lt;/li&gt;
+&lt;li&gt;Removes all digits from sentences&lt;/li&gt;
+&lt;li&gt;Finally adds line numbers to each row (more on the importance of this later…)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A sample of 10 sentences is shown below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getSentences &amp;lt;- function(dfContent) {
+    df &amp;lt;- dfContent %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;;|:|!|\\?| \\-|\\- | \\- &amp;quot;, &amp;quot;\\. &amp;quot;)) %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;[\\.]+&amp;quot;, &amp;quot;\\.&amp;quot;)) %&amp;gt;% 
+        mutate(value = str_replace_all(value, &amp;quot;[[:space:]]+&amp;quot;, &amp;quot; &amp;quot;)) %&amp;gt;% 
+        unnest_tokens(sentence, value, token = &amp;quot;sentences&amp;quot;, to_lower = FALSE) %&amp;gt;% 
+        dplyr::filter(!str_detect(sentence, &amp;quot;Act|ACT|Scene|SCENE&amp;quot;)) %&amp;gt;% 
+        mutate(sentence = str_replace_all(sentence, &amp;quot;[0-9]&amp;quot;,&amp;quot;&amp;quot;)) %&amp;gt;% 
+        mutate(lineNumber = row_number()) %&amp;gt;% 
+        select(lineNumber, everything())
+}
+
+dfSentences &amp;lt;- getSentences(dfContent)
+knitr::kable(dfSentences[sample(nrow(dfSentences), 10),])&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;right&#34;&gt;lineNumber&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;sentence&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;55991&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;That with the King here resteth in his tent. .&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;16097&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;You are a merry man, sir. fare you well.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;9717&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;He did ask favour.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;100749&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;To the health of our general. .&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;40908&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;You are, I think, assur’d I love you not.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;117828&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Laurence. and another Watchman.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;19243&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ere now denied the asker, and now again,.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;145024&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;I swear to do this, though a present death.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;70942&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Stocking his messenger.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;right&#34;&gt;122957&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;For bringing wood in slowly.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;creating-ngrams&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Creating ngrams&lt;/h2&gt;
+&lt;p&gt;“ngrams are a contiguous sequence of n items from a given sequence of text…” - &lt;a href=&#34;https://en.wikipedia.org/wiki/N-gram&#34;&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;In this case, ngrams would be a contiguous sequence of n words. In the simplest form, an ngram of size 1 is a single word.
+An ngram of size 2 or more is a set of words that appear one after the other in a sequence.&lt;/p&gt;
+&lt;p&gt;For instance, given a sentence - &lt;strong&gt;how are you doing?&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There are 4 Unigrams: how, are, you, doing&lt;/li&gt;
+&lt;li&gt;There are 3 Bigrams: how are, are you, you doing&lt;/li&gt;
+&lt;li&gt;There are 2 Trigrams: how are you, are you doing&lt;/li&gt;
+&lt;li&gt;There is 1 Quadrigram: how are you doing&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So, using the data frame of clean sentences that we parsed, the next step is to create ngrams.
+Once again this is made simple using the &lt;strong&gt;unnest_tokens&lt;/strong&gt; function from the &lt;code&gt;tidytext&lt;/code&gt; package. And this is where grouping by line numbers is important because we want ngrams to be created by sequence of words, only within the same line. We do not want ngrams connected by a sentence break.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getNgrams &amp;lt;- function(dfSentences, n) {
+    dfNgrams &amp;lt;- dfSentences %&amp;gt;% 
+        group_by(lineNumber) %&amp;gt;% 
+        unnest_tokens(word, sentence, token = &amp;quot;ngrams&amp;quot;, n = n) %&amp;gt;% 
+        ungroup() %&amp;gt;% 
+        count(word, sort = TRUE) %&amp;gt;% 
+        rename(freq = n)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;all-words&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;All Words&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df1grams &amp;lt;- getNgrams(dfSentences, 1)
+dim(df1grams)
+[1] 26453     2
+wordsOfFreq1 &amp;lt;- df1grams %&amp;gt;% group_by(freq) %&amp;gt;% summarise(n = sum(freq)) %&amp;gt;% dplyr::filter(freq == 1) %&amp;gt;% .$n&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are 26453 words in the corpus, that shows how vast Shakespeare’s vocabulary was. Let’s see a wordcloud of top 100 words. No surprise, the most commonly used words are: &lt;strong&gt;&lt;em&gt;the, and, i, to, of&lt;/em&gt;&lt;/strong&gt;. Excluding these commonly used ‘stop words’, in the second wordcloud, we can see the words Shakespeare used most frequently. We can see a lot of references to royalty and nobility, present specially in Shakespearean tragedies. Some names are mentioned quite frequently - Richard, John, Caesar, Brutus and Henry. Some English counties or &lt;a href=&#34;https://en.wikipedia.org/wiki/Shire&#34;&gt;shires&lt;/a&gt; are mentioned quite often - Warwick, York and Gloucester.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;unigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Unigrams&lt;/h3&gt;
+&lt;p&gt;Let’s see a plot of the distribution of words in corpus by usage.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here’s a strategy for building ngram tables:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is a long tail of 10522 words in the corpus that appear exactly once. Replace all words appearing just once, by &lt;strong&gt;UNK&lt;/strong&gt; as a placeholder for a word not known from the corpus. There are a couple of motivations behind this:
+&lt;ul&gt;
+&lt;li&gt;It reduces the size of ngram tables.&lt;/li&gt;
+&lt;li&gt;More importantly, when an unknown word is encountered, the model knows how to tackle it before predicting the next set of words.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Re-summarise and rearrange the table by frequency.&lt;/li&gt;
+&lt;li&gt;Assign an index to each word.&lt;/li&gt;
+&lt;li&gt;Convert to data.table format. Some of the biggest benefits of this approach are:
+&lt;ul&gt;
+&lt;li&gt;Rows could be assigned and referenced by a key. This makes it extremely simple to look up a row value.&lt;/li&gt;
+&lt;li&gt;Lookup by a key is very fast compared to matching character strings.&lt;/li&gt;
+&lt;li&gt;When we create tables for bigrams and higher order ngrams, we can replace the words by their corresponding integer indexes. It saves a lot of memory as compared to creating tibbles with character strings.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTopUnigrams &amp;lt;- df1grams %&amp;gt;% dplyr::filter(freq &amp;gt;= 2) %&amp;gt;% .$word
+df1grams &amp;lt;- df1grams %&amp;gt;% 
+    mutate(word = ifelse(word %in% vTopUnigrams, word, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    group_by(word) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq)) %&amp;gt;% 
+    mutate(index1 = row_number()) %&amp;gt;% 
+    select(index1, freq, word)
+
+dt1grams &amp;lt;- as.data.table(df1grams)
+# set key to word
+dt1grams &amp;lt;- dt1grams[,.(index1,freq),key=word]
+# create another table with key=index1
+dt1gramsByIndex &amp;lt;- dt1grams[,.(word,freq),key=index1]
+# print dimensions
+dim(dt1grams)
+[1] 15932     3&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here are the top 10 unigrams. &lt;strong&gt;UNK&lt;/strong&gt; replaces the long tail of words appearing once.
+Finally, we are left with 15932 unigrams in our table.&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:58:51 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+index1
+&lt;/th&gt;
+&lt;th&gt;
+word
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+26821
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+and
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25670
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+20473
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+19377
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16954
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+14351
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+13568
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12449
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+in
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10881
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+that
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10869
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Bigrams&lt;/h3&gt;
+&lt;p&gt;A data table of bigrams is created where the index of the first word is the lookup key. The second word cannot be &lt;strong&gt;UNK&lt;/strong&gt; since it is a word used for making predictions from the bigram table.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df2grams &amp;lt;- getNgrams(dfSentences, 2) %&amp;gt;% 
+    separate(word, c(&amp;quot;word1&amp;quot;, &amp;quot;word2&amp;quot;), sep = &amp;quot; &amp;quot;) %&amp;gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    dplyr::filter(word2 %in% vTopUnigrams) %&amp;gt;% 
+    group_by(word1, word2) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq))
+
+dt2grams &amp;lt;- as.data.table(df2grams)
+dt2grams$index1 &amp;lt;- dt1grams[dt2grams$word1]$index1
+dt2grams$index2 &amp;lt;- dt1grams[dt2grams$word2]$index1
+dt2grams &amp;lt;- dt2grams[,.(index1,index2,freq)]
+setkey(dt2grams, index1)
+
+# print dimensions
+dim(dt2grams)
+[1] 254884      3&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here are the top 10 bigrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:03 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30512
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1846
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+lord
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1640
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+in
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1611
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+have
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1603
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+will
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1553
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1417
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1380
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+it
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+is
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1066
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+be
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+973
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;trigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Trigrams&lt;/h3&gt;
+&lt;p&gt;Similarly, a data table of trigrams is created where indexes of the first and second words form the lookup key.
+The third word cannot be &lt;strong&gt;UNK&lt;/strong&gt; since it is a word used for making predictions from the trigram table.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df3grams &amp;lt;- getNgrams(dfSentences, 3) %&amp;gt;% 
+    separate(word, c(&amp;quot;word1&amp;quot;, &amp;quot;word2&amp;quot;, &amp;quot;word3&amp;quot;), sep = &amp;quot; &amp;quot;) %&amp;gt;% 
+    mutate(word1 = ifelse(word1 %in% vTopUnigrams, word1, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    mutate(word2 = ifelse(word2 %in% vTopUnigrams, word2, &amp;quot;UNK&amp;quot;)) %&amp;gt;% 
+    dplyr::filter(word3 %in% vTopUnigrams) %&amp;gt;% 
+    group_by(word1, word2, word3) %&amp;gt;% 
+    summarise(freq = sum(freq)) %&amp;gt;% 
+    arrange(desc(freq))
+
+dt3grams &amp;lt;- as.data.table(df3grams)
+dt3grams$index1 &amp;lt;- dt1grams[dt3grams$word1]$index1
+dt3grams$index2 &amp;lt;- dt1grams[dt3grams$word2]$index1
+dt3grams$index3 &amp;lt;- dt1grams[dt3grams$word3]$index1
+dt3grams &amp;lt;- dt3grams[,.(index1,index2,index3,freq)]
+setkey(dt3grams, index1,index2)
+
+# print dimensions
+dim(dt3grams)
+[1] 476098      4&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the top 10 trigrams, we can get an idea how &lt;strong&gt;UNK&lt;/strong&gt; will be useful in this context. &lt;strong&gt;&lt;em&gt;the UNK of&lt;/em&gt;&lt;/strong&gt; is one of the most frequently used word sequences in the trigram table, which implies that if we encounter an unknown word after ‘the’, then ‘of’ is the most likely word to be predicted from the trigram table.&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:27 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+38526
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+pray
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+238
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+will
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+213
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+159
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+157
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+UNK
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+155
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+duke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+141
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+139
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+138
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+would
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+127
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;quadrigrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Quadrigrams&lt;/h3&gt;
+&lt;p&gt;Here are the top 10 quadrigrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 14:59:54 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+word4
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+47569
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+with
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+all
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+heart
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+what
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+38
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+give
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+your
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+hand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+beseech
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+give
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+thy
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+hand
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+30
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+the
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+duke
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+of
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+york
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+do
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+28
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+would
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+have
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+27
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+ay
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+good
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+lord
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+25
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;pentagrams&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Pentagrams&lt;/h3&gt;
+&lt;p&gt;Here are the top 10 pentagrams:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 15:00:17 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+word1
+&lt;/th&gt;
+&lt;th&gt;
+word2
+&lt;/th&gt;
+&lt;th&gt;
+word3
+&lt;/th&gt;
+&lt;th&gt;
+word4
+&lt;/th&gt;
+&lt;th&gt;
+word5
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+60534
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+glad
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+see
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+thank
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+for
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+your
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+had
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+rather
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+be
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+glad
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+see
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+as
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+am
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+a
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+gentleman
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+for
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+mine
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+own
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+part
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+pray
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+you
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+tell
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+me
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+know
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+not
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+what
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+to
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+say
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+and
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+so
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+i
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+take
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+my
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;These ngram tables comprise all the information needed for the prediction model.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;memory-usage-comparison&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Memory Usage Comparison&lt;/h3&gt;
+&lt;p&gt;As mentioned above, storing words as integer indexes in a data table is far more efficient as compared to a data frame with character strings.
+For instance, here’s how a pentagram data table looks like that contains just the integer indexes of the words:&lt;/p&gt;
+&lt;center&gt;
+&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
+&lt;!-- Thu Jun 11 15:00:17 2020 --&gt;
+&lt;table border=&#34;1&#34;&gt;
+&lt;tr&gt;
+&lt;th&gt;
+&lt;/th&gt;
+&lt;th&gt;
+index1
+&lt;/th&gt;
+&lt;th&gt;
+index2
+&lt;/th&gt;
+&lt;th&gt;
+index3
+&lt;/th&gt;
+&lt;th&gt;
+index4
+&lt;/th&gt;
+&lt;th&gt;
+index5
+&lt;/th&gt;
+&lt;th&gt;
+freq
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9049
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9049
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+3
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9384
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+12918
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+687
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+4758
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+5
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+31
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+6421
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+29
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+6
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+183
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+2
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+7
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+46
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+15
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+8
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+57
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+16
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+9
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1267
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11402
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;
+10
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+11
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1403
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+10842
+&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;
+1
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/center&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;In a comparison of memory needed for all ngram tables, we see a difference of a factor of 5 between the two approaches.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(object.size(df1grams)+object.size(df2grams)+object.size(df3grams)+
+          object.size(df4grams)+object.size(df5grams), units = &amp;quot;auto&amp;quot;)
+158 Mb
+
+print(object.size(dt1grams)+object.size(dt1gramsByIndex)+object.size(dt2grams)+object.size(dt3grams)+
+          object.size(dt4grams)+object.size(dt5grams), units = &amp;quot;auto&amp;quot;)
+30.4 Mb&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;ngram-with-backoff-prediction-algorithm&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Ngram With Backoff Prediction Algorithm&lt;/h2&gt;
+&lt;p&gt;So, given the ngram data tables, here’s how the prediction algorithm works:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Sanitize the input text as done above&lt;/li&gt;
+&lt;li&gt;Parse the text into sentences&lt;/li&gt;
+&lt;li&gt;Determine the words in the last sentence of the input text. Use upto the last 4 words from the input text.&lt;/li&gt;
+&lt;li&gt;The word predictions are done starting from the ngram table containing the longest sequence of words, provided the input text contains atleast n-1 words. So, if the last 4 words from the input text match the first 4 words in the pentagram table, then the fifth word is chosen, that has the highest frequency of occurance after those 4 words. If more than one word prediction is desired, then the fifth words with the next highest frequency of occurance are also chosen.&lt;/li&gt;
+&lt;li&gt;If no matches or fewer than desired number of matches are found in the pentagram table, then the algorithm backoffs to the quadrigram table using the last 3 words typed, then to the trigram table using the last 2 words typed, then to the bigram table using the last word typed and finally to the unigram table, until the desired number of word predictions are returned.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s see how this works concretely with some test cases:&lt;/p&gt;
+&lt;div id=&#34;test-cases&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Test Cases&lt;/h3&gt;
+&lt;p&gt;The first test is to confirm whether the word predictions from the unigram table, match with what we expect.
+The top 10 unigram table contains 3 words beginning with the letter ‘t’ - &lt;code&gt;the&lt;/code&gt;(1), &lt;code&gt;to&lt;/code&gt;(4), &lt;code&gt;that&lt;/code&gt;(10). And sure enough, this is what we get from our prediction function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;t&amp;quot;)
+[1] &amp;quot;Predictions from 1grams: the,to,that,this,thou&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: the,to,that&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;From the bigram table, we could see that &lt;code&gt;i am&lt;/code&gt;, &lt;code&gt;i have&lt;/code&gt; and &lt;code&gt;i will&lt;/code&gt; are among the top 10. So, the next test is to confirm these.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i &amp;quot;)
+[1] &amp;quot;Predictions from 2grams: am,have,will,do,would&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: am,have,will&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Narrowing down to words that begin with letter ‘h’ gives us:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i h&amp;quot;)
+[1] &amp;quot;Predictions from 2grams: have,had,hope,hear,heard&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: have,had,hope&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s predict some trigrams. &lt;code&gt;i am not&lt;/code&gt; and &lt;code&gt;i am a&lt;/code&gt; are among the top 10 trigrams, so that’s what we expect to see.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;i am &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: not,a,sure,glad,the&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: not,a,sure&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now let’s examine the &lt;strong&gt;UNK&lt;/strong&gt; feature. We know that &lt;code&gt;the UNK of&lt;/code&gt; is number 5 most common sequence in the trigram table so we should expect to see ‘of’ as the first prediction if the input text has an unknown word after ‘the’. So let’s input some gibberish after ‘the’ to make sure this word doesn’t exist in our vocabulary:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;the sjdhsbhbfh &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: of,and,in,that,the&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: of,and,in&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now that the &lt;em&gt;known&lt;/em&gt; test cases are working well, let’s see the backoff algorithm in action:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;to be or not &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: to&amp;quot;
+[1] &amp;quot;Predictions from 4grams: to&amp;quot;
+[1] &amp;quot;Predictions from 3grams: to,at,i,allow&amp;#39;d,arriv&amp;#39;d&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: to,at,i&amp;quot;
+predictNextWords(&amp;quot;to be or not to &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: be&amp;quot;
+[1] &amp;quot;Predictions from 4grams: be,crack&amp;quot;
+[1] &amp;quot;Predictions from 3grams: be,crack,the,have,me,do&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: be,crack,the&amp;quot;
+predictNextWords(&amp;quot;be or not to &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: be&amp;quot;
+[1] &amp;quot;Predictions from 4grams: be,crack&amp;quot;
+[1] &amp;quot;Predictions from 3grams: be,crack,the,have,me,do&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: be,crack,the&amp;quot;
+predictNextWords(&amp;quot;to be or not to be &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: that&amp;quot;
+[1] &amp;quot;Predictions from 4grams: that,found,gone,endur&amp;#39;d,endured,seen&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: that,found,gone&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: is&amp;quot;
+[1] &amp;quot;Predictions from 4grams: is,which&amp;quot;
+[1] &amp;quot;Predictions from 3grams: is,which,you,he,i,thou,can&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: is,which,you&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that is &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: the&amp;quot;
+[1] &amp;quot;Predictions from 4grams: the&amp;quot;
+[1] &amp;quot;Predictions from 3grams: the,not,my,to,a&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: the,not,my&amp;quot;
+predictNextWords(&amp;quot;to be or not to be, that is the &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: question&amp;quot;
+[1] &amp;quot;Predictions from 4grams: question,very,way,humour,best,brief&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: question,very,way&amp;quot;
+predictNextWords(&amp;quot;be that is the &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: question&amp;quot;
+[1] &amp;quot;Predictions from 4grams: question,very,way,humour,best,brief&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: question,very,way&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using one of the most well known speeches from Hamlet, we can see that the algorithm gets the first word prediction from the pentagram table. But since we are looking for the next 3 words, the algorithm backoffs to predictions from quadrigram and trigram tables, until it has atleast 3 words. In this case, the pentagram table gives us the best match that we are looking for. We can also observe that once we have atleast 4 words in our input text, the words prior to those do not matter for the next word predictions.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Let’s see another example:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;What a lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: &amp;quot;
+[1] &amp;quot;Predictions from 4grams: &amp;quot;
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;a lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 4grams: &amp;quot;
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;lovely day &amp;quot;)
+[1] &amp;quot;Predictions from 3grams: &amp;quot;
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;
+predictNextWords(&amp;quot;day &amp;quot;)
+[1] &amp;quot;Predictions from 2grams: and,to,is,of,i&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: and,to,is&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see that even though there are enough words to start matching from the higher ngram tables, the matches are gotten only from the bigram table using ‘day’ as the first word.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Another one:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;predictNextWords(&amp;quot;Beware the ides of &amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,the,my,his,a,this&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,the,my&amp;quot;
+predictNextWords(&amp;quot;Beware the ides of mar&amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,marriage,marcius,marcus,mars&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,marriage,marcius&amp;quot;
+predictNextWords(&amp;quot;Beware the ides of march&amp;quot;)
+[1] &amp;quot;Predictions from 5grams: march&amp;quot;
+[1] &amp;quot;Predictions from 4grams: march&amp;quot;
+[1] &amp;quot;Predictions from 3grams: march&amp;quot;
+[1] &amp;quot;Predictions from 2grams: march,marching&amp;quot;
+[1] &amp;quot;Predictions from 1grams: march,marching,march&amp;#39;d,marches,marchioness&amp;quot;
+[1] &amp;quot;Top 3 Final Predictions: march,marching,march&amp;#39;d&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;shiny-app&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Shiny App&lt;/h2&gt;
+&lt;p&gt;Finally, here’s a &lt;a href=&#34;https://nitingupta2.shinyapps.io/ptmapp&#34;&gt;Shiny app&lt;/a&gt; that demos this predictive typing model.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;em&gt;The R markdown file for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/building-a-predictive-typing-model/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

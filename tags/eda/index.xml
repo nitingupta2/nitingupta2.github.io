@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>eda | Nitin Gupta</title>
+    <link>/tags/eda/</link>
+      <atom:link href="/tags/eda/index.xml" rel="self" type="application/rss+xml" />
+    <description>eda</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sun, 25 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>eda</title>
+      <link>/tags/eda/</link>
+    </image>
+    
+    <item>
+      <title>Ames Housing - Part 1 - Exploratory Data Analysis</title>
+      <link>/casestudies/ames-housing-part1-eda/</link>
+      <pubDate>Sun, 25 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>/casestudies/ames-housing-part1-eda/</guid>
+      <description>
+
+
+&lt;p&gt;In this case study, we will use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to explore regression techniques and predict the sale price of houses.&lt;/p&gt;
+&lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Summaries&lt;/h2&gt;
+&lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it.
+Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the training set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] 1460   81&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the testing set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] 1459   81&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The combined dataset has 2919 property records.&lt;/li&gt;
+&lt;li&gt;Very few properties have a pool, fence or an alley access to the property.&lt;/li&gt;
+&lt;li&gt;Very few properties have a miscellaneous feature that has not been covered by other features.&lt;/li&gt;
+&lt;li&gt;More than a dozen features have atleast 1 missing value. Since we have a tiny dataset, we will try to impute the missing values.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-cleaning-transformation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Cleaning &amp;amp; Transformation&lt;/h2&gt;
+&lt;p&gt;We will visualize features of the complete dataset and create a data cleaning pipeline.&lt;/p&gt;
+&lt;div id=&#34;fixing-data-errors&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Fixing Data Errors&lt;/h3&gt;
+&lt;p&gt;First, a few data integrity checks need to be done to ensure the quality of the data:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;YearRemodAdd&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;YrSold&lt;/code&gt; should not be earlier than &lt;code&gt;YearRemodAdd&lt;/code&gt;: 3 records to be fixed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+     Id YearBuilt YearRemodAdd YrSold
+  &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
+1  1877      2002         2001   2009&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+     Id YearBuilt YearRemodAdd YrSold
+  &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
+1   524      2007         2008   2007
+2  2296      2007         2008   2007
+3  2550      2008         2009   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 18 records to be fixed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be later than &lt;code&gt;YrSold&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 18 x 4
+      Id YearBuilt GarageYrBlt YrSold
+   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
+ 1    30      1927        1920   2008
+ 2    94      1910        1900   2007
+ 3   325      1967        1961   2010
+ 4   601      2005        2003   2006
+ 5   737      1950        1949   2006
+ 6  1104      1959        1954   2006
+ 7  1377      1930        1925   2008
+ 8  1415      1923        1922   2008
+ 9  1419      1963        1962   2008
+10  1522      1959        1956   2010
+11  1577      2010        2009   2010
+12  1806      1935        1920   2009
+13  1841      1978        1960   2009
+14  1896      1941        1940   2009
+15  1898      1935        1926   2009
+16  2123      1945        1925   2008
+17  2264      2006        2005   2007
+18  2510      2006        2005   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+     Id YearBuilt GarageYrBlt YrSold
+  &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
+1  2593      2006        2207   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;imputing-missing-values-new-features&#34; class=&#34;section level3 tabset tabset-fade tabset-pills&#34;&gt;
+&lt;h3&gt;Imputing Missing Values &amp;amp; New Features&lt;/h3&gt;
+&lt;!-- #### &lt;span style=&#34;color:red&#34;&gt;Basement Features&lt;/span&gt; --&gt;
+&lt;div id=&#34;basement-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Basement Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;There is one property (&lt;code&gt;Id&lt;/code&gt; = 2121) where all the basement features are NA. &lt;code&gt;TotalBsmtSF&lt;/code&gt; is replaced by 0.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Now there are 79 properties which have no basement (&lt;code&gt;TotalBsmtSF&lt;/code&gt; = 0). All other basement features having NA values are changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common value in that &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 13
+     Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
+  &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
+1  2121 BrkSide      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                 NA &amp;lt;NA&amp;gt;                 NA        NA          NA           NA           NA&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 79 x 13
+      Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
+ 1    18 Sawyer       &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 2    40 Edwards      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 3    91 NAmes        &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 4   103 SawyerW      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 5   157 NAmes        &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 6   183 Edwards      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 7   260 OldTown      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 8   343 NAmes        &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+ 9   363 Edwards      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+10   372 ClearCr      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
+# ... with 69 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 9 x 13
+     Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
+  &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
+1   333 NridgHt      Gd       TA       No           GLQ                1124 &amp;lt;NA&amp;gt;                479      1603        3206            1            0
+2   949 CollgCr      Gd       TA       &amp;lt;NA&amp;gt;         Unf                   0 Unf                   0       936         936            0            0
+3  1488 Somerst      Gd       TA       &amp;lt;NA&amp;gt;         Unf                   0 Unf                   0      1595        1595            0            0
+4  2041 Veenker      Gd       &amp;lt;NA&amp;gt;     Mn           GLQ                1044 Rec                 382         0        1426            1            0
+5  2186 Edwards      TA       &amp;lt;NA&amp;gt;     No           BLQ                1033 Unf                   0        94        1127            0            1
+6  2218 IDOTRR       &amp;lt;NA&amp;gt;     Fa       No           Unf                   0 Unf                   0       173         173            0            0
+7  2219 IDOTRR       &amp;lt;NA&amp;gt;     TA       No           Unf                   0 Unf                   0       356         356            0            0
+8  2349 Somerst      Gd       TA       &amp;lt;NA&amp;gt;         Unf                   0 Unf                   0       725         725            0            0
+9  2525 CollgCr      TA       &amp;lt;NA&amp;gt;     Av           ALQ                 755 Unf                   0       240         995            0            0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Histograms of numerical basement features and their correlations with &lt;code&gt;SalePrice&lt;/code&gt; are plotted below.&lt;/p&gt;
+&lt;p&gt;It could be verified that: &lt;code&gt;TotalBsmtSF&lt;/code&gt; = &lt;code&gt;BsmtFinSF1&lt;/code&gt; + &lt;code&gt;BsmtFinSF2&lt;/code&gt; + &lt;code&gt;BsmtUnfSF&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Additionally, new features are generated where:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;BsmtBath&lt;/code&gt; = &lt;code&gt;BsmtFullBath&lt;/code&gt; + 0.5 * &lt;code&gt;BsmtHalfBath&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HasBsmt&lt;/code&gt; = &lt;code&gt;TotalBsmtSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Most properties have a basement.&lt;/li&gt;
+&lt;li&gt;Column plots show that &lt;code&gt;BsmtFinType2&lt;/code&gt; and &lt;code&gt;BsmtCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bathroom-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Bathroom Features&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;A new feature is generated to determine the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;fireplace-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Fireplace Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;There are 1420 properties that have no fireplaces. &lt;code&gt;FireplaceQu&lt;/code&gt; is changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1,420 x 4
+      Id Neighborhood Fireplaces FireplaceQu
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      
+ 1     1 CollgCr               0 &amp;lt;NA&amp;gt;       
+ 2     6 Mitchel               0 &amp;lt;NA&amp;gt;       
+ 3    11 Sawyer                0 &amp;lt;NA&amp;gt;       
+ 4    13 Sawyer                0 &amp;lt;NA&amp;gt;       
+ 5    16 BrkSide               0 &amp;lt;NA&amp;gt;       
+ 6    18 Sawyer                0 &amp;lt;NA&amp;gt;       
+ 7    19 SawyerW               0 &amp;lt;NA&amp;gt;       
+ 8    20 NAmes                 0 &amp;lt;NA&amp;gt;       
+ 9    27 NAmes                 0 &amp;lt;NA&amp;gt;       
+10    30 BrkSide               0 &amp;lt;NA&amp;gt;       
+# ... with 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;A new feature is generated where: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;A significant number of properties have fireplaces.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;garage-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Garage Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; where NA is set to &lt;code&gt;YearBuilt&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There are 157 properties where the property has no garage. In these records, &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;GarageFinish&lt;/code&gt;, &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; are recorded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common or median value in the &lt;code&gt;Neighborhood&lt;/code&gt; by &lt;code&gt;GarageType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 157 x 9
+      Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
+ 1    40 Edwards      &amp;lt;NA&amp;gt;              1955 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 2    49 OldTown      &amp;lt;NA&amp;gt;              1920 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 3    79 Sawyer       &amp;lt;NA&amp;gt;              1968 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 4    89 IDOTRR       &amp;lt;NA&amp;gt;              1915 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 5    90 CollgCr      &amp;lt;NA&amp;gt;              1994 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 6   100 NAmes        &amp;lt;NA&amp;gt;              1959 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 7   109 IDOTRR       &amp;lt;NA&amp;gt;              1919 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 8   126 IDOTRR       &amp;lt;NA&amp;gt;              1935 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+ 9   128 OldTown      &amp;lt;NA&amp;gt;              1930 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+10   141 NAmes        &amp;lt;NA&amp;gt;              1971 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+# ... with 147 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2 x 9
+     Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
+  &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
+1  2127 OldTown      Detchd            1910 &amp;lt;NA&amp;gt;                  1        360 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
+2  2577 IDOTRR       Detchd            1923 &amp;lt;NA&amp;gt;                 NA         NA &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      &lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; and &lt;code&gt;GarageCars&lt;/code&gt; have almost similar correlation with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;A new feature is generated where: &lt;code&gt;HasGarage&lt;/code&gt; = &lt;code&gt;GarageArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;Most properties have a garage.&lt;/li&gt;
+&lt;li&gt;Column plots show that &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;masonry-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Masonry Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;There is one property (&lt;code&gt;Id&lt;/code&gt; = 2611) where &lt;code&gt;MasVnrArea&lt;/code&gt; = 198 but &lt;code&gt;MasVnrType&lt;/code&gt; = NA. Impute &lt;code&gt;MasVnrType&lt;/code&gt; to be most common value in the neighborhood where &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrType&lt;/code&gt; to be the most common values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;YearRemodAdd&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrArea&lt;/code&gt; to be the median values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+     Id Neighborhood MasVnrType MasVnrArea
+  &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
+1  2611 Mitchel      &amp;lt;NA&amp;gt;              198&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+      Id Neighborhood MasVnrType MasVnrArea
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
+ 1   235 Gilbert      &amp;lt;NA&amp;gt;               NA
+ 2   530 Crawfor      &amp;lt;NA&amp;gt;               NA
+ 3   651 Somerst      &amp;lt;NA&amp;gt;               NA
+ 4   937 SawyerW      &amp;lt;NA&amp;gt;               NA
+ 5   974 Somerst      &amp;lt;NA&amp;gt;               NA
+ 6   978 Somerst      &amp;lt;NA&amp;gt;               NA
+ 7  1244 NridgHt      &amp;lt;NA&amp;gt;               NA
+ 8  1279 CollgCr      &amp;lt;NA&amp;gt;               NA
+ 9  1692 Gilbert      &amp;lt;NA&amp;gt;               NA
+10  1707 Somerst      &amp;lt;NA&amp;gt;               NA
+# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+      Id Neighborhood MasVnrType MasVnrArea
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
+ 1   235 Gilbert      None               NA
+ 2   530 Crawfor      None               NA
+ 3   651 Somerst      None               NA
+ 4   937 SawyerW      None               NA
+ 5   974 Somerst      Stone              NA
+ 6   978 Somerst      None               NA
+ 7  1244 NridgHt      Stone              NA
+ 8  1279 CollgCr      BrkFace            NA
+ 9  1692 Gilbert      None               NA
+10  1707 Somerst      Stone              NA
+# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;A new feature is generated where: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;A significant number of properties have masonry.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;pool-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Pool Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Change values in &lt;code&gt;PoolQC&lt;/code&gt; to &lt;strong&gt;None&lt;/strong&gt; if the property has no pool&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in remaining &lt;code&gt;PoolQC&lt;/code&gt; to the most common value in the Neighborhood in the properties that have a pool.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2,906 x 4
+      Id Neighborhood PoolArea PoolQC
+   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
+ 1     1 CollgCr             0 &amp;lt;NA&amp;gt;  
+ 2     2 Veenker             0 &amp;lt;NA&amp;gt;  
+ 3     3 CollgCr             0 &amp;lt;NA&amp;gt;  
+ 4     4 Crawfor             0 &amp;lt;NA&amp;gt;  
+ 5     5 NoRidge             0 &amp;lt;NA&amp;gt;  
+ 6     6 Mitchel             0 &amp;lt;NA&amp;gt;  
+ 7     7 Somerst             0 &amp;lt;NA&amp;gt;  
+ 8     8 NWAmes              0 &amp;lt;NA&amp;gt;  
+ 9     9 OldTown             0 &amp;lt;NA&amp;gt;  
+10    10 BrkSide             0 &amp;lt;NA&amp;gt;  
+# ... with 2,896 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+     Id Neighborhood PoolArea PoolQC
+  &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
+1  2421 NAmes             368 &amp;lt;NA&amp;gt;  
+2  2504 SawyerW           444 &amp;lt;NA&amp;gt;  
+3  2600 Mitchel           561 &amp;lt;NA&amp;gt;  &lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;A new feature is generated where: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;Most properties do not have a pool.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;porch-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Porch Features&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;New features are generated for:
+&lt;ul&gt;
+&lt;li&gt;Total porch area: &lt;code&gt;PorchSF&lt;/code&gt; = &lt;code&gt;OpenPorchSF&lt;/code&gt; + &lt;code&gt;EnclosedPorch&lt;/code&gt; + &lt;code&gt;3SsnPorch&lt;/code&gt; + &lt;code&gt;ScreenPorch&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Whether property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;built-area-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Built Area Features&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;A new feature is added to determine the total square footage of built area: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;construction-year-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Construction Year Features&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;New features are generated for:
+&lt;ul&gt;
+&lt;li&gt;Vintage of year built: &lt;strong&gt;1945 or earlier, 1946-1999, 2000 or later&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Age of property from when it was built to the time it was sold: &lt;code&gt;PropertyAge&lt;/code&gt; = &lt;code&gt;YrSold&lt;/code&gt; - &lt;code&gt;YearRemodAdd&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Indicate if the property is new or newly renovated: &lt;code&gt;IsNew&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; == &lt;code&gt;YrSold&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Indicate if the property has been remodelled: &lt;code&gt;IsRemodAdd&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;neighborhood-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Neighborhood Features&lt;/h4&gt;
+&lt;p&gt;Type of Neighborhood: There are 25 neighborhoods in the dataset.
+As it is said, real estate is all about location, location, location. Clearly some neighborhoods command higher prices than others.&lt;/p&gt;
+&lt;p&gt;Neighborhoods could be grouped together in fewer categories depending upon how they are ranked by their median SalePrice:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Type1&lt;/strong&gt;: StoneBr, NridgHt, NoRidge&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Type2&lt;/strong&gt;: Veenker, Timber, Somerst&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Type3&lt;/strong&gt;: Crawfor, CollgCr, ClearCr, Blmngtn, Gilbert, NWAmes, SawyerW&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Type4&lt;/strong&gt;: Mitchel, NPkVill, NAmes, SWISU, Sawyer, Blueste, BrkSide, Edwards, OldTown&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Type5&lt;/strong&gt;: IDOTRR, BrDale, MeadowV&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other Missing Features&lt;/h4&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;MiscFeature&lt;/code&gt;, &lt;code&gt;Alley&lt;/code&gt; and &lt;code&gt;Fence&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are recoded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;Utilities&lt;/code&gt;, &lt;code&gt;Functional&lt;/code&gt;, &lt;code&gt;SaleType&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value of each feature.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;LotFrontage&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the median values in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;MSZoning&lt;/code&gt;, &lt;code&gt;KitchenQual&lt;/code&gt;, &lt;code&gt;Exterior1st&lt;/code&gt;, &lt;code&gt;Exterior2nd&lt;/code&gt;, &lt;code&gt;Electrical&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;label-encoding&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Label Encoding&lt;/h3&gt;
+&lt;p&gt;A quick look at the data description shows many features have categories that follow a specific order. These features are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;LotShape&lt;/code&gt;: Reg, IR1, IR2, IR3&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;LandSlope&lt;/code&gt;: Gtl, Mod, Sev&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ExterQual&lt;/code&gt;: Ex, Gd, TA, Fa, Po&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ExterCond&lt;/code&gt;: Ex, Gd, TA, Fa, Po&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BsmtQual&lt;/code&gt;: Ex, Gd, TA, Fa, Po, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BsmtCond&lt;/code&gt;: Ex, Gd, TA, Fa, Po, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BsmtExposure&lt;/code&gt;: Gd, Av, Mn, No, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BsmtFinType1&lt;/code&gt;: GLQ, ALQ, BLQ, Rec, LwQ, Unf, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BsmtFinType2&lt;/code&gt;: GLQ, ALQ, BLQ, Rec, LwQ, Unf, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;HeatingQC&lt;/code&gt;: Ex, Gd, TA, Fa, Po&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;CentralAir&lt;/code&gt;: Y, N&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;KitchenQual&lt;/code&gt;: Ex, Gd, TA, Fa, Po&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Functional&lt;/code&gt;: Typ, Min1, Min2, Mod, Maj1, Maj2, Sev, Sal&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;FireplaceQu&lt;/code&gt;: Ex, Gd, TA, Fa, Po, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageFinish&lt;/code&gt;: Fin, RFn, Unf, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageQual&lt;/code&gt;: Ex, Gd, TA, Fa, Po, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageCond&lt;/code&gt;: Ex, Gd, TA, Fa, Po, None&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Street&lt;/code&gt;: Grvl, Pave&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PavedDrive&lt;/code&gt;: Y, P, N&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Most of these features have a common order &lt;strong&gt;Ex, Gd, TA, Fa, Po&lt;/strong&gt;, except some are missing &lt;strong&gt;None&lt;/strong&gt; as a category. These features could be ordered with a common set of categories from &lt;strong&gt;Ex, Gd, TA, Fa, Po, None&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Some categorical features are already ordered by an integer number. These features are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;OverallQual&lt;/code&gt;: 10 to 1&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;OverallCond&lt;/code&gt;: 10 to 1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;MoSold&lt;/code&gt; is cyclical and should be recoded as a factor.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;YrSold&lt;/code&gt; has only 5 values from 2006-2010 and should also be recoded as a factor.&lt;/p&gt;
+&lt;p&gt;Categorical features where several categories have less than 10 observations are lumped into a single category named &lt;strong&gt;Other&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;features-to-drop&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Features to Drop&lt;/h3&gt;
+&lt;div id=&#34;highly-correlated-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Highly Correlated Features&lt;/h4&gt;
+&lt;p&gt;Some features could be dropped from further analysis because either they are too correlated or replaced by a similar feature.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; [1] &amp;quot;BsmtFullBath&amp;quot;  &amp;quot;GarageCars&amp;quot;    &amp;quot;GarageYrBlt&amp;quot;   &amp;quot;GrLivArea&amp;quot;     &amp;quot;PoolArea&amp;quot;      &amp;quot;YearBuilt&amp;quot;     &amp;quot;YearRemodAdd&amp;quot;  &amp;quot;Neighborhood&amp;quot;  &amp;quot;OpenPorchSF&amp;quot;  
+[10] &amp;quot;EnclosedPorch&amp;quot; &amp;quot;3SsnPorch&amp;quot;     &amp;quot;ScreenPorch&amp;quot;  &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
+&lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;finalized-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Finalized Data&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the finalized dataset&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] 2919   73&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;Excluding Id, there are 72 features in the finalized dataset.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;There are 26 numerical, 26 ordinal and 20 nominal features.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis&lt;/h2&gt;
+&lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
+&lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical Features&lt;/h3&gt;
+&lt;p&gt;First let’s plot all the features that are measured as area in square feet:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;All area features have outliers.&lt;/li&gt;
+&lt;li&gt;Many features are heavily skewed so they need to be normalized before fitting models.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now let’s see other numerical features:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most of the properties have been built less than 20 years prior to their sale.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s plot the distribution of &lt;code&gt;SalePrice&lt;/code&gt; in log scale:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;We see long tailed distribution on both sides.&lt;/li&gt;
+&lt;li&gt;There are 11 properties below USD 50,000 and 17 above USD 500,000.&lt;/li&gt;
+&lt;li&gt;Linear models are very sensitive to the presence of outliers.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Categorical Features&lt;/h2&gt;
+&lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Ordinal Features&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Categorical imbalances exist in many features where 1 or 2 categories are dominant. This poses a big challenge for using these features as predictors, as categories with fewer counts tend to be underrepresented in the data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Nominal Features.&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Categorical imbalances exist in many features where 1 or 2 categories are dominant.&lt;/li&gt;
+&lt;li&gt;Most of the properties are sold during the summer months, and the least during the winter months.&lt;/li&gt;
+&lt;li&gt;The effect of housing market crisis are visible in the data, as the fewest properties were sold in 2010.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bivariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis&lt;/h2&gt;
+&lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
+&lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;From the scatterplot of &lt;code&gt;TotalSF&lt;/code&gt; v/s &lt;code&gt;SalePrice&lt;/code&gt;, it is very clear there are &lt;em&gt;high leverage&lt;/em&gt; points where the target &lt;code&gt;SalePrice&lt;/code&gt; is unusually low relative to the area in sq. ft. These points have an outsized impact on the slope of the regression line, which otherwise would be higher.&lt;/li&gt;
+&lt;li&gt;The same set of points impact &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The Ids of these records are 524,1299,2550. Out of these 524 and 1299 are in the training set.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
+&lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The top 5 features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. Quite reasonably, a buyer would look at these features to evaluate a property and its &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;It is somewhat counterintuitive that &lt;code&gt;PropertyAge&lt;/code&gt; shows a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. It means properties that were more recently built, sell for higher prices than older properties.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;We can spot clear trends in &lt;code&gt;SalePrice&lt;/code&gt; v/s the order of the categories in almost all of these features.&lt;/li&gt;
+&lt;li&gt;Overall quality and external quality show some of the strongest trends.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
+&lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: Builtin and attached garages are more preferred than detached or other types of garages.&lt;/li&gt;
+&lt;li&gt;From &lt;code&gt;MSSubClass&lt;/code&gt; categories, it is evident that 1946 or newer houses are higher priced than older houses.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;multivariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Multivariate Analysis&lt;/h2&gt;
+&lt;p&gt;We will check variation of some related features with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
+&lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
+&lt;p&gt;We have determined &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have among the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how they vary by &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; respectively:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For the same total area, there are neighborhoods where &lt;code&gt;SalePrice&lt;/code&gt; is higher than others.&lt;/li&gt;
+&lt;li&gt;Properties with no garage are distinctly separated.&lt;/li&gt;
+&lt;li&gt;Properties with built-in or attached garages tend to have higher &lt;code&gt;SalePrice&lt;/code&gt; for the same &lt;code&gt;GarageArea&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Therefore, &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some variance in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
+&lt;p&gt;We want to see if there is any interaction of &lt;code&gt;SalePrice&lt;/code&gt; with a combination of categorical features, that could provide any additional explanatory power for prediction:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
+&lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
+&lt;li&gt;Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</title>
+      <link>/casestudies/diamonds-part1-eda/</link>
+      <pubDate>Tue, 20 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>/casestudies/diamonds-part1-eda/</guid>
+      <description>
+
+
+&lt;p&gt;In this case study, we will explore the &lt;code&gt;diamonds&lt;/code&gt; dataset, then build linear and non-linear regression models to predict the price of diamonds.&lt;/p&gt;
+&lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Description&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Attribute&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;price&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;price in 2008 USD&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;carat&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;weight of a diamond (1 carat = 0.2 gms)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;cut&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;color&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;diamond color from D (best) to J (worst)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;clarity&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;x&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;length in mm&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;y&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;width in mm&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;z&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;depth in mm&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;depth&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;total depth percentage = z/mean(x, y)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;table&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;width of the top of diamond relative to widest point&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;center&gt;
+&lt;p&gt;&lt;img src=&#34;xyz.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;color.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;clarity.png&#34; /&gt;&lt;/p&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Summaries&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.&lt;/p&gt;
+&lt;p&gt;Let’s examine each feature numerically:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dfInput 
+
+ 10  Variables      53940  Observations
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+price 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0    11602        1     3933     4012      544      646      950     2401     5324     9821    13107 
+
+lowest :   326   327   334   335   336, highest: 18803 18804 18806 18818 18823
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+carat 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      273    0.999   0.7979   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
+
+lowest : 0.20 0.21 0.22 0.23 0.24, highest: 4.00 4.01 4.13 4.50 5.01
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+cut 
+       n  missing distinct 
+   53940        0        5 
+
+lowest : Fair      Good      Very Good Premium   Ideal    , highest: Fair      Good      Very Good Premium   Ideal    
+                                                            
+Value           Fair      Good Very Good   Premium     Ideal
+Frequency       1610      4906     12082     13791     21551
+Proportion     0.030     0.091     0.224     0.256     0.400
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+color 
+       n  missing distinct 
+   53940        0        7 
+
+lowest : J I H G F, highest: H G F E D
+                                                    
+Value          J     I     H     G     F     E     D
+Frequency   2808  5422  8304 11292  9542  9797  6775
+Proportion 0.052 0.101 0.154 0.209 0.177 0.182 0.126
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+clarity 
+       n  missing distinct 
+   53940        0        8 
+
+lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+                                                          
+Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
+Frequency    741  9194 13065 12258  8171  5066  3655  1790
+Proportion 0.014 0.170 0.242 0.227 0.151 0.094 0.068 0.033
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+depth 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      184    0.999    61.75    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
+
+lowest : 43.0 44.0 50.8 51.0 52.2, highest: 72.2 72.9 73.6 78.2 79.0
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+table 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      127     0.98    57.46    2.448       54       55       56       57       59       60       61 
+
+lowest : 43.0 44.0 49.0 50.0 50.1, highest: 71.0 73.0 76.0 79.0 95.0
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+x 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      554        1    5.731    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
+
+lowest :  0.00  3.73  3.74  3.76  3.77, highest: 10.01 10.02 10.14 10.23 10.74
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+y 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      552        1    5.735    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
+
+lowest :  0.00  3.68  3.71  3.72  3.73, highest: 10.10 10.16 10.54 31.80 58.90
+                                                                                                                      
+Value        0.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   7.5   8.0   8.5   9.0   9.5  10.0  10.5  32.0  59.0
+Frequency      7     5  1731 12305  7817  5994  6742  9260  4298  3402  1635   652    69    14     6     1     1     1
+Proportion 0.000 0.000 0.032 0.228 0.145 0.111 0.125 0.172 0.080 0.063 0.030 0.012 0.001 0.000 0.000 0.000 0.000 0.000
+
+For the frequency table, variable is rounded to the nearest 0.5
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+z 
+       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      375        1    3.539   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
+
+lowest :  0.00  1.07  1.41  1.53  2.06, highest:  6.43  6.72  6.98  8.06 31.80
+                                                                                                          
+Value        0.0   1.0   1.5   2.0   2.5   3.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   8.0  32.0
+Frequency     20     1     2     3  8807 13809  9474 13682  5525  2352   237    20     5     1     1     1
+Proportion 0.000 0.000 0.000 0.000 0.163 0.256 0.176 0.254 0.102 0.044 0.004 0.000 0.000 0.000 0.000 0.000
+
+For the frequency table, variable is rounded to the nearest 0.5
+----------------------------------------------------------------------------------------------------------------------------------------------------------------&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt;: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;: The average carat weight is ~ 0.8. About 75% of the diamonds are under 1 carat. The top 5 values show presence of many outliers on the high end.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt;: About 40% of the diamonds are of &lt;em&gt;Ideal&lt;/em&gt; cut. Only 3% are &lt;em&gt;Fair&lt;/em&gt; cut. So there is a lot of imbalance in the categories.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;color&lt;/code&gt;: Most of the diamonds are rated &lt;em&gt;E&lt;/em&gt; to &lt;em&gt;H&lt;/em&gt; color. Relatively fewer are rated &lt;em&gt;J&lt;/em&gt; color.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt;: Most of the diamonds are rated &lt;em&gt;SI2&lt;/em&gt; to &lt;em&gt;VS1&lt;/em&gt; clarity. About 1% are rated the worst &lt;em&gt;I1&lt;/em&gt; clarity, where as only ~ 3% are rated &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;depth&lt;/code&gt;: Most of the depth values are between 60 and 64. There are outliers on both low end and high end.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;table&lt;/code&gt;: Most of the table values are between 54 and 65. There are outliers on both ends.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x&lt;/code&gt;: Denotes the dimension along the x-axis. Most values are between 4 and 8. There are some 0 values too which means they were not recorded.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;y&lt;/code&gt;: Denotes the dimension along the y-axis. Most values are between 3.5 and 8. There are 7 records where the values are 0.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;z&lt;/code&gt;: Denotes the dimension along the z-axis. Most values are between 2.5 and 8.5. There are 20 records where the values are 0.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis&lt;/h2&gt;
+&lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
+&lt;div id=&#34;numerical-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Numerical Features&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Excluding outliers, the range of values are more reasonable. We can see that &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are heavily right skewed.&lt;/p&gt;
+&lt;p&gt;Let’s plot the distribution of &lt;code&gt;price&lt;/code&gt; in log scale:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
+one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Categorical Features&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The categorical imbalance in &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; can be clearly noticed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bivariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis&lt;/h2&gt;
+&lt;p&gt;Let’s examine the relationship of &lt;code&gt;price&lt;/code&gt; with other features.&lt;/p&gt;
+&lt;div id=&#34;numerical-numerical&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Numerical-numerical&lt;/h4&gt;
+&lt;p&gt;First and foremost, let’s do a correlation analysis to see how &lt;code&gt;price&lt;/code&gt; is correlated with other numerical features:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can see that &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; dimensions. If a predictive linear regression model is built,
+some of these features would act as confounders. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt; so they are not so interesting for
+predictive modelling.&lt;/p&gt;
+&lt;p&gt;Now let’s see the scatter plots:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;After removing outliers, it could be noted that &lt;code&gt;price&lt;/code&gt; increases exponentially with &lt;code&gt;carat&lt;/code&gt;, as well as &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; dimensions. So &lt;code&gt;price&lt;/code&gt; should be plotted with a log tranformation. Let’s do that:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
+increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions. Log transforming &lt;code&gt;carat&lt;/code&gt; wouldn’t help because &lt;code&gt;carat&lt;/code&gt; does not have a wide range.
+We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
+&lt;p&gt;Let’s examine &lt;code&gt;price&lt;/code&gt; with respect to the categorical features in the dataset:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;In terms of &lt;code&gt;color&lt;/code&gt;, the median &lt;code&gt;price&lt;/code&gt; decreases from &lt;em&gt;J&lt;/em&gt; (worst) to &lt;em&gt;G&lt;/em&gt; (mid-grade), then increases and finally decreases for &lt;em&gt;D&lt;/em&gt; (best).&lt;/li&gt;
+&lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; increases when &lt;code&gt;clarity&lt;/code&gt; improves from &lt;em&gt;I1&lt;/em&gt; to &lt;em&gt;SI2&lt;/em&gt;, and then decreases monotonically to &lt;em&gt;IF&lt;/em&gt; grade.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;multivariate-analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Multivariate Analysis&lt;/h2&gt;
+&lt;p&gt;So far, we have determined &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price.&lt;/code&gt; Different grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some impact on median &lt;code&gt;price&lt;/code&gt;. So let’s make some scatter plots to see these relationships:&lt;/p&gt;
+&lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Numerical-Numerical-Categorical&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
+&lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;There is no pattern in the interaction of &lt;code&gt;price&lt;/code&gt; v/s &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; values when plotted by &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. So, these features do not have any predictive ability to determine &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Categorical-Categorical-Numerical&lt;/h4&gt;
+&lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. Nevertheless this counter-trend persists in the dataset.&lt;/p&gt;
+&lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the mean prices do not show any discernable pattern.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;To summarize, here’s what we found interesting in this dataset, after doing an exploratory data analysis:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; is heavily right-skewed, and when log tranformed, has a bimodal distribution which implies there is demand in 2 different price ranges.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; is imbalanced with about 40% of the diamonds rated &lt;em&gt;Ideal&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;color&lt;/code&gt; is imbalanced with about 5% of the diamonds rated &lt;em&gt;J&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt; is imbalanced at the extremes, with only 1.5% of the diamonds rated &lt;em&gt;I1&lt;/em&gt; and 3.3% of the diamonds rated &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; is strongly correlated with &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; dimensions of the diamonds. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; appear to explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/a-deep-dive-in-analyzing-swimming-data/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin="anonymous">
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/a-deep-dive-in-analyzing-swimming-data/">
+
+  
+  
+  
+  
+    
+  
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="/post/a-deep-dive-in-analyzing-swimming-data/">
+  <meta property="og:title" content="A Deep Dive in Analyzing Swimming Data | Nitin Gupta">
+  <meta property="og:description" content="This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length."><meta property="og:image" content="/post/a-deep-dive-in-analyzing-swimming-data/featured.png">
+  <meta property="twitter:image" content="/post/a-deep-dive-in-analyzing-swimming-data/featured.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2018-09-30T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2018-09-30T00:00:00&#43;00:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/a-deep-dive-in-analyzing-swimming-data/"
+  },
+  "headline": "A Deep Dive in Analyzing Swimming Data",
+  
+  "image": [
+    "/post/a-deep-dive-in-analyzing-swimming-data/featured.png"
+  ],
+  
+  "datePublished": "2018-09-30T00:00:00Z",
+  "dateModified": "2018-09-30T00:00:00Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Nitin Gupta"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nitin Gupta",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/img/icon-512.png"
+    }
+  },
+  "description": "This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>A Deep Dive in Analyzing Swimming Data | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>A Deep Dive in Analyzing Swimming Data</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Sep 30, 2018
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    12 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/datascience/">datascience</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<hr>
+<p>This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, developmental and competitive meets are organized where teams compete on a one-to-one basis. All kids in a team swim in developmental meets. For competitive meets, top 3 or 4 kids are chosen by age groups. Meets are organized in community pools that are either 25 meters or 25 yards in length. The team schedules are packed with practices and events which are intense but thoroughly enjoyable.</p>
+<p>This is one sport where progress can be measured on almost daily basis. While most young kids take it up as a hobby, older kids seem to be very competitive and quite mindful of their swim times. Besides her own results this year, I was curious to know how my daughter did compared to a larger cohort of kids her own age. And what could we expect, if she keeps at it in the years to come?</p>
+<p>Luckily, I found past several years of her team’s results to analyze. Gathering this data, cleaning and transforming it for analysis was a huge challenge onto itself. Not something I intend to discuss in this post. But I digress.</p>
+<p>Let’s take a look at the number of kids by age and gender in this dataset.</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/boys_girls-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The pyramid plot above shows the number of competitors from ages 6 to 18 throughout the years. Seems like 6 to 8 are the most popular ages for kids to begin competitive swimming. There are some late joiners by age 10, after which we see a steady decline in the number of kids competing.</p>
+<p>Let’s take a look at the ages when swimmers compete in each stroke.</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/first_competed-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>We can observe a few things here:</p>
+<ul>
+<li><p>Everyone starts with Freestyle swimming. The participation rate is close to 100% for both genders. But towards the late teens, some boys seem to give up Freestyle to specialize in other strokes.</p></li>
+<li><p>Girls seem to learn Backstroke a little faster than boys, and a wide majority of girls keep swimming Backstroke until their late teens.</p></li>
+<li><p>Girls catch up with learning Breaststroke much more quickly than boys, and a majority of them keep at it until their late teens, where as some boys choose to specialize in either Backstroke or Butterfly.</p></li>
+<li><p>Learning Butterfly appears to be a much bigger challenge for both genders. Relatively fewer kids compete in it early on. Boys in their early teens appear to participate at a faster clip than girls. But towards the late teens, girls appear to participate more consistently.</p></li>
+</ul>
+<div id="steep-learning-curve" class="section level2">
+<h2>Steep Learning Curve</h2>
+<p>There’s a steep learning curve in swimming. Each stroke has its own level of difficulty and challenges but once the basics are learned, rapid progress could be made. However, there’s a huge difference between knowing how to swim a stroke, and swimming it well. It requires both speed and precision.</p>
+<p>Swimming also happens to be one of the most unforgiving sports. In other sports, minor violations result in fouls or penalties; disqualifications or ejections are rare and usually result from violent or reckless behavior. But in swimming, the moment a competitor violates a rule, it results in disqualification. Even in summer leagues, the swim officials are trained and expected to follow USA Swimming standards. So, a 6 year old is to be judged the same way as an adult at USA Swimming events.</p>
+<p>To get an idea, here are some ways of getting disqualified:</p>
+<ul>
+<li>Freestyle: As the name suggests, everything is legal except the following:
+<ul>
+<li>Walking on the bottom of the pool.</li>
+<li>Stopping and pushing off of the bottom of the pool.</li>
+<li>Pulling on a lane line for an assist.</li>
+<li>Not touching the wall before turning or at finish.</li>
+</ul></li>
+<li>Backstroke
+<ul>
+<li>Not swimming on back off the wall.</li>
+<li>Delaying initiating a turn.</li>
+<li>Pulling on a lane line for an assist.</li>
+<li>Not touching the wall before turning or at finish.</li>
+</ul></li>
+<li>Breaststroke
+<ul>
+<li>Pulling hands beyond hips.</li>
+<li>Non-simultaneous or single hand touch at the turn or finish.</li>
+<li>Doing alternating kicks (as in Freestyle) or dolphin kicks (as in Butterfly).</li>
+<li>Not being on breast after leaving the wall.</li>
+</ul></li>
+<li>Butterfly
+<ul>
+<li>Arms underwater during the recovery phase of stroke.</li>
+<li>Non-simulatenous arm movements during strokes.</li>
+<li>Non-simultaneous or single hand touch at the turn or finish.</li>
+<li>Doing alternating kicks (as in Freestyle) or Breaststroke kicks.</li>
+</ul></li>
+</ul>
+<p>From what I observed throughout the season, in a majority of cases, rule violations are not deliberate. They happen inadvertently.</p>
+<p>Let’s take a look at the total number of disqualifications by age, gender and stroke in the dataset:</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The absolute numbers of DQs are a proxy for the level of difficulty of each stroke. Most kids learn each stroke in this order from Freestyle to Butterfly. However, as seen in the previous plot, the level of participation in Butterfly is far less as compared to other strokes. For instance, the level of participation in Freestyle and Backstroke is consistently at ~ 80% or above. About 80% of 7 year olds attempt to swim Breaststroke, where as only ~ 33% of 7 year old boys and ~ 48% of 7 year old girls attempt Butterfly in comparison. Hence the absolute numbers of disqualifications merely reflect the total number of unique competitors at that age.</p>
+<p>A better way to look at this is to compute the number of DQs per person, as shown below.</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/dqs_per_person-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Here, we can see the number of disqualifications per person reduce as the kids get better with age.
+In Freestyle, Backstroke and Breaststroke races, kids upto 8 years swim only 1 lap. In Butterfly, kids upto 10 years swim only 1 lap.
+In all other age brackets, kids swim 2 laps, which means they turn after touching the opposite end of the pool. Learning to execute a legal turn without compromising pace is both an art and a science. We can see its challenges in Backstroke at age 9 and in Butterfly at age 11, when the kids start swimming 2 laps in a race. The number of disqualifications per person increase after decreasing upto the prior year when the kids are swimming only 1 lap.</p>
+<p>Consistently swimming a legal backstroke appears to remain a challenge until the mid-teens. It is indicative of the failures in executing legal turns. Backstroke could be thought of as swimming Freestyle on the back. Arm and leg movements have no constraints as long as the body is on the back. But the biggest challenge is the swimmers cannot see the wall in the direction they are swimming. Their eyes are always facing up. They train to spot a row of flags hung 5 meters from the wall over the pool and count the number of strokes they need to reach the wall from that point. While some inexperienced swimmers touch the wall with their hands and push off again on the back, it compromises their speed. The quickest way to turn is to flip on the belly while approaching a turn and push off against the wall with the feet so that the body regains its position on the back. This needs to be done in one smooth series of motions. As soon as the body flips on the belly, only a single or double hand pull is allowed to initiate the turn. If the swimmer does multiple strokes, they’re disqualified. If the swimmer turns too soon, it’s likely they’ll miss touching the wall. No sculling is allowed to reach the wall. Therefore, again a swimmer gets disqualified. We can see these mistakes happen well into the teenage years.</p>
+<p>For every boy competing in Breaststroke at age 6, there has been more than 1 disqualification, which means 6 year old boys face multiple disqualifications in a season. Their level of participation is at 40%. It shows how challenging it is to learn Breaststroke. 6 year old girls appear to do a bit better. The good thing is that kids are persistent in learning Breaststroke from an early age. So, not only does the level of participation increase with age, but also the number of disqualifications per person decrease dramatically. But again, at age 9 when the kids start swimming 2 laps, the rate of improvement slows down. Other than the Breaststroke technique, kids have to remember to touch the wall with both hands simultaneously and then turn back on their breast. Most kids become very good with practice, but even a slight lapse of concentration results in disqualification.</p>
+<p>Similarly, Butterfly is a bigger challenge in the early years. With every stroke, the arms have to break the surface of the water during recovery. Many young swimmers find it hard to have the upper body strength to do it consistently. As the kids grow, their strength improves and it becomes less hard.
+Once again, we see a surge of DQs at age 11, when the kids start swimming 2 laps. As with Breaststroke, kids have to remember to touch the wall with both hands simultaneously and then turn back without doing any flutter or alternate kicks.</p>
+<p>Overall, girls seem to improve more consistently than boys.</p>
+</div>
+<div id="swim-times" class="section level2">
+<h2>Swim Times</h2>
+<p>Now, here is what I was most curious about before doing this analysis. Shown below are the distributions of swim times by age, gender and stroke. I have excluded the races in yards to focus only on the races in meters, which is the international standard.</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/distribution_swim_times-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>To provide a reference point, I have added the current 50 Short Course Meters world records for each stroke and gender. As expected, the distributions of swim times are heavily skewed towards the right. In the plots, I have truncated the outliers exceeding 80 seconds.</p>
+<p>On average, we see consistent improvement with age across the board. In nearly every plot, we see multi-modal distributions with multiple peaks that separate the best swimmers from merely good and the rest of the pack. As the kids progress to swimming 50 meters, i.e. 2 laps of the 25m length, the distributions during the early years once again become wider with heavier skews and fatter right tails. Not only does the difference in swim speed, but also the time taken to turn contributes to a large variance in swim times.</p>
+<p>The variance reduces in later years and the distributions tend to become more normal. I reckon this is due to two reasons:</p>
+<ol style="list-style-type: decimal">
+<li><p>Kids get stronger with age and better with practice.</p></li>
+<li><p>A survivorship bias comes in play. As we’ve seen in the first plot, the number of competitors decrease with age. Basically the kids who have consistently done well are the ones who continue to swim beyond the early years. There might be some kids who swim just for fun or to hang out with their friends. But chances are, those who cannot compete effectively in any stroke would drop out.</p></li>
+</ol>
+<p>Nevertheless, we see higher variance in strokes that are more technical, i.e. Backstroke, Breaststroke and Butterfly, as compared to Freestyle.</p>
+</div>
+<div id="mean-times" class="section level2">
+<h2>Mean Times</h2>
+<p>Looking at the plots of distributions, we can observe a very interesting thing as the kids grow older. Note, all the plots are drawn to the same scale. But the distributions of the boys’ swim times curve more to the left than those of girls. It is evident that on average, boys continue to improve well into the late teens, where as the rate of improvement of girls slows down. Why does that happen?</p>
+<p>Let’s see the mean times to swim 50 Short Course Meters by age.</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>What’s really interesting is that on average, boys and girls are doing just about the same until age 12. Thereafter, boys start pulling apart. Why? Do teenage boys work harder than teenage girls to improve? Hardly the case. On the contrary, we have seen evidence that girls learn and improve more consistently than boys. So what’s happening here? I am no expert in biology, but this is the about the age where puberty begins. Among other things, boys tend to grow taller and more muscular than girls at this stage. No wonder they start swimming faster than girls!
+This might be among the few instances where the impact of puberty on both sexes, could be measurably observed.</p>
+<p>In both genders, the trajectory of improvement is non-linear with age. Kids show dramatic improvement until they reach their teens. Thereafter, the rate of improvement slows down. There’s a physical limit to how fast a human could swim, so we could expect the curves to reach their minima at some point during the 20s - 30s when the swimmers reach the pinnacle of physical strength and performance. When the swimmers are past their prime, we could expect them to start slowing down.</p>
+<p>USA Swimming has race data for swimmers ranging from ages 5 to 50. I sampled data for 50 Short Course Meters Freestyle races to explore.</p>
+<p>Here are the curves drawn using USA Swimming data:</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/mean_swim_times_USA_Swimming-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The USA Swimming sample data produces a similar set of curves. The effects of puberty on average swim times are exhibited in this dataset too. Boys and girls have nearly the same average swim times until age 12, but from age 13 onwards, boys start swimming faster than girls.</p>
+<p>Another interesting observation is that after age 18, the rate of improvement accelerates once again for both male and female swimmers. Both curves show a big shift towards the left. Yet again, survivorship bias appears to come into play. These aren’t recreational swimmers. Rather they are kids who continue to swim in college teams, and then compete in national and international events. Superior coaching and facilities at the top level, probably are big factors contributing to this dramatic improvement.</p>
+<p>Judging by the averages, male swimmers reach their prime in their early 20s and maintain their peak form until their early 30s. In comparison, female swimmers do not hit their prime until their late 20s, and have a much shorter peak span than males.</p>
+<p>The average times start deteriorating by the mid 30s for both males and females. Unfortunately, the data is very sparse for swimmers 35 years and older. To reduce noise, I excluded the data for every age where there are fewer than 10 records. So it’s hard to see the trajectory well into the 40s.</p>
+<p>Here are plots of all swim times in this dataset with best fitting curves for both genders:</p>
+<p><img src="/post/a-deep-dive-in-analyzing-swimming-data/index_files/figure-html/improvement_curves-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>From this study, we gain some interesting insights into the world of competitive swimming from the early years:</p>
+<ul>
+<li><p>Most kids join swim teams between 6 and 8. More and more kids drop out during the teenage years.</p></li>
+<li><p>After Freestyle, kids learn to swim Backstroke before they learn Breaststroke and Butterfly. Butterfly remains a challenging stroke to learn well into the teens.</p></li>
+<li><p>Persistence pays off and kids who don’t give up improve by leaps and bounds from 6 to 10.</p></li>
+<li><p>Boys and girls improve at the same rate until the onset of puberty. Then boys start gaining a big advantage.</p></li>
+<li><p>On average, boys reach peak performance in the early 20s itself. On the flip side, they require all the hard work just to maintain it until the 30s. Girls reach peak performance only by the late 20s. On the brighter side, this is a big motivation to continue working hard well into adulthood.</p></li>
+</ul>
+<hr />
+<p><em>The R markdown file with code for this post is available <a href="https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/a-deep-dive-in-analyzing-swimming-data/">here</a></em>.</p>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/dataviz/">dataviz</a>
+  
+  <a class="badge badge-light" href="/tags/swimming/">swimming</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
+      <h6 class="card-subtitle">Founder</h6>
+      <p class="card-text">Quantitative Data Technologies</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/text-analysis-of-amazon-shareholder-letters/">Text Analysis of Amazon Shareholder Letters</a></li>
+      
+      <li><a href="/post/best-batsmen-in-cricket-at-present/">Best batsmen in cricket at present</a></li>
+      
+      <li><a href="/post/top-batsmen-in-cricket/">Top batsmen in cricket</a></li>
+      
+      <li><a href="/post/a-brief-history-of-cricket/">A brief history of cricket</a></li>
+      
+      <li><a href="/post/biased-coin-flipping-experiment/">How would you bet? Lessons from a Biased Coin Flipping Experiment</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.2.0/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+
+    
+
+
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

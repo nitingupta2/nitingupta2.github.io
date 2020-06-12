@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects | Nitin Gupta</title>
+    <link>/project/</link>
+      <atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <description>Projects</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Thu, 27 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>Projects</title>
+      <link>/project/</link>
+    </image>
+    
+    <item>
+      <title>Market Dashboard</title>
+      <link>/project/market-dashboard/</link>
+      <pubDate>Thu, 27 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>/project/market-dashboard/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Historical Performance of Stocks</title>
+      <link>/project/historical-stock-performance/</link>
+      <pubDate>Thu, 27 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>/project/historical-stock-performance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Predictive Typing Shiny App</title>
+      <link>/project/predictive-typing/</link>
+      <pubDate>Thu, 27 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>/project/predictive-typing/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
