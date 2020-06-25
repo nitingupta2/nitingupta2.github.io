@@ -1,0 +1,66 @@
+### R ###
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+.RDataTmp
+
+# User-specific files
+.Ruserdata
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# RStudio files
+.Rproj.user/
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# knitr and R markdown default cache directories
+*_cache/
+/cache/
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+### R.Bookdown Stack ###
+# R package: bookdown caching files
+/*_files/
+
+# Files in posts
+/post/a-brief-history-of-cricket/cricketClean.Rda
+/post/a-brief-history-of-cricket/cricketRaw.Rda
+/post/a-brief-history-of-cricket/download_cricinfo.R
+/post/best-batsmen-in-cricket-at-present/topBatsmen.Rda
+/post/best-batsmen-in-cricket-at-present/topBatsmenRawWins.Rda
+/post/top-batsmen-in-cricket/cricketClean.Rda
+/post/top-batsmen-in-cricket/topBatsmen.Rda
+/post/a-deep-dive-in-analyzing-swimming-data/Swimtimes.tsv
+/post/a-deep-dive-in-analyzing-swimming-data/SwimTimes.50_SCM.2002-2018.tsv
+/post/a-deep-dive-in-analyzing-swimming-data/SCM.WorldRecords.tsv
+/post/how-much-do-swimmers-improve-in-a-season/Swimtimes.tsv
+/post/analysis-of-shark-tank-data/download_sharktank.R
+/post/analysis-of-shark-tank-data/sharktank.Rda
+/post/analysis-of-shark-tank-data/sharktank_captions.Rda
+/post/analysis-of-shark-tank-data/sharktank.tsv
+/post/analysis-of-shark-tank-data/sharktank_wiki.tsv
+/post/analysis-of-shark-tank-data/sharktank_segments.tsv
+/post/analysis-of-shark-tank-data/sharktank_patents.tsv
+/post/analysis-of-shark-tank-data/sharktank_final.tsv
+/post/analysis-of-shark-tank-data/sharktank.xls
+/post/biased-coin-flipping-experiment/profit_series.rds
+/post/biased-coin-flipping-experiment/profit_series_constrained.rds
