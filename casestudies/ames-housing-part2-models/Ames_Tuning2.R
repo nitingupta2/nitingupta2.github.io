@@ -10,7 +10,7 @@ conflict_prefer("rename", "dplyr")
 conflict_prefer("slice", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("setdiff", "dplyr")
-conflict_prefer("margin", "dials")
+conflict_prefer("margin", "ggplot2")
 
 # load clean dataset
 load("Ames_Housing_Clean.Rda")
@@ -33,8 +33,8 @@ dfTest <- dfClean %>% filter(Id %in% vTestIDs)
 get_preprocessing_recipe <- function(df) {
     
     preprocessing_recipe <- recipe(SalePrice ~ ., data = df) %>% 
+        update_role(Id, new_role = "ID") %>% 
         step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L)) %>%
-        step_rm("Id") %>% 
         step_dummy(all_nominal()) %>% 
         step_log(all_outcomes()) %>% 
         prep()
@@ -43,7 +43,7 @@ get_preprocessing_recipe <- function(df) {
 
 # Preprocessed data for training models
 dfTrain_Proc <- get_preprocessing_recipe(dfTrain) %>% 
-    bake(new_data = dfTrain) %>% 
+    bake(new_data = NULL) %>% 
     rename(target = SalePrice) %>% 
     select(target, everything())
 
@@ -157,7 +157,7 @@ cross_validate_model <- function(cv_folds, model_spec, param_grid) {
     
     for(i in 1:nrow(dfResults)) {
         dfParams <- dfResults[i, ]
-        if(model_spec$engine %in% c("lm", "xgboost")) {
+        if(model_spec$engine %in% c("lm")) {
             param_results <- pmap_dfr(list(cv_folds$id, cv_folds$splits), ~ test_parameters_on_fold(.x, .y, model_spec, dfParams))
         } else {
             param_results <- future_pmap_dfr(list(cv_folds$id, cv_folds$splits), ~ test_parameters_on_fold(.x, .y, model_spec, dfParams))

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>glmnet | Nitin Gupta</title>
-    <link>/tags/glmnet/</link>
-      <atom:link href="/tags/glmnet/index.xml" rel="self" type="application/rss+xml" />
-    <description>glmnet</description>
+    <title>Glmnet | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/glmnet/</link>
+      <atom:link href="https://www.nitingupta.com/tags/glmnet/index.xml" rel="self" type="application/rss+xml" />
+    <description>Glmnet</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>glmnet</title>
-      <link>/tags/glmnet/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Glmnet</title>
+      <link>https://www.nitingupta.com/tags/glmnet/</link>
     </image>
     
     <item>
       <title>Ames Housing - Part 2 - Building Models</title>
-      <link>/casestudies/ames-housing-part2-models/</link>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</link>
       <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/ames-housing-part2-models/</guid>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</guid>
       <description>
 
 
@@ -44,7 +44,7 @@
 &lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
 &lt;p&gt;We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.&lt;/p&gt;
 &lt;p&gt;Let’s look at the distribution of the target variable across all folds:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -100,7 +100,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -146,7 +146,7 @@ Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt; cross validation takes much longer to execute than &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;randomForest&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -209,7 +209,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;finalizing-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalizing Models&lt;/h2&gt;
 &lt;p&gt;For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -221,7 +221,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Performance on Test Data&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
   model        test_rmse cv_rmse
   &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
@@ -241,7 +241,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;h2&gt;Feature Importance&lt;/h2&gt;
 &lt;p&gt;Even though &lt;code&gt;xgboost&lt;/code&gt; is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.&lt;/p&gt;
 &lt;p&gt;Let’s take a look at the top 10 most important features of our finalized &lt;code&gt;xgboost&lt;/code&gt; model:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.&lt;/li&gt;
@@ -253,7 +253,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is &lt;code&gt;PropertyAge&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;So, how would the predicted &lt;code&gt;SalePrice&lt;/code&gt; differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?&lt;/p&gt;
 &lt;p&gt;We could pick a couple of properties at random, change &lt;code&gt;PropertyAge&lt;/code&gt; and see its impact on &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.&lt;/p&gt;
 &lt;/div&gt;
 </description>

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>predictive | Nitin Gupta</title>
-    <link>/tags/predictive/</link>
-      <atom:link href="/tags/predictive/index.xml" rel="self" type="application/rss+xml" />
-    <description>predictive</description>
+    <title>Predictive | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/predictive/</link>
+      <atom:link href="https://www.nitingupta.com/tags/predictive/index.xml" rel="self" type="application/rss+xml" />
+    <description>Predictive</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sat, 15 Apr 2017 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>predictive</title>
-      <link>/tags/predictive/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Predictive</title>
+      <link>https://www.nitingupta.com/tags/predictive/</link>
     </image>
     
     <item>
       <title>Building a Predictive Typing Model</title>
-      <link>/post/building-a-predictive-typing-model/</link>
+      <link>https://www.nitingupta.com/post/building-a-predictive-typing-model/</link>
       <pubDate>Sat, 15 Apr 2017 00:00:00 +0000</pubDate>
-      <guid>/post/building-a-predictive-typing-model/</guid>
+      <guid>https://www.nitingupta.com/post/building-a-predictive-typing-model/</guid>
       <description>
 
 
@@ -239,12 +239,12 @@ dim(df1grams)
 [1] 26453     2
 wordsOfFreq1 &amp;lt;- df1grams %&amp;gt;% group_by(freq) %&amp;gt;% summarise(n = sum(freq)) %&amp;gt;% dplyr::filter(freq == 1) %&amp;gt;% .$n&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;There are 26453 words in the corpus, that shows how vast Shakespeare’s vocabulary was. Let’s see a wordcloud of top 100 words. No surprise, the most commonly used words are: &lt;strong&gt;&lt;em&gt;the, and, i, to, of&lt;/em&gt;&lt;/strong&gt;. Excluding these commonly used ‘stop words’, in the second wordcloud, we can see the words Shakespeare used most frequently. We can see a lot of references to royalty and nobility, present specially in Shakespearean tragedies. Some names are mentioned quite frequently - Richard, John, Caesar, Brutus and Henry. Some English counties or &lt;a href=&#34;https://en.wikipedia.org/wiki/Shire&#34;&gt;shires&lt;/a&gt; are mentioned quite often - Warwick, York and Gloucester.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;unigrams&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Unigrams&lt;/h3&gt;
 &lt;p&gt;Let’s see a plot of the distribution of words in corpus by usage.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Here’s a strategy for building ngram tables:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;There is a long tail of 10522 words in the corpus that appear exactly once. Replace all words appearing just once, by &lt;strong&gt;UNK&lt;/strong&gt; as a placeholder for a word not known from the corpus. There are a couple of motivations behind this:

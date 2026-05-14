@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Case Studies | Nitin Gupta</title>
-    <link>/casestudies/</link>
-      <atom:link href="/casestudies/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://www.nitingupta.com/casestudies/</link>
+      <atom:link href="https://www.nitingupta.com/casestudies/index.xml" rel="self" type="application/rss+xml" />
     <description>Case Studies</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Case Studies</title>
-      <link>/casestudies/</link>
+      <link>https://www.nitingupta.com/casestudies/</link>
     </image>
     
     <item>
       <title>Ames Housing - Part 2 - Building Models</title>
-      <link>/casestudies/ames-housing-part2-models/</link>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</link>
       <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/ames-housing-part2-models/</guid>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</guid>
       <description>
 
 
@@ -44,7 +44,7 @@
 &lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
 &lt;p&gt;We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.&lt;/p&gt;
 &lt;p&gt;Let’s look at the distribution of the target variable across all folds:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -100,7 +100,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -146,7 +146,7 @@ Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt; cross validation takes much longer to execute than &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;randomForest&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -209,7 +209,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;finalizing-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalizing Models&lt;/h2&gt;
 &lt;p&gt;For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -221,7 +221,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Performance on Test Data&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
   model        test_rmse cv_rmse
   &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
@@ -241,7 +241,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;h2&gt;Feature Importance&lt;/h2&gt;
 &lt;p&gt;Even though &lt;code&gt;xgboost&lt;/code&gt; is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.&lt;/p&gt;
 &lt;p&gt;Let’s take a look at the top 10 most important features of our finalized &lt;code&gt;xgboost&lt;/code&gt; model:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.&lt;/li&gt;
@@ -253,7 +253,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is &lt;code&gt;PropertyAge&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;So, how would the predicted &lt;code&gt;SalePrice&lt;/code&gt; differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?&lt;/p&gt;
 &lt;p&gt;We could pick a couple of properties at random, change &lt;code&gt;PropertyAge&lt;/code&gt; and see its impact on &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.&lt;/p&gt;
 &lt;/div&gt;
 </description>
@@ -261,23 +261,22 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
     
     <item>
       <title>Ames Housing - Part 1 - Exploratory Data Analysis</title>
-      <link>/casestudies/ames-housing-part1-eda/</link>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</link>
       <pubDate>Sun, 25 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/ames-housing-part1-eda/</guid>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</guid>
       <description>
 
 
 &lt;p&gt;In this case study, we will use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to explore regression techniques and predict the sale price of houses.&lt;/p&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
-&lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it.
-Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
+&lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it. Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the training set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1460   81&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the testing set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1459   81&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -385,19 +384,19 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;BsmtBath&lt;/code&gt; = &lt;code&gt;BsmtFullBath&lt;/code&gt; + 0.5 * &lt;code&gt;BsmtHalfBath&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;HasBsmt&lt;/code&gt; = &lt;code&gt;TotalBsmtSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most properties have a basement.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;BsmtFinType2&lt;/code&gt; and &lt;code&gt;BsmtCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;bathroom-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Bathroom Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated to determine the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;fireplace-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Fireplace Features&lt;/h4&gt;
@@ -422,7 +421,7 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have fireplaces.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;garage-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Garage Features&lt;/h4&gt;
@@ -456,7 +455,7 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;Most properties have a garage.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;masonry-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Masonry Features&lt;/h4&gt;
@@ -501,7 +500,7 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have masonry.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;pool-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Pool Features&lt;/h4&gt;
@@ -533,7 +532,7 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties do not have a pool.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;porch-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Porch Features&lt;/h4&gt;
@@ -544,14 +543,14 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;Whether property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;built-area-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Built Area Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is added to determine the total square footage of built area: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;construction-year-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Construction Year Features&lt;/h4&gt;
@@ -564,7 +563,7 @@ Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
 &lt;li&gt;Indicate if the property has been remodelled: &lt;code&gt;IsRemodAdd&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;neighborhood-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Neighborhood Features&lt;/h4&gt;
@@ -578,7 +577,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;&lt;strong&gt;Type4&lt;/strong&gt;: Mitchel, NPkVill, NAmes, SWISU, Sawyer, Blueste, BrkSide, Edwards, OldTown&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Type5&lt;/strong&gt;: IDOTRR, BrDale, MeadowV&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Other Missing Features&lt;/h4&gt;
@@ -635,7 +634,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
 &lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -652,7 +651,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical Features&lt;/h3&gt;
 &lt;p&gt;First let’s plot all the features that are measured as area in square feet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -660,7 +659,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Many features are heavily skewed so they need to be normalized before fitting models.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Now let’s see other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -668,7 +667,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Most of the properties have been built less than 20 years prior to their sale.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;SalePrice&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -684,7 +683,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;h2&gt;Categorical Features&lt;/h2&gt;
 &lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Ordinal Features&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -694,7 +693,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Nominal Features.&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -710,7 +709,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
 &lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -723,7 +722,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
 &lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -734,7 +733,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -746,7 +745,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -762,7 +761,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
 &lt;p&gt;We have determined &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have among the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how they vary by &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; respectively:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;For the same total area, there are neighborhoods where &lt;code&gt;SalePrice&lt;/code&gt; is higher than others.&lt;/li&gt;
 &lt;li&gt;Properties with no garage are distinctly separated.&lt;/li&gt;
@@ -773,7 +772,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;SalePrice&lt;/code&gt; with a combination of categorical features, that could provide any additional explanatory power for prediction:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
 &lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
@@ -786,9 +785,9 @@ As it is said, real estate is all about location, location, location. Clearly so
     
     <item>
       <title>Diamonds - Part 3 - A polished gem - Building Non-linear Models</title>
-      <link>/casestudies/diamonds-part3-non-linear-models/</link>
+      <link>https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/</link>
       <pubDate>Thu, 22 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/diamonds-part3-non-linear-models/</guid>
+      <guid>https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/</guid>
       <description>
 
 
@@ -1088,15 +1087,15 @@ price ~ carat + clarity + color + cut
 &lt;li&gt;Use the resulting feature weights to explain local behavior.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The features by importance that best explain the predictions in these 6 random samples are &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are co-linear with &lt;code&gt;carat&lt;/code&gt;, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
 &lt;p&gt;Finally, here are the scatterplots of actual v/s predicted &lt;code&gt;price&lt;/code&gt; from the best model on the testing set, using the 3 regression methods:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar &lt;strong&gt;r-squared&lt;/strong&gt; and &lt;strong&gt;rmse&lt;/strong&gt; values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.&lt;/p&gt;
 &lt;p&gt;As in the case with linear models, the variance in predicted diamond prices increases with &lt;code&gt;price&lt;/code&gt;. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between &lt;code&gt;price&lt;/code&gt; and its predictors, they also predict prices within a reasonable range.&lt;/p&gt;
 &lt;/div&gt;
@@ -1115,9 +1114,9 @@ price ~ carat + clarity + color + cut
     
     <item>
       <title>Diamonds - Part 2 - A cut above - Building Linear Models</title>
-      <link>/casestudies/diamonds-part2-linear-models/</link>
+      <link>https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/</link>
       <pubDate>Wed, 21 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/diamonds-part2-linear-models/</guid>
+      <guid>https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/</guid>
       <description>
 
 
@@ -1172,7 +1171,7 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
 3 mae     standard     740.   &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The model summary shows it is an overfitted model. Among other things, we know that &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; have no impact on &lt;code&gt;price&lt;/code&gt;, yet these are shown to be highly significant. Root Mean Squared Error (rmse) and other metrics are also shown above.&lt;/p&gt;
 &lt;p&gt;Let’s make a plot of actual v/s predicted prices to visualize how well this base model performs.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;If the predictions are good, the points should lie close to a straight line drawn at 45 degrees. We can see this base model does a poor job of predicting prices. Worst of all, the model predicts negative prices on the lower end.
 It shows that &lt;code&gt;price&lt;/code&gt; has to be log transformed to avoid these absurdities.&lt;/p&gt;
 &lt;div id=&#34;feature-engineering&#34; class=&#34;section level2&#34;&gt;
@@ -1183,7 +1182,7 @@ As these 3 dimensions are highly correlated, we can compute a geometrical averag
 &lt;p&gt;Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:&lt;/p&gt;
 &lt;p&gt;$ density = mass/volume $&lt;/p&gt;
 &lt;p&gt;We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
 Keep in mind there are 20 &lt;code&gt;z&lt;/code&gt; values that are 0. In 7 of these records both &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are 0 too, which means these values were not recorded reliably.&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 20 x 10
@@ -1289,9 +1288,9 @@ Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39
 Residual standard error: 0.166 on 40442 degrees of freedom
 Multiple R-squared:  0.973, Adjusted R-squared:  0.973 
 F-statistic: 1.05e+05 on 14 and 40442 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Here’s a scatterplot of actual v/s predicted log(price) from our final model on the testing set:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degress line. However, on the high end, there are many outliers where actual and predicted values have very high variance.
 Nevertheless, this is as good as it gets.&lt;/p&gt;
 &lt;/div&gt;
@@ -1300,9 +1299,9 @@ Nevertheless, this is as good as it gets.&lt;/p&gt;
     
     <item>
       <title>Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</title>
-      <link>/casestudies/diamonds-part1-eda/</link>
+      <link>https://www.nitingupta.com/casestudies/diamonds-part1-eda/</link>
       <pubDate>Tue, 20 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>/casestudies/diamonds-part1-eda/</guid>
+      <guid>https://www.nitingupta.com/casestudies/diamonds-part1-eda/</guid>
       <description>
 
 
@@ -1368,7 +1367,7 @@ Nevertheless, this is as good as it gets.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.&lt;/p&gt;
 &lt;p&gt;Let’s examine each feature numerically:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;dfInput 
@@ -1477,18 +1476,18 @@ For the frequency table, variable is rounded to the nearest 0.5
 &lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Excluding outliers, the range of values are more reasonable. We can see that &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are heavily right skewed.&lt;/p&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;price&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
 one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The categorical imbalance in &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; can be clearly noticed.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -1498,14 +1497,14 @@ one at just below USD 1000 and the other around USD 5000. Intriguingly, there ar
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-numerical&lt;/h4&gt;
 &lt;p&gt;First and foremost, let’s do a correlation analysis to see how &lt;code&gt;price&lt;/code&gt; is correlated with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see that &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; dimensions. If a predictive linear regression model is built,
 some of these features would act as confounders. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt; so they are not so interesting for
 predictive modelling.&lt;/p&gt;
 &lt;p&gt;Now let’s see the scatter plots:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;After removing outliers, it could be noted that &lt;code&gt;price&lt;/code&gt; increases exponentially with &lt;code&gt;carat&lt;/code&gt;, as well as &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; dimensions. So &lt;code&gt;price&lt;/code&gt; should be plotted with a log tranformation. Let’s do that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
 increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions. Log transforming &lt;code&gt;carat&lt;/code&gt; wouldn’t help because &lt;code&gt;carat&lt;/code&gt; does not have a wide range.
 We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
@@ -1513,7 +1512,7 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;price&lt;/code&gt; with respect to the categorical features in the dataset:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
@@ -1527,17 +1526,17 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;p&gt;So far, we have determined &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price.&lt;/code&gt; Different grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some impact on median &lt;code&gt;price&lt;/code&gt;. So let’s make some scatter plots to see these relationships:&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Numerical-Categorical&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
 &lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;There is no pattern in the interaction of &lt;code&gt;price&lt;/code&gt; v/s &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; values when plotted by &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. So, these features do not have any predictive ability to determine &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Categorical-Numerical&lt;/h4&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. Nevertheless this counter-trend persists in the dataset.&lt;/p&gt;
 &lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the mean prices do not show any discernable pattern.&lt;/p&gt;
 &lt;/div&gt;

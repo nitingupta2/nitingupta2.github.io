@@ -28,10 +28,10 @@
   
     
   
-  <meta name="description" content="Founder">
+  <meta name="description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/">
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/post/">
 
   
 
@@ -83,7 +83,7 @@
   
   
   
-  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
 
   
     
@@ -102,6 +102,43 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    const anchor = event.target.closest('a');
+    if (!anchor || anchor.host === window.location.host) {
+      return;
+    }
+    trackOutboundLink(anchor.href);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-K2NQYHG3M1', { 'anonymize_ip': true });
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -109,11 +146,13 @@
   <link rel="alternate" href="/post/index.xml" type="application/rss+xml" title="Nitin Gupta">
   
 
-  <link rel="manifest" href="/index.webmanifest">
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/post/">
+  <link rel="canonical" href="https://www.nitingupta.com/post/">
 
   
   
@@ -126,10 +165,10 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="Nitin Gupta">
-  <meta property="og:url" content="/post/">
+  <meta property="og:url" content="https://www.nitingupta.com/post/">
   <meta property="og:title" content="Posts | Nitin Gupta">
-  <meta property="og:description" content="Founder"><meta property="og:image" content="/img/icon-192.png">
-  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  <meta property="og:description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     <meta property="og:updated_time" content="2018-10-15T00:00:00&#43;00:00">
   
@@ -140,6 +179,32 @@
 
 
   
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+  window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "hsl(339, 90%, 68%)",
+          "text": "#fff"
+        },
+        "button": {
+          "background": "#fff",
+          "text": "hsl(339, 90%, 68%)"
+        }
+      },
+      "theme": "classic",
+      "content": {
+        "message": "This website uses cookies and similar technologies for analytics and embedded third-party services.",
+        "dismiss": "Got it!",
+        "link": "Learn more",
+        "href": "/privacy/"
+      }
+    })});
+</script>
+
 
 
   
@@ -439,7 +504,8 @@
 
     
     <div class="article-style">
-      In my previous post, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But how …
+      <hr>
+<p>In my <a href="../a-deep-dive-in-analyzing-swimming-data/">previous post</a>, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But …</p>
     </div>
     
 
@@ -499,7 +565,7 @@
     
     
     <a href="/post/how-much-do-swimmers-improve-in-a-season/" >
-      <img src="/post/how-much-do-swimmers-improve-in-a-season/featured_hu7e0edb6bc2178580077ee85b63461635_46778_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/how-much-do-swimmers-improve-in-a-season/featured_hu_ffa187204d23122e.png" alt="">
     </a>
     
   </div>
@@ -533,7 +599,8 @@
 
     
     <div class="article-style">
-      This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, …
+      <hr>
+<p>This past summer, my daughter joined a swim team. Her team is among several teams that are part of an area league. All summer long, …</p>
     </div>
     
 
@@ -593,7 +660,7 @@
     
     
     <a href="/post/a-deep-dive-in-analyzing-swimming-data/" >
-      <img src="/post/a-deep-dive-in-analyzing-swimming-data/featured_hu3a84fb682aa8d018829c30955dea95ad_18415_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/a-deep-dive-in-analyzing-swimming-data/featured_hu_a2888a4fa30473da.png" alt="">
     </a>
     
   </div>
@@ -627,7 +694,7 @@
 
     
     <div class="article-style">
-      Recently I listened to a podcast featuring Victor Haghani of Elm Partners, who described a fascinating coin-flipping experiment. The …
+      <p>Recently I listened to a podcast featuring Victor Haghani of <a href="https://elmfunds.com/">Elm Partners</a>, who described a fascinating coin-flipping experiment. The …</p>
     </div>
     
 
@@ -687,7 +754,7 @@
     
     
     <a href="/post/biased-coin-flipping-experiment/" >
-      <img src="/post/biased-coin-flipping-experiment/featured_hu9fe24066898240b9d33c669f9d7f6c02_31647_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/biased-coin-flipping-experiment/featured_hu_12e590bd7fcc99b5.png" alt="">
     </a>
     
   </div>
@@ -721,7 +788,7 @@
 
     
     <div class="article-style">
-      Amazon is led by its charismatic founder and CEO, Jeff Bezos, who is widely hailed as one of the top visionaries of this era. At the …
+      <p>Amazon is led by its charismatic founder and CEO, Jeff Bezos, who is widely hailed as one of the top visionaries of this era. At the …</p>
     </div>
     
 
@@ -781,7 +848,7 @@
     
     
     <a href="/post/text-analysis-of-amazon-shareholder-letters/" >
-      <img src="/post/text-analysis-of-amazon-shareholder-letters/featured_hu8b4269f74b4b6c7ef7ffffe78afc65ec_148600_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/text-analysis-of-amazon-shareholder-letters/featured_hu_ad8765480d9ee1fb.png" alt="">
     </a>
     
   </div>
@@ -815,7 +882,7 @@
 
     
     <div class="article-style">
-      Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the …
+      <p>Everyone using a smartphone or a mobile device has used an onscreen smart keyboard that tries to predict the next set of words that the …</p>
     </div>
     
 
@@ -875,7 +942,7 @@
     
     
     <a href="/post/building-a-predictive-typing-model/" >
-      <img src="/post/building-a-predictive-typing-model/featured_hu115f53000cf1e05783663d53ffc0d4a8_160911_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/building-a-predictive-typing-model/featured_hu_30ec75abad512814.png" alt="">
     </a>
     
   </div>
@@ -909,7 +976,8 @@
 
     
     <div class="article-style">
-      Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In …
+      <hr>
+<p>Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? …</p>
     </div>
     
 
@@ -969,7 +1037,7 @@
     
     
     <a href="/post/best-batsmen-in-cricket-at-present/" >
-      <img src="/post/best-batsmen-in-cricket-at-present/featured_hu40f3ecdb76201f489fda92e6010b3a18_335697_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/best-batsmen-in-cricket-at-present/featured_hu_99e9ecfab14a98ae.png" alt="">
     </a>
     
   </div>
@@ -1003,7 +1071,8 @@
 
     
     <div class="article-style">
-      In a previous post, I used data from Statsguru and looked at a brief history of cricket with respect to debut years and career spans of …
+      <hr>
+<p>In a <a href="../a-brief-history-of-cricket/">previous post</a>, I used data from <a href="http://stats.espncricinfo.com/ci/engine/stats/index.html">Statsguru</a> and looked at a brief history of cricket with respect to debut years and career spans …</p>
     </div>
     
 
@@ -1063,7 +1132,7 @@
     
     
     <a href="/post/top-batsmen-in-cricket/" >
-      <img src="/post/top-batsmen-in-cricket/featured_hu33671e451ea6aff75aae10c9f1f729e4_124421_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/top-batsmen-in-cricket/featured_hu_bfd26e8d506d9ba4.png" alt="">
     </a>
     
   </div>
@@ -1097,7 +1166,7 @@
 
     
     <div class="article-style">
-      Since early childhood, I have been a big fan of cricket. Some of my earliest childhood memories are watching the game along with my …
+      <p>Since early childhood, I have been a big fan of cricket. Some of my earliest childhood memories are watching the game along with my …</p>
     </div>
     
 
@@ -1157,7 +1226,7 @@
     
     
     <a href="/post/a-brief-history-of-cricket/" >
-      <img src="/post/a-brief-history-of-cricket/featured_hu68e1935e0e8434861cab0d6053b6fc23_94130_150x0_resize_lanczos_2.png" alt="">
+      <img src="/post/a-brief-history-of-cricket/featured_hu_2c4b17f9fe6ef5b.png" alt="">
     </a>
     
   </div>
@@ -1275,7 +1344,7 @@
     
     
     
-    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
 
@@ -1300,7 +1369,7 @@
   
 
   <p class="powered-by">
-    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+    © Nitin Gupta. All Rights Reserved. &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

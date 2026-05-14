@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>tidytext | Nitin Gupta</title>
-    <link>/tags/tidytext/</link>
-      <atom:link href="/tags/tidytext/index.xml" rel="self" type="application/rss+xml" />
-    <description>tidytext</description>
+    <title>Tidytext | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/tidytext/</link>
+      <atom:link href="https://www.nitingupta.com/tags/tidytext/index.xml" rel="self" type="application/rss+xml" />
+    <description>Tidytext</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Fri, 28 Apr 2017 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>tidytext</title>
-      <link>/tags/tidytext/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Tidytext</title>
+      <link>https://www.nitingupta.com/tags/tidytext/</link>
     </image>
     
     <item>
       <title>Text Analysis of Amazon Shareholder Letters</title>
-      <link>/post/text-analysis-of-amazon-shareholder-letters/</link>
+      <link>https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/</link>
       <pubDate>Fri, 28 Apr 2017 00:00:00 +0000</pubDate>
-      <guid>/post/text-analysis-of-amazon-shareholder-letters/</guid>
+      <guid>https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/</guid>
       <description>
 
 
@@ -268,31 +268,31 @@ To our shareowners.
 &lt;div id=&#34;words-per-letter&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Words per Letter&lt;/h3&gt;
 &lt;p&gt;We can see that Bezos doesn’t write very long letters. The mean word count is around 1700 words. But from 2013-2015, his letters were more than twice as long.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/words_per_letter-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/words_per_letter-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;top-words&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Top Words&lt;/h3&gt;
 &lt;p&gt;After excluding the commonly used ‘stop words’, a wordcloud of top 100 words is shown below. A remarkable thing to note is how much more &lt;em&gt;customers&lt;/em&gt; are emphasized in the letters. Besides the company name, other terms that gain prominence are &lt;em&gt;business, sales, service, experience, cash,&lt;/em&gt; and &lt;em&gt;shareholders&lt;/em&gt;. Also note the frequent mention of words related to some products and services - &lt;em&gt;Kindle, Prime, AWS, Marketplace, Fulfillment&lt;/em&gt;. Bezos has been talking about ‘Day 1’ right from the first to the latest letter, hence we find both &lt;em&gt;day&lt;/em&gt; and &lt;em&gt;one&lt;/em&gt; in the mix as well.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/wordcloud-1.png&#34; width=&#34;528&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/wordcloud-1.png&#34; width=&#34;528&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;words-commonly-associated-with-customers&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Words Commonly Associated with ‘customers’&lt;/h3&gt;
 &lt;p&gt;I tokenized the text into bigrams (sequence of two words occuring together) and excluded all instances containing commonly used ‘stop words’. Since we know &lt;em&gt;customer&lt;/em&gt; or &lt;em&gt;customers&lt;/em&gt; are the most common words, let’s examine which words appear the most with them.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/customer_network-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/customer_network-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The arrows point towards the second word in the bigram. And n denotes the frequency of occurance. We can see that ‘customer experience’ has the strongest focus. It has been mentioned 47 times in all the letters, followed by ‘customer service’ and ‘customer satisfaction’.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;dominant-themes&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Dominant Themes&lt;/h3&gt;
 &lt;p&gt;For each bigram and year pair, I calculate its tf-idf statistic, which measures how important a bigram is to a document in a collection of documents.&lt;/p&gt;
 &lt;p&gt;Plotting the top 10 terms by this statistic every year, reveals what was on Bezos’ mind every year that was not so common with all other years.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/unique_bigrams-1.png&#34; width=&#34;1152&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/unique_bigrams-1.png&#34; width=&#34;1152&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;In most of the cases, the top 10 tf-idf terms neatly summarise the important points mentioned in the letters. What’s really interesting is, we could get a sense of almost all major products and services offered by Amazon and when they were introduced or became popular. Beginning in 1998 with the launch of music and video stores (it means CDs and DVDs for you millennials out there :), to Prime Instant Video in 2013 and so many more. 2004 was all about explaining why free cash flow is important than earnings. 2010 was focussed on advancing machine learning and building advanced technology capabilities.
 The latest one from 2016 pertains to the Day 1 and Day 2 narrative and the quick decision making philosophy at a juggernaut like Amazon.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;network-of-common-bigrams&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Network of Common Bigrams&lt;/h3&gt;
 &lt;p&gt;These are bigrams that appear in 5 or more letters. In a nutshell. they show what has been most important to Amazon.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/bigram_network-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/bigram_network-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;sentiment-analysis&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Sentiment Analysis&lt;/h3&gt;
@@ -303,10 +303,10 @@ The latest one from 2016 pertains to the Day 1 and Day 2 narrative and the quick
 &lt;/ul&gt;
 &lt;p&gt;I restrict the usage to only positive and negative sentiment words from the &lt;strong&gt;&lt;em&gt;loughran&lt;/em&gt;&lt;/strong&gt; lexicon. Words not found in these lexicons are classified as neutral.&lt;/p&gt;
 &lt;p&gt;Let’s look at the top 10 most common words which drive the positive and negative sentiment in these letters.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment_words-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment_words-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The &lt;strong&gt;bing&lt;/strong&gt; lexicon treats &lt;em&gt;free&lt;/em&gt; and &lt;em&gt;fulfillment&lt;/em&gt; as positive words, and &lt;em&gt;cloud&lt;/em&gt; as a negative word. But these are mostly used in business terms by Amazon. &lt;em&gt;free&lt;/em&gt; is used in the context of ‘free super saver shipping’ or ‘free shipping’, &lt;em&gt;fulfillment&lt;/em&gt; is used in terms of ‘fulfillment center(s)’ and &lt;em&gt;cloud&lt;/em&gt; in terms of ‘cloud service(s)’. None of these could be interpretted as positive or negative so it is best to remove these terms from our word dictionary before calculating the net sentiment scores.&lt;/p&gt;
 &lt;p&gt;I define a net sentiment score as the sum of all positive terms, less the sum of all negative terms, divided by the sum of all positive, negative and neutral terms. The plot below shows the net sentiment scores by year, alongside the annual returns of Amazon stock. Amazon stock had a return of 966% in 1998, which distorts its plot, so I limited the annual returns plot to within 200% range.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/index_files/figure-html/sentiment-1.png&#34; width=&#34;768&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can observe the sentiment in these letters has remained quite positive, even in the wake of Amazon stock dropping more than 80% after the dot-com bubble bust. Judging from the sentiment scores of these letters, Bezos doesn’t seem to be swayed by Amazon stock performance at all. The annual returns have almost 0 correlation to the yearly sentiment scores.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;p&gt;&lt;em&gt;The R markdown file for this post is available &lt;a href=&#34;https://github.com/nitingupta2/nitingupta2.github.io/blob/master/post/text-analysis-of-amazon-shareholder-letters/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
@@ -316,9 +316,9 @@ The latest one from 2016 pertains to the Day 1 and Day 2 narrative and the quick
     
     <item>
       <title>Building a Predictive Typing Model</title>
-      <link>/post/building-a-predictive-typing-model/</link>
+      <link>https://www.nitingupta.com/post/building-a-predictive-typing-model/</link>
       <pubDate>Sat, 15 Apr 2017 00:00:00 +0000</pubDate>
-      <guid>/post/building-a-predictive-typing-model/</guid>
+      <guid>https://www.nitingupta.com/post/building-a-predictive-typing-model/</guid>
       <description>
 
 
@@ -541,12 +541,12 @@ dim(df1grams)
 [1] 26453     2
 wordsOfFreq1 &amp;lt;- df1grams %&amp;gt;% group_by(freq) %&amp;gt;% summarise(n = sum(freq)) %&amp;gt;% dplyr::filter(freq == 1) %&amp;gt;% .$n&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;There are 26453 words in the corpus, that shows how vast Shakespeare’s vocabulary was. Let’s see a wordcloud of top 100 words. No surprise, the most commonly used words are: &lt;strong&gt;&lt;em&gt;the, and, i, to, of&lt;/em&gt;&lt;/strong&gt;. Excluding these commonly used ‘stop words’, in the second wordcloud, we can see the words Shakespeare used most frequently. We can see a lot of references to royalty and nobility, present specially in Shakespearean tragedies. Some names are mentioned quite frequently - Richard, John, Caesar, Brutus and Henry. Some English counties or &lt;a href=&#34;https://en.wikipedia.org/wiki/Shire&#34;&gt;shires&lt;/a&gt; are mentioned quite often - Warwick, York and Gloucester.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/building-a-predictive-typing-model/index_files/figure-html/wordcloud-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;unigrams&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Unigrams&lt;/h3&gt;
 &lt;p&gt;Let’s see a plot of the distribution of words in corpus by usage.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/building-a-predictive-typing-model/index_files/figure-html/plot_freq-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Here’s a strategy for building ngram tables:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;There is a long tail of 10522 words in the corpus that appear exactly once. Replace all words appearing just once, by &lt;strong&gt;UNK&lt;/strong&gt; as a placeholder for a word not known from the corpus. There are a couple of motivations behind this:

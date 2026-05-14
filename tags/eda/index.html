@@ -28,10 +28,10 @@
   
     
   
-  <meta name="description" content="Founder">
+  <meta name="description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/tags/eda/">
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/tags/eda/">
 
   
 
@@ -83,7 +83,7 @@
   
   
   
-  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
 
   
     
@@ -102,6 +102,43 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    const anchor = event.target.closest('a');
+    if (!anchor || anchor.host === window.location.host) {
+      return;
+    }
+    trackOutboundLink(anchor.href);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-K2NQYHG3M1', { 'anonymize_ip': true });
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -109,11 +146,13 @@
   <link rel="alternate" href="/tags/eda/index.xml" type="application/rss+xml" title="Nitin Gupta">
   
 
-  <link rel="manifest" href="/index.webmanifest">
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/tags/eda/">
+  <link rel="canonical" href="https://www.nitingupta.com/tags/eda/">
 
   
   
@@ -126,10 +165,10 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="Nitin Gupta">
-  <meta property="og:url" content="/tags/eda/">
-  <meta property="og:title" content="eda | Nitin Gupta">
-  <meta property="og:description" content="Founder"><meta property="og:image" content="/img/icon-192.png">
-  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  <meta property="og:url" content="https://www.nitingupta.com/tags/eda/">
+  <meta property="og:title" content="Eda | Nitin Gupta">
+  <meta property="og:description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     <meta property="og:updated_time" content="2016-12-25T00:00:00&#43;00:00">
   
@@ -141,6 +180,32 @@
 
   
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+  window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "hsl(339, 90%, 68%)",
+          "text": "#fff"
+        },
+        "button": {
+          "background": "#fff",
+          "text": "hsl(339, 90%, 68%)"
+        }
+      },
+      "theme": "classic",
+      "content": {
+        "message": "This website uses cookies and similar technologies for analytics and embedded third-party services.",
+        "dismiss": "Got it!",
+        "link": "Learn more",
+        "href": "/privacy/"
+      }
+    })});
+</script>
+
+
 
   
 
@@ -148,7 +213,7 @@
 
 
 
-  <title>eda | Nitin Gupta</title>
+  <title>Eda | Nitin Gupta</title>
 
 </head>
 
@@ -398,7 +463,7 @@
     
   
 <div class="universal-wrapper pt-3">
-  <h1>eda</h1>
+  <h1>Eda</h1>
 
   
 
@@ -417,8 +482,9 @@
     <div class="article-style">
       
       In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
-Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it.Here are the dimensions of the training and testing sets respectively:
+Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
 [1] &quot;Dimensions of the training set&quot;[1] 1460 81[1] &quot;Dimensions of the testing set&quot;[1] 1459 81Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:
+
       
     </div>
   </div>
@@ -429,7 +495,7 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
       
       In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
 Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
-AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest pointData SummariesA preliminary visual summary of the whole dataset shows all the features and their types.
+AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest point
       
     </div>
   </div>
@@ -543,7 +609,7 @@ Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and
     
     
     
-    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
 
@@ -568,7 +634,7 @@ Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and
   
 
   <p class="powered-by">
-    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+    © Nitin Gupta. All Rights Reserved. &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

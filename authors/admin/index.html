@@ -28,10 +28,10 @@
   
     
   
-  <meta name="description" content="Founder">
+  <meta name="description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/authors/admin/">
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/authors/admin/">
 
   
 
@@ -83,7 +83,7 @@
   
   
   
-  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
 
   
     
@@ -102,6 +102,43 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    const anchor = event.target.closest('a');
+    if (!anchor || anchor.host === window.location.host) {
+      return;
+    }
+    trackOutboundLink(anchor.href);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-K2NQYHG3M1', { 'anonymize_ip': true });
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -109,11 +146,13 @@
   <link rel="alternate" href="/authors/admin/index.xml" type="application/rss+xml" title="Nitin Gupta">
   
 
-  <link rel="manifest" href="/index.webmanifest">
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/authors/admin/">
+  <link rel="canonical" href="https://www.nitingupta.com/authors/admin/">
 
   
   
@@ -126,10 +165,10 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="Nitin Gupta">
-  <meta property="og:url" content="/authors/admin/">
+  <meta property="og:url" content="https://www.nitingupta.com/authors/admin/">
   <meta property="og:title" content=" | Nitin Gupta">
-  <meta property="og:description" content="Founder"><meta property="og:image" content="/img/icon-192.png">
-  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  <meta property="og:description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
   
@@ -140,6 +179,32 @@
 
 
   
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+  window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "hsl(339, 90%, 68%)",
+          "text": "#fff"
+        },
+        "button": {
+          "background": "#fff",
+          "text": "hsl(339, 90%, 68%)"
+        }
+      },
+      "theme": "classic",
+      "content": {
+        "message": "This website uses cookies and similar technologies for analytics and embedded third-party services.",
+        "dismiss": "Got it!",
+        "link": "Learn more",
+        "href": "/privacy/"
+      }
+    })});
+</script>
+
 
 
   
@@ -467,7 +532,6 @@
     
 
     <p>I am the founder of Quantitative Data Technologies, a consulting firm specializing in data analytics and modeling. I have deep expertise in the application of data science and machine learning that provide actionable insights from data.</p>
-
 <p>Previously, I worked at a leading hedge fund, where I built automated trading systems and systematic investing strategies.</p>
 
 
@@ -606,7 +670,7 @@
     
     
     
-    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
 
@@ -631,7 +695,7 @@
   
 
   <p class="powered-by">
-    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+    © Nitin Gupta. All Rights Reserved. &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>simulations | Nitin Gupta</title>
-    <link>/tags/simulations/</link>
-      <atom:link href="/tags/simulations/index.xml" rel="self" type="application/rss+xml" />
-    <description>simulations</description>
+    <title>Simulations | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/simulations/</link>
+      <atom:link href="https://www.nitingupta.com/tags/simulations/index.xml" rel="self" type="application/rss+xml" />
+    <description>Simulations</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Thu, 03 Aug 2017 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>simulations</title>
-      <link>/tags/simulations/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Simulations</title>
+      <link>https://www.nitingupta.com/tags/simulations/</link>
     </image>
     
     <item>
       <title>How would you bet? Lessons from a Biased Coin Flipping Experiment</title>
-      <link>/post/biased-coin-flipping-experiment/</link>
+      <link>https://www.nitingupta.com/post/biased-coin-flipping-experiment/</link>
       <pubDate>Thu, 03 Aug 2017 00:00:00 +0000</pubDate>
-      <guid>/post/biased-coin-flipping-experiment/</guid>
+      <guid>https://www.nitingupta.com/post/biased-coin-flipping-experiment/</guid>
       <description>
 
 
@@ -33,7 +33,7 @@
 &lt;p&gt;In the original experiment, 61 participants flipped virtual coins 7253 times. So during the course of a 30 min game,
 a virtual coin was flipped ~ 120 times on average.&lt;/p&gt;
 &lt;p&gt;I generated a sample set of 1000 games. In each game, a virtual coin is flipped 120 times with a 0.6 probability of getting heads.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Assuming there are no constraints in the game and the upside is unbounded, the boxplots show the range of outcomes resulting from a constant percentage bet on heads on each flip.&lt;/p&gt;
 &lt;p&gt;Few things stand out from this plot:&lt;/p&gt;
 &lt;ul&gt;
@@ -50,7 +50,7 @@ a virtual coin was flipped ~ 120 times on average.&lt;/p&gt;
 &lt;p&gt;Alternatively, in 120 flips, if 60% or 72 were heads, the median outcome could be calculated by &lt;span class=&#34;math inline&#34;&gt;\(\$25*(1.2^{72})*(0.8^{48}) = \$280.1\)&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;Both of these values correspond to the peak of the median final balance determined from simulation.
 The median values for other constant proportional bets could be calculated in the same manner.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/median_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/median_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;!-- Furthermore, we can demonstrate that the optimal bet level is only dependent upon the favorability of odds. It is independent of the starting balance and the number of flips. --&gt;
 &lt;!-- ```{r Kelly_criterion, cache=TRUE, results=&#39;hide&#39;} --&gt;
 &lt;!-- dfParam &lt;- crossing(InitialBalance = c(25L, 50L), --&gt;
@@ -110,9 +110,9 @@ The median values for other constant proportional bets could be calculated in th
 &lt;h3&gt;Simulating the game play&lt;/h3&gt;
 &lt;p&gt;If you’ve read this far, you understand this game can’t be offered without an upper limit on the final payout. If you played the game and bet wisely or were just plain lucky, you would’ve discovered that the maximum payout is &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;. So the objective changes mid-game from growing to preserving existing balance. Once the maximum payout balance is reached, it is foolhardy to keep betting large sums no matter what betting strategy you have chosen.&lt;/p&gt;
 &lt;p&gt;Secondly, the UI design of the app doesn’t have a mechanism to choose a constant percentage bet level. So, if you were following a systematic betting strategy like Kelly, then you would have to do mental calculations to determine the exact dollar amount. While this is not hard to do, I believe most people would just round up or down to the nearest dollar amount. Also it takes less time to input a whole dollar amount than dollars and cents. So even though the minimum bet size in the game is 1 cent, effectively it would be &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions_constrained-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/final_balance_distributions_constrained-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Under these constraints and assumptions, the plot shows bimodal distributions at all bet levels. During the game, the objective changes to maximizing the chances of ending a game above the maximum payout of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;. Here we can see that the Kelly formula turned out to be a close approximation to optimal, even though the optimal level is determined only in hindsight. Fewer bankruptcies result at higher bet levels than in unconstrained games. I made the assumption that the participants who got lucky early on betting big, decided to bet just &lt;span class=&#34;math inline&#34;&gt;\(\$1\)&lt;/span&gt; on all subsequent bets after discovering the maximum payout.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/maximum_payout_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/maximum_payout_plots-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;how-did-the-participants-do-in-the-experiment&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;How did the participants do in the experiment?&lt;/h3&gt;
@@ -141,14 +141,14 @@ The median values for other constant proportional bets could be calculated in th
 &lt;div id=&#34;all-in-betting&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;All-in Betting&lt;/h4&gt;
 &lt;p&gt;18 out of 61 participants reportedly bet 100% on a single flip. Assuming they continued this betting pattern, majority of these participants would’ve lost everything after their second bet. Those who reached the maximum payout would’ve had to win first 4 flips in succession. Assuming they kept their wits beyond that point, only 13% of such participants would’ve ended up with a balance of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/all_in_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/all_in_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;betting-too-small-and-then-too-big&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Betting too small and then too big&lt;/h4&gt;
 &lt;p&gt;Some participants bet too small and then too big. It appears they were over-cautious at first, but when they built a sizeable balance, they threw caution to the wind. Some form of &lt;a href=&#34;https://en.wikipedia.org/wiki/Wealth_effect&#34;&gt;wealth effect&lt;/a&gt; or &lt;a href=&#34;http://www.investopedia.com/terms/h/house-money-effect.asp&#34;&gt;house money effect&lt;/a&gt; came into play.&lt;/p&gt;
 &lt;p&gt;To simulate this strategy, I assumed such participants bet 5% until they accumulated a balance of &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt;, after which they started betting 30%. If their balance fell below &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt; again, they got spooked and adopted the 5% conservative bet again.&lt;/p&gt;
 &lt;p&gt;The simulated results are quite interesting. Although none of the participants would’ve been bankrupted (assuming they adopted the ultra safe 5% bets when their balance was lower), only ~ 10% of them would’ve made &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/small_big_betting_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/small_big_betting_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;martingale-betting&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Martingale betting&lt;/h4&gt;
@@ -159,7 +159,7 @@ a Martingale bettor would need to bet ~ $1.05 million to recover past losses.&lt
 &lt;span class=&#34;math inline&#34;&gt;\(\$25\)&lt;/span&gt;. So it goes up to &lt;span class=&#34;math inline&#34;&gt;\(\$2\)&lt;/span&gt; when the balance is above &lt;span class=&#34;math inline&#34;&gt;\(\$50\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(\$4\)&lt;/span&gt; when the balance is above &lt;span class=&#34;math inline&#34;&gt;\(\$100\)&lt;/span&gt;. The previous losing bet is doubled up in succession.&lt;/p&gt;
 &lt;p&gt;The simulated results show 42% of the bettors going bankrupt with this strategy.
 Only 38% of the bettors would’ve ended up with &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; or more.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/martingale_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/martingale_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;betting-on-tails&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Betting on tails&lt;/h4&gt;
@@ -169,7 +169,7 @@ We could get a sense from the simulated game data.&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;Heads_Threshold_2 Heads_Threshold_3 Heads_Threshold_4 Heads_Threshold_5 Heads_Threshold_6 
              0.35              0.21              0.12              0.07              0.04 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;It turns out most of these participants were expecting tails after a string of 3 or more heads. Assuming they followed this heuristic, even while making the optimal 20% bet, the simulated results show ~ 7% of the participants going bankrupt and only 25% of them ending up with &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/betting_tails_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/betting_tails_results-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;comparison-of-betting-strategies&#34; class=&#34;section level3&#34;&gt;
@@ -177,7 +177,7 @@ We could get a sense from the simulated game data.&lt;/p&gt;
 &lt;p&gt;The plot below shows the performance of the betting strategies modelled above, with respect to a game optimal strategy of betting 20% of the balance. Most of them end up with a much higher proportion of participants going bankrupt in the game. No strategy comes anywhere close to the game optimal strategy, when it comes to the number of participants reaching the maximum payout offered in the game.&lt;/p&gt;
 &lt;p&gt;In fact, discovering the maximum payout of &lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; would’ve helped some of the participants employing these wayward betting strategies into adopting more conservative approaches in the latter part of their game. But if the game was designed to payout a fraction of the final balance, some more interesting outcomes might emerge. For instance, the maximum balance in the game could be raised to 2500 and the actual payout could be a tenth of that
 (&lt;span class=&#34;math inline&#34;&gt;\(\$250\)&lt;/span&gt; still). The evidence from simulated results suggests the outcomes in that case to be much worse.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/biased-coin-flipping-experiment/index_files/figure-html/betting_comparison-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/biased-coin-flipping-experiment/index_files/figure-html/betting_comparison-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;how-did-i-play-the-game&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;How did I play the game?&lt;/h3&gt;

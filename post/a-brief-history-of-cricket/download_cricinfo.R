@@ -126,6 +126,8 @@ url_template_search <- "http://stats.espncricinfo.com/ci/engine/stats/analysis.h
 # URL template to get statistics of Player by matches won
 url_template_player_wins <- "http://stats.espncricinfo.com/ci/engine/player/PLAYERCODE.html?class=FORMATCODE;result=1;template=results;type=batting"
 
+url_template_player_by_match <- "https://stats.espncricinfo.com/ci/engine/player/PLAYERCODE.html?class=FORMATCODE;template=results;type=allround;view=match"
+
 # Manually download player win records for dfTopBatsmen -----------------------------------------------------------------
 getPlayerCode <- function(playerName) {
     playerName <- stringi::stri_replace(playerName, replacement = "", regex = " \\(.*\\)")
@@ -152,6 +154,18 @@ getPlayerWinRecords <- function(playerCode, formatCode) {
     colnames(dfResults)[1] <- "ResultType"
     dfResults <- dfResults %>% select(-(ncol(.)))
     
+    return(dfResults)
+}
+
+getPlayerMatchRecords <- function(playerCode, formatCode) {
+    downloadURL <- sub("PLAYERCODE", playerCode, url_template_player_by_match, fixed = T)
+    downloadURL <- sub("FORMATCODE", formatCode, downloadURL, fixed = T)
+    
+    # Put a 3 seconds delay before requesting next set of records
+    Sys.sleep(3)
+    htmlContent <- read_html(downloadURL)
+    dfResults <- htmlContent %>% html_nodes("table") %>% .[[4]] %>% html_table() 
+
     return(dfResults)
 }
 

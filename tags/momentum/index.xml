@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>momentum | Nitin Gupta</title>
-    <link>/tags/momentum/</link>
-      <atom:link href="/tags/momentum/index.xml" rel="self" type="application/rss+xml" />
-    <description>momentum</description>
+    <title>Momentum | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/momentum/</link>
+      <atom:link href="https://www.nitingupta.com/tags/momentum/index.xml" rel="self" type="application/rss+xml" />
+    <description>Momentum</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Tue, 27 Jun 2017 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>momentum</title>
-      <link>/tags/momentum/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Momentum</title>
+      <link>https://www.nitingupta.com/tags/momentum/</link>
     </image>
     
     <item>
       <title>Investment Strategy Diversification</title>
-      <link>/investing/investment-strategy-diversification/</link>
+      <link>https://www.nitingupta.com/investing/investment-strategy-diversification/</link>
       <pubDate>Tue, 27 Jun 2017 00:00:00 +0000</pubDate>
-      <guid>/investing/investment-strategy-diversification/</guid>
+      <guid>https://www.nitingupta.com/investing/investment-strategy-diversification/</guid>
       <description>
 
 
@@ -281,7 +281,7 @@ May 1997 - Apr 2017 Worst Drawdown
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;It is easy to cross-check the backtesting results with simulated results from Gary’s &lt;a href=&#34;http://www.optimalmomentum.com/gem_trackrecord.html&#34;&gt;website&lt;/a&gt;. I do not expect to match the annualized returns as Gary’s simulations use theoretical indexes, do not apply any fees or transaction costs, and monthly performance numbers on his website are rounded to the first decimal place. But a correlation of monthly returns of 0.99, annualized standard deviations, shape of the equity curves and the close alignment of drawdowns all suggest a close match.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/investment-strategy-diversification/index_files/figure-html/GEM_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/investment-strategy-diversification/index_files/figure-html/GEM_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The GEM strategy performance shows simple rules could be used for timing entries and exits and work exceedingly well over complete market cycles. GEM trounces the S&amp;amp;P 500 Total Returns Index on both absolute and risk adjusted basis over 2 market cycles in this backtesting period.&lt;/p&gt;
 &lt;p&gt;The results of an equally weighted long only strategy of SPY, CWI and AGG are also shown. Essentially it’s a simplified and slightly aggressive 66.67% stocks and 33.33% bonds portfolio, which gives a sense of the performance of a passive structurally allocated portfolio strategy. As compared to the broader market, it does reduce the volatility but a worst drawdown of ~ 40% is still driven by stocks.&lt;/p&gt;
 &lt;p&gt;The edge provided by simple market timing rules in GEM is evident as compared to an equally weighted long only portfolio of the 3 underlying assets. The drawdowns are much lower as there’s a clear rule for exiting the market when it underperforms relative to the risk free rate. Moreover, there have been very few trades over the past 20 years, and most of the gains have been long term in nature. Hence GEM is quite attractive from a tax standpoint too.&lt;/p&gt;
@@ -377,7 +377,7 @@ Sep 1986 - Apr 2017 Worst Drawdown
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/investment-strategy-diversification/index_files/figure-html/UIS_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/investment-strategy-diversification/index_files/figure-html/UIS_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The performance of both UIS and an equally weighted long only mix of stocks and treasuries show the benefits of diversication between these 2 asset classes. In fact an equally weighted portfolio would’ve done just about as well as the S&amp;amp;P 500 Total Returns Index with far lower volatility and drawdowns. Since the global financial crisis of 2008, UIS has performed exceedingly well, which has led to its outperformance on both absolute as well as risk-adjusted basis.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;three-way-momentum-strategy&#34; class=&#34;section level3&#34;&gt;
@@ -473,7 +473,7 @@ Nov 1987 - Apr 2017 Worst Drawdown
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/investment-strategy-diversification/index_files/figure-html/ThreeWay_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/investment-strategy-diversification/index_files/figure-html/ThreeWay_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;strategy-correlations&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Strategy Correlations&lt;/h3&gt;
@@ -1047,7 +1047,7 @@ ALL Years
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Here are the equity curves and the distribution of weights in the blended strategy:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/investment-strategy-diversification/index_files/figure-html/Blend_performance_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/investment-strategy-diversification/index_files/figure-html/Blend_performance_weights-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;advantages&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Advantages&lt;/h3&gt;

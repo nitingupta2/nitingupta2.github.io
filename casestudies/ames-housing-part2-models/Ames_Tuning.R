@@ -2,208 +2,194 @@ library(ngmodels)
 library(tidyselect)
 library(tidymodels)
 library(keras)
+library(randomForest)
+library(stacks)
 
 library(conflicted)
 conflict_prefer("filter", "dplyr")
 conflict_prefer("rename", "dplyr")
+conflict_prefer("slice", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("setdiff", "dplyr")
-conflict_prefer("margin", "dials")
+conflict_prefer("margin", "ggplot2")
 
 # load clean dataset
 load("Ames_Housing_Clean.Rda")
 
 # Remove Outliers and split clean data
-########################################################################################################################################################
+######################################################################################################################################################
 # dfClean <- dfClean %>% dplyr::filter(!(Id %in% c(524, 1299))) # glmnet cv_rmse improves to 0.117 but test_rmse is 0.135
 dfTrain <- dfClean %>% filter(!(Id %in% vTestIDs))
 dfTest <- dfClean %>% filter(Id %in% vTestIDs)
 
-# Preprocessing Data
-########################################################################################################################################################
-normalize_skewed_data <- function(Z) {
-    vNorm <- Z
-    if(abs(skewness(Z, na.rm = T)) > 0.75) {
-        vNorm <- log(Z + 1)
-    }
-    return(vNorm)
-}
+set.seed(2300)
+train_folds <- dfTrain %>% vfold_cv(10)
 
-# Features to Preprocess excluding Ids
-vFeaturesProc <- dplyr::setdiff(vFeaturesNum, c("Id","PropertyAge"))
+# Determine skewed features
+vFeaturesSkew <- dfClean %>% 
+    select_if(is.numeric) %>% 
+    select_if(function(Z) abs(skewness(Z, na.rm = T)) > 0.75) %>% 
+    colnames() %>% 
+    setdiff(c("Id","PropertyAge"))
 
-# Preprocessing Recipe
-preprocessing_recipe <- recipe(SalePrice ~ ., data = dfClean) %>% 
-    step_mutate_at(one_of(vFeaturesProc), -all_outcomes(), fn = normalize_skewed_data) %>%
-    prep()
+## OLS LINEAR MODEL
+######################################################################################################################################################
+lm_model <- linear_reg() %>% 
+    set_engine("lm")
 
-# Normalized & Dummified Data
-dfNorm <- preprocessing_recipe %>% 
-    bake(dfClean) %>% 
-    mutate(target = log(SalePrice)) %>% 
-    select(-SalePrice) %>% 
-    select(target, everything())
+lm_recipe <- recipe(SalePrice ~ ., data = dfTrain) %>% 
+    update_role(Id, new_role = "ID") %>% 
+    step_mutate_at(LotFrontage, LotArea, MasVnrArea, BsmtFinSF1, BsmtFinSF2, BsmtUnfSF, TotalBsmtSF, `1stFlrSF`, `2ndFlrSF`,LowQualFinSF, 
+                   BsmtHalfBath, KitchenAbvGr, TotRmsAbvGrd, WoodDeckSF, MiscVal, PorchSF, TotalSF,
+                   fn = ~ log(. + 1L)) %>%
+    step_dummy(all_nominal()) %>% 
+    step_log(all_outcomes(), offset = 1)
 
-# Processed data
-dfTrain_Proc <- dfNorm %>% filter(!(Id %in% vTestIDs)) %>% select(-Id)
-dfTest_Proc <- dfNorm %>% filter(Id %in% vTestIDs)
+lm_wf <- workflow() %>% 
+    add_recipe(lm_recipe) %>% 
+    add_model(lm_model)
 
-# Create cv folds
-########################################################################################################################################################
-get_cv_folds <- function(dfTrain_Proc, numFolds, strataVar, randomSeed, shuffleData) {
-    # shuffle the rows
-    if(shuffleData) {
-        set.seed(randomSeed)
-        dfTrain_Proc <- dfTrain_Proc[sample(nrow(dfTrain_Proc)), ]
-    }
-    
-    # split dataset into folds where each fold has the same distribution of target
-    lFolds <- dfTrain_Proc %>% vfold_cv(v = numFolds, strata = all_of(strataVar))
-    
-    return(lFolds)
-}
-########################################################################################################################################################
+lm_resamples <- lm_wf %>% 
+    fit_resamples(train_folds)
 
-# Parsnip Model Specification
-get_model_spec <- function(modelType) {
-    
-    model_spec <- switch(modelType,
-                         lm = linear_reg(mode = "regression") %>% 
-                             set_engine("lm"),
-                         
-                         glmnet = linear_reg(mode = "regression", penalty = tune(), mixture = tune()) %>% 
-                             set_engine("glmnet"),
-                         
-                         xgboost = boost_tree(mode="regression", trees=1000, min_n=tune(), tree_depth=tune(), learn_rate=tune()) %>% 
-                             set_engine("xgboost", objective = "reg:squarederror"),
-                         
-                         kernlab = svm_rbf(mode="regression", cost=tune(), rbf_sigma=tune(), margin=tune()) %>% 
-                             set_engine("kernlab"),
-                         
-                         randomForest = rand_forest(mode = "regression", trees = 1000, mtry = tune(), min_n = tune()) %>%
-                             set_engine("randomForest", objective = "reg:squarederror"),
-                         
-                         mlp = mlp(mode = "regression", hidden_units = 5, dropout = tune(), epochs = 100) %>% 
-                             set_engine("keras", verbose = 0, validation_split = 0.25, 
-                                        optimizer = optimizer_rmsprop(lr = 0.01), loss = "mse", metrics = list("mean_absolute_error")))
-    
-    return(model_spec)
-}
+lm_resamples %>% collect_metrics()
 
-########################################################################################################################################################
+## Parallel Processing
+######################################################################################################################################################
+library(doParallel)
+doParallel::registerDoParallel(cores = 7)
 
-# Parameter Grid Search
-get_model_param_grid <- function(dfTrain_Proc, modelType, numParams, randomSeed) {
-    
-    set.seed(randomSeed)    
-    param_spec <- switch(modelType,
-                         glmnet = parameters(penalty(), mixture()),
-                         kernlab = parameters(cost(), rbf_sigma(), margin()),
-                         xgboost = parameters(min_n(), tree_depth(), learn_rate()),
-                         randomForest = parameters(min_n(), finalize(mtry(), dfTrain_Proc)),
-                         mlp = parameters(dropout(range = c(0, 0.1))))
-    
-    dfGrid <- grid_max_entropy(param_spec, size = numParams)
-    return(dfGrid)
-}
+## Lasso Regression
+######################################################################################################################################################
+mset <- metric_set(rmse)
 
-########################################################################################################################################################
+tune_glmnet_model = linear_reg(mode = "regression", penalty = tune(), mixture = tune()) %>% 
+    set_engine("glmnet")
 
-# Cross Validation Results
-get_cv_results <- function(modelFormula, cv_folds, model_spec, param_grid) {
-    
-    cv_results <- tune_grid(
-        formula = target ~ .,
-        resamples = cv_folds,
-        model = model_spec,
-        grid = param_grid,
-        metrics = metric_set(mae, rmse, rsq),
-        control = control_grid(verbose = TRUE)
-    )
-    return(cv_results)
-}
+tune_glmnet_wf <- workflow() %>% 
+    add_recipe(lm_recipe) %>% 
+    add_model(tune_glmnet_model)
 
-# Finalize model with best parameters
-########################################################################################################################################################
-get_finalized_model <- function(dfTrain_Proc, model_spec, param_best) {
-    
-    model_final <- model_spec %>% 
-        finalize_model(parameters = param_best) %>% 
-        fit(formula = target ~ ., data = dfTrain_Proc)
-    
-    return(model_final)
-}
+glmnet_tune <- tune_glmnet_wf %>% 
+    tune_grid(train_folds,
+              grid = grid_max_entropy(parameters(penalty(), mixture()), size = 20),
+              metrics = mset,
+              control = control_stack_grid())
 
-# Create cv folds
-########################################################################################################################################################
-cv_folds <- get_cv_folds(dfTrain_Proc, numFolds = 4, strataVar = "target", randomSeed = 2300, shuffleData = TRUE)
+glmnet_tune %>% collect_metrics() %>% arrange(mean)
 
+autoplot(glmnet_tune)
 
-# lm model
-model_spec_lm <- get_model_spec(modelType = "lm")
-cv_results_lm <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_lm, param_grid = 10)
-cv_best_lm <- cv_results_lm %>% show_best(metric = "rmse", n = 1, maximize = F)
+glmnet_model <- tune_glmnet_model %>% 
+    finalize_model(parameters = select_best(glmnet_tune))
 
-# glmnet model
-model_spec_glmnet <- get_model_spec(modelType = "glmnet")
-param_grid_glmnet <- get_model_param_grid(dfTrain_Proc, modelType = "glmnet", numParams = 30, randomSeed = 2300)
-# glmnet hyperparameter tuning
-cv_results_glmnet <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_glmnet, param_grid_glmnet)
-cv_best_glmnet <- cv_results_glmnet %>% show_best(metric = "rmse", n = 10, maximize = F)
-# glmnet finalized model
-param_best_glmnet <- cv_results_glmnet %>% select_best(metric = "rmse", maximize = F)
-model_final_glmnet <- get_finalized_model(dfTrain_Proc, model_spec_glmnet, param_best_glmnet)
+glmnet_wf <- tune_glmnet_wf %>% 
+    finalize_workflow(parameters = select_best(glmnet_tune))
 
-# randomForest model
-model_spec_rf <- get_model_spec(modelType = "randomForest")
-param_grid_rf <- get_model_param_grid(dfTrain_Proc, modelType = "randomForest", numParams = 30, randomSeed = 2300)
-# randomForest hyperparameter tuning
-cv_results_rf <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_rf, param_grid_rf)
-cv_best_rf <- cv_results_rf %>% show_best(metric = "rmse", n = 10, maximize = F)
-# randomForest finalized model
-param_best_rf <- cv_results_rf %>% select_best(metric = "rmse", maximize = F)
-model_final_rf <- get_finalized_model(dfTrain_Proc, model_spec_rf, param_best_rf)
+glmnet_fit <- glmnet_wf %>% fit(dfTrain)
+dfTest_proc <- lm_recipe %>% prep() %>% bake(new_data = dfTest)
+predict(glmnet_fit, dfTest)
 
+glmnet_chosen <- glmnet_tune %>% 
+    filter_parameters(parameters = select_best(glmnet_tune))
 
-# xgboost model
-model_spec_xgboost <- get_model_spec(modelType = "xgboost")
-param_grid_xgboost <- get_model_param_grid(dfTrain_Proc, modelType = "xgboost", numParams = 30, randomSeed = 2300)
-# xgboost hyperparameter tuning
-cv_results_xgboost <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_xgboost, param_grid_xgboost)
-cv_best_xgboost <- cv_results_xgboost %>% show_best(metric = "rmse", n = 10, maximize = F)
-# xgboost finalized model
-param_best_xgboost <- cv_results_xgboost %>% select_best(metric = "rmse", maximize = F)
-model_final_xgboost <- get_finalized_model(dfTrain_Proc, model_spec_xgboost, param_best_xgboost)
+## Random Forest
+######################################################################################################################################################
+tune_rf_model <- rand_forest(mode = "regression", trees = tune(), mtry = tune()) %>% 
+    set_engine("randomForest")
+
+rf_recipe <- recipe(SalePrice ~ ., data = dfTrain) %>% 
+    update_role(Id, new_role = "ID") %>% 
+    step_dummy(all_nominal()) %>% 
+    step_log(all_outcomes(), offset = 1)
+
+tune_rf_wf <- workflow() %>% 
+    add_recipe(rf_recipe) %>% 
+    add_model(tune_rf_model)
+
+rf_tune <- tune_rf_wf %>% 
+    tune_grid(train_folds, 
+              grid = crossing(trees = c(200, 300, 500, 1000), 
+                              mtry = seq(70, 120, by = 10)), 
+              metrics = mset,
+              control = control_stack_grid())
+
+rf_tune %>% collect_metrics() %>% arrange(mean)
+
+autoplot(rf_tune)
+
+# Final Random Forest Model
+rf_model <- tune_rf_model %>% 
+    finalize_model(parameters = select_best(rf_tune))
+
+# Final Random Forest workflow
+rf_wf <- tune_rf_wf %>% 
+    finalize_workflow(parameters = select_best(rf_tune))
+
+rf_wf %>% fit(dfTrain) 
+
+rf_chosen <- rf_tune %>% 
+    filter_parameters(parameters = select_best(rf_tune))
+
+## xgboost
+######################################################################################################################################################
+tune_xgb_model <- boost_tree(mode="regression", trees=1000, min_n=tune(), tree_depth=tune(), learn_rate=tune()) %>% 
+    set_engine("xgboost", objective = "reg:squarederror")
+
+xgb_recipe <- recipe(SalePrice ~ ., data = dfTrain) %>% 
+    update_role(Id, new_role = "ID") %>% 
+    step_dummy(all_nominal()) %>% 
+    step_log(all_outcomes(), offset = 1)
+
+tune_xgb_wf <- workflow() %>% 
+    add_recipe(xgb_recipe) %>% 
+    add_model(tune_xgb_model)
+
+xgb_tune <- tune_xgb_wf %>% 
+    tune_grid(train_folds,
+              grid = crossing(learn_rate = exp(seq(-3, 0, by = 0.5)),
+                              min_n = seq(2, 20, 2),
+                              tree_depth = 1:5),
+              metrics = mset,
+              control = control_stack_grid())
+
+xgb_tune %>% collect_metrics() %>% arrange(mean)
+
+autoplot(xgb_tune)
+
+xgb_model <- tune_xgb_model %>% 
+    finalize_model(parameters = select_best(xgb_tune))
+
+xgb_wf <- tune_xgb_wf %>% 
+    finalize_workflow(parameters = select_best(xgb_tune))
+
+xgb_chosen <- xgb_tune %>% 
+    filter_parameters(parameters = select_best(xgb_tune))
+
+## Save models and results
+######################################################################################################################################################
+save(lm_recipe, lm_wf, lm_resamples,
+     tune_glmnet_model, tune_glmnet_wf, glmnet_tune, glmnet_chosen,
+     rf_recipe, tune_rf_model, tune_rf_wf, rf_tune, rf_chosen,
+     tune_xgb_model, tune_xgb_wf, xgb_tune, xgb_chosen,
+     file = "Ames_Results.Rda")
 
 
-# kernlab model
-model_spec_kernlab <- get_model_spec(modelType = "kernlab")
-param_grid_kernlab <- get_model_param_grid(dfTrain_Proc, modelType = "kernlab", numParams = 30, randomSeed = 2300)
-# kernlab hyperparameter tuning
-cv_results_kernlab <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_kernlab, param_grid_kernlab)
-cv_best_kernlab <- cv_results_kernlab %>% show_best(metric = "rmse", n = 10, maximize = F)
-# kernlab finalized model
-param_best_kernlab <- cv_results_kernlab %>% select_best(metric = "rmse", maximize = F)
-model_final_kernlab <- get_finalized_model(dfTrain_Proc, model_spec_kernlab, param_best_kernlab)
+## Ensemble
+######################################################################################################################################################
+ensemble <- stacks() %>% 
+    add_candidates(glmnet_chosen) %>% 
+    add_candidates(rf_chosen) %>% 
+    add_candidates(xgb_chosen)
 
+ensemble_blended <- ensemble %>% blend_predictions()
 
-# mlp model
-model_spec_mlp <- get_model_spec(modelType = "mlp")
-param_grid_mlp <- get_model_param_grid(dfTrain_Proc, modelType = "mlp", numParams = 30, randomSeed = 2300)
-# mlp hyperparameter tuning
-cv_results_mlp <- get_cv_results(as.formula("target ~ ."), cv_folds, model_spec_mlp, param_grid_mlp)
-cv_best_mlp <- cv_results_mlp %>% show_best(metric = "rmse", n = 10, maximize = F)
-# mlp finalized model
-param_best_mlp <- cv_results_mlp %>% select_best(metric = "rmse", maximize = F)
-model_final_mlp <- get_finalized_model(dfTrain_Proc, model_spec_mlp, param_best_mlp)
+ensemble_fit <- ensemble_blended %>% fit_members()
 
+ensemble_fit %>% predict(lm_recipe %>% prep() %>% bake(new_data = head(dfTest)))
 
-# save models and results
-save(model_spec_lm, model_spec_glmnet, model_spec_rf, model_spec_xgboost, model_spec_mlp, model_spec_kernlab,
-     model_final_glmnet, model_final_rf, model_final_xgboost, model_final_mlp, model_final_kernlab,
-     cv_best_lm, cv_best_glmnet, cv_best_rf, cv_best_xgboost, cv_best_mlp, cv_best_kernlab,
-     param_grid_glmnet, param_grid_rf, param_grid_xgboost, param_grid_mlp, param_grid_kernlab,
-     param_best_glmnet, param_best_rf, param_best_xgboost, param_best_mlp, param_best_kernlab,
-     dfTrain, dfTest, dfTrain_Proc, dfTest_Proc,
-     preprocessing_recipe, cv_folds, normalize_skewed_data, vFeaturesProc,
-     file = "Ames_Tuning.Rda")
+ensemble_blended_full <- ensemble_blended
+ensemble_blended_full$train <- dfTrain
+
+ensemble_fit_full <- ensemble_blended_full %>% fit_members()
+ensemble_fit_full %>% predict(dfTest)

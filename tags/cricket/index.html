@@ -28,10 +28,10 @@
   
     
   
-  <meta name="description" content="Founder">
+  <meta name="description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta.">
 
   
-  <link rel="alternate" hreflang="en-us" href="/tags/cricket/">
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/tags/cricket/">
 
   
 
@@ -83,7 +83,7 @@
   
   
   
-  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
 
   
     
@@ -102,6 +102,43 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    const anchor = event.target.closest('a');
+    if (!anchor || anchor.host === window.location.host) {
+      return;
+    }
+    trackOutboundLink(anchor.href);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-K2NQYHG3M1', { 'anonymize_ip': true });
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -109,11 +146,13 @@
   <link rel="alternate" href="/tags/cricket/index.xml" type="application/rss+xml" title="Nitin Gupta">
   
 
-  <link rel="manifest" href="/index.webmanifest">
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/tags/cricket/">
+  <link rel="canonical" href="https://www.nitingupta.com/tags/cricket/">
 
   
   
@@ -126,10 +165,10 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="Nitin Gupta">
-  <meta property="og:url" content="/tags/cricket/">
-  <meta property="og:title" content="cricket | Nitin Gupta">
-  <meta property="og:description" content="Founder"><meta property="og:image" content="/img/icon-192.png">
-  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+  <meta property="og:url" content="https://www.nitingupta.com/tags/cricket/">
+  <meta property="og:title" content="Cricket | Nitin Gupta">
+  <meta property="og:description" content="Data science, machine learning, investing, and R analysis by Nitin Gupta."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     <meta property="og:updated_time" content="2017-02-16T00:00:00&#43;00:00">
   
@@ -141,6 +180,32 @@
 
   
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+  window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "hsl(339, 90%, 68%)",
+          "text": "#fff"
+        },
+        "button": {
+          "background": "#fff",
+          "text": "hsl(339, 90%, 68%)"
+        }
+      },
+      "theme": "classic",
+      "content": {
+        "message": "This website uses cookies and similar technologies for analytics and embedded third-party services.",
+        "dismiss": "Got it!",
+        "link": "Learn more",
+        "href": "/privacy/"
+      }
+    })});
+</script>
+
+
 
   
 
@@ -148,7 +213,7 @@
 
 
 
-  <title>cricket | Nitin Gupta</title>
+  <title>Cricket | Nitin Gupta</title>
 
 </head>
 
@@ -398,7 +463,7 @@
     
   
 <div class="universal-wrapper pt-3">
-  <h1>cricket</h1>
+  <h1>Cricket</h1>
 
   
 
@@ -416,7 +481,8 @@
     <h2><a href="/post/best-batsmen-in-cricket-at-present/">Best batsmen in cricket at present</a></h2>
     <div class="article-style">
       
-      Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my last post, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.
+      Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my last post, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.
+
       
     </div>
   </div>
@@ -425,8 +491,9 @@
     <h2><a href="/post/top-batsmen-in-cricket/">Top batsmen in cricket</a></h2>
     <div class="article-style">
       
-      In a previous post, I used data from Statsguru and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.
+      In a previous post, I used data from Statsguru and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.
 Distribution of matches played by all playersLet’s take a look at the summary statistics of number of matches played by all players in each format of the game.
+
       
     </div>
   </div>
@@ -436,6 +503,7 @@ Distribution of matches played by all playersLet’s take a look at the summary
     <div class="article-style">
       
       Since early childhood, I have been a big fan of cricket. Some of my earliest childhood memories are watching the game along with my loved ones in India. As much as I can recall, the first series I saw was between India and the West Indies during the early 80s, on a black and white TV set. Watching Sunil Gavaskar play the fearsome West Indian fast bowlers with aplomb, made me his fan…until a kid named Sachin Tendulkar arrived in 1989.
+
       
     </div>
   </div>
@@ -549,7 +617,7 @@ Distribution of matches played by all playersLet’s take a look at the summary
     
     
     
-    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
 
@@ -574,7 +642,7 @@ Distribution of matches played by all playersLet’s take a look at the summary
   
 
   <p class="powered-by">
-    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+    © Nitin Gupta. All Rights Reserved. &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

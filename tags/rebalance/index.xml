@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>rebalance | Nitin Gupta</title>
-    <link>/tags/rebalance/</link>
-      <atom:link href="/tags/rebalance/index.xml" rel="self" type="application/rss+xml" />
-    <description>rebalance</description>
+    <title>Rebalance | Nitin Gupta</title>
+    <link>https://www.nitingupta.com/tags/rebalance/</link>
+      <atom:link href="https://www.nitingupta.com/tags/rebalance/index.xml" rel="self" type="application/rss+xml" />
+    <description>Rebalance</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 29 May 2017 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
-      <title>rebalance</title>
-      <link>/tags/rebalance/</link>
+      <url>https://www.nitingupta.com/img/icon-192.png</url>
+      <title>Rebalance</title>
+      <link>https://www.nitingupta.com/tags/rebalance/</link>
     </image>
     
     <item>
       <title>Luck in Rebalance Timing</title>
-      <link>/investing/luck-in-rebalance-timing/</link>
+      <link>https://www.nitingupta.com/investing/luck-in-rebalance-timing/</link>
       <pubDate>Mon, 29 May 2017 00:00:00 +0000</pubDate>
-      <guid>/investing/luck-in-rebalance-timing/</guid>
+      <guid>https://www.nitingupta.com/investing/luck-in-rebalance-timing/</guid>
       <description>
 
 
@@ -55,7 +55,7 @@
 &lt;h3&gt;Methodology&lt;/h3&gt;
 &lt;p&gt;To test the effect of rebalance timing, I constructed 21 portfolio series, assuming 21 business days in a month. The first portfolio series is rebalanced on the first business day of a month, using the trading signal as of the end of the previous month. In short, signal @ t, rebalance @ t+1. If there are fewer than 21 business days in a month, say for instance 19 days, then portfolio series 20 and 21 are rebalanced on the first business day of the next month. A transaction cost of 10 bps is applied on each trade.&lt;/p&gt;
 &lt;p&gt;Here are the results:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/luck-in-rebalance-timing/index_files/figure-html/result1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/luck-in-rebalance-timing/index_files/figure-html/result1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The impact of luck could be observed in drawdowns as well as returns. The worst drawdown of series 13 is just a little more than half of series 14. Nevertheless, their annualized returns are almost the same. In all the cases, except series 13, the worst drawdown happened after the crash of 1987. Ironically, series 13 is the lucky one here ;). As Corey mentioned in his tweets, for an investment manager this is a difference between getting hired and fired.&lt;/p&gt;
 &lt;p&gt;At the moment, series 1, gives the best return. As we progress to series 9, the returns decrease quite significantly. There is a difference of over 2% in their annualized returns. Here are their performance summaries:&lt;/p&gt;
 &lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
@@ -129,7 +129,7 @@ ALL Years
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Let’s take a look at how the best (blue) and the worst (red) series have fared relative to the other 19 series in the entire historical period:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/luck-in-rebalance-timing/index_files/figure-html/best_worst_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/luck-in-rebalance-timing/index_files/figure-html/best_worst_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;So, turns out the current best performed worse than the median for most of the historical period. But since 2003, it really took off and has managed to avoid many whipsaws that appear to have affected other series. But will it continue to do better? The impact of luck is quite obvious here. Quite surprisingly, the worst series has been at or near the worst throughout the historical period. Perhaps a longer backtest or one with a different investment strategy would be useful to investigate this further.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;mitigating-the-impact-of-luck&#34; class=&#34;section level3&#34;&gt;
@@ -141,7 +141,7 @@ ALL Years
 &lt;li&gt;&lt;p&gt;Stick with rebalancing at the beginning of a new month (t+1). But instead of taking the signal at the last day of the prior month (t), take the median (or mean) of the daily signals in the prior month. This is similar to Corey’s idea of signal smoothing with 21 days SMA of signals.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Let’s see how these methods compare to the best and worst portfolios:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/investing/luck-in-rebalance-timing/index_files/figure-html/final_performance_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/investing/luck-in-rebalance-timing/index_files/figure-html/final_performance_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The three methods with overlapping portfolios and signal smoothing are denoted by &lt;em&gt;Weekly_avg, Signal_median, Signal_avg&lt;/em&gt;. We can observe that all of these methods have similar performance profiles in the historical period, with minor differences in shorter time periods. They perform much better than the &lt;em&gt;Worst&lt;/em&gt; portfolio series, in all time periods. And during most of the historical period, they have even performed better than the current &lt;em&gt;Best&lt;/em&gt; series.&lt;/p&gt;
 &lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
 &lt;thead&gt;

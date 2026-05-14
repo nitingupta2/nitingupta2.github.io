@@ -1,346 +1,185 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
-    <loc>/courses/example/example1/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/</loc>
-    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/example2/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/talk/example/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/talk/</loc>
-    <lastmod>2030-06-01T13:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/market-dashboard/</loc>
+    <loc>https://www.nitingupta.com/</loc>
+    <lastmod>2026-05-13T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/privacy/</loc>
+    <lastmod>2026-05-13T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/terms/</loc>
+    <lastmod>2026-05-13T00:00:00-04:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/project/market-dashboard/</loc>
     <lastmod>2019-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/project/</loc>
     <lastmod>2019-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/shiny-apps/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/shiny-apps/</loc>
     <lastmod>2019-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/</loc>
     <lastmod>2019-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/slides/</loc>
-    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/slides/example/</loc>
-    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/bayesian/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/bayesian/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/datascience/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/datascience/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/dataviz/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/dataviz/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/how-much-do-swimmers-improve-in-a-season/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/how-much-do-swimmers-improve-in-a-season/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rstats/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/rstats/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/swimming/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/swimming/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/a-deep-dive-in-analyzing-swimming-data/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/a-deep-dive-in-analyzing-swimming-data/</loc>
     <lastmod>2018-09-30T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/privacy/</loc>
-    <lastmod>2018-06-28T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/terms/</loc>
-    <lastmod>2018-06-28T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/betting/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/betting/</loc>
     <lastmod>2017-08-03T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/biased-coin-flipping-experiment/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/biased-coin-flipping-experiment/</loc>
     <lastmod>2017-08-03T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/simulations/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/simulations/</loc>
     <lastmod>2017-08-03T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/investing/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/investing/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/investing/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/investing/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/investing/investment-strategy-diversification/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/investing/investment-strategy-diversification/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/models/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/models/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/momentum/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/momentum/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rfinance/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/rfinance/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/investing/luck-in-rebalance-timing/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/investing/luck-in-rebalance-timing/</loc>
     <lastmod>2017-05-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rebalance/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/rebalance/</loc>
     <lastmod>2017-05-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/text-analysis-of-amazon-shareholder-letters/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/text-analysis-of-amazon-shareholder-letters/</loc>
     <lastmod>2017-04-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tidytext/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/tidytext/</loc>
     <lastmod>2017-04-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/historical-stock-performance/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/project/historical-stock-performance/</loc>
     <lastmod>2017-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/predictive-typing/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/project/predictive-typing/</loc>
     <lastmod>2017-04-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/building-a-predictive-typing-model/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/building-a-predictive-typing-model/</loc>
     <lastmod>2017-04-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/data.table/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/data.table/</loc>
     <lastmod>2017-04-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/predictive/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/predictive/</loc>
     <lastmod>2017-04-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/shinyapps/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/shinyapps/</loc>
     <lastmod>2017-04-15T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/best-batsmen-in-cricket-at-present/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/best-batsmen-in-cricket-at-present/</loc>
     <lastmod>2017-02-16T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/cricket/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/cricket/</loc>
     <lastmod>2017-02-16T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/top-batsmen-in-cricket/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/top-batsmen-in-cricket/</loc>
     <lastmod>2017-02-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/a-brief-history-of-cricket/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/post/a-brief-history-of-cricket/</loc>
     <lastmod>2017-02-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/ames-housing-part2-models/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/case-studies/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/case-studies/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/ggplot2/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/ggplot2/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/glmnet/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/glmnet/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/linear/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/linear/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/non-linear/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/non-linear/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/randomforest/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/randomforest/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/regression/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/regression/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/xgboost/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/xgboost/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/ames-housing-part1-eda/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</loc>
     <lastmod>2016-12-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/eda/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/eda/</loc>
     <lastmod>2016-12-25T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/diamonds-part3-non-linear-models/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/</loc>
     <lastmod>2016-12-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/keras/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/keras/</loc>
     <lastmod>2016-12-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/neural-net/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/neural-net/</loc>
     <lastmod>2016-12-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/diamonds-part2-linear-models/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/</loc>
     <lastmod>2016-12-21T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/casestudies/diamonds-part1-eda/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/diamonds-part1-eda/</loc>
     <lastmod>2016-12-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/investing/building-blocks-of-investment-strategies/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/investing/building-blocks-of-investment-strategies/</loc>
     <lastmod>2016-07-22T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/schematic/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/schematic/</loc>
     <lastmod>2016-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/authors/admin/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/authors/</loc>
+  </url><url>
+    <loc>https://www.nitingupta.com/publication_types/</loc>
   </url>
-  
-  <url>
-    <loc>/authors/admin/</loc>
-  </url>
-  
-  <url>
-    <loc>/authors/</loc>
-  </url>
-  
-  <url>
-    <loc>/courses/</loc>
-  </url>
-  
-  <url>
-    <loc>/publication_types/</loc>
-  </url>
-  
 </urlset>

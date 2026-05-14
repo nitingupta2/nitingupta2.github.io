@@ -29,11 +29,17 @@
     
   
   <meta name="description" content="In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
-Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it.Here are the dimensions of the training and testing sets respectively:
-[1] &quot;Dimensions of the training set&quot;[1] 1460 81[1] &quot;Dimensions of the testing set&quot;[1] 1459 81Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:">
+
+Data Summaries
+The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
+[1] &quot;Dimensions of the training set&quot;
+[1] 1460   81
+[1] &quot;Dimensions of the testing set&quot;
+[1] 1459   81
+Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:">
 
   
-  <link rel="alternate" hreflang="en-us" href="/casestudies/ames-housing-part1-eda/">
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">
 
   
 
@@ -85,7 +91,7 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
   
   
   
-  <link rel="stylesheet" href="/css/academic.min.54f0d8ecdd50ac9b1b0821399a5fddc1.css">
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
 
   
     
@@ -104,16 +110,55 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    const anchor = event.target.closest('a');
+    if (!anchor || anchor.host === window.location.host) {
+      return;
+    }
+    trackOutboundLink(anchor.href);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'G-K2NQYHG3M1', { 'anonymize_ip': true });
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
   
 
-  <link rel="manifest" href="/index.webmanifest">
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/casestudies/ames-housing-part1-eda/">
+  <link rel="canonical" href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">
 
   
   
@@ -126,12 +171,18 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="Nitin Gupta">
-  <meta property="og:url" content="/casestudies/ames-housing-part1-eda/">
+  <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">
   <meta property="og:title" content="Ames Housing - Part 1 - Exploratory Data Analysis | Nitin Gupta">
   <meta property="og:description" content="In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
-Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it.Here are the dimensions of the training and testing sets respectively:
-[1] &quot;Dimensions of the training set&quot;[1] 1460 81[1] &quot;Dimensions of the testing set&quot;[1] 1459 81Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:"><meta property="og:image" content="/img/icon-192.png">
-  <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
+
+Data Summaries
+The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
+[1] &quot;Dimensions of the training set&quot;
+[1] 1460   81
+[1] &quot;Dimensions of the testing set&quot;
+[1] 1459   81
+Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:"><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
       <meta property="article:published_time" content="2016-12-25T00:00:00&#43;00:00">
@@ -147,6 +198,32 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
 
 
   
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+  window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "hsl(339, 90%, 68%)",
+          "text": "#fff"
+        },
+        "button": {
+          "background": "#fff",
+          "text": "hsl(339, 90%, 68%)"
+        }
+      },
+      "theme": "classic",
+      "content": {
+        "message": "This website uses cookies and similar technologies for analytics and embedded third-party services.",
+        "dismiss": "Got it!",
+        "link": "Learn more",
+        "href": "/privacy/"
+      }
+    })});
+</script>
+
 
 
   
@@ -474,14 +551,13 @@ Data SummariesThe Ames Housing dataset contains the sale prices of properties i
 <p>In this case study, we will use the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a> to explore regression techniques and predict the sale price of houses.</p>
 <div id="data-summaries" class="section level2">
 <h2>Data Summaries</h2>
-<p>The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an <strong>Id</strong> associated with it.
-Here are the dimensions of the training and testing sets respectively:</p>
+<p>The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an <strong>Id</strong> associated with it. Here are the dimensions of the training and testing sets respectively:</p>
 <pre><code>[1] &quot;Dimensions of the training set&quot;</code></pre>
 <pre><code>[1] 1460   81</code></pre>
 <pre><code>[1] &quot;Dimensions of the testing set&quot;</code></pre>
 <pre><code>[1] 1459   81</code></pre>
 <p>Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png" width="672" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png" width="672" /></p>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -589,19 +665,19 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li><code>BsmtBath</code> = <code>BsmtFullBath</code> + 0.5 * <code>BsmtHalfBath</code></li>
 <li><code>HasBsmt</code> = <code>TotalBsmtSF</code> &gt; 0</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png" width="960" /></p>
 <ul>
 <li>Most properties have a basement.</li>
 <li>Column plots show that <code>BsmtFinType2</code> and <code>BsmtCond</code> values are dominated by a single category.</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png" width="672" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png" width="672" /></p>
 </div>
 <div id="bathroom-features" class="section level4">
 <h4>Bathroom Features</h4>
 <ul>
 <li>A new feature is generated to determine the total number of bathrooms: <code>TotalBath</code> = <code>FullBath</code> + <code>HalfBath</code> + <code>BsmtBath</code></li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png" width="960" /></p>
 </div>
 <div id="fireplace-features" class="section level4">
 <h4>Fireplace Features</h4>
@@ -626,7 +702,7 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>A new feature is generated where: <code>HasFireplace</code> = <code>Fireplaces</code> &gt; 0</li>
 <li>A significant number of properties have fireplaces.</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png" width="960" /></p>
 </div>
 <div id="garage-features" class="section level4">
 <h4>Garage Features</h4>
@@ -660,7 +736,7 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>Most properties have a garage.</li>
 <li>Column plots show that <code>GarageQual</code> and <code>GarageCond</code> values are dominated by a single category.</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png" width="960" /></p>
 </div>
 <div id="masonry-features" class="section level4">
 <h4>Masonry Features</h4>
@@ -705,7 +781,7 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>A new feature is generated where: <code>HasMasVnr</code> = <code>MasVnrArea</code> &gt; 0</li>
 <li>A significant number of properties have masonry.</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png" width="960" /></p>
 </div>
 <div id="pool-features" class="section level4">
 <h4>Pool Features</h4>
@@ -737,7 +813,7 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>A new feature is generated where: <code>HasPool</code> = <code>PoolArea</code> &gt; 0</li>
 <li>Most properties do not have a pool.</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png" width="960" /></p>
 </div>
 <div id="porch-features" class="section level4">
 <h4>Porch Features</h4>
@@ -748,14 +824,14 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>Whether property has a porch: <code>HasPorch</code> = <code>PorchSF</code> &gt; 0</li>
 </ul></li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png" width="960" /></p>
 </div>
 <div id="built-area-features" class="section level4">
 <h4>Built Area Features</h4>
 <ul>
 <li>A new feature is added to determine the total square footage of built area: <code>TotalSF</code> = <code>GrLivArea</code> + <code>TotalBsmtSF</code></li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png" width="960" /></p>
 </div>
 <div id="construction-year-features" class="section level4">
 <h4>Construction Year Features</h4>
@@ -768,7 +844,7 @@ Here are the dimensions of the training and testing sets respectively:</p>
 <li>Indicate if the property has been remodelled: <code>IsRemodAdd</code> = <code>YearRemodAdd</code> &gt; <code>YearBuilt</code></li>
 </ul></li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png" width="960" /></p>
 </div>
 <div id="neighborhood-features" class="section level4">
 <h4>Neighborhood Features</h4>
@@ -782,7 +858,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <li><strong>Type4</strong>: Mitchel, NPkVill, NAmes, SWISU, Sawyer, Blueste, BrkSide, Edwards, OldTown</li>
 <li><strong>Type5</strong>: IDOTRR, BrDale, MeadowV</li>
 </ul>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png" width="960" /></p>
 </div>
 <div id="other-missing-features" class="section level4">
 <h4>Other Missing Features</h4>
@@ -839,7 +915,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="skewed-categorical-features" class="section level4">
 <h4>Skewed Categorical Features</h4>
 <p>Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is <code>Utilities</code> which has only 2 categories - <strong>AllPub</strong> and <strong>NoSeWa</strong> in the dataset. Only 1 record has <strong>NoSeWa</strong> and the rest of the records have <strong>AllPub</strong>. Therefore, features like these do not have any predictive value.</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png" width="960" /></p>
 </div>
 </div>
 </div>
@@ -856,7 +932,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="numerical-features" class="section level3">
 <h3>Numerical Features</h3>
 <p>First let’s plot all the features that are measured as area in square feet:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png" width="960" /></p>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -864,7 +940,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <li>Many features are heavily skewed so they need to be normalized before fitting models.</li>
 </ul>
 <p>Now let’s see other numerical features:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png" width="960" /></p>
 </div>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
@@ -872,7 +948,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <li>Most of the properties have been built less than 20 years prior to their sale.</li>
 </ul>
 <p>Let’s plot the distribution of <code>SalePrice</code> in log scale:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png" width="672" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png" width="672" /></p>
 </div>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
@@ -888,7 +964,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <h2>Categorical Features</h2>
 <div id="ordinal-features" class="section level3">
 <h3>Ordinal Features</h3>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png" width="960" /></p>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -898,7 +974,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 </div>
 <div id="nominal-features." class="section level3">
 <h3>Nominal Features.</h3>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png" width="960" /></p>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -914,7 +990,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="numerical-numerical" class="section level3">
 <h3>Numerical-Numerical</h3>
 <p>Let’s examine the relationship of <code>SalePrice</code> with other numerical features:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" width="960" /></p>
 <div id="whats-notable-6" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -927,7 +1003,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="correlations-with-saleprice" class="section level3">
 <h3>Correlations with SalePrice</h3>
 <p>We isolate the features that have an absolute correlation of 0.1 or more with <code>SalePrice</code>.</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png" width="672" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png" width="672" /></p>
 <div id="whats-notable-7" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -938,7 +1014,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 </div>
 <div id="numerical-categorical-ordinal" class="section level3">
 <h3>Numerical-Categorical (Ordinal)</h3>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png" width="960" /></p>
 <div id="whats-notable-8" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -950,7 +1026,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="numerical-categorical-nominal" class="section level3">
 <h3>Numerical-Categorical (Nominal)</h3>
 <p>Let’s examine <code>SalePrice</code> with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median <code>SalePrice</code>. The <code>SalePrice</code> axis is truncated to exclude outliers.</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png" width="960" /></p>
 <div id="whats-notable-9" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -966,7 +1042,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="numerical-numerical-categorical" class="section level3">
 <h3>Numerical-Numerical-Categorical</h3>
 <p>We have determined <code>TotalSF</code> and <code>GarageArea</code> have among the strongest correlations with <code>SalePrice</code>. Let’s see how they vary by <code>NeighborhoodType</code> and <code>GarageType</code> respectively:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" width="960" /></p>
 <ul>
 <li>For the same total area, there are neighborhoods where <code>SalePrice</code> is higher than others.</li>
 <li>Properties with no garage are distinctly separated.</li>
@@ -977,7 +1053,7 @@ As it is said, real estate is all about location, location, location. Clearly so
 <div id="categorical-categorical-numerical" class="section level3">
 <h3>Categorical-Categorical-Numerical</h3>
 <p>We want to see if there is any interaction of <code>SalePrice</code> with a combination of categorical features, that could provide any additional explanatory power for prediction:</p>
-<p><img src="/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" width="960" /></p>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" width="960" /></p>
 <ul>
 <li>It is evident that some neighborhoods have higher <code>OverallQual</code> and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in <code>SalePrice</code> by quality of property.</li>
 <li>It is less clear if <code>GarageType</code> has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by <code>NeighborhoodType</code> itself.</li>
@@ -1021,60 +1097,6 @@ As it is said, real estate is all about location, location, location. Clearly so
 
 
 
-
-  
-  
-  
-    
-  
-  
-  <div class="media author-card content-widget-hr">
-    
-
-    <div class="media-body">
-      <h5 class="card-title"><a href="/">Nitin Gupta</a></h5>
-      <h6 class="card-subtitle">Founder</h6>
-      <p class="card-text">Quantitative Data Technologies</p>
-      <ul class="network-icon" aria-hidden="true">
-  
-    
-    
-    
-      
-    
-    
-    
-    
-    
-      
-    
-    <li>
-      <a href="https://www.github.com/nitingupta2" target="_blank" rel="noopener">
-        <i class="fab fa-github"></i>
-      </a>
-    </li>
-  
-    
-    
-    
-      
-    
-    
-    
-    
-    
-      
-    
-    <li>
-      <a href="https://www.linkedin.com/in/nitingupta2" target="_blank" rel="noopener">
-        <i class="fab fa-linkedin"></i>
-      </a>
-    </li>
-  
-</ul>
-
-    </div>
-  </div>
 
 
 
@@ -1209,7 +1231,7 @@ As it is said, real estate is all about location, location, location. Clearly so
     
     
     
-    <script src="/js/academic.min.d6bd04fdad2ad213aa8111c5a3b72fc5.js"></script>
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
 
@@ -1234,7 +1256,7 @@ As it is said, real estate is all about location, location, location. Clearly so
   
 
   <p class="powered-by">
-    &copy; Nitin Gupta. All Rights Reserved. &middot; 
+    © Nitin Gupta. All Rights Reserved. &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
