@@ -21,7 +21,7 @@
 
 
 &lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we did an exploratory data analysis of the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In this post, we will build linear and non-linear models and see how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties.&lt;/p&gt;
+&lt;p&gt;In this post, we will build both linear and non-linear models and see how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties.&lt;/p&gt;
 &lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
 &lt;p&gt;Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed &lt;code&gt;SalePrice&lt;/code&gt; will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.&lt;/p&gt;
@@ -32,7 +32,7 @@
 &lt;ul&gt;
 &lt;li&gt;Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Define linear and non-linear models.&lt;/li&gt;
-&lt;li&gt;For each model, create a grid of hyperparameter combinations that are equally spaced.&lt;/li&gt;
+&lt;li&gt;For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.&lt;/li&gt;
 &lt;li&gt;For each hyperparameter combination, fit a model on the training set and make predictions on the validation set. Repeat the process for all folds.&lt;/li&gt;
 &lt;li&gt;Determine root mean squared errors (RMSE) and choose the best hyperparameter combination that corresponds to the minimum RMSE.&lt;/li&gt;
 &lt;li&gt;Train each model with its best hyperparameter combination on the entire training set.&lt;/li&gt;
@@ -42,9 +42,18 @@
 &lt;/div&gt;
 &lt;div id=&#34;partitioning-training-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
-&lt;p&gt;We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.&lt;/p&gt;
+&lt;p&gt;We split the training data into 5 folds. Within each fold, 80% of the data is used for training models and 20% for validating the predicted values against the actual values.&lt;/p&gt;
 &lt;p&gt;Let’s look at the distribution of the target variable across all folds:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_folds %&amp;gt;% 
+  mutate(target = map(splits, function(Z) bind_rows(training(Z) %&amp;gt;% select(target) %&amp;gt;% mutate(type = &amp;quot;training&amp;quot;), 
+                                                    testing(Z) %&amp;gt;% select(target) %&amp;gt;% mutate(type = &amp;quot;validation&amp;quot;)))) %&amp;gt;% 
+  select(-splits) %&amp;gt;% 
+  unnest(cols = c(target)) %&amp;gt;% 
+  ggplot(aes(x = target)) +
+  geom_histogram(bins = 30, color = &amp;quot;white&amp;quot;, fill = &amp;quot;#F37735&amp;quot;) +
+  labs(x = &amp;quot;log(SalePrice)&amp;quot;) +
+  facet_grid(type ~ id)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -52,13 +61,20 @@
 &lt;div id=&#34;ordinary-least-squares-regression&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Ordinary Least Squares Regression&lt;/h3&gt;
 &lt;p&gt;Before creating any new features or indulging in more complex modelling methods, we will cross validate a simple linear model on the training data to establish a benchmark. If more complex approaches do not have a significant improvement in the model validation metrics, then they are not worthwhile to be pursued.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_lm&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
 
 Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_lm %&amp;gt;% select(-dummy)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 1
+  mean_rmse
+      &amp;lt;dbl&amp;gt;
+1     0.147&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rmse_val &amp;lt;- cv_results_lm %&amp;gt;% pull(mean_rmse)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1468&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1467&lt;/strong&gt;.&lt;/li&gt;
 &lt;li&gt;This is the simplest and fastest model with no hyperparameters to tune.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -70,6 +86,7 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;penalty&lt;/code&gt;: The total amount of regularization in the model.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;mixture&lt;/code&gt;: The proportion of L1 regularization in the model.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_glmnet&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
 
 Main Arguments:
@@ -78,29 +95,35 @@ Main Arguments:
 
 Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_glmnet %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
     penalty mixture mean_rmse
       &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1 4.83e- 3  0.922      0.127
- 2 3.79e- 2  0.0518     0.129
- 3 1.36e- 3  0.659      0.132
- 4 1.60e- 3  0.431      0.133
- 5 3.50e- 3  0.177      0.133
- 6 4.17e- 2  0.288      0.133
- 7 5.67e- 4  0.970      0.133
- 8 6.79e- 9  0.0193     0.138
- 9 4.32e-10  0.337      0.138
-10 1.95e- 6  0.991      0.138&lt;/code&gt;&lt;/pre&gt;
+ 1 1.46e- 2  0.297      0.128
+ 2 1.22e- 2  0.657      0.129
+ 3 1.22e- 3  0.490      0.133
+ 4 1.09e- 2  0.0439     0.133
+ 5 3.47e- 4  0.992      0.134
+ 6 8.18e- 4  0.0856     0.137
+ 7 1.15e- 4  0.798      0.138
+ 8 7.37e- 7  0.0221     0.138
+ 9 1.23e-10  0.333      0.138
+10 3.37e-10  0.0573     0.138&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After hyperparameter tuning with cross validation, &lt;code&gt;glmnet&lt;/code&gt; gives the best RMSE of 0.127 with penalty = 0.0048 and mixture = 0.9216.&lt;/li&gt;
-&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.&lt;/li&gt;
+&lt;li&gt;After hyperparameter tuning with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
+&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1467.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation takes under a minute to execute.&lt;/li&gt;
 &lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_glmnet, &amp;quot;mixture&amp;quot;, &amp;quot;penalty&amp;quot;, alpha = 1, add_lm = F, yLog = T, yLabelsScale = scales::scientific) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &amp;quot;red&amp;quot;) +
+  ggrepel::geom_label_repel(data = param_best_glmnet %&amp;gt;% map_df(round, digits = 4), 
+                            aes(x = mixture, y = penalty, label = glue::glue(&amp;quot;penalty: {penalty}, mixture:{mixture}&amp;quot;)),
+                            family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -114,6 +137,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;mtry&lt;/code&gt;: The number of predictors to randomly sample at each split.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of data points in a node required to further split the node.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_rf&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Random Forest Model Specification (regression)
 
 Main Arguments:
@@ -126,27 +150,31 @@ Engine-Specific Arguments:
 
 Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_rf %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
    min_n  mtry mean_rmse
    &amp;lt;int&amp;gt; &amp;lt;int&amp;gt;     &amp;lt;dbl&amp;gt;
- 1     4    85     0.134
- 2     3   140     0.135
- 3    14    90     0.135
- 4     6    45     0.136
- 5     9   138     0.136
- 6    13   158     0.137
- 7     9   183     0.137
- 8    19    56     0.138
- 9    21   130     0.138
-10     5   218     0.138&lt;/code&gt;&lt;/pre&gt;
+ 1     2    84     0.135
+ 2     5   135     0.135
+ 3    12   111     0.136
+ 4    15    56     0.136
+ 5     9    36     0.137
+ 6     8   200     0.138
+ 7    18   137     0.138
+ 8    22    69     0.138
+ 9    19   180     0.139
+10    29   124     0.140&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.134 with mtry = 85 and min_n = 4.&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.135 with mtry = 84 and min_n = 2.&lt;/li&gt;
 &lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt; cross validation takes much longer to execute than &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;randomForest&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &amp;quot;red&amp;quot;) +
+  ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&amp;quot;mtry: {mtry}, min_n:{min_n}&amp;quot;)), family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -157,6 +185,7 @@ Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;tree_depth&lt;/code&gt;: The maximum depth or the number of splits of the tree.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;learn_rate&lt;/code&gt;: The rate at which the boosting algorithm adapts from one iteration to another.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_xgboost&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Boosted Tree Model Specification (regression)
 
 Main Arguments:
@@ -170,24 +199,25 @@ Engine-Specific Arguments:
 
 Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_xgboost %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &amp;lt;int&amp;gt;      &amp;lt;int&amp;gt;      &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1    13          3  0.0309        0.124
- 2    40          4  0.0350        0.126
- 3     6          8  0.0469        0.126
- 4    34         15  0.0172        0.127
- 5    28         10  0.0336        0.128
- 6    20         14  0.00348       0.389
- 7    22          7  0.000953      4.46 
- 8     3          2  0.000528      6.81 
- 9    10         12  0.000401      7.73 
-10    34          3  0.0000802    10.6  &lt;/code&gt;&lt;/pre&gt;
+ 1    12          5  0.0689        0.130
+ 2    36         10  0.0308        0.131
+ 3    26         13  0.0217        0.133
+ 4    18         10  0.0150        0.133
+ 5     4         13  0.0128        0.141
+ 6    24          1  0.0101        0.143
+ 7    33          5  0.000872      0.226
+ 8     4          1  0.000303      0.353
+ 9    11          5  0.0000379     0.387
+10    37         14  0.0000164     0.394&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.124 with min_n = 13, tree_depth = 3 and learn_rate = 0.0309.&lt;/li&gt;
-&lt;li&gt;Gives the best RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.13 with min_n = 12, tree_depth = 5 and learn_rate = 0.0689.&lt;/li&gt;
+&lt;li&gt;It improves on &lt;code&gt;randomForest&lt;/code&gt;, but its RMSE is slightly higher than that of &lt;code&gt;glmnet&lt;/code&gt; (0.128).&lt;/li&gt;
 &lt;li&gt;However, &lt;code&gt;xgboost&lt;/code&gt; cross validation takes longer to execute than that of &lt;code&gt;glmnet&lt;/code&gt;, but is faster than that of &lt;code&gt;randomForest&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
@@ -209,7 +239,36 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;finalizing-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalizing Models&lt;/h2&gt;
 &lt;p&gt;For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Get predicted estimates
+get_predicted &amp;lt;- function(model_final, dfNew) {
+
+  # Predict on testing set
+  vEstimates &amp;lt;- model_final %&amp;gt;%
+    predict(new_data = dfNew) %&amp;gt;%
+    pull(.pred)
+  
+  return(vEstimates)
+}
+
+dfResults_train &amp;lt;- dfTrain %&amp;gt;% 
+  mutate(actual = log(SalePrice)) %&amp;gt;% 
+  select(Id, actual) %&amp;gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTrain_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTrain_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTrain_Proc))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfPlot &amp;lt;- dfResults_train %&amp;gt;% 
+  gather(model, predicted, -actual, -Id) %&amp;gt;% 
+  mutate(model = ordered(model, levels = c(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&amp;gt;% filter(predicted &amp;gt; 13, actual &amp;gt; 11.5, actual &amp;lt; 12.5), 
+                           aes(x = actual, y = predicted, label = Id), family = &amp;quot;Roboto Condensed&amp;quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;model&amp;quot;) +
+  labs(title = &amp;quot;Scatterplot of actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -221,30 +280,70 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Performance on Test Data&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfResults_test &amp;lt;- dfTest %&amp;gt;% 
+  mutate(actual = log(SalePrice)) %&amp;gt;% 
+  select(Id, actual) %&amp;gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTest_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTest_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTest_Proc))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfPlot &amp;lt;- dfResults_test %&amp;gt;% 
+  gather(model, predicted, -actual, -Id) %&amp;gt;% 
+  mutate(model = ordered(model, levels = c(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&amp;gt;% filter(predicted &amp;gt; 13.5 | actual &amp;lt; 10), 
+                           aes(x = actual, y = predicted, label = Id), family = &amp;quot;Roboto Condensed&amp;quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;model&amp;quot;) +
+  labs(title = &amp;quot;Scatterplot of actual v/s predicted log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRMSE &amp;lt;- map(list(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&amp;gt;% mutate(model = .x)) %&amp;gt;%
+  bind_rows() %&amp;gt;%
+  mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&amp;gt;%
+  select(-.estimator, -.metric) %&amp;gt;%
+  rename(test_rmse = .estimate) %&amp;gt;%
+  select(model, everything())
+
+dfRMSE&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 3
   model        test_rmse cv_rmse
   &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
-1 glmnet           0.129   0.127
-2 randomForest     0.139   0.134
-3 xgboost          0.128   0.124&lt;/code&gt;&lt;/pre&gt;
+1 glmnet           0.130   0.128
+2 randomForest     0.138   0.135
+3 xgboost          0.135   0.130&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.&lt;/li&gt;
 &lt;li&gt;Records with Ids &lt;strong&gt;1537&lt;/strong&gt; and &lt;strong&gt;2217&lt;/strong&gt; are outliers, as none of the models are able to predict close to actual values.&lt;/li&gt;
-&lt;li&gt;Looking at the test RMSE, we could finalize &lt;code&gt;xgboost&lt;/code&gt; as the model that generalizes very well on this dataset.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; has the lowest test RMSE of 0.130, with &lt;code&gt;xgboost&lt;/code&gt; close behind at 0.135.&lt;/li&gt;
+&lt;li&gt;However, &lt;code&gt;glmnet&lt;/code&gt; is sensitive to outliers, as we saw with Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; in the training set. Since the difference in test RMSE is small, we could finalize &lt;code&gt;xgboost&lt;/code&gt;, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_final &amp;lt;- model_final_xgboost&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;feature-importance&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Feature Importance&lt;/h2&gt;
 &lt;p&gt;Even though &lt;code&gt;xgboost&lt;/code&gt; is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.&lt;/p&gt;
 &lt;p&gt;Let’s take a look at the top 10 most important features of our finalized &lt;code&gt;xgboost&lt;/code&gt; model:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(vip)
+
+p1 &amp;lt;- vip(model_final, aesthetics = list(fill = &amp;quot;#00AED8&amp;quot;)) +
+  labs(title = &amp;quot;xgboost model Feature Importance in Training&amp;quot;) +
+  theme_quant()
+
+vFeaturesImp &amp;lt;- vip::vi(model_final) %&amp;gt;% top_n(10, Importance) %&amp;gt;% pull(Variable)
+
+p2 &amp;lt;- eda_plot_correlation_matrix(dfTrain %&amp;gt;% select(SalePrice, one_of(vFeaturesImp)), 
+                            outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlations with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.&lt;/li&gt;
+&lt;li&gt;Correlations of numerical features are plotted side-by-side. Most of them have a correlation of 0.5 or more (in absolute terms) with &lt;code&gt;SalePrice&lt;/code&gt;. &lt;code&gt;LotArea&lt;/code&gt; is the exception with a weaker correlation, though it still ranks among the top 10 features.&lt;/li&gt;
+&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, central air conditioning, age of property, kitchen quality, etc.&lt;/li&gt;
 &lt;li&gt;This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -253,7 +352,34 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is &lt;code&gt;PropertyAge&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;So, how would the predicted &lt;code&gt;SalePrice&lt;/code&gt; differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?&lt;/p&gt;
 &lt;p&gt;We could pick a couple of properties at random, change &lt;code&gt;PropertyAge&lt;/code&gt; and see its impact on &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getSampleProperty &amp;lt;- function(randomSeed) {
+  
+  set.seed(randomSeed)
+  dfSample &amp;lt;- dfTest %&amp;gt;% 
+    filter(PropertyAge &amp;gt;= 30) %&amp;gt;% 
+    sample_n(1)
+  
+  dfSample &amp;lt;- tibble(PropertyAge = 1:dfSample$PropertyAge[1]) %&amp;gt;% expand_grid(dfSample %&amp;gt;% select(-PropertyAge))
+}
+
+dfSample &amp;lt;- getSampleProperty(1000) %&amp;gt;% bind_rows(getSampleProperty(2000))
+
+# preprocess the sample data and generated predicted values from the final model
+get_preprocessing_recipe(dfSample) %&amp;gt;% 
+  bake(dfSample) %&amp;gt;% 
+  get_predicted(model_final, .) %&amp;gt;% 
+  as_tibble() %&amp;gt;% 
+  bind_cols(dfSample) %&amp;gt;% 
+  mutate(predicted = exp(value)) %&amp;gt;% 
+  group_by(Id) %&amp;gt;% 
+  ggplot(aes(x = PropertyAge, y = predicted)) +
+  geom_point(color = &amp;quot;#00AED8&amp;quot;) +
+  geom_line() +
+  facet_wrap(~Id, scales = &amp;quot;free&amp;quot;) +
+  scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
+  labs(y = &amp;quot;Predicted Sale Price&amp;quot;,
+       title = &amp;quot;New Property Premium&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.&lt;/p&gt;
 &lt;/div&gt;
 </description>
@@ -294,254 +420,123 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here are the average metrics for all the models trained with &lt;code&gt;keras&lt;/code&gt;, &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; regression methods:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;load(&amp;quot;fit_models_keras.Rda&amp;quot;)
+
+dfModels_keras &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;keras&amp;quot;)
+best_model_results_keras &amp;lt;- best_model_results
+dfResults_keras &amp;lt;- best_model_results_keras$dfResults %&amp;gt;% mutate(type = &amp;quot;keras&amp;quot;)
+
+load(&amp;quot;fit_models_rf.Rda&amp;quot;)
+
+dfModels_rf &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;randomForest&amp;quot;)
+best_model_results_rf &amp;lt;- best_model_results
+dfResults_rf &amp;lt;- best_model_results_rf$dfResults %&amp;gt;% mutate(type = &amp;quot;randomForest&amp;quot;)
+
+load(&amp;quot;fit_models_xgb.Rda&amp;quot;)
+
+dfModels_xgb &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;quot;)
+best_model_results_xgb &amp;lt;- best_model_results
+dfResults_xgb &amp;lt;- best_model_results_xgb$dfResults %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;quot;)
+
+# combine the actual v/s predicted results from the best model using the 3 methods
+dfResults &amp;lt;- map_df(list(dfResults_keras, dfResults_rf, dfResults_xgb), bind_rows) %&amp;gt;% 
+  select(type, everything()) %&amp;gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&amp;gt;% 
+  group_by(type)
+
+# combine the average metrics from all the models using the 3 methods
+dfModels &amp;lt;- map_df(list(dfModels_keras, dfModels_rf, dfModels_xgb), bind_rows) %&amp;gt;% 
+  select(type, everything()) %&amp;gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&amp;gt;% 
+  gather(avg_metric, value, rmse, rsq, mae)
+
+# create an HTML table
+dfModels %&amp;gt;% tidyHtmlTable(header = &amp;quot;type&amp;quot;, cgroup1 = &amp;quot;avg_metric&amp;quot;, cell_value = &amp;quot;value&amp;quot;, rnames = &amp;quot;model&amp;quot;, align = &amp;quot;|rrr|rrr|rrr&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th style=&#34;border-top: 2px solid grey;&#34;&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; border-top: 2px solid grey;&#34;&gt;
 &lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-mae
-&lt;/th&gt;
-&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-rmse
-&lt;/th&gt;
-&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-rsq
-&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34;&gt;
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 keras
 &lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 randomForest
 &lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-xgboost
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-keras
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-randomForest
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-xgboost
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-keras
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-randomForest
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 xgboost
 &lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ .
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-360.55
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-262.35
+c(“989.71”, “0.93”, “360.55”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-280.49
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“529.28”, “0.98”, “262.35”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-989.71
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-529.28
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-540.76
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.93
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
+c(“540.76”, “0.98”, “280.49”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-860.29
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-816.1
+c(“1499.2”, “0.86”, “860.29”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-815.76
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“1427.25”, “0.87”, “816.1”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-1499.2
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-1427.25
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-1427.35
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.86
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.87
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.87
+c(“1427.35”, “0.87”, “815.76”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-590.32
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-548.67
+c(“1040.69”, “0.93”, “590.32”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-544.48
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“1006.61”, “0.94”, “548.67”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-1040.69
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-1006.61
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-992.46
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.93
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.94
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.94
+c(“992.46”, “0.94”, “544.48”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity + color
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-358.85
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-305.17
+c(“645.4”, “0.97”, “358.85”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-306.86
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“571.73”, “0.98”, “305.17”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-645.4
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-571.73
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-575.3
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.97
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
+c(“575.3”, “0.98”, “306.86”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity + color + cut
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-347.99
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-285.96
+c(“626.78”, “0.98”, “347.99”)
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
-282.38
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
+c(“545.02”, “0.98”, “285.96”)
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-626.78
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-545.02
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
-541.63
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
+c(“541.63”, “0.98”, “282.38”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -563,15 +558,57 @@ price ~ carat + clarity + color + cut
 &lt;li&gt;Use the resulting feature weights to explain local behavior.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Plot Feature Importance by sample
+plot_features(explanation_keras, ncol = 3) + 
+  labs(title = &amp;quot;LIME Feature Importance from a keras model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_features(explanation_xgb, ncol = 3) + 
+  labs(title = &amp;quot;LIME Feature Importance from an xgboost model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The features by importance that best explain the predictions in these 6 random samples are &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Plot Feature Importance Heatmap
+plot_explanations(explanation_keras) +
+  labs(title = &amp;quot;LIME Feature Importance Heatmap from a keras model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_explanations(explanation_xgb) +
+  labs(title = &amp;quot;LIME Feature Importance Heatmap from an xgboost model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are co-linear with &lt;code&gt;carat&lt;/code&gt;, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
 &lt;p&gt;Finally, here are the scatterplots of actual v/s predicted &lt;code&gt;price&lt;/code&gt; from the best model on the testing set, using the 3 regression methods:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dfResults %&amp;gt;% 
+  ggplot(aes(x = actual, y = estimate)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  facet_grid(type ~ .) +
+  scale_x_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = formulaString_best,
+       subtitle = &amp;quot;(linear scale)&amp;quot;)
+
+p2 &amp;lt;- p1 + 
+  scale_x_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(subtitle = &amp;quot;(log scale)&amp;quot;, x = &amp;quot;actual price&amp;quot;, y = &amp;quot;predicted price&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar &lt;strong&gt;r-squared&lt;/strong&gt; and &lt;strong&gt;rmse&lt;/strong&gt; values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.&lt;/p&gt;
 &lt;p&gt;As in the case with linear models, the variance in predicted diamond prices increases with &lt;code&gt;price&lt;/code&gt;. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between &lt;code&gt;price&lt;/code&gt; and its predictors, they also predict prices within a reasonable range.&lt;/p&gt;
 &lt;/div&gt;
@@ -599,6 +636,8 @@ price ~ carat + clarity + color + cut
 &lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we did an exploratory data analysis of the &lt;code&gt;diamonds&lt;/code&gt; dataset and found that &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; were strongly correlated with &lt;code&gt;price&lt;/code&gt;. To some extent, &lt;code&gt;clarity&lt;/code&gt; also appeared to provide some predictive ability.&lt;/p&gt;
 &lt;p&gt;In this post, we will build linear models and see how well they predict the &lt;code&gt;price&lt;/code&gt; of diamonds.&lt;/p&gt;
 &lt;p&gt;Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_lm &amp;lt;- lm(price ~ ., data = diamonds)
+summary(model_lm)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;
 Call:
 lm(formula = price ~ ., data = diamonds)
@@ -637,9 +676,12 @@ z             -50.12      33.49   -1.50               0.1345
 Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
 
 Residual standard error: 1130 on 53916 degrees of freedom
-Multiple R-squared:  0.92,  Adjusted R-squared:  0.92 
+Multiple R-squared:  0.92,	Adjusted R-squared:  0.92 
 F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;diamonds %&amp;gt;% 
+    mutate(estimate = predict(model_lm, diamonds)) %&amp;gt;% 
+    metrics(truth = price, estimate = estimate)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 3
   .metric .estimator .estimate
   &amp;lt;chr&amp;gt;   &amp;lt;chr&amp;gt;          &amp;lt;dbl&amp;gt;
 1 rmse    standard    1130.   
@@ -647,7 +689,16 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
 3 mae     standard     740.   &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The model summary shows it is an overfitted model. Among other things, we know that &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; have no impact on &lt;code&gt;price&lt;/code&gt;, yet these are shown to be highly significant. Root Mean Squared Error (rmse) and other metrics are also shown above.&lt;/p&gt;
 &lt;p&gt;Let’s make a plot of actual v/s predicted prices to visualize how well this base model performs.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;augment(model_lm, diamonds) %&amp;gt;% 
+  ggplot(aes(x = price, y = .fitted)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  scale_x_continuous(labels = scales::dollar) +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = &amp;quot;Scatterplot of predicted v/s actual price from a base linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;If the predictions are good, the points should lie close to a straight line drawn at 45 degrees. We can see this base model does a poor job of predicting prices. Worst of all, the model predicts negative prices on the lower end.
 It shows that &lt;code&gt;price&lt;/code&gt; has to be log transformed to avoid these absurdities.&lt;/p&gt;
 &lt;div id=&#34;feature-engineering&#34; class=&#34;section level2&#34;&gt;
@@ -658,10 +709,19 @@ As these 3 dimensions are highly correlated, we can compute a geometrical averag
 &lt;p&gt;Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:&lt;/p&gt;
 &lt;p&gt;$ density = mass/volume $&lt;/p&gt;
 &lt;p&gt;We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfInput &amp;lt;- diamonds %&amp;gt;% 
+  mutate(volume = x*y*z,
+         `average dimension` = volume ^ (1/3),
+         volume2 = carat * 0.2/3.51,
+         `average dimension2` = (volume2 ^ (1/3)) * 10)   # Multiply by 10 to convert from cm to mm
+
+eda_plot_scatter(dfInput, c(&amp;quot;average dimension&amp;quot;, &amp;quot;average dimension2&amp;quot;), &amp;quot;price&amp;quot;, yLabelsScale = scales::dollar) + 
+  labs(title = &amp;quot;Scatterplot of price v/s average dimension&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
 Keep in mind there are 20 &lt;code&gt;z&lt;/code&gt; values that are 0. In 7 of these records both &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are 0 too, which means these values were not recorded reliably.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 20 x 10
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;diamonds %&amp;gt;% dplyr::filter(x == 0 | y == 0 | z == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 20 × 10
    carat cut       color clarity depth table price     x     y     z
    &amp;lt;dbl&amp;gt; &amp;lt;ord&amp;gt;     &amp;lt;ord&amp;gt; &amp;lt;ord&amp;gt;   &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;int&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
  1  1    Premium   G     SI2      59.1    59  3142  6.55  6.48     0
@@ -701,74 +761,142 @@ It is the reason why we’re fitting a linear model because the model is linear 
 &lt;li&gt;Run multiple iterations of a model with different seeds, and compute its average metrics, that would reflect the results on unseen data.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here’s a sample split of training and testing set, stratified by &lt;code&gt;clarity&lt;/code&gt;. As we can see, the training and testing sets have similar distributions.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(1333)
+train_split &amp;lt;- diamonds %&amp;gt;% 
+  select(price, everything()) %&amp;gt;% 
+  initial_split(prop = 0.75, strata = &amp;quot;clarity&amp;quot;)
+
+dfTrain &amp;lt;- training(train_split)
+dfTest &amp;lt;- testing(train_split)
+
+Hmisc::describe(dfTrain$clarity)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfTrain$clarity 
        n  missing distinct 
-   40457        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+   40453        0        8 
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
-Frequency    552  6895  9826  9222  6125  3780  2722  1335
-Proportion 0.014 0.170 0.243 0.228 0.151 0.093 0.067 0.033&lt;/code&gt;&lt;/pre&gt;
+Frequency    557  6904  9810  9197  6109  3785  2766  1325
+Proportion 0.014 0.171 0.243 0.227 0.151 0.094 0.068 0.033&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Hmisc::describe(dfTest$clarity)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfTest$clarity 
        n  missing distinct 
-   13483        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+   13487        0        8 
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
-Frequency    189  2299  3239  3036  2046  1286   933   455
-Proportion 0.014 0.171 0.240 0.225 0.152 0.095 0.069 0.034&lt;/code&gt;&lt;/pre&gt;
+Frequency    184  2290  3255  3061  2062  1281   889   465
+Proportion 0.014 0.170 0.241 0.227 0.153 0.095 0.066 0.034&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;After running 5 iterations of each model with a different seed, here are the average metrics:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 5 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_linear_model &amp;lt;- function(randomSeed, model_formula, get_model = FALSE) {
+
+  set.seed(randomSeed)
+  train_split &amp;lt;- diamonds %&amp;gt;% 
+    select(price, everything()) %&amp;gt;% 
+    initial_split(prop = 0.75, strata = &amp;quot;clarity&amp;quot;)
+  
+  dfTrain &amp;lt;- training(train_split)
+  dfTest &amp;lt;- testing(train_split)
+
+  # fit a linear model
+  model_lm &amp;lt;- lm(model_formula, data = dfTrain)
+  
+  # predict on testing set to determine rmse  
+  predict_lm &amp;lt;- predict(model_lm, dfTest)
+
+  # predict on testing set with outliers
+  dfResults &amp;lt;- dfTest %&amp;gt;% 
+    mutate(actual = price) %&amp;gt;% 
+    mutate(estimate = predict_lm %&amp;gt;% exp()) %&amp;gt;% 
+    select(actual, estimate)
+  
+  if(get_model) {
+    return(list(model_lm, dfResults))
+  } else {
+    return(dfResults)
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(1000)
+vRandomSeeds &amp;lt;- sample(9999, 5)
+dfModels &amp;lt;- expand_grid(seed = vRandomSeeds, 
+                        model = c(&amp;quot;log(price) ~ .&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3))&amp;quot;, 
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color + cut&amp;quot;)) %&amp;gt;% 
+  mutate(results = map2(seed, model, ~ fit_linear_model(.x, as.formula(.y)))) %&amp;gt;% 
+  mutate(metrics = map(results, ~ metrics(.x, truth = actual, estimate = estimate))) %&amp;gt;%
+  select(-results) %&amp;gt;% 
+  unnest(cols = metrics) %&amp;gt;% 
+  select(-.estimator) %&amp;gt;% 
+  spread(.metric, .estimate) %&amp;gt;% 
+  group_by(model) %&amp;gt;% 
+  summarise_at(vars(rmse, rsq, mae), mean)
+
+dfModels&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 5 × 4
   model                                                 rmse   rsq   mae
   &amp;lt;chr&amp;gt;                                                &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
-1 log(price) ~ .                                      11055. 0.670  570.
-2 log(price) ~ I(carat^(1/3))                          2893. 0.687 1039.
-3 log(price) ~ I(carat^(1/3)) + clarity                2312. 0.807  881.
-4 log(price) ~ I(carat^(1/3)) + clarity + color        1870. 0.870  631.
-5 log(price) ~ I(carat^(1/3)) + clarity + color + cut  1848. 0.875  625.&lt;/code&gt;&lt;/pre&gt;
+1 log(price) ~ .                                      12085. 0.756  559.
+2 log(price) ~ I(carat^(1/3))                          2525. 0.741 1023.
+3 log(price) ~ I(carat^(1/3)) + clarity                2173. 0.827  871.
+4 log(price) ~ I(carat^(1/3)) + clarity + color        1725. 0.888  624.
+5 log(price) ~ I(carat^(1/3)) + clarity + color + cut  1718. 0.891  618.&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The first model with all predictors is an overfitted one.&lt;/p&gt;
 &lt;p&gt;The model with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; provides the best combination of root mean squared error and r-squared, that explains the most variance.
 This is our final model.
 Including &lt;code&gt;cut&lt;/code&gt; in the model has diminishing benefits, and tends to overfit the data.&lt;/p&gt;
 &lt;p&gt;Here’s the summary of our final model:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;formula_string &amp;lt;- &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color&amp;quot;
+fit_lm &amp;lt;- fit_linear_model(1333, as.formula(formula_string), get_model = T)
+
+summary(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;
 Call:
 lm(formula = model_formula, data = dfTrain)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--1.6022 -0.1034  0.0145  0.1066  1.7941 
+-1.9173 -0.1036  0.0148  0.1077  1.2052 
 
 Coefficients:
-                Estimate Std. Error t value             Pr(&amp;gt;|t|)    
-(Intercept)     2.147009   0.004993  429.99 &amp;lt; 0.0000000000000002 ***
-I(carat^(1/3))  6.246412   0.005365 1164.27 &amp;lt; 0.0000000000000002 ***
-clarity.L       0.922295   0.005036  183.15 &amp;lt; 0.0000000000000002 ***
-clarity.Q      -0.295539   0.004734  -62.43 &amp;lt; 0.0000000000000002 ***
-clarity.C       0.166979   0.004068   41.05 &amp;lt; 0.0000000000000002 ***
-clarity^4      -0.068591   0.003260  -21.04 &amp;lt; 0.0000000000000002 ***
-clarity^5       0.032833   0.002669   12.30 &amp;lt; 0.0000000000000002 ***
-clarity^6      -0.001904   0.002325   -0.82              0.41288    
-clarity^7       0.025508   0.002049   12.45 &amp;lt; 0.0000000000000002 ***
-color.L        -0.488882   0.002927 -167.05 &amp;lt; 0.0000000000000002 ***
-color.Q        -0.117319   0.002680  -43.78 &amp;lt; 0.0000000000000002 ***
-color.C        -0.012230   0.002497   -4.90           0.00000098 ***
-color^4         0.019007   0.002288    8.31 &amp;lt; 0.0000000000000002 ***
-color^5        -0.008110   0.002159   -3.76              0.00017 ***
-color^6        -0.000396   0.001967   -0.20              0.84055    
+               Estimate Std. Error t value             Pr(&amp;gt;|t|)    
+(Intercept)     2.15095    0.00504  426.51 &amp;lt; 0.0000000000000002 ***
+I(carat^(1/3))  6.23951    0.00541 1154.26 &amp;lt; 0.0000000000000002 ***
+clarity.L       0.92971    0.00508  183.12 &amp;lt; 0.0000000000000002 ***
+clarity.Q      -0.30576    0.00476  -64.19 &amp;lt; 0.0000000000000002 ***
+clarity.C       0.17282    0.00409   42.25 &amp;lt; 0.0000000000000002 ***
+clarity^4      -0.07375    0.00328  -22.52 &amp;lt; 0.0000000000000002 ***
+clarity^5       0.03493    0.00268   13.03 &amp;lt; 0.0000000000000002 ***
+clarity^6      -0.00258    0.00234   -1.10               0.2701    
+clarity^7       0.02551    0.00207   12.35 &amp;lt; 0.0000000000000002 ***
+color.L        -0.48801    0.00294 -165.74 &amp;lt; 0.0000000000000002 ***
+color.Q        -0.12021    0.00269  -44.66 &amp;lt; 0.0000000000000002 ***
+color.C        -0.01205    0.00252   -4.79            0.0000017 ***
+color^4         0.02066    0.00231    8.94 &amp;lt; 0.0000000000000002 ***
+color^5        -0.00596    0.00218   -2.73               0.0063 ** 
+color^6         0.00232    0.00198    1.17               0.2412    
 ---
 Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
 
-Residual standard error: 0.166 on 40442 degrees of freedom
-Multiple R-squared:  0.973, Adjusted R-squared:  0.973 
-F-statistic: 1.05e+05 on 14 and 40442 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+Residual standard error: 0.167 on 40438 degrees of freedom
+Multiple R-squared:  0.973,	Adjusted R-squared:  0.973 
+F-statistic: 1.04e+05 on 14 and 40438 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow = c(2,2))
+plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Here’s a scatterplot of actual v/s predicted log(price) from our final model on the testing set:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_lm[[2]] %&amp;gt;% 
+  ggplot(aes(x = actual, y = estimate)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  scale_x_log10(labels = scales::dollar) +
+  scale_y_log10(labels = scales::dollar) +
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = bquote(log(price) == carat^{1/3} + clarity + color))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degress line. However, on the high end, there are many outliers where actual and predicted values have very high variance.
 Nevertheless, this is as good as it gets.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
     </item>

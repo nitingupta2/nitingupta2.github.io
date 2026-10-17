@@ -3954,7 +3954,7 @@ SR Waugh
 
 
 &lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we did an exploratory data analysis of the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In this post, we will build linear and non-linear models and see how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties.&lt;/p&gt;
+&lt;p&gt;In this post, we will build both linear and non-linear models and see how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties.&lt;/p&gt;
 &lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
 &lt;p&gt;Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed &lt;code&gt;SalePrice&lt;/code&gt; will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.&lt;/p&gt;
@@ -3965,7 +3965,7 @@ SR Waugh
 &lt;ul&gt;
 &lt;li&gt;Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Define linear and non-linear models.&lt;/li&gt;
-&lt;li&gt;For each model, create a grid of hyperparameter combinations that are equally spaced.&lt;/li&gt;
+&lt;li&gt;For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.&lt;/li&gt;
 &lt;li&gt;For each hyperparameter combination, fit a model on the training set and make predictions on the validation set. Repeat the process for all folds.&lt;/li&gt;
 &lt;li&gt;Determine root mean squared errors (RMSE) and choose the best hyperparameter combination that corresponds to the minimum RMSE.&lt;/li&gt;
 &lt;li&gt;Train each model with its best hyperparameter combination on the entire training set.&lt;/li&gt;
@@ -3975,9 +3975,18 @@ SR Waugh
 &lt;/div&gt;
 &lt;div id=&#34;partitioning-training-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
-&lt;p&gt;We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.&lt;/p&gt;
+&lt;p&gt;We split the training data into 5 folds. Within each fold, 80% of the data is used for training models and 20% for validating the predicted values against the actual values.&lt;/p&gt;
 &lt;p&gt;Let’s look at the distribution of the target variable across all folds:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_folds %&amp;gt;% 
+  mutate(target = map(splits, function(Z) bind_rows(training(Z) %&amp;gt;% select(target) %&amp;gt;% mutate(type = &amp;quot;training&amp;quot;), 
+                                                    testing(Z) %&amp;gt;% select(target) %&amp;gt;% mutate(type = &amp;quot;validation&amp;quot;)))) %&amp;gt;% 
+  select(-splits) %&amp;gt;% 
+  unnest(cols = c(target)) %&amp;gt;% 
+  ggplot(aes(x = target)) +
+  geom_histogram(bins = 30, color = &amp;quot;white&amp;quot;, fill = &amp;quot;#F37735&amp;quot;) +
+  labs(x = &amp;quot;log(SalePrice)&amp;quot;) +
+  facet_grid(type ~ id)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -3985,13 +3994,20 @@ SR Waugh
 &lt;div id=&#34;ordinary-least-squares-regression&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Ordinary Least Squares Regression&lt;/h3&gt;
 &lt;p&gt;Before creating any new features or indulging in more complex modelling methods, we will cross validate a simple linear model on the training data to establish a benchmark. If more complex approaches do not have a significant improvement in the model validation metrics, then they are not worthwhile to be pursued.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_lm&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
 
 Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_lm %&amp;gt;% select(-dummy)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 1
+  mean_rmse
+      &amp;lt;dbl&amp;gt;
+1     0.147&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rmse_val &amp;lt;- cv_results_lm %&amp;gt;% pull(mean_rmse)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1468&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1467&lt;/strong&gt;.&lt;/li&gt;
 &lt;li&gt;This is the simplest and fastest model with no hyperparameters to tune.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -4003,6 +4019,7 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;penalty&lt;/code&gt;: The total amount of regularization in the model.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;mixture&lt;/code&gt;: The proportion of L1 regularization in the model.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_glmnet&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Linear Regression Model Specification (regression)
 
 Main Arguments:
@@ -4011,29 +4028,35 @@ Main Arguments:
 
 Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_glmnet %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
     penalty mixture mean_rmse
       &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1 4.83e- 3  0.922      0.127
- 2 3.79e- 2  0.0518     0.129
- 3 1.36e- 3  0.659      0.132
- 4 1.60e- 3  0.431      0.133
- 5 3.50e- 3  0.177      0.133
- 6 4.17e- 2  0.288      0.133
- 7 5.67e- 4  0.970      0.133
- 8 6.79e- 9  0.0193     0.138
- 9 4.32e-10  0.337      0.138
-10 1.95e- 6  0.991      0.138&lt;/code&gt;&lt;/pre&gt;
+ 1 1.46e- 2  0.297      0.128
+ 2 1.22e- 2  0.657      0.129
+ 3 1.22e- 3  0.490      0.133
+ 4 1.09e- 2  0.0439     0.133
+ 5 3.47e- 4  0.992      0.134
+ 6 8.18e- 4  0.0856     0.137
+ 7 1.15e- 4  0.798      0.138
+ 8 7.37e- 7  0.0221     0.138
+ 9 1.23e-10  0.333      0.138
+10 3.37e-10  0.0573     0.138&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After hyperparameter tuning with cross validation, &lt;code&gt;glmnet&lt;/code&gt; gives the best RMSE of 0.127 with penalty = 0.0048 and mixture = 0.9216.&lt;/li&gt;
-&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.&lt;/li&gt;
+&lt;li&gt;After hyperparameter tuning with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
+&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1467.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation takes under a minute to execute.&lt;/li&gt;
 &lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_glmnet, &amp;quot;mixture&amp;quot;, &amp;quot;penalty&amp;quot;, alpha = 1, add_lm = F, yLog = T, yLabelsScale = scales::scientific) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &amp;quot;red&amp;quot;) +
+  ggrepel::geom_label_repel(data = param_best_glmnet %&amp;gt;% map_df(round, digits = 4), 
+                            aes(x = mixture, y = penalty, label = glue::glue(&amp;quot;penalty: {penalty}, mixture:{mixture}&amp;quot;)),
+                            family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -4047,6 +4070,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;mtry&lt;/code&gt;: The number of predictors to randomly sample at each split.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of data points in a node required to further split the node.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_rf&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Random Forest Model Specification (regression)
 
 Main Arguments:
@@ -4059,27 +4083,31 @@ Engine-Specific Arguments:
 
 Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_rf %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
    min_n  mtry mean_rmse
    &amp;lt;int&amp;gt; &amp;lt;int&amp;gt;     &amp;lt;dbl&amp;gt;
- 1     4    85     0.134
- 2     3   140     0.135
- 3    14    90     0.135
- 4     6    45     0.136
- 5     9   138     0.136
- 6    13   158     0.137
- 7     9   183     0.137
- 8    19    56     0.138
- 9    21   130     0.138
-10     5   218     0.138&lt;/code&gt;&lt;/pre&gt;
+ 1     2    84     0.135
+ 2     5   135     0.135
+ 3    12   111     0.136
+ 4    15    56     0.136
+ 5     9    36     0.137
+ 6     8   200     0.138
+ 7    18   137     0.138
+ 8    22    69     0.138
+ 9    19   180     0.139
+10    29   124     0.140&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.134 with mtry = 85 and min_n = 4.&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.135 with mtry = 84 and min_n = 2.&lt;/li&gt;
 &lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt; cross validation takes much longer to execute than &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;randomForest&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &amp;quot;red&amp;quot;) +
+  ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&amp;quot;mtry: {mtry}, min_n:{min_n}&amp;quot;)), family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -4090,6 +4118,7 @@ Computational engine: randomForest &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;tree_depth&lt;/code&gt;: The maximum depth or the number of splits of the tree.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;learn_rate&lt;/code&gt;: The rate at which the boosting algorithm adapts from one iteration to another.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_xgboost&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Boosted Tree Model Specification (regression)
 
 Main Arguments:
@@ -4103,24 +4132,25 @@ Engine-Specific Arguments:
 
 Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s take a look at the top 10 RMSE values and hyperparameter combinations:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 10 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_xgboost %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &amp;lt;int&amp;gt;      &amp;lt;int&amp;gt;      &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1    13          3  0.0309        0.124
- 2    40          4  0.0350        0.126
- 3     6          8  0.0469        0.126
- 4    34         15  0.0172        0.127
- 5    28         10  0.0336        0.128
- 6    20         14  0.00348       0.389
- 7    22          7  0.000953      4.46 
- 8     3          2  0.000528      6.81 
- 9    10         12  0.000401      7.73 
-10    34          3  0.0000802    10.6  &lt;/code&gt;&lt;/pre&gt;
+ 1    12          5  0.0689        0.130
+ 2    36         10  0.0308        0.131
+ 3    26         13  0.0217        0.133
+ 4    18         10  0.0150        0.133
+ 5     4         13  0.0128        0.141
+ 6    24          1  0.0101        0.143
+ 7    33          5  0.000872      0.226
+ 8     4          1  0.000303      0.353
+ 9    11          5  0.0000379     0.387
+10    37         14  0.0000164     0.394&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.124 with min_n = 13, tree_depth = 3 and learn_rate = 0.0309.&lt;/li&gt;
-&lt;li&gt;Gives the best RMSE compared to &lt;code&gt;glmnet&lt;/code&gt; and &lt;code&gt;randomForest&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.13 with min_n = 12, tree_depth = 5 and learn_rate = 0.0689.&lt;/li&gt;
+&lt;li&gt;It improves on &lt;code&gt;randomForest&lt;/code&gt;, but its RMSE is slightly higher than that of &lt;code&gt;glmnet&lt;/code&gt; (0.128).&lt;/li&gt;
 &lt;li&gt;However, &lt;code&gt;xgboost&lt;/code&gt; cross validation takes longer to execute than that of &lt;code&gt;glmnet&lt;/code&gt;, but is faster than that of &lt;code&gt;randomForest&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
@@ -4142,7 +4172,36 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;finalizing-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalizing Models&lt;/h2&gt;
 &lt;p&gt;For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Get predicted estimates
+get_predicted &amp;lt;- function(model_final, dfNew) {
+
+  # Predict on testing set
+  vEstimates &amp;lt;- model_final %&amp;gt;%
+    predict(new_data = dfNew) %&amp;gt;%
+    pull(.pred)
+  
+  return(vEstimates)
+}
+
+dfResults_train &amp;lt;- dfTrain %&amp;gt;% 
+  mutate(actual = log(SalePrice)) %&amp;gt;% 
+  select(Id, actual) %&amp;gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTrain_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTrain_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTrain_Proc))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfPlot &amp;lt;- dfResults_train %&amp;gt;% 
+  gather(model, predicted, -actual, -Id) %&amp;gt;% 
+  mutate(model = ordered(model, levels = c(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&amp;gt;% filter(predicted &amp;gt; 13, actual &amp;gt; 11.5, actual &amp;lt; 12.5), 
+                           aes(x = actual, y = predicted, label = Id), family = &amp;quot;Roboto Condensed&amp;quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;model&amp;quot;) +
+  labs(title = &amp;quot;Scatterplot of actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4154,30 +4213,70 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Performance on Test Data&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfResults_test &amp;lt;- dfTest %&amp;gt;% 
+  mutate(actual = log(SalePrice)) %&amp;gt;% 
+  select(Id, actual) %&amp;gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTest_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTest_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTest_Proc))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfPlot &amp;lt;- dfResults_test %&amp;gt;% 
+  gather(model, predicted, -actual, -Id) %&amp;gt;% 
+  mutate(model = ordered(model, levels = c(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&amp;gt;% filter(predicted &amp;gt; 13.5 | actual &amp;lt; 10), 
+                           aes(x = actual, y = predicted, label = Id), family = &amp;quot;Roboto Condensed&amp;quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;model&amp;quot;) +
+  labs(title = &amp;quot;Scatterplot of actual v/s predicted log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRMSE &amp;lt;- map(list(&amp;quot;glmnet&amp;quot;,&amp;quot;randomForest&amp;quot;,&amp;quot;xgboost&amp;quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&amp;gt;% mutate(model = .x)) %&amp;gt;%
+  bind_rows() %&amp;gt;%
+  mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&amp;gt;%
+  select(-.estimator, -.metric) %&amp;gt;%
+  rename(test_rmse = .estimate) %&amp;gt;%
+  select(model, everything())
+
+dfRMSE&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 3
   model        test_rmse cv_rmse
   &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
-1 glmnet           0.129   0.127
-2 randomForest     0.139   0.134
-3 xgboost          0.128   0.124&lt;/code&gt;&lt;/pre&gt;
+1 glmnet           0.130   0.128
+2 randomForest     0.138   0.135
+3 xgboost          0.135   0.130&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.&lt;/li&gt;
 &lt;li&gt;Records with Ids &lt;strong&gt;1537&lt;/strong&gt; and &lt;strong&gt;2217&lt;/strong&gt; are outliers, as none of the models are able to predict close to actual values.&lt;/li&gt;
-&lt;li&gt;Looking at the test RMSE, we could finalize &lt;code&gt;xgboost&lt;/code&gt; as the model that generalizes very well on this dataset.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; has the lowest test RMSE of 0.130, with &lt;code&gt;xgboost&lt;/code&gt; close behind at 0.135.&lt;/li&gt;
+&lt;li&gt;However, &lt;code&gt;glmnet&lt;/code&gt; is sensitive to outliers, as we saw with Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; in the training set. Since the difference in test RMSE is small, we could finalize &lt;code&gt;xgboost&lt;/code&gt;, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_final &amp;lt;- model_final_xgboost&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;feature-importance&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Feature Importance&lt;/h2&gt;
 &lt;p&gt;Even though &lt;code&gt;xgboost&lt;/code&gt; is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.&lt;/p&gt;
 &lt;p&gt;Let’s take a look at the top 10 most important features of our finalized &lt;code&gt;xgboost&lt;/code&gt; model:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(vip)
+
+p1 &amp;lt;- vip(model_final, aesthetics = list(fill = &amp;quot;#00AED8&amp;quot;)) +
+  labs(title = &amp;quot;xgboost model Feature Importance in Training&amp;quot;) +
+  theme_quant()
+
+vFeaturesImp &amp;lt;- vip::vi(model_final) %&amp;gt;% top_n(10, Importance) %&amp;gt;% pull(Variable)
+
+p2 &amp;lt;- eda_plot_correlation_matrix(dfTrain %&amp;gt;% select(SalePrice, one_of(vFeaturesImp)), 
+                            outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlations with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.&lt;/li&gt;
+&lt;li&gt;Correlations of numerical features are plotted side-by-side. Most of them have a correlation of 0.5 or more (in absolute terms) with &lt;code&gt;SalePrice&lt;/code&gt;. &lt;code&gt;LotArea&lt;/code&gt; is the exception with a weaker correlation, though it still ranks among the top 10 features.&lt;/li&gt;
+&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, central air conditioning, age of property, kitchen quality, etc.&lt;/li&gt;
 &lt;li&gt;This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -4186,7 +4285,34 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is &lt;code&gt;PropertyAge&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;So, how would the predicted &lt;code&gt;SalePrice&lt;/code&gt; differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?&lt;/p&gt;
 &lt;p&gt;We could pick a couple of properties at random, change &lt;code&gt;PropertyAge&lt;/code&gt; and see its impact on &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getSampleProperty &amp;lt;- function(randomSeed) {
+  
+  set.seed(randomSeed)
+  dfSample &amp;lt;- dfTest %&amp;gt;% 
+    filter(PropertyAge &amp;gt;= 30) %&amp;gt;% 
+    sample_n(1)
+  
+  dfSample &amp;lt;- tibble(PropertyAge = 1:dfSample$PropertyAge[1]) %&amp;gt;% expand_grid(dfSample %&amp;gt;% select(-PropertyAge))
+}
+
+dfSample &amp;lt;- getSampleProperty(1000) %&amp;gt;% bind_rows(getSampleProperty(2000))
+
+# preprocess the sample data and generated predicted values from the final model
+get_preprocessing_recipe(dfSample) %&amp;gt;% 
+  bake(dfSample) %&amp;gt;% 
+  get_predicted(model_final, .) %&amp;gt;% 
+  as_tibble() %&amp;gt;% 
+  bind_cols(dfSample) %&amp;gt;% 
+  mutate(predicted = exp(value)) %&amp;gt;% 
+  group_by(Id) %&amp;gt;% 
+  ggplot(aes(x = PropertyAge, y = predicted)) +
+  geom_point(color = &amp;quot;#00AED8&amp;quot;) +
+  geom_line() +
+  facet_wrap(~Id, scales = &amp;quot;free&amp;quot;) +
+  scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
+  labs(y = &amp;quot;Predicted Sale Price&amp;quot;,
+       title = &amp;quot;New Property Premium&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.&lt;/p&gt;
 &lt;/div&gt;
 </description>
@@ -4204,12 +4330,34 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
 &lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it. Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(&amp;quot;Dimensions of the training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the training set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfTrain)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1460   81&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTrainIDs &amp;lt;- dfTrain$Id
+
+print(&amp;quot;Dimensions of the testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the testing set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfTest)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1459   81&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTestIDs &amp;lt;- dfTest$Id
+
+dfClean &amp;lt;- dfTrain %&amp;gt;% bind_rows(dfTest)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# dfDescription &amp;lt;- read.delim(&amp;quot;data_description.txt&amp;quot;, header = F, sep = &amp;quot;:&amp;quot;, na.strings = &amp;quot;&amp;quot;) %&amp;gt;% 
+#   as_tibble() %&amp;gt;% 
+#   set_names(c(&amp;quot;Feature&amp;quot;, &amp;quot;Description&amp;quot;)) %&amp;gt;% 
+#   map_df(str_trim) %&amp;gt;% 
+#   mutate(Feature = ifelse(Feature == &amp;quot;&amp;quot;, NA, Feature)) %&amp;gt;% 
+#   drop_na(Feature) %&amp;gt;% 
+#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&amp;gt;% 
+#   mutate(Feature = ifelse(Feature == Description, &amp;quot;&amp;quot;, Feature))
+
+# knitr::kable(dfDescription)
+
+# Hmisc::describe(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4230,21 +4378,28 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;YearRemodAdd&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;YrSold&lt;/code&gt; should not be earlier than &lt;code&gt;YearRemodAdd&lt;/code&gt;: 3 records to be fixed&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&amp;gt;% dplyr::filter(YearRemodAdd &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id YearBuilt YearRemodAdd YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1  1877      2002         2001   2009&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&amp;gt;% dplyr::filter(YrSold &amp;lt; YearRemodAdd)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 4
      Id YearBuilt YearRemodAdd YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1   524      2007         2008   2007
 2  2296      2007         2008   2007
 3  2550      2008         2009   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# fix errors
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(YearRemodAdd = ifelse(YearRemodAdd &amp;lt; YearBuilt, YearBuilt, YearRemodAdd)) %&amp;gt;% 
+  mutate(YrSold = ifelse(YrSold &amp;lt; YearRemodAdd, YearRemodAdd, YrSold))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 18 records to be fixed&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be later than &lt;code&gt;YrSold&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 18 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&amp;gt;% dplyr::filter(GarageYrBlt &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 18 × 4
       Id YearBuilt GarageYrBlt YrSold
    &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
  1    30      1927        1920   2008
@@ -4265,10 +4420,15 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 16  2123      1945        1925   2008
 17  2264      2006        2005   2007
 18  2510      2006        2005   2007&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&amp;gt;% dplyr::filter(GarageYrBlt &amp;gt; YrSold)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id YearBuilt GarageYrBlt YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1  2593      2006        2207   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# fix errors
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(GarageYrBlt = ifelse(GarageYrBlt &amp;lt; YearBuilt, YearBuilt, GarageYrBlt)) %&amp;gt;% 
+  mutate(GarageYrBlt = ifelse(GarageYrBlt &amp;gt; YrSold, YrSold, GarageYrBlt))&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;imputing-missing-values-new-features&#34; class=&#34;section level3 tabset tabset-fade tabset-pills&#34;&gt;
 &lt;h3&gt;Imputing Missing Values &amp;amp; New Features&lt;/h3&gt;
@@ -4280,11 +4440,19 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;p&gt;Now there are 79 properties which have no basement (&lt;code&gt;TotalBsmtSF&lt;/code&gt; = 0). All other basement features having NA values are changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common value in that &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 13
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change TotalBsmtSF to 0 when all basement features are NA
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter(is.na(TotalBsmtSF))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 13
      Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
 1  2121 BrkSide      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                 NA &amp;lt;NA&amp;gt;                 NA        NA          NA           NA           NA&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 79 x 13
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate(TotalBsmtSF = if_else(Id == 2121, 0, TotalBsmtSF))
+
+# 2. Change NA values to None or 0 if there is no basement
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter(TotalBsmtSF == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 79 × 13
       Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
  1    18 Sawyer       &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
@@ -4297,8 +4465,19 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8   343 NAmes        &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
  9   363 Edwards      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
 10   372 ClearCr      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
-# ... with 69 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 9 x 13
+# ℹ 69 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr_bsmt &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Bsmt&amp;quot;))  %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+vFeaturesNum_bsmt &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Bsmt&amp;quot;))  %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate_at(all_of(vFeaturesChr_bsmt), ~ case_when(TotalBsmtSF == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .)) %&amp;gt;% 
+  mutate_at(all_of(vFeaturesNum_bsmt), ~ case_when(TotalBsmtSF == 0 ~ 0, TRUE ~ .))
+
+
+# 3. Change NA values in remaining features to the most common value in the neighborhood where TotalBsmtSF &amp;gt; 0
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 9 × 13
      Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
 1   333 NridgHt      Gd       TA       No           GLQ                1124 &amp;lt;NA&amp;gt;                479      1603        3206            1            0
@@ -4310,6 +4489,25 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 7  2219 IDOTRR       &amp;lt;NA&amp;gt;     TA       No           Unf                   0 Unf                   0       356         356            0            0
 8  2349 Somerst      Gd       TA       &amp;lt;NA&amp;gt;         Unf                   0 Unf                   0       725         725            0            0
 9  2525 CollgCr      TA       &amp;lt;NA&amp;gt;     Av           ALQ                 755 Unf                   0       240         995            0            0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# determine most common values by Neighborhood
+dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean %&amp;gt;% dplyr::filter(TotalBsmtSF &amp;gt; 0), &amp;quot;Neighborhood&amp;quot;, c(&amp;quot;BsmtQual&amp;quot;,&amp;quot;BsmtCond&amp;quot;,&amp;quot;BsmtExposure&amp;quot;))
+bsmt_fintype2_mcv &amp;lt;- dfClean %&amp;gt;% dplyr::filter(BsmtFinSF2 &amp;gt; 0) %&amp;gt;% pull(BsmtFinType2) %&amp;gt;% find_most_common_value()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(BsmtQual = if_else(is.na(BsmtQual),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtQual[Neighborhood == .x])),
+                            BsmtQual)) %&amp;gt;%
+  mutate(BsmtCond = if_else(is.na(BsmtCond),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtCond[Neighborhood == .x])),
+                            BsmtCond)) %&amp;gt;%
+  mutate(BsmtExposure = if_else(is.na(BsmtExposure),
+                                map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtExposure[Neighborhood == .x])),
+                                BsmtExposure)) %&amp;gt;%
+  mutate(BsmtFinType2 = if_else(is.na(BsmtFinType2), bsmt_fintype2_mcv, BsmtFinType2))
+
+# cleanup
+rm(vFeaturesChr_bsmt, vFeaturesNum_bsmt)
+rm(dfNeighborhood_mcv, bsmt_fintype2_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Histograms of numerical basement features and their correlations with &lt;code&gt;SalePrice&lt;/code&gt; are plotted below.&lt;/p&gt;
 &lt;p&gt;It could be verified that: &lt;code&gt;TotalBsmtSF&lt;/code&gt; = &lt;code&gt;BsmtFinSF1&lt;/code&gt; + &lt;code&gt;BsmtFinSF2&lt;/code&gt; + &lt;code&gt;BsmtUnfSF&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Additionally, new features are generated where:&lt;/p&gt;
@@ -4317,26 +4515,62 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;BsmtBath&lt;/code&gt; = &lt;code&gt;BsmtFullBath&lt;/code&gt; + 0.5 * &lt;code&gt;BsmtHalfBath&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;HasBsmt&lt;/code&gt; = &lt;code&gt;TotalBsmtSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: BsmtBath, HasBsmt
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(BsmtBath = BsmtFullBath + 0.5*BsmtHalfBath) %&amp;gt;% 
+  mutate(HasBsmt = (TotalBsmtSF &amp;gt; 0),
+         HasBsmt = as.character(HasBsmt))
+
+dfBsmt &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Bsmt&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfBsmt, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Basement Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfBsmt[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most properties have a basement.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;BsmtFinType2&lt;/code&gt; and &lt;code&gt;BsmtCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfBsmt, .x)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfBsmt, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;bathroom-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Bathroom Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated to determine the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(TotalBath = FullBath + 0.5*HalfBath + BsmtBath)
+
+dfBath &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Bath&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfBath %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfBath, vFeaturesNum, plotTitle = &amp;quot;Bathroom Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfBath[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfBath, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;fireplace-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Fireplace Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;There are 1420 properties that have no fireplaces. &lt;code&gt;FireplaceQu&lt;/code&gt; is changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1,420 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change FireplaceQu to None if there is no fireplace
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Fire&amp;quot;)) %&amp;gt;% dplyr::filter(Fireplaces == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1,420 × 4
       Id Neighborhood Fireplaces FireplaceQu
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      
  1     1 CollgCr               0 &amp;lt;NA&amp;gt;       
@@ -4349,12 +4583,30 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8    20 NAmes                 0 &amp;lt;NA&amp;gt;       
  9    27 NAmes                 0 &amp;lt;NA&amp;gt;       
 10    30 BrkSide               0 &amp;lt;NA&amp;gt;       
-# ... with 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
+# ℹ 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate_at(vars(&amp;quot;FireplaceQu&amp;quot;), ~ case_when(Fireplaces == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have fireplaces.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasFireplace = (Fireplaces &amp;gt; 0),
+         HasFireplace = as.character(HasFireplace))
+
+dfFireplace &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Fireplace&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfFireplace %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfFireplace %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfFireplace, vFeaturesNum, plotTitle = &amp;quot;Fireplace Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfFireplace, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfFireplace[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfFireplace, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;garage-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Garage Features&lt;/h4&gt;
@@ -4363,7 +4615,14 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;p&gt;There are 157 properties where the property has no garage. In these records, &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;GarageFinish&lt;/code&gt;, &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; are recorded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common or median value in the &lt;code&gt;Neighborhood&lt;/code&gt; by &lt;code&gt;GarageType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 157 x 9
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change GarageYrBlt to YearBuilt if it is NA
+############################################################################################################
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate(GarageYrBlt = if_else(is.na(GarageYrBlt), YearBuilt, GarageYrBlt))
+
+# 2. Change NA values to None if there is no garage
+############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% dplyr::filter(GarageArea == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 157 × 9
       Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
  1    40 Edwards      &amp;lt;NA&amp;gt;              1955 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
@@ -4376,19 +4635,67 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8   126 IDOTRR       &amp;lt;NA&amp;gt;              1935 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
  9   128 OldTown      &amp;lt;NA&amp;gt;              1930 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
 10   141 NAmes        &amp;lt;NA&amp;gt;              1971 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
-# ... with 147 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 2 x 9
+# ℹ 147 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr_garage &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate_at(all_of(vFeaturesChr_garage), ~ case_when(GarageArea == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .))
+
+# 3. Change NA values in remaining features to the most common or median value in the Neighborhood for that GarageType
+######################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2 × 9
      Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
 1  2127 OldTown      Detchd            1910 &amp;lt;NA&amp;gt;                  1        360 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
 2  2577 IDOTRR       Detchd            1923 &amp;lt;NA&amp;gt;                 NA         NA &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;GarageType&amp;quot;), c(&amp;quot;GarageQual&amp;quot;,&amp;quot;GarageFinish&amp;quot;,&amp;quot;GarageCond&amp;quot;))
+dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;GarageType&amp;quot;), c(&amp;quot;GarageCars&amp;quot;,&amp;quot;GarageArea&amp;quot;)) %&amp;gt;% 
+  ungroup() %&amp;gt;% 
+  mutate_if(is.numeric, as.integer)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(GarageFinish = if_else(is.na(GarageFinish),
+                                map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageFinish[Neighborhood==.x &amp;amp; GarageType==.y])),
+                                GarageFinish)) %&amp;gt;% 
+  mutate(GarageQual = if_else(is.na(GarageQual),
+                              map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageQual[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageQual)) %&amp;gt;%
+  mutate(GarageCond = if_else(is.na(GarageCond),
+                              map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageCond[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageCond)) %&amp;gt;%
+  mutate(GarageCars = if_else(is.na(GarageCars),
+                              map2_dbl(Neighborhood, GarageType, ~ with(dfNeighborhood_med, GarageCars[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageCars)) %&amp;gt;%
+  mutate(GarageArea = if_else(is.na(GarageArea),
+                              map2_dbl(Neighborhood, GarageType, ~ with(dfNeighborhood_med, GarageArea[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageArea))
+
+# cleanup
+rm(vFeaturesChr_garage, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; and &lt;code&gt;GarageCars&lt;/code&gt; have almost similar correlation with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasGarage&lt;/code&gt; = &lt;code&gt;GarageArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties have a garage.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasGarage = (GarageArea &amp;gt; 0),
+         HasGarage = as.character(HasGarage))
+
+dfGarage &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Garage&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfGarage %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfGarage %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfGarage, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Garage Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfGarage, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfGarage[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfGarage, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;masonry-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Masonry Features&lt;/h4&gt;
@@ -4397,11 +4704,23 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrType&lt;/code&gt; to be the most common values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;YearRemodAdd&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrArea&lt;/code&gt; to be the median values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change MasVnrType in Id 2611 as the most common value in the Neighborhood
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter(Id == 2611)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id Neighborhood MasVnrType MasVnrArea
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
 1  2611 Mitchel      &amp;lt;NA&amp;gt;              198&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;masvnrtype_mcv &amp;lt;- dfClean %&amp;gt;% dplyr::filter(MasVnrArea &amp;gt; 0, Neighborhood == &amp;quot;Mitchel&amp;quot;) %&amp;gt;%
+  most_common_value_by_grouping(c(&amp;quot;Neighborhood&amp;quot;), &amp;quot;MasVnrType&amp;quot;) %&amp;gt;% pull(MasVnrType)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate(MasVnrType = if_else(Id == 2611, masvnrtype_mcv, MasVnrType))
+
+
+# 2. Change remaining NA values in MasVnrType to most common values by Neighborhood and YearRemodAdd
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 × 4
       Id Neighborhood MasVnrType MasVnrArea
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
  1   235 Gilbert      &amp;lt;NA&amp;gt;               NA
@@ -4414,8 +4733,19 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8  1279 CollgCr      &amp;lt;NA&amp;gt;               NA
  9  1692 Gilbert      &amp;lt;NA&amp;gt;               NA
 10  1707 Somerst      &amp;lt;NA&amp;gt;               NA
-# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+# ℹ 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;YearRemodAdd&amp;quot;), &amp;quot;MasVnrType&amp;quot;) %&amp;gt;% 
+  mutate(MasVnrType = if_else(is.na(MasVnrType), &amp;quot;None&amp;quot;, MasVnrType))
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MasVnrType = if_else(is.na(MasVnrType), 
+                              map2_chr(Neighborhood, YearRemodAdd, ~ with(dfNeighborhood_mcv, MasVnrType[Neighborhood == .x &amp;amp; YearRemodAdd == .y])),
+                              MasVnrType))
+
+# 3. Change NA values in MasVnrArea to median values by Neighborhood and MasVnrType
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 × 4
       Id Neighborhood MasVnrType MasVnrArea
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
  1   235 Gilbert      None               NA
@@ -4428,12 +4758,38 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8  1279 CollgCr      BrkFace            NA
  9  1692 Gilbert      None               NA
 10  1707 Somerst      Stone              NA
-# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
+# ℹ 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;MasVnrType&amp;quot;), &amp;quot;MasVnrArea&amp;quot;)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MasVnrArea = if_else(is.na(MasVnrArea),
+                              map2_dbl(Neighborhood, MasVnrType, ~ with(dfNeighborhood_med, MasVnrArea[Neighborhood == .x &amp;amp; MasVnrType == .y])),
+                              MasVnrArea))
+
+# cleanup
+rm(masvnrtype_mcv, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have masonry.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasMasVnr
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasMasVnr = (MasVnrArea &amp;gt; 0),
+         HasMasVnr = as.character(HasMasVnr))
+
+dfMasVnr &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;MasVnr&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfMasVnr %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfMasVnr %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfMasVnr, vFeaturesNum, plotTitle = &amp;quot;Masonry Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfMasVnr, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfMasVnr[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfMasVnr, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;pool-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Pool Features&lt;/h4&gt;
@@ -4441,7 +4797,10 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;p&gt;Change values in &lt;code&gt;PoolQC&lt;/code&gt; to &lt;strong&gt;None&lt;/strong&gt; if the property has no pool&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in remaining &lt;code&gt;PoolQC&lt;/code&gt; to the most common value in the Neighborhood in the properties that have a pool.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 2,906 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change NA values in PoolQC to None if there is no pool
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Pool&amp;quot;)) %&amp;gt;% dplyr::filter(PoolArea == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2,906 × 4
       Id Neighborhood PoolArea PoolQC
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
  1     1 CollgCr             0 &amp;lt;NA&amp;gt;  
@@ -4454,18 +4813,50 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
  8     8 NWAmes              0 &amp;lt;NA&amp;gt;  
  9     9 OldTown             0 &amp;lt;NA&amp;gt;  
 10    10 BrkSide             0 &amp;lt;NA&amp;gt;  
-# ... with 2,896 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+# ℹ 2,896 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate(PoolQC = if_else(PoolArea == 0, &amp;quot;None&amp;quot;, PoolQC))
+
+
+# 2. Change NA values in remaining PoolQC to the most common value in the Neighborhood where PoolArea &amp;gt; 0
+###############################################################################################################
+(dfMissing &amp;lt;- dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Pool&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.))))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 4
      Id Neighborhood PoolArea PoolQC
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
 1  2421 NAmes             368 &amp;lt;NA&amp;gt;  
 2  2504 SawyerW           444 &amp;lt;NA&amp;gt;  
 3  2600 Mitchel           561 &amp;lt;NA&amp;gt;  &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean %&amp;gt;% dplyr::filter(PoolArea &amp;gt; 0), &amp;quot;Neighborhood&amp;quot;, &amp;quot;PoolQC&amp;quot;) %&amp;gt;% 
+  mutate(PoolQC = if_else(is.na(PoolQC), &amp;quot;None&amp;quot;, PoolQC))
+
+dfMissing &amp;lt;- dfMissing %&amp;gt;% mutate(PoolQC = map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, PoolQC[Neighborhood == .x])))
+
+dfClean$PoolQC[dfClean$Id %in% dfMissing$Id] &amp;lt;- dfMissing$PoolQC
+
+# cleanup
+rm(dfNeighborhood_mcv, dfMissing)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties do not have a pool.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasPool = (PoolArea &amp;gt; 0),
+         HasPool = as.character(HasPool))
+
+dfPool &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Pool&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfPool %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfPool %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfPool, vFeaturesNum, plotTitle = &amp;quot;Pool Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfPool, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfPool[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfPool, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;porch-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Porch Features&lt;/h4&gt;
@@ -4476,14 +4867,43 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Whether property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: PorchSF, HasPorch
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(PorchSF = OpenPorchSF + EnclosedPorch + `3SsnPorch` + ScreenPorch) %&amp;gt;% 
+  mutate(HasPorch = PorchSF &amp;gt; 0,
+         HasPorch = as.character(HasPorch))
+
+dfPorch &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Porch&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfPorch %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfPorch %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfPorch, vFeaturesNum, plotTitle = &amp;quot;Porch Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfPorch, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfPorch[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfPorch, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;built-area-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Built Area Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is added to determine the total square footage of built area: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(TotalSF = GrLivArea + TotalBsmtSF)
+
+vFeaturesNum &amp;lt;- c(&amp;quot;TotalSF&amp;quot;,&amp;quot;GrLivArea&amp;quot;,&amp;quot;TotalBsmtSF&amp;quot;)
+
+p1 &amp;lt;- eda_plot_histograms(dfClean, vFeaturesNum, plotTitle = &amp;quot;Built Area Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;construction-year-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Construction Year Features&lt;/h4&gt;
@@ -4496,7 +4916,28 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Indicate if the property has been remodelled: &lt;code&gt;IsRemodAdd&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New feature: Vintage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(Vintage = cut(YearBuilt, breaks = c(1800, 1945, 1999, 2100), 
+                       labels = c(&amp;quot;1945 or ealier&amp;quot;,&amp;quot;1946-1999&amp;quot;,&amp;quot;2000 or later&amp;quot;),
+                       ordered_result = T)) %&amp;gt;% 
+  mutate(PropertyAge = YrSold - YearRemodAdd) %&amp;gt;% 
+  mutate(IsNew = (YearBuilt == YrSold),
+         IsNew = as.character(IsNew)) %&amp;gt;% 
+  mutate(IsRemod = (YearRemodAdd &amp;gt; YearBuilt),
+         IsRemod = as.character(IsRemod))
+
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Year&amp;quot;),contains(&amp;quot;Yr&amp;quot;),&amp;quot;PropertyAge&amp;quot;) %&amp;gt;% colnames() %&amp;gt;% sort()
+vFeaturesChr &amp;lt;- c(&amp;quot;IsNew&amp;quot;,&amp;quot;IsRemod&amp;quot;,&amp;quot;Vintage&amp;quot;)
+
+p1 &amp;lt;- eda_plot_histograms(dfClean, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Construction Year Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfClean, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;neighborhood-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Neighborhood Features&lt;/h4&gt;
@@ -4510,7 +4951,20 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;&lt;strong&gt;Type4&lt;/strong&gt;: Mitchel, NPkVill, NAmes, SWISU, Sawyer, Blueste, BrkSide, Edwards, OldTown&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Type5&lt;/strong&gt;: IDOTRR, BrDale, MeadowV&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(NeighborhoodType = fct_collapse(Neighborhood,
+                                         Type1 = c(&amp;quot;StoneBr&amp;quot;, &amp;quot;NridgHt&amp;quot;, &amp;quot;NoRidge&amp;quot;),
+                                         Type2 = c(&amp;quot;Veenker&amp;quot;, &amp;quot;Timber&amp;quot;, &amp;quot;Somerst&amp;quot;),
+                                         Type3 = c(&amp;quot;Crawfor&amp;quot;, &amp;quot;CollgCr&amp;quot;, &amp;quot;ClearCr&amp;quot;, &amp;quot;Blmngtn&amp;quot;, &amp;quot;Gilbert&amp;quot;, &amp;quot;NWAmes&amp;quot;, &amp;quot;SawyerW&amp;quot;),
+                                         Type4 = c(&amp;quot;Mitchel&amp;quot;, &amp;quot;NPkVill&amp;quot;, &amp;quot;NAmes&amp;quot;, &amp;quot;SWISU&amp;quot;, &amp;quot;Sawyer&amp;quot;, &amp;quot;Blueste&amp;quot;, &amp;quot;BrkSide&amp;quot;, &amp;quot;Edwards&amp;quot;, &amp;quot;OldTown&amp;quot;),
+                                         Type5 = c(&amp;quot;IDOTRR&amp;quot;, &amp;quot;BrDale&amp;quot;, &amp;quot;MeadowV&amp;quot;))) %&amp;gt;% 
+  mutate(NeighborhoodType = factor(NeighborhoodType, levels = c(&amp;quot;Type5&amp;quot;,&amp;quot;Type4&amp;quot;,&amp;quot;Type3&amp;quot;,&amp;quot;Type2&amp;quot;,&amp;quot;Type1&amp;quot;), ordered = TRUE))
+
+p1 &amp;lt;- eda_plot_box(dfClean, &amp;quot;Neighborhood&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &amp;lt;- eda_plot_box(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::label_dollar(accuracy = 1))
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Other Missing Features&lt;/h4&gt;
@@ -4520,6 +4974,45 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;&lt;p&gt;In &lt;code&gt;LotFrontage&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the median values in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;In &lt;code&gt;MSZoning&lt;/code&gt;, &lt;code&gt;KitchenQual&lt;/code&gt;, &lt;code&gt;Exterior1st&lt;/code&gt;, &lt;code&gt;Exterior2nd&lt;/code&gt;, &lt;code&gt;Electrical&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. &amp;amp; 2. change NA values to None or most common value of that feature
+####################################################################################################################
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate_at(c(&amp;quot;MiscFeature&amp;quot;, &amp;quot;Alley&amp;quot;, &amp;quot;Fence&amp;quot;), change_na_to, value = &amp;quot;None&amp;quot;) %&amp;gt;% 
+  mutate_at(c(&amp;quot;Utilities&amp;quot;), change_na_to_most_common_value) %&amp;gt;% 
+  mutate_at(c(&amp;quot;Functional&amp;quot;), change_na_to_most_common_value) %&amp;gt;% 
+  mutate_at(c(&amp;quot;SaleType&amp;quot;), change_na_to_most_common_value)
+
+# 3. In LotFrontage, change NA values to the median value by neighborhood
+####################################################################################################################
+dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, &amp;quot;Neighborhood&amp;quot;, &amp;quot;LotFrontage&amp;quot;)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(LotFrontage = if_else(is.na(LotFrontage), 
+                               map_dbl(Neighborhood, ~ with(dfNeighborhood_med, LotFrontage[Neighborhood == .x])), 
+                               LotFrontage))
+
+# 4. In MSZoning,KitchenQual,Exterior1st,Exterior2nd,Electrical change NA values to the median value by neighborhood
+dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, &amp;quot;Neighborhood&amp;quot;, c(&amp;quot;MSZoning&amp;quot;,&amp;quot;KitchenQual&amp;quot;,&amp;quot;Exterior1st&amp;quot;,&amp;quot;Exterior2nd&amp;quot;,&amp;quot;Electrical&amp;quot;))
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MSZoning = if_else(is.na(MSZoning),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, MSZoning[Neighborhood == .x])),
+                            MSZoning)) %&amp;gt;%
+  mutate(KitchenQual = if_else(is.na(KitchenQual),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, KitchenQual[Neighborhood == .x])),
+                              KitchenQual)) %&amp;gt;%
+  mutate(Exterior1st = if_else(is.na(Exterior1st),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Exterior1st[Neighborhood == .x])),
+                              Exterior1st)) %&amp;gt;%
+  mutate(Exterior2nd = if_else(is.na(Exterior2nd),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Exterior2nd[Neighborhood == .x])),
+                              Exterior2nd)) %&amp;gt;%
+  mutate(Electrical = if_else(is.na(Electrical),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Electrical[Neighborhood == .x])),
+                              Electrical))
+
+# cleanup
+rm(dfNeighborhood_med, dfNeighborhood_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;label-encoding&#34; class=&#34;section level3&#34;&gt;
@@ -4555,27 +5048,98 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;p&gt;&lt;code&gt;MoSold&lt;/code&gt; is cyclical and should be recoded as a factor.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;YrSold&lt;/code&gt; has only 5 values from 2006-2010 and should also be recoded as a factor.&lt;/p&gt;
 &lt;p&gt;Categorical features where several categories have less than 10 observations are lumped into a single category named &lt;strong&gt;Other&lt;/strong&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;is.nominal &amp;lt;- function(Z) {
+  return(is.factor(Z) &amp;amp; !is.ordered(Z))
+}
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MoSold = as.factor(MoSold)) %&amp;gt;% 
+  mutate(YrSold = as.factor(YrSold)) %&amp;gt;% 
+  mutate(MSSubClass = as.character(MSSubClass)) %&amp;gt;% 
+  mutate_at(c(&amp;quot;ExterCond&amp;quot;,&amp;quot;ExterQual&amp;quot;,&amp;quot;BsmtQual&amp;quot;,&amp;quot;BsmtCond&amp;quot;,&amp;quot;HeatingQC&amp;quot;,&amp;quot;KitchenQual&amp;quot;,&amp;quot;FireplaceQu&amp;quot;,&amp;quot;GarageQual&amp;quot;,&amp;quot;GarageCond&amp;quot;), 
+            factor, levels = c(&amp;quot;Ex&amp;quot;,&amp;quot;Gd&amp;quot;,&amp;quot;TA&amp;quot;,&amp;quot;Fa&amp;quot;,&amp;quot;Po&amp;quot;,&amp;quot;None&amp;quot;), ordered = TRUE) %&amp;gt;% 
+  mutate_at(c(&amp;quot;BsmtFinType1&amp;quot;,&amp;quot;BsmtFinType2&amp;quot;), 
+            factor, levels = c(&amp;quot;GLQ&amp;quot;, &amp;quot;ALQ&amp;quot;, &amp;quot;BLQ&amp;quot;, &amp;quot;Rec&amp;quot;, &amp;quot;LwQ&amp;quot;, &amp;quot;Unf&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE) %&amp;gt;% 
+  mutate(LotShape = factor(LotShape, levels = c(&amp;quot;Reg&amp;quot;,&amp;quot;IR1&amp;quot;,&amp;quot;IR2&amp;quot;,&amp;quot;IR3&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(LandSlope = factor(LandSlope, levels = c(&amp;quot;Gtl&amp;quot;, &amp;quot;Mod&amp;quot;, &amp;quot;Sev&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(BsmtExposure = factor(BsmtExposure, levels = c(&amp;quot;Gd&amp;quot;, &amp;quot;Av&amp;quot;, &amp;quot;Mn&amp;quot;, &amp;quot;No&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(Functional = factor(Functional, levels = c(&amp;quot;Typ&amp;quot;, &amp;quot;Min1&amp;quot;, &amp;quot;Min2&amp;quot;, &amp;quot;Mod&amp;quot;, &amp;quot;Maj1&amp;quot;, &amp;quot;Maj2&amp;quot;, &amp;quot;Sev&amp;quot;, &amp;quot;Sal&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(GarageFinish = factor(GarageFinish, levels = c(&amp;quot;Fin&amp;quot;, &amp;quot;RFn&amp;quot;, &amp;quot;Unf&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(Street = factor(Street, levels = c(&amp;quot;Pave&amp;quot;,&amp;quot;Grvl&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(PavedDrive = factor(PavedDrive, levels = c(&amp;quot;Y&amp;quot;,&amp;quot;P&amp;quot;,&amp;quot;N&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(OverallCond = ordered(OverallCond, levels = 1:10),
+         OverallQual = ordered(OverallQual, levels = 1:10)) %&amp;gt;% 
+  mutate(CentralAir = ordered(CentralAir, levels = c(&amp;quot;Y&amp;quot;,&amp;quot;N&amp;quot;)),
+         HasGarage = ordered(HasGarage, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasFireplace = ordered(HasFireplace, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasMasVnr = ordered(HasMasVnr, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasPorch = ordered(HasPorch, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         IsNew = ordered(IsNew, levels = c(&amp;quot;TRUE&amp;quot;,&amp;quot;FALSE&amp;quot;)),
+         IsRemod = ordered(IsRemod, levels = c(&amp;quot;TRUE&amp;quot;,&amp;quot;FALSE&amp;quot;))) %&amp;gt;% 
+  # mutate_if(is.ordered, fct_rev) %&amp;gt;% # reverse the factor levels before assigning an integer order
+  # mutate_if(is.ordered, function(Z) as.integer(Z) - 1) %&amp;gt;% 
+  mutate_if(is.character, as.factor) %&amp;gt;% 
+  mutate_if(is.nominal, ~ fct_lump_min(.x, min = 10)) %&amp;gt;% 
+  mutate_if(is.logical, as.factor)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;features-to-drop&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Features to Drop&lt;/h3&gt;
 &lt;div id=&#34;highly-correlated-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Highly Correlated Features&lt;/h4&gt;
 &lt;p&gt;Some features could be dropped from further analysis because either they are too correlated or replaced by a similar feature.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(vFeatures_to_exclude &amp;lt;- c(&amp;quot;BsmtFullBath&amp;quot;,&amp;quot;GarageCars&amp;quot;,&amp;quot;GarageYrBlt&amp;quot;,
+                           &amp;quot;GrLivArea&amp;quot;,&amp;quot;PoolArea&amp;quot;,
+                           &amp;quot;YearBuilt&amp;quot;,&amp;quot;YearRemodAdd&amp;quot;,&amp;quot;Neighborhood&amp;quot;,
+                           &amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt; [1] &amp;quot;BsmtFullBath&amp;quot;  &amp;quot;GarageCars&amp;quot;    &amp;quot;GarageYrBlt&amp;quot;   &amp;quot;GrLivArea&amp;quot;     &amp;quot;PoolArea&amp;quot;      &amp;quot;YearBuilt&amp;quot;     &amp;quot;YearRemodAdd&amp;quot;  &amp;quot;Neighborhood&amp;quot;  &amp;quot;OpenPorchSF&amp;quot;  
 [10] &amp;quot;EnclosedPorch&amp;quot; &amp;quot;3SsnPorch&amp;quot;     &amp;quot;ScreenPorch&amp;quot;  &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
 &lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeatures_skewed &amp;lt;- dfClean %&amp;gt;% 
+  select_if(is.factor) %&amp;gt;% 
+  gather(feature, value) %&amp;gt;% 
+  group_by(feature, value) %&amp;gt;% 
+  count() %&amp;gt;% 
+  mutate(perc = n/nrow(dfClean)) %&amp;gt;% 
+  dplyr::filter(perc &amp;gt; 0.95) %&amp;gt;% 
+  pull(feature)
+
+cowplot::plot_grid(plotlist = map(vFeatures_skewed, ~ eda_plot_column(dfClean, .x)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Features to exclude for modelling
+vFeatures_to_exclude &amp;lt;- c(vFeatures_to_exclude, vFeatures_skewed) %&amp;gt;% unique()
+
+# cleanup
+rm(vFeatures_skewed)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;finalized-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalized Data&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# print(&amp;quot;Following features are dropped&amp;quot;)
+# print(vFeatures_to_exclude)
+
+# Finalized dataset
+dfClean &amp;lt;- dfClean %&amp;gt;% select(-one_of(vFeatures_to_exclude))
+
+# determine the numerical features
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(-Id) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames() %&amp;gt;% sort()
+
+# determine the categorical features
+vFeaturesCat &amp;lt;- dfClean %&amp;gt;% select(-Id) %&amp;gt;% select_if(is.factor) %&amp;gt;% colnames() %&amp;gt;% sort()
+# vFeaturesCat1 &amp;lt;- vFeaturesCat[map_int(vFeaturesCat, ~ length(levels(dfClean[[.x]]))) &amp;gt; 5]
+vFeaturesCat1 &amp;lt;- dfClean %&amp;gt;% select_if(is.ordered) %&amp;gt;% colnames() %&amp;gt;% sort()
+vFeaturesCat2 &amp;lt;- setdiff(vFeaturesCat, vFeaturesCat1)
+
+print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the finalized dataset&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 2919   73&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;Excluding Id, there are {(ncol(dfClean)-1)} features in the finalized dataset.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Excluding Id, there are 72 features in the finalized dataset.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;There are {length(vFeaturesNum)} numerical, {length(vFeaturesCat1)} ordinal and {length(vFeaturesCat2)} nominal features.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;There are 26 numerical, 26 ordinal and 20 nominal features.&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
@@ -4584,7 +5148,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical Features&lt;/h3&gt;
 &lt;p&gt;First let’s plot all the features that are measured as area in square feet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4592,7 +5157,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Many features are heavily skewed so they need to be normalized before fitting models.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Now let’s see other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)], &amp;quot;SalePrice&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -4600,7 +5166,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Most of the properties have been built less than 20 years prior to their sale.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;SalePrice&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, &amp;quot;SalePrice&amp;quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -4616,7 +5183,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;h2&gt;Categorical Features&lt;/h2&gt;
 &lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Ordinal Features&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat1, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4626,7 +5194,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Nominal Features.&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat2, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4642,7 +5211,9 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
 &lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vOutliers_TotalSF &amp;lt;- dfClean %&amp;gt;% filter(TotalSF &amp;gt; 7000) %&amp;gt;% pull(Id)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4655,7 +5226,31 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
 &lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
+
+dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
+  correlate() %&amp;gt;% 
+  focus(SalePrice) %&amp;gt;% 
+  dplyr::rename(feature = term,
+                corr = SalePrice) %&amp;gt;%
+  arrange(desc(abs(corr))) %&amp;gt;% 
+  dplyr::filter(abs(corr) &amp;gt; 0.1) %&amp;gt;% 
+  mutate(corr = round(corr, 2)) %&amp;gt;% 
+  mutate(feature = fct_reorder(feature, corr)) %&amp;gt;% 
+  dplyr::filter(!(feature %in% vFeatures_to_exclude))
+
+vFeaturesCor &amp;lt;- dfCor %&amp;gt;% pull(feature) %&amp;gt;% as.character()
+
+
+# plotCorrelationMatrix(dfClean %&amp;gt;% select(c(&amp;quot;SalePrice&amp;quot;,one_of(vFeaturesCor))), outlineVar = &amp;quot;SalePrice&amp;quot;, &amp;quot;Correlation with SalePrice&amp;quot;) # doesn&amp;#39;t fit page
+ggplot(dfCor, aes(x = feature, y = corr)) +
+  geom_col(aes(fill = corr &amp;lt; 0), color = &amp;quot;white&amp;quot;) +
+  geom_label(aes(label = corr, hjust = if_else(corr &amp;gt; 0, -0.1, 1.1)), size = 2.8) +
+  scale_fill_quant(palette = &amp;quot;heatmap&amp;quot;, guide = &amp;quot;none&amp;quot;) +
+  expand_limits(y = c(-0.8, 0.8)) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;&amp;quot;, title = &amp;quot;Highest Correlations with SalePrice&amp;quot;) +
+  coord_flip()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4666,7 +5261,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4678,7 +5274,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -4694,7 +5291,10 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
 &lt;p&gt;We have determined &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have among the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how they vary by &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; respectively:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, yLabelsScale = scales::dollar)
+p2 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;GarageArea&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageType&amp;quot;, yLabelsScale = scales::dollar)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;For the same total area, there are neighborhoods where &lt;code&gt;SalePrice&lt;/code&gt; is higher than others.&lt;/li&gt;
 &lt;li&gt;Properties with no garage are distinctly separated.&lt;/li&gt;
@@ -4705,12 +5305,22 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;SalePrice&lt;/code&gt; with a combination of categorical features, that could provide any additional explanatory power for prediction:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;OverallQual&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
 &lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
 &lt;li&gt;Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# split the data back to training and testing sets
+# dfTrain &amp;lt;- dfClean %&amp;gt;% dplyr::slice(1:nrows_train)
+# dfTest &amp;lt;- dfClean %&amp;gt;% dplyr::slice(-(1:nrows_train))
+
+save(vFeaturesCat, vFeaturesNum, vFeaturesCor, dfClean, vTestIDs, 
+     file = &amp;quot;Ames_Housing_Clean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>
@@ -4751,254 +5361,123 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here are the average metrics for all the models trained with &lt;code&gt;keras&lt;/code&gt;, &lt;code&gt;randomForest&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; regression methods:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;load(&amp;quot;fit_models_keras.Rda&amp;quot;)
+
+dfModels_keras &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;keras&amp;quot;)
+best_model_results_keras &amp;lt;- best_model_results
+dfResults_keras &amp;lt;- best_model_results_keras$dfResults %&amp;gt;% mutate(type = &amp;quot;keras&amp;quot;)
+
+load(&amp;quot;fit_models_rf.Rda&amp;quot;)
+
+dfModels_rf &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;randomForest&amp;quot;)
+best_model_results_rf &amp;lt;- best_model_results
+dfResults_rf &amp;lt;- best_model_results_rf$dfResults %&amp;gt;% mutate(type = &amp;quot;randomForest&amp;quot;)
+
+load(&amp;quot;fit_models_xgb.Rda&amp;quot;)
+
+dfModels_xgb &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;quot;)
+best_model_results_xgb &amp;lt;- best_model_results
+dfResults_xgb &amp;lt;- best_model_results_xgb$dfResults %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;quot;)
+
+# combine the actual v/s predicted results from the best model using the 3 methods
+dfResults &amp;lt;- map_df(list(dfResults_keras, dfResults_rf, dfResults_xgb), bind_rows) %&amp;gt;% 
+  select(type, everything()) %&amp;gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&amp;gt;% 
+  group_by(type)
+
+# combine the average metrics from all the models using the 3 methods
+dfModels &amp;lt;- map_df(list(dfModels_keras, dfModels_rf, dfModels_xgb), bind_rows) %&amp;gt;% 
+  select(type, everything()) %&amp;gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&amp;gt;% 
+  gather(avg_metric, value, rmse, rsq, mae)
+
+# create an HTML table
+dfModels %&amp;gt;% tidyHtmlTable(header = &amp;quot;type&amp;quot;, cgroup1 = &amp;quot;avg_metric&amp;quot;, cell_value = &amp;quot;value&amp;quot;, rnames = &amp;quot;model&amp;quot;, align = &amp;quot;|rrr|rrr|rrr&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;table class=&#34;gmisc_table&#34; style=&#34;border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;&#34;&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th style=&#34;border-top: 2px solid grey;&#34;&gt;
+&lt;th style=&#34;border-bottom: 1px solid grey; border-top: 2px solid grey;&#34;&gt;
 &lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-mae
-&lt;/th&gt;
-&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-rmse
-&lt;/th&gt;
-&lt;th style=&#34;border-top: 2px solid grey;; border-bottom: hidden;&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th colspan=&#34;3&#34; style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
-rsq
-&lt;/th&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34;&gt;
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 keras
 &lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 randomForest
 &lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-xgboost
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-keras
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-randomForest
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-xgboost
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-keras
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
-randomForest
-&lt;/th&gt;
-&lt;th style=&#34;border-bottom: 1px solid grey; text-align: center;&#34;&gt;
+&lt;th style=&#34;font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;&#34;&gt;
 xgboost
 &lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ .
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-360.55
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-262.35
+c(“989.71”, “0.93”, “360.55”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-280.49
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“529.28”, “0.98”, “262.35”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-989.71
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-529.28
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-540.76
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.93
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
+c(“540.76”, “0.98”, “280.49”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-860.29
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-816.1
+c(“1499.2”, “0.86”, “860.29”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-815.76
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“1427.25”, “0.87”, “816.1”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-1499.2
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-1427.25
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-1427.35
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.86
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.87
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.87
+c(“1427.35”, “0.87”, “815.76”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-590.32
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-548.67
+c(“1040.69”, “0.93”, “590.32”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-544.48
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“1006.61”, “0.94”, “548.67”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-1040.69
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-1006.61
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-992.46
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.93
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.94
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.94
+c(“992.46”, “0.94”, “544.48”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity + color
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-358.85
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-305.17
+c(“645.4”, “0.97”, “358.85”)
 &lt;/td&gt;
 &lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-306.86
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
+c(“571.73”, “0.98”, “305.17”)
 &lt;/td&gt;
 &lt;td style=&#34;text-align: right;&#34;&gt;
-645.4
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-571.73
-&lt;/td&gt;
-&lt;td style=&#34;border-right: 1px solid black; text-align: right;&#34;&gt;
-575.3
-&lt;/td&gt;
-&lt;td style colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.97
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;text-align: right;&#34;&gt;
-0.98
+c(“575.3”, “0.98”, “306.86”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: left;&#34;&gt;
+&lt;td style=&#34;border-bottom: 2px solid grey; border-left: 1px solid black; text-align: right;&#34;&gt;
 price ~ carat + clarity + color + cut
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-347.99
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-285.96
+c(“626.78”, “0.98”, “347.99”)
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
-282.38
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
+c(“545.02”, “0.98”, “285.96”)
 &lt;/td&gt;
 &lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-626.78
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-545.02
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;&#34;&gt;
-541.63
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey;&#34; colspan=&#34;1&#34;&gt;
- 
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
-&lt;/td&gt;
-&lt;td style=&#34;border-bottom: 2px solid grey; text-align: right;&#34;&gt;
-0.98
+c(“541.63”, “0.98”, “282.38”)
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -5020,15 +5499,57 @@ price ~ carat + clarity + color + cut
 &lt;li&gt;Use the resulting feature weights to explain local behavior.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; width=&#34;960&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Plot Feature Importance by sample
+plot_features(explanation_keras, ncol = 3) + 
+  labs(title = &amp;quot;LIME Feature Importance from a keras model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_features(explanation_xgb, ncol = 3) + 
+  labs(title = &amp;quot;LIME Feature Importance from an xgboost model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The features by importance that best explain the predictions in these 6 random samples are &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Plot Feature Importance Heatmap
+plot_explanations(explanation_keras) +
+  labs(title = &amp;quot;LIME Feature Importance Heatmap from a keras model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_explanations(explanation_xgb) +
+  labs(title = &amp;quot;LIME Feature Importance Heatmap from an xgboost model&amp;quot;,
+       subtitle = glue::glue(&amp;quot;{numSamples} random samples from testing set&amp;quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are co-linear with &lt;code&gt;carat&lt;/code&gt;, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
 &lt;p&gt;Finally, here are the scatterplots of actual v/s predicted &lt;code&gt;price&lt;/code&gt; from the best model on the testing set, using the 3 regression methods:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dfResults %&amp;gt;% 
+  ggplot(aes(x = actual, y = estimate)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  facet_grid(type ~ .) +
+  scale_x_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = formulaString_best,
+       subtitle = &amp;quot;(linear scale)&amp;quot;)
+
+p2 &amp;lt;- p1 + 
+  scale_x_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(subtitle = &amp;quot;(log scale)&amp;quot;, x = &amp;quot;actual price&amp;quot;, y = &amp;quot;predicted price&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar &lt;strong&gt;r-squared&lt;/strong&gt; and &lt;strong&gt;rmse&lt;/strong&gt; values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.&lt;/p&gt;
 &lt;p&gt;As in the case with linear models, the variance in predicted diamond prices increases with &lt;code&gt;price&lt;/code&gt;. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between &lt;code&gt;price&lt;/code&gt; and its predictors, they also predict prices within a reasonable range.&lt;/p&gt;
 &lt;/div&gt;
@@ -5056,6 +5577,8 @@ price ~ carat + clarity + color + cut
 &lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we did an exploratory data analysis of the &lt;code&gt;diamonds&lt;/code&gt; dataset and found that &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; were strongly correlated with &lt;code&gt;price&lt;/code&gt;. To some extent, &lt;code&gt;clarity&lt;/code&gt; also appeared to provide some predictive ability.&lt;/p&gt;
 &lt;p&gt;In this post, we will build linear models and see how well they predict the &lt;code&gt;price&lt;/code&gt; of diamonds.&lt;/p&gt;
 &lt;p&gt;Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_lm &amp;lt;- lm(price ~ ., data = diamonds)
+summary(model_lm)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;
 Call:
 lm(formula = price ~ ., data = diamonds)
@@ -5094,9 +5617,12 @@ z             -50.12      33.49   -1.50               0.1345
 Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
 
 Residual standard error: 1130 on 53916 degrees of freedom
-Multiple R-squared:  0.92,  Adjusted R-squared:  0.92 
+Multiple R-squared:  0.92,	Adjusted R-squared:  0.92 
 F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 3
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;diamonds %&amp;gt;% 
+    mutate(estimate = predict(model_lm, diamonds)) %&amp;gt;% 
+    metrics(truth = price, estimate = estimate)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 3
   .metric .estimator .estimate
   &amp;lt;chr&amp;gt;   &amp;lt;chr&amp;gt;          &amp;lt;dbl&amp;gt;
 1 rmse    standard    1130.   
@@ -5104,7 +5630,16 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
 3 mae     standard     740.   &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The model summary shows it is an overfitted model. Among other things, we know that &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; have no impact on &lt;code&gt;price&lt;/code&gt;, yet these are shown to be highly significant. Root Mean Squared Error (rmse) and other metrics are also shown above.&lt;/p&gt;
 &lt;p&gt;Let’s make a plot of actual v/s predicted prices to visualize how well this base model performs.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;augment(model_lm, diamonds) %&amp;gt;% 
+  ggplot(aes(x = price, y = .fitted)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  scale_x_continuous(labels = scales::dollar) +
+  scale_y_continuous(labels = scales::dollar) +
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = &amp;quot;Scatterplot of predicted v/s actual price from a base linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;If the predictions are good, the points should lie close to a straight line drawn at 45 degrees. We can see this base model does a poor job of predicting prices. Worst of all, the model predicts negative prices on the lower end.
 It shows that &lt;code&gt;price&lt;/code&gt; has to be log transformed to avoid these absurdities.&lt;/p&gt;
 &lt;div id=&#34;feature-engineering&#34; class=&#34;section level2&#34;&gt;
@@ -5115,10 +5650,19 @@ As these 3 dimensions are highly correlated, we can compute a geometrical averag
 &lt;p&gt;Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:&lt;/p&gt;
 &lt;p&gt;$ density = mass/volume $&lt;/p&gt;
 &lt;p&gt;We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfInput &amp;lt;- diamonds %&amp;gt;% 
+  mutate(volume = x*y*z,
+         `average dimension` = volume ^ (1/3),
+         volume2 = carat * 0.2/3.51,
+         `average dimension2` = (volume2 ^ (1/3)) * 10)   # Multiply by 10 to convert from cm to mm
+
+eda_plot_scatter(dfInput, c(&amp;quot;average dimension&amp;quot;, &amp;quot;average dimension2&amp;quot;), &amp;quot;price&amp;quot;, yLabelsScale = scales::dollar) + 
+  labs(title = &amp;quot;Scatterplot of price v/s average dimension&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
 Keep in mind there are 20 &lt;code&gt;z&lt;/code&gt; values that are 0. In 7 of these records both &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are 0 too, which means these values were not recorded reliably.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 20 x 10
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;diamonds %&amp;gt;% dplyr::filter(x == 0 | y == 0 | z == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 20 × 10
    carat cut       color clarity depth table price     x     y     z
    &amp;lt;dbl&amp;gt; &amp;lt;ord&amp;gt;     &amp;lt;ord&amp;gt; &amp;lt;ord&amp;gt;   &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;int&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
  1  1    Premium   G     SI2      59.1    59  3142  6.55  6.48     0
@@ -5158,74 +5702,142 @@ It is the reason why we’re fitting a linear model because the model is linear 
 &lt;li&gt;Run multiple iterations of a model with different seeds, and compute its average metrics, that would reflect the results on unseen data.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here’s a sample split of training and testing set, stratified by &lt;code&gt;clarity&lt;/code&gt;. As we can see, the training and testing sets have similar distributions.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(1333)
+train_split &amp;lt;- diamonds %&amp;gt;% 
+  select(price, everything()) %&amp;gt;% 
+  initial_split(prop = 0.75, strata = &amp;quot;clarity&amp;quot;)
+
+dfTrain &amp;lt;- training(train_split)
+dfTest &amp;lt;- testing(train_split)
+
+Hmisc::describe(dfTrain$clarity)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfTrain$clarity 
        n  missing distinct 
-   40457        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+   40453        0        8 
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
-Frequency    552  6895  9826  9222  6125  3780  2722  1335
-Proportion 0.014 0.170 0.243 0.228 0.151 0.093 0.067 0.033&lt;/code&gt;&lt;/pre&gt;
+Frequency    557  6904  9810  9197  6109  3785  2766  1325
+Proportion 0.014 0.171 0.243 0.227 0.151 0.094 0.068 0.033&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Hmisc::describe(dfTest$clarity)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfTest$clarity 
        n  missing distinct 
-   13483        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
+   13487        0        8 
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
-Frequency    189  2299  3239  3036  2046  1286   933   455
-Proportion 0.014 0.171 0.240 0.225 0.152 0.095 0.069 0.034&lt;/code&gt;&lt;/pre&gt;
+Frequency    184  2290  3255  3061  2062  1281   889   465
+Proportion 0.014 0.170 0.241 0.227 0.153 0.095 0.066 0.034&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;After running 5 iterations of each model with a different seed, here are the average metrics:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 5 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_linear_model &amp;lt;- function(randomSeed, model_formula, get_model = FALSE) {
+
+  set.seed(randomSeed)
+  train_split &amp;lt;- diamonds %&amp;gt;% 
+    select(price, everything()) %&amp;gt;% 
+    initial_split(prop = 0.75, strata = &amp;quot;clarity&amp;quot;)
+  
+  dfTrain &amp;lt;- training(train_split)
+  dfTest &amp;lt;- testing(train_split)
+
+  # fit a linear model
+  model_lm &amp;lt;- lm(model_formula, data = dfTrain)
+  
+  # predict on testing set to determine rmse  
+  predict_lm &amp;lt;- predict(model_lm, dfTest)
+
+  # predict on testing set with outliers
+  dfResults &amp;lt;- dfTest %&amp;gt;% 
+    mutate(actual = price) %&amp;gt;% 
+    mutate(estimate = predict_lm %&amp;gt;% exp()) %&amp;gt;% 
+    select(actual, estimate)
+  
+  if(get_model) {
+    return(list(model_lm, dfResults))
+  } else {
+    return(dfResults)
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(1000)
+vRandomSeeds &amp;lt;- sample(9999, 5)
+dfModels &amp;lt;- expand_grid(seed = vRandomSeeds, 
+                        model = c(&amp;quot;log(price) ~ .&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3))&amp;quot;, 
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color&amp;quot;,
+                                  &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color + cut&amp;quot;)) %&amp;gt;% 
+  mutate(results = map2(seed, model, ~ fit_linear_model(.x, as.formula(.y)))) %&amp;gt;% 
+  mutate(metrics = map(results, ~ metrics(.x, truth = actual, estimate = estimate))) %&amp;gt;%
+  select(-results) %&amp;gt;% 
+  unnest(cols = metrics) %&amp;gt;% 
+  select(-.estimator) %&amp;gt;% 
+  spread(.metric, .estimate) %&amp;gt;% 
+  group_by(model) %&amp;gt;% 
+  summarise_at(vars(rmse, rsq, mae), mean)
+
+dfModels&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 5 × 4
   model                                                 rmse   rsq   mae
   &amp;lt;chr&amp;gt;                                                &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt;
-1 log(price) ~ .                                      11055. 0.670  570.
-2 log(price) ~ I(carat^(1/3))                          2893. 0.687 1039.
-3 log(price) ~ I(carat^(1/3)) + clarity                2312. 0.807  881.
-4 log(price) ~ I(carat^(1/3)) + clarity + color        1870. 0.870  631.
-5 log(price) ~ I(carat^(1/3)) + clarity + color + cut  1848. 0.875  625.&lt;/code&gt;&lt;/pre&gt;
+1 log(price) ~ .                                      12085. 0.756  559.
+2 log(price) ~ I(carat^(1/3))                          2525. 0.741 1023.
+3 log(price) ~ I(carat^(1/3)) + clarity                2173. 0.827  871.
+4 log(price) ~ I(carat^(1/3)) + clarity + color        1725. 0.888  624.
+5 log(price) ~ I(carat^(1/3)) + clarity + color + cut  1718. 0.891  618.&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The first model with all predictors is an overfitted one.&lt;/p&gt;
 &lt;p&gt;The model with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; provides the best combination of root mean squared error and r-squared, that explains the most variance.
 This is our final model.
 Including &lt;code&gt;cut&lt;/code&gt; in the model has diminishing benefits, and tends to overfit the data.&lt;/p&gt;
 &lt;p&gt;Here’s the summary of our final model:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;formula_string &amp;lt;- &amp;quot;log(price) ~ I(carat^(1/3)) + clarity + color&amp;quot;
+fit_lm &amp;lt;- fit_linear_model(1333, as.formula(formula_string), get_model = T)
+
+summary(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;
 Call:
 lm(formula = model_formula, data = dfTrain)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--1.6022 -0.1034  0.0145  0.1066  1.7941 
+-1.9173 -0.1036  0.0148  0.1077  1.2052 
 
 Coefficients:
-                Estimate Std. Error t value             Pr(&amp;gt;|t|)    
-(Intercept)     2.147009   0.004993  429.99 &amp;lt; 0.0000000000000002 ***
-I(carat^(1/3))  6.246412   0.005365 1164.27 &amp;lt; 0.0000000000000002 ***
-clarity.L       0.922295   0.005036  183.15 &amp;lt; 0.0000000000000002 ***
-clarity.Q      -0.295539   0.004734  -62.43 &amp;lt; 0.0000000000000002 ***
-clarity.C       0.166979   0.004068   41.05 &amp;lt; 0.0000000000000002 ***
-clarity^4      -0.068591   0.003260  -21.04 &amp;lt; 0.0000000000000002 ***
-clarity^5       0.032833   0.002669   12.30 &amp;lt; 0.0000000000000002 ***
-clarity^6      -0.001904   0.002325   -0.82              0.41288    
-clarity^7       0.025508   0.002049   12.45 &amp;lt; 0.0000000000000002 ***
-color.L        -0.488882   0.002927 -167.05 &amp;lt; 0.0000000000000002 ***
-color.Q        -0.117319   0.002680  -43.78 &amp;lt; 0.0000000000000002 ***
-color.C        -0.012230   0.002497   -4.90           0.00000098 ***
-color^4         0.019007   0.002288    8.31 &amp;lt; 0.0000000000000002 ***
-color^5        -0.008110   0.002159   -3.76              0.00017 ***
-color^6        -0.000396   0.001967   -0.20              0.84055    
+               Estimate Std. Error t value             Pr(&amp;gt;|t|)    
+(Intercept)     2.15095    0.00504  426.51 &amp;lt; 0.0000000000000002 ***
+I(carat^(1/3))  6.23951    0.00541 1154.26 &amp;lt; 0.0000000000000002 ***
+clarity.L       0.92971    0.00508  183.12 &amp;lt; 0.0000000000000002 ***
+clarity.Q      -0.30576    0.00476  -64.19 &amp;lt; 0.0000000000000002 ***
+clarity.C       0.17282    0.00409   42.25 &amp;lt; 0.0000000000000002 ***
+clarity^4      -0.07375    0.00328  -22.52 &amp;lt; 0.0000000000000002 ***
+clarity^5       0.03493    0.00268   13.03 &amp;lt; 0.0000000000000002 ***
+clarity^6      -0.00258    0.00234   -1.10               0.2701    
+clarity^7       0.02551    0.00207   12.35 &amp;lt; 0.0000000000000002 ***
+color.L        -0.48801    0.00294 -165.74 &amp;lt; 0.0000000000000002 ***
+color.Q        -0.12021    0.00269  -44.66 &amp;lt; 0.0000000000000002 ***
+color.C        -0.01205    0.00252   -4.79            0.0000017 ***
+color^4         0.02066    0.00231    8.94 &amp;lt; 0.0000000000000002 ***
+color^5        -0.00596    0.00218   -2.73               0.0063 ** 
+color^6         0.00232    0.00198    1.17               0.2412    
 ---
 Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
 
-Residual standard error: 0.166 on 40442 degrees of freedom
-Multiple R-squared:  0.973, Adjusted R-squared:  0.973 
-F-statistic: 1.05e+05 on 14 and 40442 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+Residual standard error: 0.167 on 40438 degrees of freedom
+Multiple R-squared:  0.973,	Adjusted R-squared:  0.973 
+F-statistic: 1.04e+05 on 14 and 40438 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow = c(2,2))
+plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Here’s a scatterplot of actual v/s predicted log(price) from our final model on the testing set:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_lm[[2]] %&amp;gt;% 
+  ggplot(aes(x = actual, y = estimate)) +
+  geom_point(color = &amp;quot;orange&amp;quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &amp;quot;gray50&amp;quot;, linewidth = 1) +
+  scale_x_log10(labels = scales::dollar) +
+  scale_y_log10(labels = scales::dollar) +
+  labs(x = &amp;quot;actual price&amp;quot;,
+       y = &amp;quot;predicted price&amp;quot;,
+       title = bquote(log(price) == carat^{1/3} + clarity + color))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degress line. However, on the high end, there are many outliers where actual and predicted values have very high variance.
 Nevertheless, this is as good as it gets.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
     </item>
@@ -5242,7 +5854,24 @@ Nevertheless, this is as good as it gets.&lt;/p&gt;
 &lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Description&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDescription &amp;lt;- tribble(~ Attribute, ~ Description,
+                         &amp;quot;price&amp;quot;, &amp;quot;price in 2008 USD&amp;quot;,
+                         &amp;quot;carat&amp;quot;, &amp;quot;weight of a diamond (1 carat = 0.2 gms)&amp;quot;,
+                         &amp;quot;cut&amp;quot;, &amp;quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&amp;quot;,
+                         &amp;quot;color&amp;quot;, &amp;quot;diamond color from D (best) to J (worst)&amp;quot;,
+                         &amp;quot;clarity&amp;quot;, &amp;quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&amp;quot;,
+                         &amp;quot;x&amp;quot;, &amp;quot;length in mm&amp;quot;,
+                         &amp;quot;y&amp;quot;, &amp;quot;width in mm&amp;quot;,
+                         &amp;quot;z&amp;quot;, &amp;quot;depth in mm&amp;quot;,
+                         &amp;quot;depth&amp;quot;, &amp;quot;total depth percentage = z/mean(x, y)&amp;quot;,
+                         &amp;quot;table&amp;quot;, &amp;quot;width of the top of diamond relative to widest point&amp;quot;)
+
+knitr::kable(dfDescription)&lt;/code&gt;&lt;/pre&gt;
 &lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;9%&#34; /&gt;
+&lt;col width=&#34;90%&#34; /&gt;
+&lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr class=&#34;header&#34;&gt;
 &lt;th align=&#34;left&#34;&gt;Attribute&lt;/th&gt;
@@ -5300,30 +5929,32 @@ Nevertheless, this is as good as it gets.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesCat &amp;lt;- dfInput %&amp;gt;% select_if(is.factor) %&amp;gt;% colnames() 
+vFeaturesNum &amp;lt;- dfInput %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;visdat::vis_dat(dfInput) + theme_quant()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.&lt;/p&gt;
 &lt;p&gt;Let’s examine each feature numerically:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Hmisc::describe(dfInput)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfInput 
 
  10  Variables      53940  Observations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 price 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0    11602        1     3933     4012      544      646      950     2401     5324     9821    13107 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0    11602        1     3933     3180     4012      544      646      950     2401     5324     9821    13107 
 
 lowest :   326   327   334   335   336, highest: 18803 18804 18806 18818 18823
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 carat 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      273    0.999   0.7979   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      273    0.999   0.7979     0.75   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
 
-lowest : 0.20 0.21 0.22 0.23 0.24, highest: 4.00 4.01 4.13 4.50 5.01
+lowest : 0.2  0.21 0.22 0.23 0.24, highest: 4    4.01 4.13 4.5  5.01
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 cut 
        n  missing distinct 
    53940        0        5 
-
-lowest : Fair      Good      Very Good Premium   Ideal    , highest: Fair      Good      Very Good Premium   Ideal    
                                                             
 Value           Fair      Good Very Good   Premium     Ideal
 Frequency       1610      4906     12082     13791     21551
@@ -5332,8 +5963,6 @@ Proportion     0.030     0.091     0.224     0.256     0.400
 color 
        n  missing distinct 
    53940        0        7 
-
-lowest : J I H G F, highest: H G F E D
                                                     
 Value          J     I     H     G     F     E     D
 Frequency   2808  5422  8304 11292  9542  9797  6775
@@ -5342,54 +5971,40 @@ Proportion 0.052 0.101 0.154 0.209 0.177 0.182 0.126
 clarity 
        n  missing distinct 
    53940        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
 Frequency    741  9194 13065 12258  8171  5066  3655  1790
 Proportion 0.014 0.170 0.242 0.227 0.151 0.094 0.068 0.033
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 depth 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      184    0.999    61.75    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      184    0.999    61.75     61.8    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
 
-lowest : 43.0 44.0 50.8 51.0 52.2, highest: 72.2 72.9 73.6 78.2 79.0
+lowest : 43   44   50.8 51   52.2, highest: 72.2 72.9 73.6 78.2 79  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 table 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      127     0.98    57.46    2.448       54       55       56       57       59       60       61 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      127     0.98    57.46     57.5    2.448       54       55       56       57       59       60       61 
 
-lowest : 43.0 44.0 49.0 50.0 50.1, highest: 71.0 73.0 76.0 79.0 95.0
+lowest : 43   44   49   50   50.1, highest: 71   73   76   79   95  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 x 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      554        1    5.731    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      554        1    5.731    5.685    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
 
-lowest :  0.00  3.73  3.74  3.76  3.77, highest: 10.01 10.02 10.14 10.23 10.74
+lowest : 0     3.73  3.74  3.76  3.77 , highest: 10.01 10.02 10.14 10.23 10.74
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 y 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      552        1    5.735    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      552        1    5.735     5.69    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
 
-lowest :  0.00  3.68  3.71  3.72  3.73, highest: 10.10 10.16 10.54 31.80 58.90
-                                                                                                                      
-Value        0.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   7.5   8.0   8.5   9.0   9.5  10.0  10.5  32.0  59.0
-Frequency      7     5  1731 12305  7817  5994  6742  9260  4298  3402  1635   652    69    14     6     1     1     1
-Proportion 0.000 0.000 0.032 0.228 0.145 0.111 0.125 0.172 0.080 0.063 0.030 0.012 0.001 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0     3.68  3.71  3.72  3.73 , highest: 10.1  10.16 10.54 31.8  58.9 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 z 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      375        1    3.539   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      375        1    3.539     3.51   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
 
-lowest :  0.00  1.07  1.41  1.53  2.06, highest:  6.43  6.72  6.98  8.06 31.80
-                                                                                                          
-Value        0.0   1.0   1.5   2.0   2.5   3.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   8.0  32.0
-Frequency     20     1     2     3  8807 13809  9474 13682  5525  2352   237    20     5     1     1     1
-Proportion 0.000 0.000 0.000 0.000 0.163 0.256 0.176 0.254 0.102 0.044 0.004 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt;: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.&lt;/li&gt;
@@ -5409,18 +6024,36 @@ For the frequency table, variable is rounded to the nearest 0.5
 &lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;makeOutliersNA &amp;lt;- function(Z) {
+  min_value = min(Z, na.rm = T)
+  max_value = max(Z, na.rm = T)
+  median_value = median(Z, na.rm = T)
+  IQR = IQR(Z, na.rm = T)
+  lower_bound = max(min_value, median_value - 2.5*IQR)
+  upper_bound = min(max_value, median_value + 2.5*IQR)
+  
+  Z &amp;lt;- ifelse(Z &amp;gt;= lower_bound &amp;amp; Z &amp;lt;= upper_bound, Z, NA)
+}
+
+# convert outliers to NA values
+dfInput &amp;lt;- dfInput %&amp;gt;% mutate_at(vFeaturesNum, makeOutliersNA)
+
+eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &amp;quot;Histograms of numerical features excluding outliers&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Excluding outliers, the range of values are more reasonable. We can see that &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are heavily right skewed.&lt;/p&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;price&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, &amp;quot;price&amp;quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
 one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_column(dfInput, .x)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The categorical imbalance in &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; can be clearly noticed.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -5430,14 +6063,17 @@ one at just below USD 1000 and the other around USD 5000. Intriguingly, there ar
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-numerical&lt;/h4&gt;
 &lt;p&gt;First and foremost, let’s do a correlation analysis to see how &lt;code&gt;price&lt;/code&gt; is correlated with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_correlation_matrix(dfInput[vFeaturesNum] %&amp;gt;% drop_na(), outlineVar = &amp;quot;price&amp;quot;, plotTitle = &amp;quot;Clustered correlations of numerical features&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see that &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; dimensions. If a predictive linear regression model is built,
 some of these features would act as confounders. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt; so they are not so interesting for
 predictive modelling.&lt;/p&gt;
 &lt;p&gt;Now let’s see the scatter plots:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;After removing outliers, it could be noted that &lt;code&gt;price&lt;/code&gt; increases exponentially with &lt;code&gt;carat&lt;/code&gt;, as well as &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; dimensions. So &lt;code&gt;price&lt;/code&gt; should be plotted with a log tranformation. Let’s do that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
 increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions. Log transforming &lt;code&gt;carat&lt;/code&gt; wouldn’t help because &lt;code&gt;carat&lt;/code&gt; does not have a wide range.
 We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
@@ -5445,7 +6081,9 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;price&lt;/code&gt; with respect to the categorical features in the dataset:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &amp;quot;price&amp;quot;, yLimits = c(300, 8000), 
+                                                               yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
@@ -5459,17 +6097,22 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;p&gt;So far, we have determined &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price.&lt;/code&gt; Different grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some impact on median &lt;code&gt;price&lt;/code&gt;. So let’s make some scatter plots to see these relationships:&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Numerical-Categorical&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_scatter_cat(dfInput, &amp;quot;carat&amp;quot;, &amp;quot;price&amp;quot;, .x, yLabelsScale = scales::dollar)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
 &lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfFeatures &amp;lt;- expand_grid(feat1 = c(&amp;quot;depth&amp;quot;,&amp;quot;table&amp;quot;), feat2 = c(&amp;quot;color&amp;quot;,&amp;quot;clarity&amp;quot;)) %&amp;gt;% arrange(desc(feat2))
+cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
+                                   ~ eda_plot_scatter_cat(dfInput, .x, &amp;quot;price&amp;quot;, .y, yLabelsScale = scales::dollar)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;There is no pattern in the interaction of &lt;code&gt;price&lt;/code&gt; v/s &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; values when plotted by &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. So, these features do not have any predictive ability to determine &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Categorical-Numerical&lt;/h4&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(c(&amp;quot;cut&amp;quot;,&amp;quot;color&amp;quot;), ~ eda_plot_heatmap(dfInput, .x, &amp;quot;clarity&amp;quot;, &amp;quot;price&amp;quot;)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. Nevertheless this counter-trend persists in the dataset.&lt;/p&gt;
 &lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the mean prices do not show any discernable pattern.&lt;/p&gt;
 &lt;/div&gt;
@@ -5486,6 +6129,7 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt; is strongly correlated with &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; dimensions of the diamonds. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; appear to explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &amp;quot;diamondClean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
     </item>

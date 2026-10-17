@@ -100,49 +100,12 @@ In a couple of previous posts, we tried to understand what attributes of diamond
     
     
     
-    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
   
 
   
 
 
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-
-  function gtag() {
-      dataLayer.push(arguments);
-  }
-
-  function trackOutboundLink(url) {
-    gtag('event', 'click', {
-         'event_category': 'outbound',
-         'event_label': url,
-         'transport_type': 'beacon',
-         'event_callback': function () {
-           document.location = url;
-         }
-    });
-    console.debug("Outbound link clicked: " + url);
-  }
-
-  function onClickCallback(event) {
-    const anchor = event.target.closest('a');
-    if (!anchor || anchor.host === window.location.host) {
-      return;
-    }
-    trackOutboundLink(anchor.href);  
-  }
-
-  gtag('js', new Date());
-  gtag('config', 'G-K2NQYHG3M1', {});
-
-  
-  document.addEventListener('click', onClickCallback, false);
-</script>
 
 
   
@@ -545,254 +508,123 @@ In a couple of previous posts, we tried to understand what attributes of diamond
 <li>Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.</li>
 </ul>
 <p>Here are the average metrics for all the models trained with <code>keras</code>, <code>randomForest</code> and <code>xgboost</code> regression methods:</p>
+<pre class="r"><code>load(&quot;fit_models_keras.Rda&quot;)
+
+dfModels_keras &lt;- dfModels %&gt;% mutate(type = &quot;keras&quot;)
+best_model_results_keras &lt;- best_model_results
+dfResults_keras &lt;- best_model_results_keras$dfResults %&gt;% mutate(type = &quot;keras&quot;)
+
+load(&quot;fit_models_rf.Rda&quot;)
+
+dfModels_rf &lt;- dfModels %&gt;% mutate(type = &quot;randomForest&quot;)
+best_model_results_rf &lt;- best_model_results
+dfResults_rf &lt;- best_model_results_rf$dfResults %&gt;% mutate(type = &quot;randomForest&quot;)
+
+load(&quot;fit_models_xgb.Rda&quot;)
+
+dfModels_xgb &lt;- dfModels %&gt;% mutate(type = &quot;xgboost&quot;)
+best_model_results_xgb &lt;- best_model_results
+dfResults_xgb &lt;- best_model_results_xgb$dfResults %&gt;% mutate(type = &quot;xgboost&quot;)
+
+# combine the actual v/s predicted results from the best model using the 3 methods
+dfResults &lt;- map_df(list(dfResults_keras, dfResults_rf, dfResults_xgb), bind_rows) %&gt;% 
+  select(type, everything()) %&gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&gt;% 
+  group_by(type)
+
+# combine the average metrics from all the models using the 3 methods
+dfModels &lt;- map_df(list(dfModels_keras, dfModels_rf, dfModels_xgb), bind_rows) %&gt;% 
+  select(type, everything()) %&gt;% 
+  mutate_if(is.numeric, ~ round(.x, digits = 2)) %&gt;% 
+  gather(avg_metric, value, rmse, rsq, mae)
+
+# create an HTML table
+dfModels %&gt;% tidyHtmlTable(header = &quot;type&quot;, cgroup1 = &quot;avg_metric&quot;, cell_value = &quot;value&quot;, rnames = &quot;model&quot;, align = &quot;|rrr|rrr|rrr&quot;)</code></pre>
 <table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
 <thead>
 <tr>
-<th style="border-top: 2px solid grey;">
+<th style="border-bottom: 1px solid grey; border-top: 2px solid grey;">
 </th>
-<th colspan="3" style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
-mae
-</th>
-<th style="border-top: 2px solid grey;; border-bottom: hidden;">
- 
-</th>
-<th colspan="3" style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
-rmse
-</th>
-<th style="border-top: 2px solid grey;; border-bottom: hidden;">
- 
-</th>
-<th colspan="3" style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
-rsq
-</th>
-</tr>
-<tr>
-<th style="border-bottom: 1px solid grey;">
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
 keras
 </th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
 randomForest
 </th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-xgboost
-</th>
-<th style="border-bottom: 1px solid grey;" colspan="1">
- 
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-keras
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-randomForest
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-xgboost
-</th>
-<th style="border-bottom: 1px solid grey;" colspan="1">
- 
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-keras
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
-randomForest
-</th>
-<th style="border-bottom: 1px solid grey; text-align: center;">
+<th style="font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;">
 xgboost
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="border-right: 1px solid black; text-align: left;">
+<td style="border-left: 1px solid black; text-align: right;">
 price ~ .
 </td>
 <td style="text-align: right;">
-360.55
-</td>
-<td style="text-align: right;">
-262.35
+c(“989.71”, “0.93”, “360.55”)
 </td>
 <td style="border-right: 1px solid black; text-align: right;">
-280.49
-</td>
-<td style colspan="1">
- 
+c(“529.28”, “0.98”, “262.35”)
 </td>
 <td style="text-align: right;">
-989.71
-</td>
-<td style="text-align: right;">
-529.28
-</td>
-<td style="border-right: 1px solid black; text-align: right;">
-540.76
-</td>
-<td style colspan="1">
- 
-</td>
-<td style="text-align: right;">
-0.93
-</td>
-<td style="text-align: right;">
-0.98
-</td>
-<td style="text-align: right;">
-0.98
+c(“540.76”, “0.98”, “280.49”)
 </td>
 </tr>
 <tr>
-<td style="border-right: 1px solid black; text-align: left;">
+<td style="border-left: 1px solid black; text-align: right;">
 price ~ carat
 </td>
 <td style="text-align: right;">
-860.29
-</td>
-<td style="text-align: right;">
-816.1
+c(“1499.2”, “0.86”, “860.29”)
 </td>
 <td style="border-right: 1px solid black; text-align: right;">
-815.76
-</td>
-<td style colspan="1">
- 
+c(“1427.25”, “0.87”, “816.1”)
 </td>
 <td style="text-align: right;">
-1499.2
-</td>
-<td style="text-align: right;">
-1427.25
-</td>
-<td style="border-right: 1px solid black; text-align: right;">
-1427.35
-</td>
-<td style colspan="1">
- 
-</td>
-<td style="text-align: right;">
-0.86
-</td>
-<td style="text-align: right;">
-0.87
-</td>
-<td style="text-align: right;">
-0.87
+c(“1427.35”, “0.87”, “815.76”)
 </td>
 </tr>
 <tr>
-<td style="border-right: 1px solid black; text-align: left;">
+<td style="border-left: 1px solid black; text-align: right;">
 price ~ carat + clarity
 </td>
 <td style="text-align: right;">
-590.32
-</td>
-<td style="text-align: right;">
-548.67
+c(“1040.69”, “0.93”, “590.32”)
 </td>
 <td style="border-right: 1px solid black; text-align: right;">
-544.48
-</td>
-<td style colspan="1">
- 
+c(“1006.61”, “0.94”, “548.67”)
 </td>
 <td style="text-align: right;">
-1040.69
-</td>
-<td style="text-align: right;">
-1006.61
-</td>
-<td style="border-right: 1px solid black; text-align: right;">
-992.46
-</td>
-<td style colspan="1">
- 
-</td>
-<td style="text-align: right;">
-0.93
-</td>
-<td style="text-align: right;">
-0.94
-</td>
-<td style="text-align: right;">
-0.94
+c(“992.46”, “0.94”, “544.48”)
 </td>
 </tr>
 <tr>
-<td style="border-right: 1px solid black; text-align: left;">
+<td style="border-left: 1px solid black; text-align: right;">
 price ~ carat + clarity + color
 </td>
 <td style="text-align: right;">
-358.85
-</td>
-<td style="text-align: right;">
-305.17
+c(“645.4”, “0.97”, “358.85”)
 </td>
 <td style="border-right: 1px solid black; text-align: right;">
-306.86
-</td>
-<td style colspan="1">
- 
+c(“571.73”, “0.98”, “305.17”)
 </td>
 <td style="text-align: right;">
-645.4
-</td>
-<td style="text-align: right;">
-571.73
-</td>
-<td style="border-right: 1px solid black; text-align: right;">
-575.3
-</td>
-<td style colspan="1">
- 
-</td>
-<td style="text-align: right;">
-0.97
-</td>
-<td style="text-align: right;">
-0.98
-</td>
-<td style="text-align: right;">
-0.98
+c(“575.3”, “0.98”, “306.86”)
 </td>
 </tr>
 <tr>
-<td style="border-bottom: 2px solid grey; border-right: 1px solid black; text-align: left;">
+<td style="border-bottom: 2px solid grey; border-left: 1px solid black; text-align: right;">
 price ~ carat + clarity + color + cut
 </td>
 <td style="border-bottom: 2px solid grey; text-align: right;">
-347.99
-</td>
-<td style="border-bottom: 2px solid grey; text-align: right;">
-285.96
+c(“626.78”, “0.98”, “347.99”)
 </td>
 <td style="border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;">
-282.38
-</td>
-<td style="border-bottom: 2px solid grey;" colspan="1">
- 
+c(“545.02”, “0.98”, “285.96”)
 </td>
 <td style="border-bottom: 2px solid grey; text-align: right;">
-626.78
-</td>
-<td style="border-bottom: 2px solid grey; text-align: right;">
-545.02
-</td>
-<td style="border-bottom: 2px solid grey; border-right: 1px solid black; text-align: right;">
-541.63
-</td>
-<td style="border-bottom: 2px solid grey;" colspan="1">
- 
-</td>
-<td style="border-bottom: 2px solid grey; text-align: right;">
-0.98
-</td>
-<td style="border-bottom: 2px solid grey; text-align: right;">
-0.98
-</td>
-<td style="border-bottom: 2px solid grey; text-align: right;">
-0.98
+c(“541.63”, “0.98”, “282.38”)
 </td>
 </tr>
 </tbody>
@@ -814,15 +646,57 @@ price ~ carat + clarity + color + cut
 <li>Use the resulting feature weights to explain local behavior.</li>
 </ul>
 <p>Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.</p>
-<p><img src="/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png" width="960" /><img src="/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png" width="960" /></p>
+<pre class="r"><code># Plot Feature Importance by sample
+plot_features(explanation_keras, ncol = 3) + 
+  labs(title = &quot;LIME Feature Importance from a keras model&quot;,
+       subtitle = glue::glue(&quot;{numSamples} random samples from testing set&quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-1.png" alt="" width="960" /></p>
+<pre class="r"><code>plot_features(explanation_xgb, ncol = 3) + 
+  labs(title = &quot;LIME Feature Importance from an xgboost model&quot;,
+       subtitle = glue::glue(&quot;{numSamples} random samples from testing set&quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png" alt="" width="960" /></p>
 <p>The features by importance that best explain the predictions in these 6 random samples are <code>carat</code>, <code>clarity</code>, <code>color</code>, <code>x</code> and <code>y</code>.</p>
-<p><img src="/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png" width="672" /><img src="/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png" width="672" /></p>
+<pre class="r"><code># Plot Feature Importance Heatmap
+plot_explanations(explanation_keras) +
+  labs(title = &quot;LIME Feature Importance Heatmap from a keras model&quot;,
+       subtitle = glue::glue(&quot;{numSamples} random samples from testing set&quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-1.png" alt="" width="672" /></p>
+<pre class="r"><code>plot_explanations(explanation_xgb) +
+  labs(title = &quot;LIME Feature Importance Heatmap from an xgboost model&quot;,
+       subtitle = glue::glue(&quot;{numSamples} random samples from testing set&quot;)) +
+  theme_quant() +
+  theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png" alt="" width="672" /></p>
 <p>We know that <code>x</code> and <code>y</code> are co-linear with <code>carat</code>, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using <code>carat</code>, <code>clarity</code> and <code>color</code>.</p>
 </div>
 <div id="actual-vs-predicted" class="section level2">
 <h2>Actual v/s Predicted</h2>
 <p>Finally, here are the scatterplots of actual v/s predicted <code>price</code> from the best model on the testing set, using the 3 regression methods:</p>
-<p><img src="/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png" width="960" /></p>
+<pre class="r"><code>p1 &lt;- dfResults %&gt;% 
+  ggplot(aes(x = actual, y = estimate)) +
+  geom_point(color = &quot;orange&quot;, alpha = 0.3) +
+  geom_abline(lty = 2, color = &quot;gray50&quot;, linewidth = 1) +
+  facet_grid(type ~ .) +
+  scale_x_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(x = &quot;actual price&quot;,
+       y = &quot;predicted price&quot;,
+       title = formulaString_best,
+       subtitle = &quot;(linear scale)&quot;)
+
+p2 &lt;- p1 + 
+  scale_x_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  scale_y_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
+  labs(subtitle = &quot;(log scale)&quot;, x = &quot;actual price&quot;, y = &quot;predicted price&quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png" alt="" width="960" /></p>
 <p>The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar <strong>r-squared</strong> and <strong>rmse</strong> values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.</p>
 <p>As in the case with linear models, the variance in predicted diamond prices increases with <code>price</code>. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between <code>price</code> and its predictors, they also predict prices within a reasonable range.</p>
 </div>
@@ -1022,7 +896,41 @@ price ~ carat + clarity + color + cut
 
     
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
 
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
 
 
 

@@ -94,49 +94,12 @@
     
     
     
-    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
   
 
   
 
 
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-
-  function gtag() {
-      dataLayer.push(arguments);
-  }
-
-  function trackOutboundLink(url) {
-    gtag('event', 'click', {
-         'event_category': 'outbound',
-         'event_label': url,
-         'transport_type': 'beacon',
-         'event_callback': function () {
-           document.location = url;
-         }
-    });
-    console.debug("Outbound link clicked: " + url);
-  }
-
-  function onClickCallback(event) {
-    const anchor = event.target.closest('a');
-    if (!anchor || anchor.host === window.location.host) {
-      return;
-    }
-    trackOutboundLink(anchor.href);  
-  }
-
-  gtag('js', new Date());
-  gtag('config', 'G-K2NQYHG3M1', {});
-
-  
-  document.addEventListener('click', onClickCallback, false);
-</script>
 
 
   
@@ -456,7 +419,7 @@
     <div class="article-style">
       
       In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build linear and non-linear models and see how well they predict the SalePrice of properties.
+In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
 Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.
 
       
@@ -469,7 +432,7 @@ Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the 
       
       In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
 Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
-[1] &quot;Dimensions of the training set&quot;[1] 1460 81[1] &quot;Dimensions of the testing set&quot;[1] 1459 81Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:
+print(&quot;Dimensions of the training set&quot;)[1] &quot;Dimensions of the training set&quot;dim(dfTrain)[1] 1460 81vTrainIDs &lt;- dfTrain$Idprint(&quot;Dimensions of the testing set&quot;)[1] &quot;Dimensions of the testing set&quot;dim(dfTest)[1] 1459 81vTestIDs &lt;- dfTest$IddfClean &lt;- dfTrain %&gt;% bind_rows(dfTest)# dfDescription &lt;- read.delim(&quot;data_description.txt&quot;, header = F, sep = &quot;:&quot;, na.strings = &quot;&quot;) %&gt;% # as_tibble() %&gt;% # set_names(c(&quot;Feature&quot;, &quot;Description&quot;)) %&gt;% # map_df(str_trim) %&gt;% # mutate(Feature = ifelse(Feature == &quot;&quot;, NA, Feature)) %&gt;% # drop_na(Feature) %&gt;% # mutate(Description = ifelse(is.na(Description), Feature, Description)) %&gt;% # mutate(Feature = ifelse(Feature == Description, &quot;&quot;, Feature))# knitr::kable(dfDescription)# Hmisc::describe(dfClean)Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:
 
       
     </div>
@@ -503,7 +466,7 @@ Before we do any transformations, feature engineering or feature selections for 
       
       In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
 Data DescriptionThe diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
-AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest point
+dfDescription &lt;- tribble(~ Attribute, ~ Description,&quot;price&quot;, &quot;price in 2008 USD&quot;,&quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,&quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,&quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,&quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,&quot;x&quot;, &quot;length in mm&quot;,&quot;y&quot;, &quot;width in mm&quot;,&quot;z&quot;, &quot;depth in mm&quot;,&quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,&quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)knitr::kable(dfDescription)AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat = 0.2 gms)cutquality of the cut (Fair, Good, Very Good, Premium, Ideal)colordiamond color from D (best) to J (worst)claritya measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))xlength in mmywidth in mmzdepth in mmdepthtotal depth percentage = z/mean(x, y)tablewidth of the top of diamond relative to widest point
       
     </div>
   </div>
@@ -621,7 +584,41 @@ AttributeDescriptionpriceprice in 2008 USDcaratweight of a diamond (1 carat
 
     
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
 
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
 
 
 

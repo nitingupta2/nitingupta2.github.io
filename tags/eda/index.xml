@@ -24,12 +24,34 @@
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
 &lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it. Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(&amp;quot;Dimensions of the training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the training set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfTrain)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1460   81&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTrainIDs &amp;lt;- dfTrain$Id
+
+print(&amp;quot;Dimensions of the testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the testing set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfTest)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 1459   81&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTestIDs &amp;lt;- dfTest$Id
+
+dfClean &amp;lt;- dfTrain %&amp;gt;% bind_rows(dfTest)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# dfDescription &amp;lt;- read.delim(&amp;quot;data_description.txt&amp;quot;, header = F, sep = &amp;quot;:&amp;quot;, na.strings = &amp;quot;&amp;quot;) %&amp;gt;% 
+#   as_tibble() %&amp;gt;% 
+#   set_names(c(&amp;quot;Feature&amp;quot;, &amp;quot;Description&amp;quot;)) %&amp;gt;% 
+#   map_df(str_trim) %&amp;gt;% 
+#   mutate(Feature = ifelse(Feature == &amp;quot;&amp;quot;, NA, Feature)) %&amp;gt;% 
+#   drop_na(Feature) %&amp;gt;% 
+#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&amp;gt;% 
+#   mutate(Feature = ifelse(Feature == Description, &amp;quot;&amp;quot;, Feature))
+
+# knitr::kable(dfDescription)
+
+# Hmisc::describe(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -50,21 +72,28 @@
 &lt;li&gt;&lt;code&gt;YearRemodAdd&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;YrSold&lt;/code&gt; should not be earlier than &lt;code&gt;YearRemodAdd&lt;/code&gt;: 3 records to be fixed&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&amp;gt;% dplyr::filter(YearRemodAdd &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id YearBuilt YearRemodAdd YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1  1877      2002         2001   2009&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&amp;gt;% dplyr::filter(YrSold &amp;lt; YearRemodAdd)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 4
      Id YearBuilt YearRemodAdd YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1   524      2007         2008   2007
 2  2296      2007         2008   2007
 3  2550      2008         2009   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# fix errors
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(YearRemodAdd = ifelse(YearRemodAdd &amp;lt; YearBuilt, YearBuilt, YearRemodAdd)) %&amp;gt;% 
+  mutate(YrSold = ifelse(YrSold &amp;lt; YearRemodAdd, YearRemodAdd, YrSold))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 18 records to be fixed&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be later than &lt;code&gt;YrSold&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
 &lt;/ul&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 18 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&amp;gt;% dplyr::filter(GarageYrBlt &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 18 × 4
       Id YearBuilt GarageYrBlt YrSold
    &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
  1    30      1927        1920   2008
@@ -85,10 +114,15 @@
 16  2123      1945        1925   2008
 17  2264      2006        2005   2007
 18  2510      2006        2005   2007&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&amp;gt;% dplyr::filter(GarageYrBlt &amp;gt; YrSold)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id YearBuilt GarageYrBlt YrSold
   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;
 1  2593      2006        2207   2007&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# fix errors
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(GarageYrBlt = ifelse(GarageYrBlt &amp;lt; YearBuilt, YearBuilt, GarageYrBlt)) %&amp;gt;% 
+  mutate(GarageYrBlt = ifelse(GarageYrBlt &amp;gt; YrSold, YrSold, GarageYrBlt))&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;imputing-missing-values-new-features&#34; class=&#34;section level3 tabset tabset-fade tabset-pills&#34;&gt;
 &lt;h3&gt;Imputing Missing Values &amp;amp; New Features&lt;/h3&gt;
@@ -100,11 +134,19 @@
 &lt;li&gt;&lt;p&gt;Now there are 79 properties which have no basement (&lt;code&gt;TotalBsmtSF&lt;/code&gt; = 0). All other basement features having NA values are changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common value in that &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 13
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change TotalBsmtSF to 0 when all basement features are NA
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter(is.na(TotalBsmtSF))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 13
      Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
 1  2121 BrkSide      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                 NA &amp;lt;NA&amp;gt;                 NA        NA          NA           NA           NA&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 79 x 13
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate(TotalBsmtSF = if_else(Id == 2121, 0, TotalBsmtSF))
+
+# 2. Change NA values to None or 0 if there is no basement
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter(TotalBsmtSF == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 79 × 13
       Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
  1    18 Sawyer       &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
@@ -117,8 +159,19 @@
  8   343 NAmes        &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
  9   363 Edwards      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
 10   372 ClearCr      &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;         &amp;lt;NA&amp;gt;                  0 &amp;lt;NA&amp;gt;                  0         0           0            0            0
-# ... with 69 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 9 x 13
+# ℹ 69 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr_bsmt &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Bsmt&amp;quot;))  %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+vFeaturesNum_bsmt &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Bsmt&amp;quot;))  %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate_at(all_of(vFeaturesChr_bsmt), ~ case_when(TotalBsmtSF == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .)) %&amp;gt;% 
+  mutate_at(all_of(vFeaturesNum_bsmt), ~ case_when(TotalBsmtSF == 0 ~ 0, TRUE ~ .))
+
+
+# 3. Change NA values in remaining features to the most common value in the neighborhood where TotalBsmtSF &amp;gt; 0
+#####################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Bsmt&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 9 × 13
      Id Neighborhood BsmtQual BsmtCond BsmtExposure BsmtFinType1 BsmtFinSF1 BsmtFinType2 BsmtFinSF2 BsmtUnfSF TotalBsmtSF BsmtFullBath BsmtHalfBath
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;    &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;        &amp;lt;dbl&amp;gt;
 1   333 NridgHt      Gd       TA       No           GLQ                1124 &amp;lt;NA&amp;gt;                479      1603        3206            1            0
@@ -130,6 +183,25 @@
 7  2219 IDOTRR       &amp;lt;NA&amp;gt;     TA       No           Unf                   0 Unf                   0       356         356            0            0
 8  2349 Somerst      Gd       TA       &amp;lt;NA&amp;gt;         Unf                   0 Unf                   0       725         725            0            0
 9  2525 CollgCr      TA       &amp;lt;NA&amp;gt;     Av           ALQ                 755 Unf                   0       240         995            0            0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# determine most common values by Neighborhood
+dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean %&amp;gt;% dplyr::filter(TotalBsmtSF &amp;gt; 0), &amp;quot;Neighborhood&amp;quot;, c(&amp;quot;BsmtQual&amp;quot;,&amp;quot;BsmtCond&amp;quot;,&amp;quot;BsmtExposure&amp;quot;))
+bsmt_fintype2_mcv &amp;lt;- dfClean %&amp;gt;% dplyr::filter(BsmtFinSF2 &amp;gt; 0) %&amp;gt;% pull(BsmtFinType2) %&amp;gt;% find_most_common_value()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(BsmtQual = if_else(is.na(BsmtQual),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtQual[Neighborhood == .x])),
+                            BsmtQual)) %&amp;gt;%
+  mutate(BsmtCond = if_else(is.na(BsmtCond),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtCond[Neighborhood == .x])),
+                            BsmtCond)) %&amp;gt;%
+  mutate(BsmtExposure = if_else(is.na(BsmtExposure),
+                                map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, BsmtExposure[Neighborhood == .x])),
+                                BsmtExposure)) %&amp;gt;%
+  mutate(BsmtFinType2 = if_else(is.na(BsmtFinType2), bsmt_fintype2_mcv, BsmtFinType2))
+
+# cleanup
+rm(vFeaturesChr_bsmt, vFeaturesNum_bsmt)
+rm(dfNeighborhood_mcv, bsmt_fintype2_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Histograms of numerical basement features and their correlations with &lt;code&gt;SalePrice&lt;/code&gt; are plotted below.&lt;/p&gt;
 &lt;p&gt;It could be verified that: &lt;code&gt;TotalBsmtSF&lt;/code&gt; = &lt;code&gt;BsmtFinSF1&lt;/code&gt; + &lt;code&gt;BsmtFinSF2&lt;/code&gt; + &lt;code&gt;BsmtUnfSF&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Additionally, new features are generated where:&lt;/p&gt;
@@ -137,26 +209,62 @@
 &lt;li&gt;&lt;code&gt;BsmtBath&lt;/code&gt; = &lt;code&gt;BsmtFullBath&lt;/code&gt; + 0.5 * &lt;code&gt;BsmtHalfBath&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;HasBsmt&lt;/code&gt; = &lt;code&gt;TotalBsmtSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: BsmtBath, HasBsmt
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(BsmtBath = BsmtFullBath + 0.5*BsmtHalfBath) %&amp;gt;% 
+  mutate(HasBsmt = (TotalBsmtSF &amp;gt; 0),
+         HasBsmt = as.character(HasBsmt))
+
+dfBsmt &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Bsmt&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfBsmt, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Basement Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfBsmt[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most properties have a basement.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;BsmtFinType2&lt;/code&gt; and &lt;code&gt;BsmtCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfBsmt, .x)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfBsmt, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;bathroom-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Bathroom Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated to determine the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(TotalBath = FullBath + 0.5*HalfBath + BsmtBath)
+
+dfBath &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Bath&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfBath %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfBath, vFeaturesNum, plotTitle = &amp;quot;Bathroom Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfBath[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfBath, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;fireplace-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Fireplace Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;There are 1420 properties that have no fireplaces. &lt;code&gt;FireplaceQu&lt;/code&gt; is changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1,420 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change FireplaceQu to None if there is no fireplace
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Fire&amp;quot;)) %&amp;gt;% dplyr::filter(Fireplaces == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1,420 × 4
       Id Neighborhood Fireplaces FireplaceQu
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      
  1     1 CollgCr               0 &amp;lt;NA&amp;gt;       
@@ -169,12 +277,30 @@
  8    20 NAmes                 0 &amp;lt;NA&amp;gt;       
  9    27 NAmes                 0 &amp;lt;NA&amp;gt;       
 10    30 BrkSide               0 &amp;lt;NA&amp;gt;       
-# ... with 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
+# ℹ 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate_at(vars(&amp;quot;FireplaceQu&amp;quot;), ~ case_when(Fireplaces == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have fireplaces.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasFireplace = (Fireplaces &amp;gt; 0),
+         HasFireplace = as.character(HasFireplace))
+
+dfFireplace &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Fireplace&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfFireplace %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfFireplace %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfFireplace, vFeaturesNum, plotTitle = &amp;quot;Fireplace Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfFireplace, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfFireplace[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfFireplace, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;garage-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Garage Features&lt;/h4&gt;
@@ -183,7 +309,14 @@
 &lt;li&gt;&lt;p&gt;There are 157 properties where the property has no garage. In these records, &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;GarageFinish&lt;/code&gt;, &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; are recorded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common or median value in the &lt;code&gt;Neighborhood&lt;/code&gt; by &lt;code&gt;GarageType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 157 x 9
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change GarageYrBlt to YearBuilt if it is NA
+############################################################################################################
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate(GarageYrBlt = if_else(is.na(GarageYrBlt), YearBuilt, GarageYrBlt))
+
+# 2. Change NA values to None if there is no garage
+############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% dplyr::filter(GarageArea == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 157 × 9
       Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
  1    40 Edwards      &amp;lt;NA&amp;gt;              1955 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
@@ -196,19 +329,67 @@
  8   126 IDOTRR       &amp;lt;NA&amp;gt;              1935 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
  9   128 OldTown      &amp;lt;NA&amp;gt;              1930 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
 10   141 NAmes        &amp;lt;NA&amp;gt;              1971 &amp;lt;NA&amp;gt;                  0          0 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
-# ... with 147 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 2 x 9
+# ℹ 147 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr_garage &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate_at(all_of(vFeaturesChr_garage), ~ case_when(GarageArea == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .))
+
+# 3. Change NA values in remaining features to the most common or median value in the Neighborhood for that GarageType
+######################################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Garage&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2 × 9
      Id Neighborhood GarageType GarageYrBlt GarageFinish GarageCars GarageArea GarageQual GarageCond
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;             &amp;lt;dbl&amp;gt;      &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;     
 1  2127 OldTown      Detchd            1910 &amp;lt;NA&amp;gt;                  1        360 &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      
 2  2577 IDOTRR       Detchd            1923 &amp;lt;NA&amp;gt;                 NA         NA &amp;lt;NA&amp;gt;       &amp;lt;NA&amp;gt;      &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;GarageType&amp;quot;), c(&amp;quot;GarageQual&amp;quot;,&amp;quot;GarageFinish&amp;quot;,&amp;quot;GarageCond&amp;quot;))
+dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;GarageType&amp;quot;), c(&amp;quot;GarageCars&amp;quot;,&amp;quot;GarageArea&amp;quot;)) %&amp;gt;% 
+  ungroup() %&amp;gt;% 
+  mutate_if(is.numeric, as.integer)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(GarageFinish = if_else(is.na(GarageFinish),
+                                map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageFinish[Neighborhood==.x &amp;amp; GarageType==.y])),
+                                GarageFinish)) %&amp;gt;% 
+  mutate(GarageQual = if_else(is.na(GarageQual),
+                              map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageQual[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageQual)) %&amp;gt;%
+  mutate(GarageCond = if_else(is.na(GarageCond),
+                              map2_chr(Neighborhood, GarageType, ~ with(dfNeighborhood_mcv, GarageCond[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageCond)) %&amp;gt;%
+  mutate(GarageCars = if_else(is.na(GarageCars),
+                              map2_dbl(Neighborhood, GarageType, ~ with(dfNeighborhood_med, GarageCars[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageCars)) %&amp;gt;%
+  mutate(GarageArea = if_else(is.na(GarageArea),
+                              map2_dbl(Neighborhood, GarageType, ~ with(dfNeighborhood_med, GarageArea[Neighborhood==.x &amp;amp; GarageType==.y])),
+                              GarageArea))
+
+# cleanup
+rm(vFeaturesChr_garage, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; and &lt;code&gt;GarageCars&lt;/code&gt; have almost similar correlation with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasGarage&lt;/code&gt; = &lt;code&gt;GarageArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties have a garage.&lt;/li&gt;
 &lt;li&gt;Column plots show that &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasGarage = (GarageArea &amp;gt; 0),
+         HasGarage = as.character(HasGarage))
+
+dfGarage &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Garage&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfGarage %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfGarage %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfGarage, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Garage Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfGarage, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfGarage[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfGarage, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;masonry-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Masonry Features&lt;/h4&gt;
@@ -217,11 +398,23 @@
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrType&lt;/code&gt; to be the most common values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;YearRemodAdd&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrArea&lt;/code&gt; to be the median values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 1 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change MasVnrType in Id 2611 as the most common value in the Neighborhood
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter(Id == 2611)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
      Id Neighborhood MasVnrType MasVnrArea
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
 1  2611 Mitchel      &amp;lt;NA&amp;gt;              198&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;masvnrtype_mcv &amp;lt;- dfClean %&amp;gt;% dplyr::filter(MasVnrArea &amp;gt; 0, Neighborhood == &amp;quot;Mitchel&amp;quot;) %&amp;gt;%
+  most_common_value_by_grouping(c(&amp;quot;Neighborhood&amp;quot;), &amp;quot;MasVnrType&amp;quot;) %&amp;gt;% pull(MasVnrType)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% mutate(MasVnrType = if_else(Id == 2611, masvnrtype_mcv, MasVnrType))
+
+
+# 2. Change remaining NA values in MasVnrType to most common values by Neighborhood and YearRemodAdd
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 × 4
       Id Neighborhood MasVnrType MasVnrArea
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
  1   235 Gilbert      &amp;lt;NA&amp;gt;               NA
@@ -234,8 +427,19 @@
  8  1279 CollgCr      &amp;lt;NA&amp;gt;               NA
  9  1692 Gilbert      &amp;lt;NA&amp;gt;               NA
 10  1707 Somerst      &amp;lt;NA&amp;gt;               NA
-# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 23 x 4
+# ℹ 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;YearRemodAdd&amp;quot;), &amp;quot;MasVnrType&amp;quot;) %&amp;gt;% 
+  mutate(MasVnrType = if_else(is.na(MasVnrType), &amp;quot;None&amp;quot;, MasVnrType))
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MasVnrType = if_else(is.na(MasVnrType), 
+                              map2_chr(Neighborhood, YearRemodAdd, ~ with(dfNeighborhood_mcv, MasVnrType[Neighborhood == .x &amp;amp; YearRemodAdd == .y])),
+                              MasVnrType))
+
+# 3. Change NA values in MasVnrArea to median values by Neighborhood and MasVnrType
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Mas&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 23 × 4
       Id Neighborhood MasVnrType MasVnrArea
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt;
  1   235 Gilbert      None               NA
@@ -248,12 +452,38 @@
  8  1279 CollgCr      BrkFace            NA
  9  1692 Gilbert      None               NA
 10  1707 Somerst      Stone              NA
-# ... with 13 more rows&lt;/code&gt;&lt;/pre&gt;
+# ℹ 13 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, c(&amp;quot;Neighborhood&amp;quot;,&amp;quot;MasVnrType&amp;quot;), &amp;quot;MasVnrArea&amp;quot;)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MasVnrArea = if_else(is.na(MasVnrArea),
+                              map2_dbl(Neighborhood, MasVnrType, ~ with(dfNeighborhood_med, MasVnrArea[Neighborhood == .x &amp;amp; MasVnrType == .y])),
+                              MasVnrArea))
+
+# cleanup
+rm(masvnrtype_mcv, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;A significant number of properties have masonry.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasMasVnr
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasMasVnr = (MasVnrArea &amp;gt; 0),
+         HasMasVnr = as.character(HasMasVnr))
+
+dfMasVnr &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;MasVnr&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfMasVnr %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfMasVnr %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfMasVnr, vFeaturesNum, plotTitle = &amp;quot;Masonry Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfMasVnr, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfMasVnr[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfMasVnr, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;pool-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Pool Features&lt;/h4&gt;
@@ -261,7 +491,10 @@
 &lt;li&gt;&lt;p&gt;Change values in &lt;code&gt;PoolQC&lt;/code&gt; to &lt;strong&gt;None&lt;/strong&gt; if the property has no pool&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in remaining &lt;code&gt;PoolQC&lt;/code&gt; to the most common value in the Neighborhood in the properties that have a pool.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 2,906 x 4
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change NA values in PoolQC to None if there is no pool
+###############################################################################################################
+dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Pool&amp;quot;)) %&amp;gt;% dplyr::filter(PoolArea == 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 2,906 × 4
       Id Neighborhood PoolArea PoolQC
    &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
  1     1 CollgCr             0 &amp;lt;NA&amp;gt;  
@@ -274,18 +507,50 @@
  8     8 NWAmes              0 &amp;lt;NA&amp;gt;  
  9     9 OldTown             0 &amp;lt;NA&amp;gt;  
 10    10 BrkSide             0 &amp;lt;NA&amp;gt;  
-# ... with 2,896 more rows&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;# A tibble: 3 x 4
+# ℹ 2,896 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate(PoolQC = if_else(PoolArea == 0, &amp;quot;None&amp;quot;, PoolQC))
+
+
+# 2. Change NA values in remaining PoolQC to the most common value in the Neighborhood where PoolArea &amp;gt; 0
+###############################################################################################################
+(dfMissing &amp;lt;- dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Pool&amp;quot;)) %&amp;gt;% dplyr::filter_all(any_vars(is.na(.))))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 3 × 4
      Id Neighborhood PoolArea PoolQC
   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;           &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; 
 1  2421 NAmes             368 &amp;lt;NA&amp;gt;  
 2  2504 SawyerW           444 &amp;lt;NA&amp;gt;  
 3  2600 Mitchel           561 &amp;lt;NA&amp;gt;  &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean %&amp;gt;% dplyr::filter(PoolArea &amp;gt; 0), &amp;quot;Neighborhood&amp;quot;, &amp;quot;PoolQC&amp;quot;) %&amp;gt;% 
+  mutate(PoolQC = if_else(is.na(PoolQC), &amp;quot;None&amp;quot;, PoolQC))
+
+dfMissing &amp;lt;- dfMissing %&amp;gt;% mutate(PoolQC = map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, PoolQC[Neighborhood == .x])))
+
+dfClean$PoolQC[dfClean$Id %in% dfMissing$Id] &amp;lt;- dfMissing$PoolQC
+
+# cleanup
+rm(dfNeighborhood_mcv, dfMissing)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is generated where: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties do not have a pool.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(HasPool = (PoolArea &amp;gt; 0),
+         HasPool = as.character(HasPool))
+
+dfPool &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Pool&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfPool %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfPool %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfPool, vFeaturesNum, plotTitle = &amp;quot;Pool Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfPool, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfPool[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfPool, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;porch-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Porch Features&lt;/h4&gt;
@@ -296,14 +561,43 @@
 &lt;li&gt;Whether property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: PorchSF, HasPorch
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(PorchSF = OpenPorchSF + EnclosedPorch + `3SsnPorch` + ScreenPorch) %&amp;gt;% 
+  mutate(HasPorch = PorchSF &amp;gt; 0,
+         HasPorch = as.character(HasPorch))
+
+dfPorch &amp;lt;- dfClean %&amp;gt;% select(SalePrice, contains(&amp;quot;Porch&amp;quot;))
+
+vFeaturesNum &amp;lt;- dfPorch %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()
+vFeaturesChr &amp;lt;- dfPorch %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
+
+p1 &amp;lt;- eda_plot_histograms(dfPorch, vFeaturesNum, plotTitle = &amp;quot;Porch Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfPorch, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfPorch[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(dfPorch, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;built-area-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Built Area Features&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;A new feature is added to determine the total square footage of built area: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(TotalSF = GrLivArea + TotalBsmtSF)
+
+vFeaturesNum &amp;lt;- c(&amp;quot;TotalSF&amp;quot;,&amp;quot;GrLivArea&amp;quot;,&amp;quot;TotalBsmtSF&amp;quot;)
+
+p1 &amp;lt;- eda_plot_histograms(dfClean, vFeaturesNum, plotTitle = &amp;quot;Built Area Features&amp;quot;)
+p2 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;construction-year-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Construction Year Features&lt;/h4&gt;
@@ -316,7 +610,28 @@
 &lt;li&gt;Indicate if the property has been remodelled: &lt;code&gt;IsRemodAdd&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New feature: Vintage
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(Vintage = cut(YearBuilt, breaks = c(1800, 1945, 1999, 2100), 
+                       labels = c(&amp;quot;1945 or ealier&amp;quot;,&amp;quot;1946-1999&amp;quot;,&amp;quot;2000 or later&amp;quot;),
+                       ordered_result = T)) %&amp;gt;% 
+  mutate(PropertyAge = YrSold - YearRemodAdd) %&amp;gt;% 
+  mutate(IsNew = (YearBuilt == YrSold),
+         IsNew = as.character(IsNew)) %&amp;gt;% 
+  mutate(IsRemod = (YearRemodAdd &amp;gt; YearBuilt),
+         IsRemod = as.character(IsRemod))
+
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(contains(&amp;quot;Year&amp;quot;),contains(&amp;quot;Yr&amp;quot;),&amp;quot;PropertyAge&amp;quot;) %&amp;gt;% colnames() %&amp;gt;% sort()
+vFeaturesChr &amp;lt;- c(&amp;quot;IsNew&amp;quot;,&amp;quot;IsRemod&amp;quot;,&amp;quot;Vintage&amp;quot;)
+
+p1 &amp;lt;- eda_plot_histograms(dfClean, vFeaturesNum, nCols = 2, plotTitle = &amp;quot;Construction Year Features&amp;quot;)
+p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfClean, .x)))
+p3 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
+
+grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
+rm(vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;neighborhood-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Neighborhood Features&lt;/h4&gt;
@@ -330,7 +645,20 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;&lt;strong&gt;Type4&lt;/strong&gt;: Mitchel, NPkVill, NAmes, SWISU, Sawyer, Blueste, BrkSide, Edwards, OldTown&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Type5&lt;/strong&gt;: IDOTRR, BrDale, MeadowV&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(NeighborhoodType = fct_collapse(Neighborhood,
+                                         Type1 = c(&amp;quot;StoneBr&amp;quot;, &amp;quot;NridgHt&amp;quot;, &amp;quot;NoRidge&amp;quot;),
+                                         Type2 = c(&amp;quot;Veenker&amp;quot;, &amp;quot;Timber&amp;quot;, &amp;quot;Somerst&amp;quot;),
+                                         Type3 = c(&amp;quot;Crawfor&amp;quot;, &amp;quot;CollgCr&amp;quot;, &amp;quot;ClearCr&amp;quot;, &amp;quot;Blmngtn&amp;quot;, &amp;quot;Gilbert&amp;quot;, &amp;quot;NWAmes&amp;quot;, &amp;quot;SawyerW&amp;quot;),
+                                         Type4 = c(&amp;quot;Mitchel&amp;quot;, &amp;quot;NPkVill&amp;quot;, &amp;quot;NAmes&amp;quot;, &amp;quot;SWISU&amp;quot;, &amp;quot;Sawyer&amp;quot;, &amp;quot;Blueste&amp;quot;, &amp;quot;BrkSide&amp;quot;, &amp;quot;Edwards&amp;quot;, &amp;quot;OldTown&amp;quot;),
+                                         Type5 = c(&amp;quot;IDOTRR&amp;quot;, &amp;quot;BrDale&amp;quot;, &amp;quot;MeadowV&amp;quot;))) %&amp;gt;% 
+  mutate(NeighborhoodType = factor(NeighborhoodType, levels = c(&amp;quot;Type5&amp;quot;,&amp;quot;Type4&amp;quot;,&amp;quot;Type3&amp;quot;,&amp;quot;Type2&amp;quot;,&amp;quot;Type1&amp;quot;), ordered = TRUE))
+
+p1 &amp;lt;- eda_plot_box(dfClean, &amp;quot;Neighborhood&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &amp;lt;- eda_plot_box(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::label_dollar(accuracy = 1))
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Other Missing Features&lt;/h4&gt;
@@ -340,6 +668,45 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;&lt;p&gt;In &lt;code&gt;LotFrontage&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the median values in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;In &lt;code&gt;MSZoning&lt;/code&gt;, &lt;code&gt;KitchenQual&lt;/code&gt;, &lt;code&gt;Exterior1st&lt;/code&gt;, &lt;code&gt;Exterior2nd&lt;/code&gt;, &lt;code&gt;Electrical&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. &amp;amp; 2. change NA values to None or most common value of that feature
+####################################################################################################################
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate_at(c(&amp;quot;MiscFeature&amp;quot;, &amp;quot;Alley&amp;quot;, &amp;quot;Fence&amp;quot;), change_na_to, value = &amp;quot;None&amp;quot;) %&amp;gt;% 
+  mutate_at(c(&amp;quot;Utilities&amp;quot;), change_na_to_most_common_value) %&amp;gt;% 
+  mutate_at(c(&amp;quot;Functional&amp;quot;), change_na_to_most_common_value) %&amp;gt;% 
+  mutate_at(c(&amp;quot;SaleType&amp;quot;), change_na_to_most_common_value)
+
+# 3. In LotFrontage, change NA values to the median value by neighborhood
+####################################################################################################################
+dfNeighborhood_med &amp;lt;- median_by_grouping(dfClean, &amp;quot;Neighborhood&amp;quot;, &amp;quot;LotFrontage&amp;quot;)
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(LotFrontage = if_else(is.na(LotFrontage), 
+                               map_dbl(Neighborhood, ~ with(dfNeighborhood_med, LotFrontage[Neighborhood == .x])), 
+                               LotFrontage))
+
+# 4. In MSZoning,KitchenQual,Exterior1st,Exterior2nd,Electrical change NA values to the median value by neighborhood
+dfNeighborhood_mcv &amp;lt;- most_common_value_by_grouping(dfClean, &amp;quot;Neighborhood&amp;quot;, c(&amp;quot;MSZoning&amp;quot;,&amp;quot;KitchenQual&amp;quot;,&amp;quot;Exterior1st&amp;quot;,&amp;quot;Exterior2nd&amp;quot;,&amp;quot;Electrical&amp;quot;))
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MSZoning = if_else(is.na(MSZoning),
+                            map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, MSZoning[Neighborhood == .x])),
+                            MSZoning)) %&amp;gt;%
+  mutate(KitchenQual = if_else(is.na(KitchenQual),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, KitchenQual[Neighborhood == .x])),
+                              KitchenQual)) %&amp;gt;%
+  mutate(Exterior1st = if_else(is.na(Exterior1st),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Exterior1st[Neighborhood == .x])),
+                              Exterior1st)) %&amp;gt;%
+  mutate(Exterior2nd = if_else(is.na(Exterior2nd),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Exterior2nd[Neighborhood == .x])),
+                              Exterior2nd)) %&amp;gt;%
+  mutate(Electrical = if_else(is.na(Electrical),
+                              map_chr(Neighborhood, ~ with(dfNeighborhood_mcv, Electrical[Neighborhood == .x])),
+                              Electrical))
+
+# cleanup
+rm(dfNeighborhood_med, dfNeighborhood_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;label-encoding&#34; class=&#34;section level3&#34;&gt;
@@ -375,27 +742,98 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;p&gt;&lt;code&gt;MoSold&lt;/code&gt; is cyclical and should be recoded as a factor.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;YrSold&lt;/code&gt; has only 5 values from 2006-2010 and should also be recoded as a factor.&lt;/p&gt;
 &lt;p&gt;Categorical features where several categories have less than 10 observations are lumped into a single category named &lt;strong&gt;Other&lt;/strong&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;is.nominal &amp;lt;- function(Z) {
+  return(is.factor(Z) &amp;amp; !is.ordered(Z))
+}
+
+dfClean &amp;lt;- dfClean %&amp;gt;% 
+  mutate(MoSold = as.factor(MoSold)) %&amp;gt;% 
+  mutate(YrSold = as.factor(YrSold)) %&amp;gt;% 
+  mutate(MSSubClass = as.character(MSSubClass)) %&amp;gt;% 
+  mutate_at(c(&amp;quot;ExterCond&amp;quot;,&amp;quot;ExterQual&amp;quot;,&amp;quot;BsmtQual&amp;quot;,&amp;quot;BsmtCond&amp;quot;,&amp;quot;HeatingQC&amp;quot;,&amp;quot;KitchenQual&amp;quot;,&amp;quot;FireplaceQu&amp;quot;,&amp;quot;GarageQual&amp;quot;,&amp;quot;GarageCond&amp;quot;), 
+            factor, levels = c(&amp;quot;Ex&amp;quot;,&amp;quot;Gd&amp;quot;,&amp;quot;TA&amp;quot;,&amp;quot;Fa&amp;quot;,&amp;quot;Po&amp;quot;,&amp;quot;None&amp;quot;), ordered = TRUE) %&amp;gt;% 
+  mutate_at(c(&amp;quot;BsmtFinType1&amp;quot;,&amp;quot;BsmtFinType2&amp;quot;), 
+            factor, levels = c(&amp;quot;GLQ&amp;quot;, &amp;quot;ALQ&amp;quot;, &amp;quot;BLQ&amp;quot;, &amp;quot;Rec&amp;quot;, &amp;quot;LwQ&amp;quot;, &amp;quot;Unf&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE) %&amp;gt;% 
+  mutate(LotShape = factor(LotShape, levels = c(&amp;quot;Reg&amp;quot;,&amp;quot;IR1&amp;quot;,&amp;quot;IR2&amp;quot;,&amp;quot;IR3&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(LandSlope = factor(LandSlope, levels = c(&amp;quot;Gtl&amp;quot;, &amp;quot;Mod&amp;quot;, &amp;quot;Sev&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(BsmtExposure = factor(BsmtExposure, levels = c(&amp;quot;Gd&amp;quot;, &amp;quot;Av&amp;quot;, &amp;quot;Mn&amp;quot;, &amp;quot;No&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(Functional = factor(Functional, levels = c(&amp;quot;Typ&amp;quot;, &amp;quot;Min1&amp;quot;, &amp;quot;Min2&amp;quot;, &amp;quot;Mod&amp;quot;, &amp;quot;Maj1&amp;quot;, &amp;quot;Maj2&amp;quot;, &amp;quot;Sev&amp;quot;, &amp;quot;Sal&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(GarageFinish = factor(GarageFinish, levels = c(&amp;quot;Fin&amp;quot;, &amp;quot;RFn&amp;quot;, &amp;quot;Unf&amp;quot;, &amp;quot;None&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(Street = factor(Street, levels = c(&amp;quot;Pave&amp;quot;,&amp;quot;Grvl&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(PavedDrive = factor(PavedDrive, levels = c(&amp;quot;Y&amp;quot;,&amp;quot;P&amp;quot;,&amp;quot;N&amp;quot;), ordered = TRUE)) %&amp;gt;% 
+  mutate(OverallCond = ordered(OverallCond, levels = 1:10),
+         OverallQual = ordered(OverallQual, levels = 1:10)) %&amp;gt;% 
+  mutate(CentralAir = ordered(CentralAir, levels = c(&amp;quot;Y&amp;quot;,&amp;quot;N&amp;quot;)),
+         HasGarage = ordered(HasGarage, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasFireplace = ordered(HasFireplace, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasMasVnr = ordered(HasMasVnr, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         HasPorch = ordered(HasPorch, levels = c(&amp;quot;TRUE&amp;quot;, &amp;quot;FALSE&amp;quot;)),
+         IsNew = ordered(IsNew, levels = c(&amp;quot;TRUE&amp;quot;,&amp;quot;FALSE&amp;quot;)),
+         IsRemod = ordered(IsRemod, levels = c(&amp;quot;TRUE&amp;quot;,&amp;quot;FALSE&amp;quot;))) %&amp;gt;% 
+  # mutate_if(is.ordered, fct_rev) %&amp;gt;% # reverse the factor levels before assigning an integer order
+  # mutate_if(is.ordered, function(Z) as.integer(Z) - 1) %&amp;gt;% 
+  mutate_if(is.character, as.factor) %&amp;gt;% 
+  mutate_if(is.nominal, ~ fct_lump_min(.x, min = 10)) %&amp;gt;% 
+  mutate_if(is.logical, as.factor)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;features-to-drop&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Features to Drop&lt;/h3&gt;
 &lt;div id=&#34;highly-correlated-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Highly Correlated Features&lt;/h4&gt;
 &lt;p&gt;Some features could be dropped from further analysis because either they are too correlated or replaced by a similar feature.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(vFeatures_to_exclude &amp;lt;- c(&amp;quot;BsmtFullBath&amp;quot;,&amp;quot;GarageCars&amp;quot;,&amp;quot;GarageYrBlt&amp;quot;,
+                           &amp;quot;GrLivArea&amp;quot;,&amp;quot;PoolArea&amp;quot;,
+                           &amp;quot;YearBuilt&amp;quot;,&amp;quot;YearRemodAdd&amp;quot;,&amp;quot;Neighborhood&amp;quot;,
+                           &amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt; [1] &amp;quot;BsmtFullBath&amp;quot;  &amp;quot;GarageCars&amp;quot;    &amp;quot;GarageYrBlt&amp;quot;   &amp;quot;GrLivArea&amp;quot;     &amp;quot;PoolArea&amp;quot;      &amp;quot;YearBuilt&amp;quot;     &amp;quot;YearRemodAdd&amp;quot;  &amp;quot;Neighborhood&amp;quot;  &amp;quot;OpenPorchSF&amp;quot;  
 [10] &amp;quot;EnclosedPorch&amp;quot; &amp;quot;3SsnPorch&amp;quot;     &amp;quot;ScreenPorch&amp;quot;  &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
 &lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeatures_skewed &amp;lt;- dfClean %&amp;gt;% 
+  select_if(is.factor) %&amp;gt;% 
+  gather(feature, value) %&amp;gt;% 
+  group_by(feature, value) %&amp;gt;% 
+  count() %&amp;gt;% 
+  mutate(perc = n/nrow(dfClean)) %&amp;gt;% 
+  dplyr::filter(perc &amp;gt; 0.95) %&amp;gt;% 
+  pull(feature)
+
+cowplot::plot_grid(plotlist = map(vFeatures_skewed, ~ eda_plot_column(dfClean, .x)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Features to exclude for modelling
+vFeatures_to_exclude &amp;lt;- c(vFeatures_to_exclude, vFeatures_skewed) %&amp;gt;% unique()
+
+# cleanup
+rm(vFeatures_skewed)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;finalized-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finalized Data&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# print(&amp;quot;Following features are dropped&amp;quot;)
+# print(vFeatures_to_exclude)
+
+# Finalized dataset
+dfClean &amp;lt;- dfClean %&amp;gt;% select(-one_of(vFeatures_to_exclude))
+
+# determine the numerical features
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(-Id) %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames() %&amp;gt;% sort()
+
+# determine the categorical features
+vFeaturesCat &amp;lt;- dfClean %&amp;gt;% select(-Id) %&amp;gt;% select_if(is.factor) %&amp;gt;% colnames() %&amp;gt;% sort()
+# vFeaturesCat1 &amp;lt;- vFeaturesCat[map_int(vFeaturesCat, ~ length(levels(dfClean[[.x]]))) &amp;gt; 5]
+vFeaturesCat1 &amp;lt;- dfClean %&amp;gt;% select_if(is.ordered) %&amp;gt;% colnames() %&amp;gt;% sort()
+vFeaturesCat2 &amp;lt;- setdiff(vFeaturesCat, vFeaturesCat1)
+
+print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the finalized dataset&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] 2919   73&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;Excluding Id, there are {(ncol(dfClean)-1)} features in the finalized dataset.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;Excluding Id, there are 72 features in the finalized dataset.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;There are {length(vFeaturesNum)} numerical, {length(vFeaturesCat1)} ordinal and {length(vFeaturesCat2)} nominal features.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;There are 26 numerical, 26 ordinal and 20 nominal features.&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
@@ -404,7 +842,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical Features&lt;/h3&gt;
 &lt;p&gt;First let’s plot all the features that are measured as area in square feet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -412,7 +851,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Many features are heavily skewed so they need to be normalized before fitting models.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Now let’s see other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)], &amp;quot;SalePrice&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -420,7 +860,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;li&gt;Most of the properties have been built less than 20 years prior to their sale.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;SalePrice&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, &amp;quot;SalePrice&amp;quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
@@ -436,7 +877,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;h2&gt;Categorical Features&lt;/h2&gt;
 &lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Ordinal Features&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat1, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -446,7 +888,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Nominal Features.&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat2, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -462,7 +905,9 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
 &lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vOutliers_TotalSF &amp;lt;- dfClean %&amp;gt;% filter(TotalSF &amp;gt; 7000) %&amp;gt;% pull(Id)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -475,7 +920,31 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
 &lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
+
+dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
+  correlate() %&amp;gt;% 
+  focus(SalePrice) %&amp;gt;% 
+  dplyr::rename(feature = term,
+                corr = SalePrice) %&amp;gt;%
+  arrange(desc(abs(corr))) %&amp;gt;% 
+  dplyr::filter(abs(corr) &amp;gt; 0.1) %&amp;gt;% 
+  mutate(corr = round(corr, 2)) %&amp;gt;% 
+  mutate(feature = fct_reorder(feature, corr)) %&amp;gt;% 
+  dplyr::filter(!(feature %in% vFeatures_to_exclude))
+
+vFeaturesCor &amp;lt;- dfCor %&amp;gt;% pull(feature) %&amp;gt;% as.character()
+
+
+# plotCorrelationMatrix(dfClean %&amp;gt;% select(c(&amp;quot;SalePrice&amp;quot;,one_of(vFeaturesCor))), outlineVar = &amp;quot;SalePrice&amp;quot;, &amp;quot;Correlation with SalePrice&amp;quot;) # doesn&amp;#39;t fit page
+ggplot(dfCor, aes(x = feature, y = corr)) +
+  geom_col(aes(fill = corr &amp;lt; 0), color = &amp;quot;white&amp;quot;) +
+  geom_label(aes(label = corr, hjust = if_else(corr &amp;gt; 0, -0.1, 1.1)), size = 2.8) +
+  scale_fill_quant(palette = &amp;quot;heatmap&amp;quot;, guide = &amp;quot;none&amp;quot;) +
+  expand_limits(y = c(-0.8, 0.8)) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;&amp;quot;, title = &amp;quot;Highest Correlations with SalePrice&amp;quot;) +
+  coord_flip()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -486,7 +955,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -498,7 +968,8 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -514,7 +985,10 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
 &lt;p&gt;We have determined &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have among the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how they vary by &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; respectively:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, yLabelsScale = scales::dollar)
+p2 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;GarageArea&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageType&amp;quot;, yLabelsScale = scales::dollar)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;For the same total area, there are neighborhoods where &lt;code&gt;SalePrice&lt;/code&gt; is higher than others.&lt;/li&gt;
 &lt;li&gt;Properties with no garage are distinctly separated.&lt;/li&gt;
@@ -525,12 +999,22 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;SalePrice&lt;/code&gt; with a combination of categorical features, that could provide any additional explanatory power for prediction:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;OverallQual&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
 &lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
 &lt;li&gt;Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# split the data back to training and testing sets
+# dfTrain &amp;lt;- dfClean %&amp;gt;% dplyr::slice(1:nrows_train)
+# dfTest &amp;lt;- dfClean %&amp;gt;% dplyr::slice(-(1:nrows_train))
+
+save(vFeaturesCat, vFeaturesNum, vFeaturesCor, dfClean, vTestIDs, 
+     file = &amp;quot;Ames_Housing_Clean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>
@@ -548,7 +1032,24 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Description&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDescription &amp;lt;- tribble(~ Attribute, ~ Description,
+                         &amp;quot;price&amp;quot;, &amp;quot;price in 2008 USD&amp;quot;,
+                         &amp;quot;carat&amp;quot;, &amp;quot;weight of a diamond (1 carat = 0.2 gms)&amp;quot;,
+                         &amp;quot;cut&amp;quot;, &amp;quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&amp;quot;,
+                         &amp;quot;color&amp;quot;, &amp;quot;diamond color from D (best) to J (worst)&amp;quot;,
+                         &amp;quot;clarity&amp;quot;, &amp;quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&amp;quot;,
+                         &amp;quot;x&amp;quot;, &amp;quot;length in mm&amp;quot;,
+                         &amp;quot;y&amp;quot;, &amp;quot;width in mm&amp;quot;,
+                         &amp;quot;z&amp;quot;, &amp;quot;depth in mm&amp;quot;,
+                         &amp;quot;depth&amp;quot;, &amp;quot;total depth percentage = z/mean(x, y)&amp;quot;,
+                         &amp;quot;table&amp;quot;, &amp;quot;width of the top of diamond relative to widest point&amp;quot;)
+
+knitr::kable(dfDescription)&lt;/code&gt;&lt;/pre&gt;
 &lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;9%&#34; /&gt;
+&lt;col width=&#34;90%&#34; /&gt;
+&lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr class=&#34;header&#34;&gt;
 &lt;th align=&#34;left&#34;&gt;Attribute&lt;/th&gt;
@@ -606,30 +1107,32 @@ As it is said, real estate is all about location, location, location. Clearly so
 &lt;/div&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesCat &amp;lt;- dfInput %&amp;gt;% select_if(is.factor) %&amp;gt;% colnames() 
+vFeaturesNum &amp;lt;- dfInput %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;visdat::vis_dat(dfInput) + theme_quant()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.&lt;/p&gt;
 &lt;p&gt;Let’s examine each feature numerically:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Hmisc::describe(dfInput)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfInput 
 
  10  Variables      53940  Observations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 price 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0    11602        1     3933     4012      544      646      950     2401     5324     9821    13107 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0    11602        1     3933     3180     4012      544      646      950     2401     5324     9821    13107 
 
 lowest :   326   327   334   335   336, highest: 18803 18804 18806 18818 18823
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 carat 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      273    0.999   0.7979   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      273    0.999   0.7979     0.75   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
 
-lowest : 0.20 0.21 0.22 0.23 0.24, highest: 4.00 4.01 4.13 4.50 5.01
+lowest : 0.2  0.21 0.22 0.23 0.24, highest: 4    4.01 4.13 4.5  5.01
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 cut 
        n  missing distinct 
    53940        0        5 
-
-lowest : Fair      Good      Very Good Premium   Ideal    , highest: Fair      Good      Very Good Premium   Ideal    
                                                             
 Value           Fair      Good Very Good   Premium     Ideal
 Frequency       1610      4906     12082     13791     21551
@@ -638,8 +1141,6 @@ Proportion     0.030     0.091     0.224     0.256     0.400
 color 
        n  missing distinct 
    53940        0        7 
-
-lowest : J I H G F, highest: H G F E D
                                                     
 Value          J     I     H     G     F     E     D
 Frequency   2808  5422  8304 11292  9542  9797  6775
@@ -648,54 +1149,40 @@ Proportion 0.052 0.101 0.154 0.209 0.177 0.182 0.126
 clarity 
        n  missing distinct 
    53940        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
 Frequency    741  9194 13065 12258  8171  5066  3655  1790
 Proportion 0.014 0.170 0.242 0.227 0.151 0.094 0.068 0.033
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 depth 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      184    0.999    61.75    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      184    0.999    61.75     61.8    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
 
-lowest : 43.0 44.0 50.8 51.0 52.2, highest: 72.2 72.9 73.6 78.2 79.0
+lowest : 43   44   50.8 51   52.2, highest: 72.2 72.9 73.6 78.2 79  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 table 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      127     0.98    57.46    2.448       54       55       56       57       59       60       61 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      127     0.98    57.46     57.5    2.448       54       55       56       57       59       60       61 
 
-lowest : 43.0 44.0 49.0 50.0 50.1, highest: 71.0 73.0 76.0 79.0 95.0
+lowest : 43   44   49   50   50.1, highest: 71   73   76   79   95  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 x 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      554        1    5.731    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      554        1    5.731    5.685    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
 
-lowest :  0.00  3.73  3.74  3.76  3.77, highest: 10.01 10.02 10.14 10.23 10.74
+lowest : 0     3.73  3.74  3.76  3.77 , highest: 10.01 10.02 10.14 10.23 10.74
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 y 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      552        1    5.735    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      552        1    5.735     5.69    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
 
-lowest :  0.00  3.68  3.71  3.72  3.73, highest: 10.10 10.16 10.54 31.80 58.90
-                                                                                                                      
-Value        0.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   7.5   8.0   8.5   9.0   9.5  10.0  10.5  32.0  59.0
-Frequency      7     5  1731 12305  7817  5994  6742  9260  4298  3402  1635   652    69    14     6     1     1     1
-Proportion 0.000 0.000 0.032 0.228 0.145 0.111 0.125 0.172 0.080 0.063 0.030 0.012 0.001 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0     3.68  3.71  3.72  3.73 , highest: 10.1  10.16 10.54 31.8  58.9 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 z 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      375        1    3.539   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      375        1    3.539     3.51   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
 
-lowest :  0.00  1.07  1.41  1.53  2.06, highest:  6.43  6.72  6.98  8.06 31.80
-                                                                                                          
-Value        0.0   1.0   1.5   2.0   2.5   3.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   8.0  32.0
-Frequency     20     1     2     3  8807 13809  9474 13682  5525  2352   237    20     5     1     1     1
-Proportion 0.000 0.000 0.000 0.000 0.163 0.256 0.176 0.254 0.102 0.044 0.004 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt;: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.&lt;/li&gt;
@@ -715,18 +1202,36 @@ For the frequency table, variable is rounded to the nearest 0.5
 &lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;makeOutliersNA &amp;lt;- function(Z) {
+  min_value = min(Z, na.rm = T)
+  max_value = max(Z, na.rm = T)
+  median_value = median(Z, na.rm = T)
+  IQR = IQR(Z, na.rm = T)
+  lower_bound = max(min_value, median_value - 2.5*IQR)
+  upper_bound = min(max_value, median_value + 2.5*IQR)
+  
+  Z &amp;lt;- ifelse(Z &amp;gt;= lower_bound &amp;amp; Z &amp;lt;= upper_bound, Z, NA)
+}
+
+# convert outliers to NA values
+dfInput &amp;lt;- dfInput %&amp;gt;% mutate_at(vFeaturesNum, makeOutliersNA)
+
+eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &amp;quot;Histograms of numerical features excluding outliers&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Excluding outliers, the range of values are more reasonable. We can see that &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are heavily right skewed.&lt;/p&gt;
 &lt;p&gt;Let’s plot the distribution of &lt;code&gt;price&lt;/code&gt; in log scale:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, &amp;quot;price&amp;quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
 one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical Features&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_column(dfInput, .x)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The categorical imbalance in &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; can be clearly noticed.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -736,14 +1241,17 @@ one at just below USD 1000 and the other around USD 5000. Intriguingly, there ar
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-numerical&lt;/h4&gt;
 &lt;p&gt;First and foremost, let’s do a correlation analysis to see how &lt;code&gt;price&lt;/code&gt; is correlated with other numerical features:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_correlation_matrix(dfInput[vFeaturesNum] %&amp;gt;% drop_na(), outlineVar = &amp;quot;price&amp;quot;, plotTitle = &amp;quot;Clustered correlations of numerical features&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We can see that &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; dimensions. If a predictive linear regression model is built,
 some of these features would act as confounders. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt; so they are not so interesting for
 predictive modelling.&lt;/p&gt;
 &lt;p&gt;Now let’s see the scatter plots:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;After removing outliers, it could be noted that &lt;code&gt;price&lt;/code&gt; increases exponentially with &lt;code&gt;carat&lt;/code&gt;, as well as &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; dimensions. So &lt;code&gt;price&lt;/code&gt; should be plotted with a log tranformation. Let’s do that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
 increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions. Log transforming &lt;code&gt;carat&lt;/code&gt; wouldn’t help because &lt;code&gt;carat&lt;/code&gt; does not have a wide range.
 We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
@@ -751,7 +1259,9 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
 &lt;p&gt;Let’s examine &lt;code&gt;price&lt;/code&gt; with respect to the categorical features in the dataset:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &amp;quot;price&amp;quot;, yLimits = c(300, 8000), 
+                                                               yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
@@ -765,17 +1275,22 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;p&gt;So far, we have determined &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price.&lt;/code&gt; Different grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some impact on median &lt;code&gt;price&lt;/code&gt;. So let’s make some scatter plots to see these relationships:&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Numerical-Categorical&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_scatter_cat(dfInput, &amp;quot;carat&amp;quot;, &amp;quot;price&amp;quot;, .x, yLabelsScale = scales::dollar)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
 &lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfFeatures &amp;lt;- expand_grid(feat1 = c(&amp;quot;depth&amp;quot;,&amp;quot;table&amp;quot;), feat2 = c(&amp;quot;color&amp;quot;,&amp;quot;clarity&amp;quot;)) %&amp;gt;% arrange(desc(feat2))
+cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
+                                   ~ eda_plot_scatter_cat(dfInput, .x, &amp;quot;price&amp;quot;, .y, yLabelsScale = scales::dollar)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;There is no pattern in the interaction of &lt;code&gt;price&lt;/code&gt; v/s &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; values when plotted by &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. So, these features do not have any predictive ability to determine &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Categorical-Numerical&lt;/h4&gt;
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(c(&amp;quot;cut&amp;quot;,&amp;quot;color&amp;quot;), ~ eda_plot_heatmap(dfInput, .x, &amp;quot;clarity&amp;quot;, &amp;quot;price&amp;quot;)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. Nevertheless this counter-trend persists in the dataset.&lt;/p&gt;
 &lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the mean prices do not show any discernable pattern.&lt;/p&gt;
 &lt;/div&gt;
@@ -792,6 +1307,7 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt; is strongly correlated with &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; dimensions of the diamonds. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; appear to explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &amp;quot;diamondClean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
     </item>

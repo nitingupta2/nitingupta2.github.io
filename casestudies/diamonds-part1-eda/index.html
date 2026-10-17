@@ -32,6 +32,23 @@
 
 Data Description
 The diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
+dfDescription &lt;- tribble(~ Attribute, ~ Description,
+                         &quot;price&quot;, &quot;price in 2008 USD&quot;,
+                         &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
+                         &quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,
+                         &quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,
+                         &quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,
+                         &quot;x&quot;, &quot;length in mm&quot;,
+                         &quot;y&quot;, &quot;width in mm&quot;,
+                         &quot;z&quot;, &quot;depth in mm&quot;,
+                         &quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,
+                         &quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)
+
+knitr::kable(dfDescription)
+
+
+
+
 
 
 
@@ -149,49 +166,12 @@ width of the top of diamond relative to widest point
     
     
     
-    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
   
 
   
 
 
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-
-  function gtag() {
-      dataLayer.push(arguments);
-  }
-
-  function trackOutboundLink(url) {
-    gtag('event', 'click', {
-         'event_category': 'outbound',
-         'event_label': url,
-         'transport_type': 'beacon',
-         'event_callback': function () {
-           document.location = url;
-         }
-    });
-    console.debug("Outbound link clicked: " + url);
-  }
-
-  function onClickCallback(event) {
-    const anchor = event.target.closest('a');
-    if (!anchor || anchor.host === window.location.host) {
-      return;
-    }
-    trackOutboundLink(anchor.href);  
-  }
-
-  gtag('js', new Date());
-  gtag('config', 'G-K2NQYHG3M1', {});
-
-  
-  document.addEventListener('click', onClickCallback, false);
-</script>
 
 
   
@@ -224,6 +204,23 @@ width of the top of diamond relative to widest point
 
 Data Description
 The diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
+dfDescription &lt;- tribble(~ Attribute, ~ Description,
+                         &quot;price&quot;, &quot;price in 2008 USD&quot;,
+                         &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
+                         &quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,
+                         &quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,
+                         &quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,
+                         &quot;x&quot;, &quot;length in mm&quot;,
+                         &quot;y&quot;, &quot;width in mm&quot;,
+                         &quot;z&quot;, &quot;depth in mm&quot;,
+                         &quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,
+                         &quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)
+
+knitr::kable(dfDescription)
+
+
+
+
 
 
 
@@ -620,7 +617,24 @@ width of the top of diamond relative to widest point
 <div id="data-description" class="section level2">
 <h2>Data Description</h2>
 <p>The <code>diamonds</code> dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.</p>
+<pre class="r"><code>dfDescription &lt;- tribble(~ Attribute, ~ Description,
+                         &quot;price&quot;, &quot;price in 2008 USD&quot;,
+                         &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
+                         &quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,
+                         &quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,
+                         &quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,
+                         &quot;x&quot;, &quot;length in mm&quot;,
+                         &quot;y&quot;, &quot;width in mm&quot;,
+                         &quot;z&quot;, &quot;depth in mm&quot;,
+                         &quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,
+                         &quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)
+
+knitr::kable(dfDescription)</code></pre>
 <table>
+<colgroup>
+<col width="9%" />
+<col width="90%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Attribute</th>
@@ -678,30 +692,32 @@ width of the top of diamond relative to widest point
 </div>
 <div id="data-summaries" class="section level2">
 <h2>Data Summaries</h2>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png" width="672" /></p>
+<pre class="r"><code>vFeaturesCat &lt;- dfInput %&gt;% select_if(is.factor) %&gt;% colnames() 
+vFeaturesNum &lt;- dfInput %&gt;% select_if(is.numeric) %&gt;% colnames()</code></pre>
+<pre class="r"><code>visdat::vis_dat(dfInput) + theme_quant()</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png" alt="" width="672" /></p>
 <p>A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.</p>
 <p>Let’s examine each feature numerically:</p>
+<pre class="r"><code>Hmisc::describe(dfInput)</code></pre>
 <pre><code>dfInput 
 
  10  Variables      53940  Observations
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 price 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0    11602        1     3933     4012      544      646      950     2401     5324     9821    13107 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0    11602        1     3933     3180     4012      544      646      950     2401     5324     9821    13107 
 
 lowest :   326   327   334   335   336, highest: 18803 18804 18806 18818 18823
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 carat 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      273    0.999   0.7979   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      273    0.999   0.7979     0.75   0.5122     0.30     0.31     0.40     0.70     1.04     1.51     1.70 
 
-lowest : 0.20 0.21 0.22 0.23 0.24, highest: 4.00 4.01 4.13 4.50 5.01
+lowest : 0.2  0.21 0.22 0.23 0.24, highest: 4    4.01 4.13 4.5  5.01
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 cut 
        n  missing distinct 
    53940        0        5 
-
-lowest : Fair      Good      Very Good Premium   Ideal    , highest: Fair      Good      Very Good Premium   Ideal    
                                                             
 Value           Fair      Good Very Good   Premium     Ideal
 Frequency       1610      4906     12082     13791     21551
@@ -710,8 +726,6 @@ Proportion     0.030     0.091     0.224     0.256     0.400
 color 
        n  missing distinct 
    53940        0        7 
-
-lowest : J I H G F, highest: H G F E D
                                                     
 Value          J     I     H     G     F     E     D
 Frequency   2808  5422  8304 11292  9542  9797  6775
@@ -720,54 +734,40 @@ Proportion 0.052 0.101 0.154 0.209 0.177 0.182 0.126
 clarity 
        n  missing distinct 
    53940        0        8 
-
-lowest : I1   SI2  SI1  VS2  VS1 , highest: VS2  VS1  VVS2 VVS1 IF  
                                                           
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
 Frequency    741  9194 13065 12258  8171  5066  3655  1790
 Proportion 0.014 0.170 0.242 0.227 0.151 0.094 0.068 0.033
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 depth 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      184    0.999    61.75    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      184    0.999    61.75     61.8    1.515     59.3     60.0     61.0     61.8     62.5     63.3     63.8 
 
-lowest : 43.0 44.0 50.8 51.0 52.2, highest: 72.2 72.9 73.6 78.2 79.0
+lowest : 43   44   50.8 51   52.2, highest: 72.2 72.9 73.6 78.2 79  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 table 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      127     0.98    57.46    2.448       54       55       56       57       59       60       61 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      127     0.98    57.46     57.5    2.448       54       55       56       57       59       60       61 
 
-lowest : 43.0 44.0 49.0 50.0 50.1, highest: 71.0 73.0 76.0 79.0 95.0
+lowest : 43   44   49   50   50.1, highest: 71   73   76   79   95  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 x 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      554        1    5.731    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      554        1    5.731    5.685    1.276     4.29     4.36     4.71     5.70     6.54     7.31     7.66 
 
-lowest :  0.00  3.73  3.74  3.76  3.77, highest: 10.01 10.02 10.14 10.23 10.74
+lowest : 0     3.73  3.74  3.76  3.77 , highest: 10.01 10.02 10.14 10.23 10.74
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 y 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      552        1    5.735    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      552        1    5.735     5.69    1.269     4.30     4.36     4.72     5.71     6.54     7.30     7.65 
 
-lowest :  0.00  3.68  3.71  3.72  3.73, highest: 10.10 10.16 10.54 31.80 58.90
-                                                                                                                      
-Value        0.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   7.5   8.0   8.5   9.0   9.5  10.0  10.5  32.0  59.0
-Frequency      7     5  1731 12305  7817  5994  6742  9260  4298  3402  1635   652    69    14     6     1     1     1
-Proportion 0.000 0.000 0.032 0.228 0.145 0.111 0.125 0.172 0.080 0.063 0.030 0.012 0.001 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0     3.68  3.71  3.72  3.73 , highest: 10.1  10.16 10.54 31.8  58.9 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 z 
-       n  missing distinct     Info     Mean      Gmd      .05      .10      .25      .50      .75      .90      .95 
-   53940        0      375        1    3.539   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05      .10      .25      .50      .75      .90      .95 
+   53940        0      375        1    3.539     3.51   0.7901     2.65     2.69     2.91     3.53     4.04     4.52     4.73 
 
-lowest :  0.00  1.07  1.41  1.53  2.06, highest:  6.43  6.72  6.98  8.06 31.80
-                                                                                                          
-Value        0.0   1.0   1.5   2.0   2.5   3.0   3.5   4.0   4.5   5.0   5.5   6.0   6.5   7.0   8.0  32.0
-Frequency     20     1     2     3  8807 13809  9474 13682  5525  2352   237    20     5     1     1     1
-Proportion 0.000 0.000 0.000 0.000 0.163 0.256 0.176 0.254 0.102 0.044 0.004 0.000 0.000 0.000 0.000 0.000
-
-For the frequency table, variable is rounded to the nearest 0.5
+lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------</code></pre>
 <ul>
 <li><code>price</code>: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.</li>
@@ -787,18 +787,36 @@ For the frequency table, variable is rounded to the nearest 0.5
 <p>Let us look at each feature in the dataset in detail.</p>
 <div id="numerical-features" class="section level4">
 <h4>Numerical Features</h4>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_histograms(dfInput, vFeaturesNum)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png" alt="" width="672" /></p>
 <p>The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png" width="672" /></p>
+<pre class="r"><code>makeOutliersNA &lt;- function(Z) {
+  min_value = min(Z, na.rm = T)
+  max_value = max(Z, na.rm = T)
+  median_value = median(Z, na.rm = T)
+  IQR = IQR(Z, na.rm = T)
+  lower_bound = max(min_value, median_value - 2.5*IQR)
+  upper_bound = min(max_value, median_value + 2.5*IQR)
+  
+  Z &lt;- ifelse(Z &gt;= lower_bound &amp; Z &lt;= upper_bound, Z, NA)
+}
+
+# convert outliers to NA values
+dfInput &lt;- dfInput %&gt;% mutate_at(vFeaturesNum, makeOutliersNA)
+
+eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &quot;Histograms of numerical features excluding outliers&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png" alt="" width="672" /></p>
 <p>Excluding outliers, the range of values are more reasonable. We can see that <code>carat</code> and <code>price</code> are heavily right skewed.</p>
 <p>Let’s plot the distribution of <code>price</code> in log scale:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_histograms(dfInput, &quot;price&quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png" alt="" width="672" /></p>
 <p>Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
 one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.</p>
 </div>
 <div id="categorical-features" class="section level4">
 <h4>Categorical Features</h4>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png" width="672" /></p>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_column(dfInput, .x)), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png" alt="" width="672" /></p>
 <p>The categorical imbalance in <code>cut</code> and <code>clarity</code> can be clearly noticed.</p>
 </div>
 </div>
@@ -808,14 +826,17 @@ one at just below USD 1000 and the other around USD 5000. Intriguingly, there ar
 <div id="numerical-numerical" class="section level4">
 <h4>Numerical-numerical</h4>
 <p>First and foremost, let’s do a correlation analysis to see how <code>price</code> is correlated with other numerical features:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_correlation_matrix(dfInput[vFeaturesNum] %&gt;% drop_na(), outlineVar = &quot;price&quot;, plotTitle = &quot;Clustered correlations of numerical features&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png" alt="" width="672" /></p>
 <p>We can see that <code>price</code> is very strongly correlated with <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> dimensions. If a predictive linear regression model is built,
 some of these features would act as confounders. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code> so they are not so interesting for
 predictive modelling.</p>
 <p>Now let’s see the scatter plots:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_scatter(dfInput, vFeaturesNum, &quot;price&quot;, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" alt="" width="672" /></p>
 <p>After removing outliers, it could be noted that <code>price</code> increases exponentially with <code>carat</code>, as well as <code>x</code>, <code>y</code> and <code>z</code> dimensions. So <code>price</code> should be plotted with a log tranformation. Let’s do that:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_scatter(dfInput, vFeaturesNum, &quot;price&quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png" alt="" width="672" /></p>
 <p>Now, the relationship between <code>log(price)</code> appears to be linear with <code>x</code>, <code>y</code> and <code>z</code>. But, not so much with <code>carat</code>. Variance in <code>price</code> tends to
 increase both by <code>carat</code> and its dimensions. Log transforming <code>carat</code> wouldn’t help because <code>carat</code> does not have a wide range.
 We will find ways to deal with this when we do Feature Engineering.</p>
@@ -823,7 +844,9 @@ We will find ways to deal with this when we do Feature Engineering.</p>
 <div id="numerical-categorical" class="section level4">
 <h4>Numerical-Categorical</h4>
 <p>Let’s examine <code>price</code> with respect to the categorical features in the dataset:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png" width="960" /></p>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &quot;price&quot;, yLimits = c(300, 8000), 
+                                                               yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png" alt="" width="960" /></p>
 <p>The boxplots above are plotted with truncated <code>price</code> axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of <code>cut</code>, <code>color</code> and <code>clarity</code>. This is very odd.</p>
 <ul>
 <li>The median <code>price</code> declines monotonically from <em>Fair</em> <code>cut</code> to <em>Ideal</em> <code>cut</code>.</li>
@@ -837,17 +860,22 @@ We will find ways to deal with this when we do Feature Engineering.</p>
 <p>So far, we have determined <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> have the strongest relationship with <code>price.</code> Different grades of <code>cut</code>, <code>color</code> and <code>clarity</code> also seem to have some impact on median <code>price</code>. So let’s make some scatter plots to see these relationships:</p>
 <div id="numerical-numerical-categorical" class="section level4">
 <h4>Numerical-Numerical-Categorical</h4>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" width="960" /></p>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_scatter_cat(dfInput, &quot;carat&quot;, &quot;price&quot;, .x, yLabelsScale = scales::dollar)), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" alt="" width="960" /></p>
 <p>Although there is a lot of overlap, but there is a clear trend of <code>price</code> increasing with <code>clarity</code>, at a given <code>carat</code> weight. The same pattern could also be observed in the plot with increasing grades of <code>color</code>, though not to the same extent. There is no evidence of any relationship between <code>price</code> and <code>carat</code> with <code>cut</code>.</p>
 <p>We can conclude both <code>color</code> and <code>clarity</code> explain some variance in <code>price</code> at a given <code>carat</code> weight.</p>
 <p>To be sure of any interaction between <code>table</code> and <code>depth</code>, with <code>color</code> and <code>clarity</code>, let’s plot these:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png" width="1152" /></p>
+<pre class="r"><code>dfFeatures &lt;- expand_grid(feat1 = c(&quot;depth&quot;,&quot;table&quot;), feat2 = c(&quot;color&quot;,&quot;clarity&quot;)) %&gt;% arrange(desc(feat2))
+cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
+                                   ~ eda_plot_scatter_cat(dfInput, .x, &quot;price&quot;, .y, yLabelsScale = scales::dollar)), nrow = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png" alt="" width="1152" /></p>
 <p>There is no pattern in the interaction of <code>price</code> v/s <code>depth</code> and <code>table</code> values when plotted by <code>color</code> and <code>clarity</code>. So, these features do not have any predictive ability to determine <code>price</code>.</p>
 </div>
 <div id="categorical-categorical-numerical" class="section level4">
 <h4>Categorical-Categorical-Numerical</h4>
 <p>We want to see if there is any interaction of <code>clarity</code> with <code>cut</code> and <code>color</code>, that could provide any additional explanatory power to predict <code>price</code>:</p>
-<p><img src="/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" width="672" /></p>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(c(&quot;cut&quot;,&quot;color&quot;), ~ eda_plot_heatmap(dfInput, .x, &quot;clarity&quot;, &quot;price&quot;)), nrow = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" alt="" width="672" /></p>
 <p>The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of <code>color</code> and <code>clarity</code>, <code>price</code> tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best <code>color</code> and <code>clarity</code> should be the highest. Nevertheless this counter-trend persists in the dataset.</p>
 <p>With respect to <code>cut</code> and <code>clarity</code>, the mean prices do not show any discernable pattern.</p>
 </div>
@@ -864,6 +892,7 @@ We will find ways to deal with this when we do Feature Engineering.</p>
 <li><code>price</code> is strongly correlated with <code>carat</code> and <code>x</code>, <code>y</code>, <code>z</code> dimensions of the diamonds. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code>.</li>
 <li>Both <code>clarity</code> and <code>color</code> appear to explain some variance in <code>price</code> for a given <code>carat</code> weight.</li>
 </ul>
+<pre class="r"><code>save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &quot;diamondClean.Rda&quot;)</code></pre>
 </div>
 
     </div>
@@ -1026,7 +1055,41 @@ We will find ways to deal with this when we do Feature Engineering.</p>
 
     
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
 
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
 
 
 

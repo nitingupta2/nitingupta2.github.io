@@ -1,4 +1,4 @@
-library(ngmodels)
+library(nglib)
 library(tidyselect)
 library(tidymodels)
 library(keras)
@@ -10,7 +10,7 @@ conflict_prefer("rename", "dplyr")
 conflict_prefer("slice", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("setdiff", "dplyr")
-conflict_prefer("margin", "ggplot2")
+# conflict_prefer("margin", "ggplot2")
 
 # load clean dataset
 load("Ames_Housing_Clean.Rda")
@@ -18,7 +18,7 @@ load("Ames_Housing_Clean.Rda")
 # Determine skewed features
 vFeaturesSkew <- dfClean %>% 
     select_if(is.numeric) %>% 
-    select_if(function(Z) abs(skewness(Z, na.rm = T)) > 0.75) %>% 
+    select_if(function(Z) abs(timeDate::skewness(Z, na.rm = T)) > 0.75) %>% 
     colnames() %>% 
     setdiff(c("Id","PropertyAge"))
 
@@ -93,7 +93,7 @@ get_model_spec <- function(modelType) {
                          
                          mlp = mlp(mode = "regression", hidden_units = 5, dropout = tune(), epochs = 100) %>% 
                              set_engine("keras", verbose = 0, validation_split = 0.25, 
-                                        optimizer = optimizer_rmsprop(lr = 0.01), loss = "mse", metrics = list("mean_absolute_error")))
+                                        optimizer = optimizer_rmsprop(learning_rate = 0.01), loss = "mse", metrics = list("mean_absolute_error")))
     
     return(model_spec)
 }
@@ -106,13 +106,13 @@ get_model_param_grid <- function(df, modelType, numParams, randomSeed) {
     set.seed(randomSeed)    
     param_spec <- switch(modelType,
                          glmnet = parameters(penalty(), mixture()),
-                         kernlab = parameters(cost(), rbf_sigma(), margin()),
+                         kernlab = parameters(cost(), rbf_sigma(), svm_margin()),
                          xgboost = parameters(min_n(), tree_depth(), learn_rate()),
                          randomForest = parameters(min_n(), finalize(mtry(), df)),
                          ranger = parameters(min_n(), finalize(mtry(), df)),
                          mlp = parameters(dropout(range = c(0, 0.1))))
     
-    dfParamGrid <- grid_max_entropy(param_spec, size = numParams)
+    dfParamGrid <- grid_space_filling(param_spec, size = numParams, type = "max_entropy")
     return(dfParamGrid)
 }
 
@@ -160,7 +160,8 @@ cross_validate_model <- function(cv_folds, model_spec, param_grid) {
         if(model_spec$engine %in% c("lm")) {
             param_results <- pmap_dfr(list(cv_folds$id, cv_folds$splits), ~ test_parameters_on_fold(.x, .y, model_spec, dfParams))
         } else {
-            param_results <- future_pmap_dfr(list(cv_folds$id, cv_folds$splits), ~ test_parameters_on_fold(.x, .y, model_spec, dfParams))
+            param_results <- future_pmap_dfr(list(cv_folds$id, cv_folds$splits), ~ test_parameters_on_fold(.x, .y, model_spec, dfParams),
+                                             .options = furrr_options(seed = TRUE))
         }
         mean_rmse <- param_results %>% group_by(id) %>% rmse(truth = actual, estimate = estimate) %>% summarise(mean_rmse = mean(.estimate)) %>% pull()
         dfResults$mean_rmse[i] <- mean_rmse
@@ -176,7 +177,7 @@ cv_folds <- get_cv_folds(dfTrain_Proc, numFolds = 5, strataVar = "target", rando
 # calls. this will result in sequential execution of 
 # embarassingly parallel model fitting procedures
 # but may prevent R from getting angry at parallelism
-plan(multiprocess)
+plan(multisession)
 
 # lm model
 model_spec_lm <- get_model_spec(modelType = "lm")

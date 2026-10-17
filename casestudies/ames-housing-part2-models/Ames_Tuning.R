@@ -1,4 +1,4 @@
-library(ngmodels)
+library(ngquantr)
 library(tidyselect)
 library(tidymodels)
 library(keras)

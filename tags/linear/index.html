@@ -94,49 +94,12 @@
     
     
     
-    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
   
 
   
 
 
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-
-  function gtag() {
-      dataLayer.push(arguments);
-  }
-
-  function trackOutboundLink(url) {
-    gtag('event', 'click', {
-         'event_category': 'outbound',
-         'event_label': url,
-         'transport_type': 'beacon',
-         'event_callback': function () {
-           document.location = url;
-         }
-    });
-    console.debug("Outbound link clicked: " + url);
-  }
-
-  function onClickCallback(event) {
-    const anchor = event.target.closest('a');
-    if (!anchor || anchor.host === window.location.host) {
-      return;
-    }
-    trackOutboundLink(anchor.href);  
-  }
-
-  gtag('js', new Date());
-  gtag('config', 'G-K2NQYHG3M1', {});
-
-  
-  document.addEventListener('click', onClickCallback, false);
-</script>
 
 
   
@@ -456,7 +419,7 @@
     <div class="article-style">
       
       In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build linear and non-linear models and see how well they predict the SalePrice of properties.
+In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
 Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.
 
       
@@ -587,8 +550,6 @@ Before we do any transformations, feature engineering or feature selections for 
     <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
 
     
-
-
 
 
 

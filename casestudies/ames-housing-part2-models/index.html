@@ -29,7 +29,7 @@
     
   
   <meta name="description" content="In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build linear and non-linear models and see how well they predict the SalePrice of properties.
+In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
 
 Evaluation Criteria
 Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.">
@@ -98,49 +98,12 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
     
     
     
-    <link rel="stylesheet" href="/css/academic.9a879b7db394c489bc2f88387b1e646d.css">
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
   
 
   
 
 
-
-
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K2NQYHG3M1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-
-  function gtag() {
-      dataLayer.push(arguments);
-  }
-
-  function trackOutboundLink(url) {
-    gtag('event', 'click', {
-         'event_category': 'outbound',
-         'event_label': url,
-         'transport_type': 'beacon',
-         'event_callback': function () {
-           document.location = url;
-         }
-    });
-    console.debug("Outbound link clicked: " + url);
-  }
-
-  function onClickCallback(event) {
-    const anchor = event.target.closest('a');
-    if (!anchor || anchor.host === window.location.host) {
-      return;
-    }
-    trackOutboundLink(anchor.href);  
-  }
-
-  gtag('js', new Date());
-  gtag('config', 'G-K2NQYHG3M1', {});
-
-  
-  document.addEventListener('click', onClickCallback, false);
-</script>
 
 
   
@@ -170,7 +133,7 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">
   <meta property="og:title" content="Ames Housing - Part 2 - Building Models | Nitin Gupta">
   <meta property="og:description" content="In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build linear and non-linear models and see how well they predict the SalePrice of properties.
+In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
 
 Evaluation Criteria
 Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
@@ -515,7 +478,7 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 
 
 <p>In a <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> in this series, we did an exploratory data analysis of the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a>.</p>
-<p>In this post, we will build linear and non-linear models and see how well they predict the <code>SalePrice</code> of properties.</p>
+<p>In this post, we will build both linear and non-linear models and see how well they predict the <code>SalePrice</code> of properties.</p>
 <div id="evaluation-criteria" class="section level2">
 <h2>Evaluation Criteria</h2>
 <p>Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed <code>SalePrice</code> will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.</p>
@@ -526,7 +489,7 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 <ul>
 <li>Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - <code>SalePrice</code>.</li>
 <li>Define linear and non-linear models.</li>
-<li>For each model, create a grid of hyperparameter combinations that are equally spaced.</li>
+<li>For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.</li>
 <li>For each hyperparameter combination, fit a model on the training set and make predictions on the validation set. Repeat the process for all folds.</li>
 <li>Determine root mean squared errors (RMSE) and choose the best hyperparameter combination that corresponds to the minimum RMSE.</li>
 <li>Train each model with its best hyperparameter combination on the entire training set.</li>
@@ -536,9 +499,18 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 </div>
 <div id="partitioning-training-data" class="section level2">
 <h2>Partitioning Training Data</h2>
-<p>We split the training data into 4 folds. Within each fold, 75% of the data is used for training models and 25% for validating the predicted values against the actual values.</p>
+<p>We split the training data into 5 folds. Within each fold, 80% of the data is used for training models and 20% for validating the predicted values against the actual values.</p>
 <p>Let’s look at the distribution of the target variable across all folds:</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png" width="672" /></p>
+<pre class="r"><code>cv_folds %&gt;% 
+  mutate(target = map(splits, function(Z) bind_rows(training(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;training&quot;), 
+                                                    testing(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;validation&quot;)))) %&gt;% 
+  select(-splits) %&gt;% 
+  unnest(cols = c(target)) %&gt;% 
+  ggplot(aes(x = target)) +
+  geom_histogram(bins = 30, color = &quot;white&quot;, fill = &quot;#F37735&quot;) +
+  labs(x = &quot;log(SalePrice)&quot;) +
+  facet_grid(type ~ id)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png" alt="" width="672" /></p>
 <p>By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.</p>
 </div>
 <div id="linear-models" class="section level2">
@@ -546,13 +518,20 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 <div id="ordinary-least-squares-regression" class="section level3">
 <h3>Ordinary Least Squares Regression</h3>
 <p>Before creating any new features or indulging in more complex modelling methods, we will cross validate a simple linear model on the training data to establish a benchmark. If more complex approaches do not have a significant improvement in the model validation metrics, then they are not worthwhile to be pursued.</p>
+<pre class="r"><code>model_spec_lm</code></pre>
 <pre><code>Linear Regression Model Specification (regression)
 
 Computational engine: lm </code></pre>
+<pre class="r"><code>cv_results_lm %&gt;% select(-dummy)</code></pre>
+<pre><code># A tibble: 1 × 1
+  mean_rmse
+      &lt;dbl&gt;
+1     0.147</code></pre>
+<pre class="r"><code>rmse_val &lt;- cv_results_lm %&gt;% pull(mean_rmse)</code></pre>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1468</strong>.</li>
+<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1467</strong>.</li>
 <li>This is the simplest and fastest model with no hyperparameters to tune.</li>
 </ul>
 </div>
@@ -564,6 +543,7 @@ Computational engine: lm </code></pre>
 <li><code>penalty</code>: The total amount of regularization in the model.</li>
 <li><code>mixture</code>: The proportion of L1 regularization in the model.</li>
 </ul>
+<pre class="r"><code>model_spec_glmnet</code></pre>
 <pre><code>Linear Regression Model Specification (regression)
 
 Main Arguments:
@@ -572,29 +552,35 @@ Main Arguments:
 
 Computational engine: glmnet </code></pre>
 <p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
-<pre><code># A tibble: 10 x 3
+<pre class="r"><code>cv_results_glmnet %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 3
     penalty mixture mean_rmse
       &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
- 1 4.83e- 3  0.922      0.127
- 2 3.79e- 2  0.0518     0.129
- 3 1.36e- 3  0.659      0.132
- 4 1.60e- 3  0.431      0.133
- 5 3.50e- 3  0.177      0.133
- 6 4.17e- 2  0.288      0.133
- 7 5.67e- 4  0.970      0.133
- 8 6.79e- 9  0.0193     0.138
- 9 4.32e-10  0.337      0.138
-10 1.95e- 6  0.991      0.138</code></pre>
+ 1 1.46e- 2  0.297      0.128
+ 2 1.22e- 2  0.657      0.129
+ 3 1.22e- 3  0.490      0.133
+ 4 1.09e- 2  0.0439     0.133
+ 5 3.47e- 4  0.992      0.134
+ 6 8.18e- 4  0.0856     0.137
+ 7 1.15e- 4  0.798      0.138
+ 8 7.37e- 7  0.0221     0.138
+ 9 1.23e-10  0.333      0.138
+10 3.37e-10  0.0573     0.138</code></pre>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After hyperparameter tuning with cross validation, <code>glmnet</code> gives the best RMSE of 0.127 with penalty = 0.0048 and mixture = 0.9216.</li>
-<li>It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.</li>
+<li>After hyperparameter tuning with cross validation, the best <code>glmnet</code> model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.</li>
+<li>It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1467.</li>
 <li><code>glmnet</code> cross validation takes under a minute to execute.</li>
 <li>But the presence of outliers can significantly affect its performance.</li>
 </ul>
 <p>Here a plot of the <code>glmnet</code> hyperparameter grid along with the best hyperparameter combination:</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_scatter(param_grid_glmnet, &quot;mixture&quot;, &quot;penalty&quot;, alpha = 1, add_lm = F, yLog = T, yLabelsScale = scales::scientific) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &quot;red&quot;) +
+  ggrepel::geom_label_repel(data = param_best_glmnet %&gt;% map_df(round, digits = 4), 
+                            aes(x = mixture, y = penalty, label = glue::glue(&quot;penalty: {penalty}, mixture:{mixture}&quot;)),
+                            family = &quot;Roboto Condensed&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png" alt="" width="672" /></p>
 </div>
 </div>
 </div>
@@ -608,6 +594,7 @@ Computational engine: glmnet </code></pre>
 <li><code>mtry</code>: The number of predictors to randomly sample at each split.</li>
 <li><code>min_n</code>: The minimum number of data points in a node required to further split the node.</li>
 </ul>
+<pre class="r"><code>model_spec_rf</code></pre>
 <pre><code>Random Forest Model Specification (regression)
 
 Main Arguments:
@@ -620,27 +607,31 @@ Engine-Specific Arguments:
 
 Computational engine: randomForest </code></pre>
 <p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
-<pre><code># A tibble: 10 x 3
+<pre class="r"><code>cv_results_rf %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 3
    min_n  mtry mean_rmse
    &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
- 1     4    85     0.134
- 2     3   140     0.135
- 3    14    90     0.135
- 4     6    45     0.136
- 5     9   138     0.136
- 6    13   158     0.137
- 7     9   183     0.137
- 8    19    56     0.138
- 9    21   130     0.138
-10     5   218     0.138</code></pre>
+ 1     2    84     0.135
+ 2     5   135     0.135
+ 3    12   111     0.136
+ 4    15    56     0.136
+ 5     9    36     0.137
+ 6     8   200     0.138
+ 7    18   137     0.138
+ 8    22    69     0.138
+ 9    19   180     0.139
+10    29   124     0.140</code></pre>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.134 with mtry = 85 and min_n = 4.</li>
+<li>After cross validation, we get the best RMSE of 0.135 with mtry = 84 and min_n = 2.</li>
 <li>This is no improvement in RMSE compared to <code>glmnet</code> and <code>randomForest</code> cross validation takes much longer to execute than <code>glmnet</code>.</li>
 </ul>
 <p>Here a plot of the <code>randomForest</code> hyperparameter grid along with the best hyperparameter combination:</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png" width="672" /></p>
+<pre class="r"><code>eda_plot_scatter(param_grid_rf, &quot;min_n&quot;, &quot;mtry&quot;, alpha = 1, add_lm = F) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;) +
+  ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&quot;mtry: {mtry}, min_n:{min_n}&quot;)), family = &quot;Roboto Condensed&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png" alt="" width="672" /></p>
 </div>
 </div>
 <div id="xgboost" class="section level3">
@@ -651,6 +642,7 @@ Computational engine: randomForest </code></pre>
 <li><code>tree_depth</code>: The maximum depth or the number of splits of the tree.</li>
 <li><code>learn_rate</code>: The rate at which the boosting algorithm adapts from one iteration to another.</li>
 </ul>
+<pre class="r"><code>model_spec_xgboost</code></pre>
 <pre><code>Boosted Tree Model Specification (regression)
 
 Main Arguments:
@@ -664,24 +656,25 @@ Engine-Specific Arguments:
 
 Computational engine: xgboost </code></pre>
 <p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
-<pre><code># A tibble: 10 x 4
+<pre class="r"><code>cv_results_xgboost %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1    13          3  0.0309        0.124
- 2    40          4  0.0350        0.126
- 3     6          8  0.0469        0.126
- 4    34         15  0.0172        0.127
- 5    28         10  0.0336        0.128
- 6    20         14  0.00348       0.389
- 7    22          7  0.000953      4.46 
- 8     3          2  0.000528      6.81 
- 9    10         12  0.000401      7.73 
-10    34          3  0.0000802    10.6  </code></pre>
+ 1    12          5  0.0689        0.130
+ 2    36         10  0.0308        0.131
+ 3    26         13  0.0217        0.133
+ 4    18         10  0.0150        0.133
+ 5     4         13  0.0128        0.141
+ 6    24          1  0.0101        0.143
+ 7    33          5  0.000872      0.226
+ 8     4          1  0.000303      0.353
+ 9    11          5  0.0000379     0.387
+10    37         14  0.0000164     0.394</code></pre>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.124 with min_n = 13, tree_depth = 3 and learn_rate = 0.0309.</li>
-<li>Gives the best RMSE compared to <code>glmnet</code> and <code>randomForest</code>.</li>
+<li>After cross validation, we get the best RMSE of 0.13 with min_n = 12, tree_depth = 5 and learn_rate = 0.0689.</li>
+<li>It improves on <code>randomForest</code>, but its RMSE is slightly higher than that of <code>glmnet</code> (0.128).</li>
 <li>However, <code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>randomForest</code></li>
 </ul>
 <!-- Here a 3D plot of the `xgboost` hyperparameter grid: -->
@@ -703,7 +696,36 @@ Computational engine: xgboost </code></pre>
 <div id="finalizing-models" class="section level2">
 <h2>Finalizing Models</h2>
 <p>For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png" width="768" /></p>
+<pre class="r"><code># Get predicted estimates
+get_predicted &lt;- function(model_final, dfNew) {
+
+  # Predict on testing set
+  vEstimates &lt;- model_final %&gt;%
+    predict(new_data = dfNew) %&gt;%
+    pull(.pred)
+  
+  return(vEstimates)
+}
+
+dfResults_train &lt;- dfTrain %&gt;% 
+  mutate(actual = log(SalePrice)) %&gt;% 
+  select(Id, actual) %&gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTrain_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTrain_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTrain_Proc))</code></pre>
+<pre class="r"><code>dfPlot &lt;- dfResults_train %&gt;% 
+  gather(model, predicted, -actual, -Id) %&gt;% 
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&gt;% filter(predicted &gt; 13, actual &gt; 11.5, actual &lt; 12.5), 
+                           aes(x = actual, y = predicted, label = Id), family = &quot;Roboto Condensed&quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &quot;metro&quot;, name = &quot;model&quot;) +
+  labs(title = &quot;Scatterplot of actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png" alt="" width="768" /></p>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
@@ -715,30 +737,70 @@ Computational engine: xgboost </code></pre>
 </div>
 <div id="performance-on-test-data" class="section level2">
 <h2>Performance on Test Data</h2>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png" width="768" /></p>
-<pre><code># A tibble: 3 x 3
+<pre class="r"><code>dfResults_test &lt;- dfTest %&gt;% 
+  mutate(actual = log(SalePrice)) %&gt;% 
+  select(Id, actual) %&gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTest_Proc),
+         randomForest = get_predicted(model_final = model_final_rf, dfTest_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTest_Proc))</code></pre>
+<pre class="r"><code>dfPlot &lt;- dfResults_test %&gt;% 
+  gather(model, predicted, -actual, -Id) %&gt;% 
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;)))
+
+ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
+  geom_point(alpha = 0.3, size = 2) +
+  geom_abline(lty = 2) +
+  facet_wrap(~model) +
+  ggrepel::geom_text_repel(data = dfPlot %&gt;% filter(predicted &gt; 13.5 | actual &lt; 10), 
+                           aes(x = actual, y = predicted, label = Id), family = &quot;Roboto Condensed&quot;, show.legend = FALSE) +
+  scale_color_quant(palette = &quot;metro&quot;, name = &quot;model&quot;) +
+  labs(title = &quot;Scatterplot of actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png" alt="" width="768" /></p>
+<pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
+  bind_rows() %&gt;%
+  mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&gt;%
+  select(-.estimator, -.metric) %&gt;%
+  rename(test_rmse = .estimate) %&gt;%
+  select(model, everything())
+
+dfRMSE</code></pre>
+<pre><code># A tibble: 3 × 3
   model        test_rmse cv_rmse
   &lt;chr&gt;            &lt;dbl&gt;   &lt;dbl&gt;
-1 glmnet           0.129   0.127
-2 randomForest     0.139   0.134
-3 xgboost          0.128   0.124</code></pre>
+1 glmnet           0.130   0.128
+2 randomForest     0.138   0.135
+3 xgboost          0.135   0.130</code></pre>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.</li>
 <li>Records with Ids <strong>1537</strong> and <strong>2217</strong> are outliers, as none of the models are able to predict close to actual values.</li>
-<li>Looking at the test RMSE, we could finalize <code>xgboost</code> as the model that generalizes very well on this dataset.</li>
+<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.135.</li>
+<li>However, <code>glmnet</code> is sensitive to outliers, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. Since the difference in test RMSE is small, we could finalize <code>xgboost</code>, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.</li>
 </ul>
+<pre class="r"><code>model_final &lt;- model_final_xgboost</code></pre>
 </div>
 </div>
 <div id="feature-importance" class="section level2">
 <h2>Feature Importance</h2>
 <p>Even though <code>xgboost</code> is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.</p>
 <p>Let’s take a look at the top 10 most important features of our finalized <code>xgboost</code> model:</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png" width="1152" /></p>
+<pre class="r"><code>library(vip)
+
+p1 &lt;- vip(model_final, aesthetics = list(fill = &quot;#00AED8&quot;)) +
+  labs(title = &quot;xgboost model Feature Importance in Training&quot;) +
+  theme_quant()
+
+vFeaturesImp &lt;- vip::vi(model_final) %&gt;% top_n(10, Importance) %&gt;% pull(Variable)
+
+p2 &lt;- eda_plot_correlation_matrix(dfTrain %&gt;% select(SalePrice, one_of(vFeaturesImp)), 
+                            outlineVar = &quot;SalePrice&quot;, plotTitle = &quot;Correlations with SalePrice&quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png" alt="" width="1152" /></p>
 <ul>
-<li>Correlations of numerical features are plotted side-by-side. All features have a correlation of 0.5 or more with <code>SalePrice</code>.</li>
-<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, etc.</li>
+<li>Correlations of numerical features are plotted side-by-side. Most of them have a correlation of 0.5 or more (in absolute terms) with <code>SalePrice</code>. <code>LotArea</code> is the exception with a weaker correlation, though it still ranks among the top 10 features.</li>
+<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, central air conditioning, age of property, kitchen quality, etc.</li>
 <li>This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.</li>
 </ul>
 </div>
@@ -747,7 +809,34 @@ Computational engine: xgboost </code></pre>
 <p>Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is <code>PropertyAge</code>.</p>
 <p>So, how would the predicted <code>SalePrice</code> differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?</p>
 <p>We could pick a couple of properties at random, change <code>PropertyAge</code> and see its impact on <code>SalePrice</code>.</p>
-<p><img src="/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png" width="672" /></p>
+<pre class="r"><code>getSampleProperty &lt;- function(randomSeed) {
+  
+  set.seed(randomSeed)
+  dfSample &lt;- dfTest %&gt;% 
+    filter(PropertyAge &gt;= 30) %&gt;% 
+    sample_n(1)
+  
+  dfSample &lt;- tibble(PropertyAge = 1:dfSample$PropertyAge[1]) %&gt;% expand_grid(dfSample %&gt;% select(-PropertyAge))
+}
+
+dfSample &lt;- getSampleProperty(1000) %&gt;% bind_rows(getSampleProperty(2000))
+
+# preprocess the sample data and generated predicted values from the final model
+get_preprocessing_recipe(dfSample) %&gt;% 
+  bake(dfSample) %&gt;% 
+  get_predicted(model_final, .) %&gt;% 
+  as_tibble() %&gt;% 
+  bind_cols(dfSample) %&gt;% 
+  mutate(predicted = exp(value)) %&gt;% 
+  group_by(Id) %&gt;% 
+  ggplot(aes(x = PropertyAge, y = predicted)) +
+  geom_point(color = &quot;#00AED8&quot;) +
+  geom_line() +
+  facet_wrap(~Id, scales = &quot;free&quot;) +
+  scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
+  labs(y = &quot;Predicted Sale Price&quot;,
+       title = &quot;New Property Premium&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png" alt="" width="672" /></p>
 <p>We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.</p>
 </div>
 
@@ -940,7 +1029,41 @@ Computational engine: xgboost </code></pre>
 
     
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
 
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
 
 
 
