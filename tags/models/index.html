@@ -473,9 +473,8 @@ Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the 
     <h2><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></h2>
     <div class="article-style">
       
-      In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price. To some extent, clarity also appeared to provide some predictive ability.
+      In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price, and that log(price) was close to linear in log(carat). For diamonds of similar weight, clarity and color also appeared to provide some predictive ability.
 In this post, we will build linear models and see how well they predict the price of diamonds.
-Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict price:
 
       
     </div>

@@ -1298,6 +1298,16 @@ dfClean &lt;- dfClean %&gt;%
 <div id="skewed-categorical-features" class="section level4">
 <h4>Skewed Categorical Features</h4>
 <p>Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is <code>Utilities</code> which has only 2 categories - <strong>AllPub</strong> and <strong>NoSeWa</strong> in the dataset. Only 1 record has <strong>NoSeWa</strong> and the rest of the records have <strong>AllPub</strong>. Therefore, features like these do not have any predictive value.</p>
+<p>Let’s see the share of the most common category in every categorical feature, along with the number of rare categories that have fewer than 10 records:</p>
+<pre class="r"><code>p_dominance &lt;- eda_plot_category_dominance(dfClean, threshold = 0.95, minCount = 10)
+p_dominance</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_category_dominance-1.png" alt="" width="960" /></p>
+<pre class="r"><code>dfDominance &lt;- p_dominance$data
+dfRare &lt;- dfDominance %&gt;% filter(share &lt; 0.95, n_rare &gt; 0) %&gt;% arrange(desc(n_rare), desc(share))</code></pre>
+<ul>
+<li>11 features lie above the 95% line, so we will drop them. These are plotted below.</li>
+<li>Among the remaining features, 13 have at least one rare category with fewer than 10 records, such as Functional, GarageQual, Electrical. When these features are dummy encoded for modelling, the rare categories become predictors that are based on only a handful of records, so their effects cannot be estimated reliably. Combining rare categories into a single category is one way to deal with them.</li>
+</ul>
 <pre class="r"><code>vFeatures_skewed &lt;- dfClean %&gt;% 
   select_if(is.factor) %&gt;% 
   gather(feature, value) %&gt;% 
@@ -1424,9 +1434,35 @@ print(&quot;Dimensions of the finalized dataset&quot;)</code></pre>
 </ul>
 </div>
 </div>
+<div id="transforming-skewed-features" class="section level3">
+<h3>Transforming Skewed Features</h3>
+<p>Many numerical features are right skewed. Would transforming them make their relationship with <code>log(SalePrice)</code> more linear? Let’s compare common transforms of the strongest area feature <code>TotalSF</code>, the heavily skewed <code>LotArea</code>, and <code>GarageArea</code>, which is barely skewed. Each panel is labelled with the R-squared of a linear fit of <code>log(SalePrice)</code> on the transformed feature:</p>
+<pre class="r"><code>lTransformPlots &lt;- map(c(&quot;TotalSF&quot;, &quot;LotArea&quot;, &quot;GarageArea&quot;), ~ eda_plot_transforms(dfClean, .x, &quot;SalePrice&quot;))
+cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_transforms-1.png" alt="" width="960" /></p>
+<pre class="r"><code># R-squared of each transform, in the order of the panels
+vR2 &lt;- map(lTransformPlots, ~ .x$data %&gt;%
+             distinct(transform, r_squared) %&gt;%
+             pull(r_squared) %&gt;%
+             set_names(c(&quot;identity&quot;, &quot;log&quot;, &quot;sqrt&quot;, &quot;cuberoot&quot;))) %&gt;%
+  set_names(c(&quot;TotalSF&quot;, &quot;LotArea&quot;, &quot;GarageArea&quot;))
+r2 &lt;- function(feature, transform) round(vR2[[feature]][transform], 3)
+
+# skewness of each feature
+vSkew &lt;- map_dbl(c(TotalSF = &quot;TotalSF&quot;, LotArea = &quot;LotArea&quot;, GarageArea = &quot;GarageArea&quot;), ~ timeDate::skewness(dfClean[[.x]], na.rm = T))</code></pre>
+<div id="whats-notable-7" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>A log transform roughly doubles the R-squared of <code>LotArea</code> (skewness 12.8), from 0.066 to 0.138. Its few very large lots dominate a linear fit until they are compressed.</li>
+<li><code>TotalSF</code> (skewness 1.5) gains modestly from any of the transforms, from 0.61 to 0.647 with a log.</li>
+<li><code>GarageArea</code> (skewness 0.2) is barely skewed, and transforming it makes the fit worse: the R-squared drops from 0.426 to 0.389 with a log, which also has to drop the properties without a garage.</li>
+<li>So only the heavily skewed features should be log transformed before fitting linear models, rather than all of them.</li>
+</ul>
+</div>
+</div>
 <div id="correlations-with-saleprice" class="section level3">
 <h3>Correlations with SalePrice</h3>
-<p>We isolate the features that have an absolute correlation of 0.1 or more with <code>SalePrice</code>.</p>
+<p>We isolate the features that have an absolute correlation of 0.1 or more with <code>SalePrice</code>. Pearson correlation measures how linear a relationship is, so it is sensitive to outliers and skewed features. Spearman correlation is computed on ranks, so it measures how monotonic a relationship is. Comparing the two shows which relationships are strong but not linear:</p>
 <pre class="r"><code>library(corrr)
 
 dfCor &lt;- dfClean[vFeaturesNum] %&gt;% 
@@ -1442,21 +1478,22 @@ dfCor &lt;- dfClean[vFeaturesNum] %&gt;%
 
 vFeaturesCor &lt;- dfCor %&gt;% pull(feature) %&gt;% as.character()
 
-
-# plotCorrelationMatrix(dfClean %&gt;% select(c(&quot;SalePrice&quot;,one_of(vFeaturesCor))), outlineVar = &quot;SalePrice&quot;, &quot;Correlation with SalePrice&quot;) # doesn&#39;t fit page
-ggplot(dfCor, aes(x = feature, y = corr)) +
-  geom_col(aes(fill = corr &lt; 0), color = &quot;white&quot;) +
-  geom_label(aes(label = corr, hjust = if_else(corr &gt; 0, -0.1, 1.1)), size = 2.8) +
-  scale_fill_quant(palette = &quot;heatmap&quot;, guide = &quot;none&quot;) +
-  expand_limits(y = c(-0.8, 0.8)) +
-  labs(x = &quot;&quot;, y = &quot;&quot;, title = &quot;Highest Correlations with SalePrice&quot;) +
-  coord_flip()</code></pre>
-<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png" alt="" width="672" /></p>
-<div id="whats-notable-7" class="section level4">
+p1 &lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &quot;SalePrice&quot;, method = &quot;pearson&quot;, minAbsCor = 0.1)
+p2 &lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &quot;SalePrice&quot;, method = &quot;spearman&quot;, minAbsCor = 0.1)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png" alt="" width="960" /></p>
+<pre class="r"><code># compare Pearson and Spearman correlations
+dfCorMethods &lt;- tibble(feature = setdiff(vFeaturesNum, &quot;SalePrice&quot;)) %&gt;%
+  mutate(pearson = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &quot;pairwise.complete.obs&quot;)),
+         spearman = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &quot;pairwise.complete.obs&quot;, method = &quot;spearman&quot;)))
+cor_of &lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMethods$feature == feature_name], 2)</code></pre>
+<div id="whats-notable-8" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>The top 5 features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. Quite reasonably, a buyer would look at these features to evaluate a property and its <code>SalePrice</code>.</li>
 <li>It is somewhat counterintuitive that <code>PropertyAge</code> shows a strong negative correlation with <code>SalePrice</code>. It means properties that were more recently built, sell for higher prices than older properties.</li>
+<li>Most features have similar Pearson and Spearman correlations, but <code>LotArea</code> stands out: its correlation rises from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from linear, which the log transform above partly addresses.</li>
+<li>The opposite happens with <code>BsmtFinSF1</code>, whose correlation falls from 0.43 to 0.33. About 32% of the properties have no finished basement and share the same rank, while the largest finished basements carry extra weight in the Pearson correlation. So its linear relationship with <code>SalePrice</code> looks stronger than its rank relationship.</li>
 </ul>
 </div>
 </div>
@@ -1464,7 +1501,7 @@ ggplot(dfCor, aes(x = feature, y = corr)) +
 <h3>Numerical-Categorical (Ordinal)</h3>
 <pre class="r"><code>cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&quot;SalePrice&quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png" alt="" width="960" /></p>
-<div id="whats-notable-8" class="section level4">
+<div id="whats-notable-9" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>We can spot clear trends in <code>SalePrice</code> v/s the order of the categories in almost all of these features.</li>
@@ -1477,7 +1514,7 @@ ggplot(dfCor, aes(x = feature, y = corr)) +
 <p>Let’s examine <code>SalePrice</code> with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median <code>SalePrice</code>. The <code>SalePrice</code> axis is truncated to exclude outliers.</p>
 <pre class="r"><code>cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&quot;SalePrice&quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png" alt="" width="960" /></p>
-<div id="whats-notable-9" class="section level4">
+<div id="whats-notable-10" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li><code>GarageType</code>: Builtin and attached garages are more preferred than detached or other types of garages.</li>
@@ -1502,6 +1539,34 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)</code></pre>
 <li>Properties with built-in or attached garages tend to have higher <code>SalePrice</code> for the same <code>GarageArea</code>.</li>
 <li>Therefore, <code>NeighborhoodType</code> and <code>GarageType</code> explain some variance in <code>SalePrice</code>.</li>
 </ul>
+</div>
+<div id="categorical-numerical-numerical" class="section level3">
+<h3>Categorical-Numerical-Numerical</h3>
+<p>The scatterplots overlap a lot, so let’s check these observations by comparing categories among properties of similar size. <code>TotalSF</code> and <code>GarageArea</code> are split into four quartile bins, and <code>SalePrice</code> is plotted by category within each bin. We also check whether central air conditioning (<code>CentralAir</code>) matters for properties of the same size:</p>
+<pre class="r"><code>p1 &lt;- eda_plot_box_by_bins(dfClean, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &lt;- eda_plot_box_by_bins(dfClean, &quot;GarageType&quot;, &quot;SalePrice&quot;, &quot;GarageArea&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p3 &lt;- eda_plot_box_by_bins(dfClean, &quot;CentralAir&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_num_bins-1.png" alt="" width="960" /></p>
+<pre class="r"><code># median SalePrice by category within each bin
+get_bin_medians &lt;- function(p) {
+  p$data %&gt;%
+    group_by(bin = as.integer(bin), category = as.character(x)) %&gt;%
+    summarise(median = median(y), .groups = &quot;drop&quot;)
+}
+lBinMedians &lt;- map(list(neighborhood = p1, garage = p2, air = p3), get_bin_medians)
+bin_median &lt;- function(plotName, binNum, categoryName) {
+  dfMedians &lt;- lBinMedians[[plotName]]
+  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp; dfMedians$category == categoryName], accuracy = 1)
+}</code></pre>
+<div id="whats-notable-11" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median <code>SalePrice</code> ranges from $161,000 in Type5 neighborhoods to $327,000 in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.</li>
+<li>For the same <code>GarageArea</code>, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median <code>SalePrice</code> is $299,018 for built-in, $253,000 for attached and $140,000 for detached garages. Some garage types have very few properties, so their boxplots are less reliable.</li>
+<li>Properties with central air conditioning sell for more at every size. Among the largest properties, the median <code>SalePrice</code> is $262,140 with central air and $136,000 without it.</li>
+</ul>
+</div>
 </div>
 <div id="categorical-categorical-numerical" class="section level3">
 <h3>Categorical-Categorical-Numerical</h3>

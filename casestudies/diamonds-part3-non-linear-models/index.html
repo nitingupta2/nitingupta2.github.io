@@ -629,7 +629,7 @@ c(“541.63”, “0.98”, “282.38”)
 </tr>
 </tbody>
 </table>
-<p>Looking at the r-squared terms, it is remarkable how well all the models have been able to infer the complex relationship between <code>price</code> and <code>carat</code>. To fit linear models, we needed to transform <code>price</code> to logarithmic terms and take the cube root of <code>carat</code>. The neural network as well as the decision tree based models do this all on their own. The root mean squared error is in $ terms so it is easier to interpret. Considering the mean and standard deviation of <code>price</code> in the dataset is about $4000, the root mean squared errors of the models are very low.</p>
+<p>Looking at the r-squared terms, it is remarkable how well all the models have been able to infer the complex relationship between <code>price</code> and <code>carat</code>. To fit linear models, we needed to transform both <code>price</code> and <code>carat</code> to logarithmic terms. The neural network as well as the decision tree based models do this all on their own. The root mean squared error is in $ terms so it is easier to interpret. Considering the mean and standard deviation of <code>price</code> in the dataset is about $4000, the root mean squared errors of the models are very low. With <code>carat</code>, <code>clarity</code> and <code>color</code>, they range from $572 to $645, compared with about $816 for the best linear model with the same predictors.</p>
 <p>Exploratory data analysis adds value here, as the models with <code>carat</code>, <code>clarity</code> and <code>color</code> give excellent results. Including <code>cut</code> in the models does not provide any significant benefits and results in overfitted models.</p>
 <p>Even the base models with all predictors: <strong>price ~ .</strong> (where some of them are confounders), do a very good job of explaning the variance. Decision tree and neural network models are unaffected by multi-collinearity. We can use local model interpretations to determine the most important predictors from these models.</p>
 </div>
@@ -678,27 +678,26 @@ plot_explanations(explanation_keras) +
 <div id="actual-vs-predicted" class="section level2">
 <h2>Actual v/s Predicted</h2>
 <p>Finally, here are the scatterplots of actual v/s predicted <code>price</code> from the best model on the testing set, using the 3 regression methods:</p>
-<pre class="r"><code>p1 &lt;- dfResults %&gt;% 
-  ggplot(aes(x = actual, y = estimate)) +
-  geom_point(color = &quot;orange&quot;, alpha = 0.3) +
-  geom_abline(lty = 2, color = &quot;gray50&quot;, linewidth = 1) +
-  facet_grid(type ~ .) +
-  scale_x_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
-  scale_y_continuous(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
-  labs(x = &quot;actual price&quot;,
-       y = &quot;predicted price&quot;,
-       title = formulaString_best,
-       subtitle = &quot;(linear scale)&quot;)
+<pre class="r"><code>p1 &lt;- dfResults %&gt;%
+  ungroup() %&gt;%
+  rename(price = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0,
+                               labelsScale = scales::label_dollar(accuracy = 1)) +
+  labs(title = paste(formulaString_best, &quot;(linear scale)&quot;)) +
+  theme(panel.spacing.x = unit(2, &quot;lines&quot;), plot.margin = margin(5, 25, 5, 5))
 
-p2 &lt;- p1 + 
-  scale_x_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
-  scale_y_log10(limits = c(500, 30000), labels = scales::label_dollar(accuracy = 1)) + 
-  labs(subtitle = &quot;(log scale)&quot;, x = &quot;actual price&quot;, y = &quot;predicted price&quot;)
+p2 &lt;- dfResults %&gt;%
+  ungroup() %&gt;%
+  rename(price = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0, xLog = T, yLog = T,
+                               labelsScale = scales::label_dollar(accuracy = 1)) +
+  labs(title = paste(formulaString_best, &quot;(log scale)&quot;)) +
+  theme(panel.spacing.x = unit(2, &quot;lines&quot;), plot.margin = margin(5, 25, 5, 5))
 
-cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png" alt="" width="960" /></p>
 <p>The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar <strong>r-squared</strong> and <strong>rmse</strong> values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.</p>
-<p>As in the case with linear models, the variance in predicted diamond prices increases with <code>price</code>. But unlike linear models, the non-linear models do not produce extreme outliers in predicted prices. So, not only do non-linear methods do a fantastic job in inferring the relationships between <code>price</code> and its predictors, they also predict prices within a reasonable range.</p>
+<p>As in the case with linear models, the variance in predicted diamond prices increases with <code>price</code>. The decision-tree based methods keep their predictions close to the range of prices in the data: their highest predictions are $18,340 (<code>randomForest</code>) and $19,118 (<code>xgboost</code>), while the most expensive diamond in the testing set costs $18,823. A <code>randomForest</code> prediction is an average of prices seen in the training data, so it cannot go beyond them, and <code>xgboost</code> adds up many small corrections, so it can exceed them only slightly. A neural network, like a linear model, can extrapolate further, and the highest price predicted by <code>keras</code> is $26,591. So, not only do non-linear methods do a fantastic job in inferring the relationships between <code>price</code> and its predictors, the decision-tree methods also predict prices within a reasonable range.</p>
 </div>
 <div id="summary" class="section level2">
 <h2>Summary</h2>

@@ -718,20 +718,25 @@ dfResults_train &lt;- dfTrain %&gt;%
   gather(model, predicted, -actual, -Id) %&gt;% 
   mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
 
-ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
-  geom_point(alpha = 0.3, size = 2) +
-  geom_abline(lty = 2) +
-  facet_wrap(~model) +
-  ggrepel::geom_text_repel(data = dfPlot %&gt;% filter(predicted &gt; 13, actual &gt; 11.5, actual &lt; 12.5), 
-                           aes(x = actual, y = predicted, label = Id), family = &quot;Roboto Condensed&quot;, show.legend = FALSE) +
-  scale_color_quant(palette = &quot;metro&quot;, name = &quot;model&quot;) +
-  labs(title = &quot;Scatterplot of actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
-<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png" alt="" width="768" /></p>
+dfPlot %&gt;%
+  rename(`log(SalePrice)` = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png" alt="" width="960" /></p>
+<pre class="r"><code># properties among the 3 largest errors of every model
+vWorst_train &lt;- dfPlot %&gt;% 
+  group_by(model) %&gt;% 
+  slice_max(abs(predicted - actual), n = 3) %&gt;% 
+  ungroup() %&gt;% 
+  count(Id) %&gt;% 
+  filter(n == n_distinct(dfPlot$model)) %&gt;% 
+  pull(Id)</code></pre>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>Both <code>ranger</code> and <code>xgboost</code> models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. <code>ranger</code> fits it most closely, with a training RMSE of 0.051 versus 0.094 for <code>xgboost</code>.</li>
 <li>The <code>glmnet</code> model shows a couple of outliers with Ids <strong>524</strong> and <strong>1299</strong> whose predicted values are far in excess of their actual values. Even properties whose <code>SalePrice</code> is at the lower end, show a wide dispersion in prediced values.</li>
+<li>The plots label the three largest errors of each model. The property with Id <strong>633</strong> is among them for all three models, so it is worth checking for errors in its data.</li>
 <li>But the true performance can only be measured on unseen testing data.</li>
 </ul>
 </div>
@@ -748,15 +753,11 @@ ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
   gather(model, predicted, -actual, -Id) %&gt;% 
   mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
 
-ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
-  geom_point(alpha = 0.3, size = 2) +
-  geom_abline(lty = 2) +
-  facet_wrap(~model) +
-  ggrepel::geom_text_repel(data = dfPlot %&gt;% filter(predicted &gt; 13.5 | actual &lt; 10), 
-                           aes(x = actual, y = predicted, label = Id), family = &quot;Roboto Condensed&quot;, show.legend = FALSE) +
-  scale_color_quant(palette = &quot;metro&quot;, name = &quot;model&quot;) +
-  labs(title = &quot;Scatterplot of actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
-<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png" alt="" width="768" /></p>
+dfPlot %&gt;%
+  rename(`log(SalePrice)` = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png" alt="" width="960" /></p>
 <pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
   bind_rows() %&gt;%
   mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&gt;%

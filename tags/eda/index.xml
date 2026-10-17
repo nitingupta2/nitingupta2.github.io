@@ -791,6 +791,16 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
 &lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
+&lt;p&gt;Let’s see the share of the most common category in every categorical feature, along with the number of rare categories that have fewer than 10 records:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p_dominance &amp;lt;- eda_plot_category_dominance(dfClean, threshold = 0.95, minCount = 10)
+p_dominance&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_category_dominance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDominance &amp;lt;- p_dominance$data
+dfRare &amp;lt;- dfDominance %&amp;gt;% filter(share &amp;lt; 0.95, n_rare &amp;gt; 0) %&amp;gt;% arrange(desc(n_rare), desc(share))&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;11 features lie above the 95% line, so we will drop them. These are plotted below.&lt;/li&gt;
+&lt;li&gt;Among the remaining features, 13 have at least one rare category with fewer than 10 records, such as Functional, GarageQual, Electrical. When these features are dummy encoded for modelling, the rare categories become predictors that are based on only a handful of records, so their effects cannot be estimated reliably. Combining rare categories into a single category is one way to deal with them.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeatures_skewed &amp;lt;- dfClean %&amp;gt;% 
   select_if(is.factor) %&amp;gt;% 
   gather(feature, value) %&amp;gt;% 
@@ -917,9 +927,35 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;div id=&#34;transforming-skewed-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Transforming Skewed Features&lt;/h3&gt;
+&lt;p&gt;Many numerical features are right skewed. Would transforming them make their relationship with &lt;code&gt;log(SalePrice)&lt;/code&gt; more linear? Let’s compare common transforms of the strongest area feature &lt;code&gt;TotalSF&lt;/code&gt;, the heavily skewed &lt;code&gt;LotArea&lt;/code&gt;, and &lt;code&gt;GarageArea&lt;/code&gt;, which is barely skewed. Each panel is labelled with the R-squared of a linear fit of &lt;code&gt;log(SalePrice)&lt;/code&gt; on the transformed feature:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lTransformPlots &amp;lt;- map(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;), ~ eda_plot_transforms(dfClean, .x, &amp;quot;SalePrice&amp;quot;))
+cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# R-squared of each transform, in the order of the panels
+vR2 &amp;lt;- map(lTransformPlots, ~ .x$data %&amp;gt;%
+             distinct(transform, r_squared) %&amp;gt;%
+             pull(r_squared) %&amp;gt;%
+             set_names(c(&amp;quot;identity&amp;quot;, &amp;quot;log&amp;quot;, &amp;quot;sqrt&amp;quot;, &amp;quot;cuberoot&amp;quot;))) %&amp;gt;%
+  set_names(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;))
+r2 &amp;lt;- function(feature, transform) round(vR2[[feature]][transform], 3)
+
+# skewness of each feature
+vSkew &amp;lt;- map_dbl(c(TotalSF = &amp;quot;TotalSF&amp;quot;, LotArea = &amp;quot;LotArea&amp;quot;, GarageArea = &amp;quot;GarageArea&amp;quot;), ~ timeDate::skewness(dfClean[[.x]], na.rm = T))&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;A log transform roughly doubles the R-squared of &lt;code&gt;LotArea&lt;/code&gt; (skewness 12.8), from 0.066 to 0.138. Its few very large lots dominate a linear fit until they are compressed.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TotalSF&lt;/code&gt; (skewness 1.5) gains modestly from any of the transforms, from 0.61 to 0.647 with a log.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; (skewness 0.2) is barely skewed, and transforming it makes the fit worse: the R-squared drops from 0.426 to 0.389 with a log, which also has to drop the properties without a garage.&lt;/li&gt;
+&lt;li&gt;So only the heavily skewed features should be log transformed before fitting linear models, rather than all of them.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
 &lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
-&lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;. Pearson correlation measures how linear a relationship is, so it is sensitive to outliers and skewed features. Spearman correlation is computed on ranks, so it measures how monotonic a relationship is. Comparing the two shows which relationships are strong but not linear:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
 
 dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
@@ -935,21 +971,22 @@ dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;%
 
 vFeaturesCor &amp;lt;- dfCor %&amp;gt;% pull(feature) %&amp;gt;% as.character()
 
-
-# plotCorrelationMatrix(dfClean %&amp;gt;% select(c(&amp;quot;SalePrice&amp;quot;,one_of(vFeaturesCor))), outlineVar = &amp;quot;SalePrice&amp;quot;, &amp;quot;Correlation with SalePrice&amp;quot;) # doesn&amp;#39;t fit page
-ggplot(dfCor, aes(x = feature, y = corr)) +
-  geom_col(aes(fill = corr &amp;lt; 0), color = &amp;quot;white&amp;quot;) +
-  geom_label(aes(label = corr, hjust = if_else(corr &amp;gt; 0, -0.1, 1.1)), size = 2.8) +
-  scale_fill_quant(palette = &amp;quot;heatmap&amp;quot;, guide = &amp;quot;none&amp;quot;) +
-  expand_limits(y = c(-0.8, 0.8)) +
-  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;&amp;quot;, title = &amp;quot;Highest Correlations with SalePrice&amp;quot;) +
-  coord_flip()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+p1 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;pearson&amp;quot;, minAbsCor = 0.1)
+p2 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;spearman&amp;quot;, minAbsCor = 0.1)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# compare Pearson and Spearman correlations
+dfCorMethods &amp;lt;- tibble(feature = setdiff(vFeaturesNum, &amp;quot;SalePrice&amp;quot;)) %&amp;gt;%
+  mutate(pearson = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;)),
+         spearman = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;, method = &amp;quot;spearman&amp;quot;)))
+cor_of &amp;lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMethods$feature == feature_name], 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;The top 5 features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. Quite reasonably, a buyer would look at these features to evaluate a property and its &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;It is somewhat counterintuitive that &lt;code&gt;PropertyAge&lt;/code&gt; shows a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. It means properties that were more recently built, sell for higher prices than older properties.&lt;/li&gt;
+&lt;li&gt;Most features have similar Pearson and Spearman correlations, but &lt;code&gt;LotArea&lt;/code&gt; stands out: its correlation rises from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from linear, which the log transform above partly addresses.&lt;/li&gt;
+&lt;li&gt;The opposite happens with &lt;code&gt;BsmtFinSF1&lt;/code&gt;, whose correlation falls from 0.43 to 0.33. About 32% of the properties have no finished basement and share the same rank, while the largest finished basements carry extra weight in the Pearson correlation. So its linear relationship with &lt;code&gt;SalePrice&lt;/code&gt; looks stronger than its rank relationship.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -957,7 +994,7 @@ ggplot(dfCor, aes(x = feature, y = corr)) +
 &lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;We can spot clear trends in &lt;code&gt;SalePrice&lt;/code&gt; v/s the order of the categories in almost all of these features.&lt;/li&gt;
@@ -970,7 +1007,7 @@ ggplot(dfCor, aes(x = feature, y = corr)) +
 &lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
+&lt;div id=&#34;whats-notable-10&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: Builtin and attached garages are more preferred than detached or other types of garages.&lt;/li&gt;
@@ -995,6 +1032,34 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Properties with built-in or attached garages tend to have higher &lt;code&gt;SalePrice&lt;/code&gt; for the same &lt;code&gt;GarageArea&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Therefore, &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some variance in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical-Numerical-Numerical&lt;/h3&gt;
+&lt;p&gt;The scatterplots overlap a lot, so let’s check these observations by comparing categories among properties of similar size. &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; are split into four quartile bins, and &lt;code&gt;SalePrice&lt;/code&gt; is plotted by category within each bin. We also check whether central air conditioning (&lt;code&gt;CentralAir&lt;/code&gt;) matters for properties of the same size:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageArea&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p3 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;CentralAir&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_num_bins-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# median SalePrice by category within each bin
+get_bin_medians &amp;lt;- function(p) {
+  p$data %&amp;gt;%
+    group_by(bin = as.integer(bin), category = as.character(x)) %&amp;gt;%
+    summarise(median = median(y), .groups = &amp;quot;drop&amp;quot;)
+}
+lBinMedians &amp;lt;- map(list(neighborhood = p1, garage = p2, air = p3), get_bin_medians)
+bin_median &amp;lt;- function(plotName, binNum, categoryName) {
+  dfMedians &amp;lt;- lBinMedians[[plotName]]
+  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp;amp; dfMedians$category == categoryName], accuracy = 1)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-11&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; ranges from $161,000 in Type5 neighborhoods to $327,000 in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is $299,018 for built-in, $253,000 for attached and $140,000 for detached garages. Some garage types have very few properties, so their boxplots are less reliable.&lt;/li&gt;
+&lt;li&gt;Properties with central air conditioning sell for more at every size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is $262,140 with central air and $136,000 without it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
@@ -1253,8 +1318,17 @@ predictive modelling.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
-increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions. Log transforming &lt;code&gt;carat&lt;/code&gt; wouldn’t help because &lt;code&gt;carat&lt;/code&gt; does not have a wide range.
-We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
+increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions.&lt;/p&gt;
+&lt;p&gt;Which transform of &lt;code&gt;carat&lt;/code&gt; would make its relationship with &lt;code&gt;log(price)&lt;/code&gt; linear? Let’s compare a few common transforms. Each panel is labelled with the R-squared of a linear fit of &lt;code&gt;log(price)&lt;/code&gt; on the transformed &lt;code&gt;carat&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p_transforms &amp;lt;- eda_plot_transforms(dfInput, &amp;quot;carat&amp;quot;, &amp;quot;price&amp;quot;)
+p_transforms&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/carat_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# R-squared of each transform, in the order of the panels
+vR2_carat &amp;lt;- p_transforms$data %&amp;gt;%
+  distinct(transform, r_squared) %&amp;gt;%
+  pull(r_squared) %&amp;gt;%
+  set_names(c(&amp;quot;identity&amp;quot;, &amp;quot;log&amp;quot;, &amp;quot;sqrt&amp;quot;, &amp;quot;cuberoot&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;log(carat)&lt;/code&gt; makes the relationship the most linear, with an R-squared of 0.926, followed by the cube root (0.919) and the square root (0.91). Untransformed &lt;code&gt;carat&lt;/code&gt; has the lowest R-squared of 0.862. So &lt;code&gt;log(price)&lt;/code&gt; is close to linear in &lt;code&gt;log(carat)&lt;/code&gt;: a given percentage increase in weight raises the price by a roughly constant percentage. We will make use of this when we do Feature Engineering.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
@@ -1262,7 +1336,7 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &amp;quot;price&amp;quot;, yLimits = c(300, 8000), 
                                                                yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd.&lt;/p&gt;
+&lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd. We will find out why in the multivariate analysis.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;In terms of &lt;code&gt;color&lt;/code&gt;, the median &lt;code&gt;price&lt;/code&gt; decreases from &lt;em&gt;J&lt;/em&gt; (worst) to &lt;em&gt;G&lt;/em&gt; (mid-grade), then increases and finally decreases for &lt;em&gt;D&lt;/em&gt; (best).&lt;/li&gt;
@@ -1279,6 +1353,34 @@ We will find ways to deal with this when we do Feature Engineering.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Categorical-Numerical-Numerical&lt;/h4&gt;
+&lt;p&gt;The overlap in the scatterplots makes it hard to see how much each grade matters. Let’s compare the grades among diamonds of similar weight, by splitting &lt;code&gt;carat&lt;/code&gt; into four quartile bins and plotting &lt;code&gt;price&lt;/code&gt; by grade within each bin:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lBinPlots &amp;lt;- map(c(&amp;quot;clarity&amp;quot;, &amp;quot;color&amp;quot;, &amp;quot;cut&amp;quot;), ~ eda_plot_box_by_bins(dfInput, .x, &amp;quot;price&amp;quot;, &amp;quot;carat&amp;quot;, yLog = T,
+                                                                       yLabelsScale = scales::label_dollar(accuracy = 1)))
+cowplot::plot_grid(plotlist = lBinPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_num_bins-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# median price by grade within each carat bin
+get_bin_medians &amp;lt;- function(p) {
+  p$data %&amp;gt;%
+    group_by(bin = as.integer(bin), grade = as.character(x)) %&amp;gt;%
+    summarise(median = median(y), .groups = &amp;quot;drop&amp;quot;)
+}
+dfBinMedians_clarity &amp;lt;- get_bin_medians(lBinPlots[[1]])
+bin_median &amp;lt;- function(dfMedians, binNum, gradeName) {
+  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp;amp; dfMedians$grade == gradeName], accuracy = 1)
+}
+
+# median carat by clarity
+dfCarat_clarity &amp;lt;- dfInput %&amp;gt;% group_by(clarity) %&amp;gt;% summarise(carat = median(carat, na.rm = T))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This resolves the paradox in the boxplots of the bivariate analysis:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Within each &lt;code&gt;carat&lt;/code&gt; bin, the median &lt;code&gt;price&lt;/code&gt; generally rises with &lt;code&gt;clarity&lt;/code&gt;, most clearly among the heaviest diamonds, where it goes from $3,985 for &lt;em&gt;I1&lt;/em&gt; to $10,332 for &lt;em&gt;IF&lt;/em&gt;. The top grades (&lt;em&gt;VVS2&lt;/em&gt; to &lt;em&gt;IF&lt;/em&gt;) are priced close to each other and not always in order.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; also rises with &lt;code&gt;color&lt;/code&gt; from &lt;em&gt;J&lt;/em&gt; to &lt;em&gt;G&lt;/em&gt; within each bin, but the top grades (&lt;em&gt;G&lt;/em&gt; to &lt;em&gt;D&lt;/em&gt;) are priced about the same. Among the heaviest diamonds, &lt;em&gt;D&lt;/em&gt; and &lt;em&gt;E&lt;/em&gt; are even slightly cheaper than &lt;em&gt;G&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; shows no consistent trend, even among diamonds of similar weight.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The reason better grades look cheaper overall is that they tend to be smaller. The median weight of an &lt;em&gt;I1&lt;/em&gt; diamond is 1.07 carat, but only 0.35 carat for an &lt;em&gt;IF&lt;/em&gt; diamond. &lt;code&gt;carat&lt;/code&gt; confounds the relationship between &lt;code&gt;price&lt;/code&gt; and the grades, so it has to be accounted for when we judge the effect of &lt;code&gt;clarity&lt;/code&gt; or &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfFeatures &amp;lt;- expand_grid(feat1 = c(&amp;quot;depth&amp;quot;,&amp;quot;table&amp;quot;), feat2 = c(&amp;quot;color&amp;quot;,&amp;quot;clarity&amp;quot;)) %&amp;gt;% arrange(desc(feat2))
 cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
@@ -1300,12 +1402,12 @@ cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2,
 &lt;p&gt;To summarize, here’s what we found interesting in this dataset, after doing an exploratory data analysis:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt; is heavily right-skewed, and when log tranformed, has a bimodal distribution which implies there is demand in 2 different price ranges.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight, and &lt;code&gt;log(price)&lt;/code&gt; is close to linear in &lt;code&gt;log(carat)&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;cut&lt;/code&gt; is imbalanced with about 40% of the diamonds rated &lt;em&gt;Ideal&lt;/em&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;color&lt;/code&gt; is imbalanced with about 5% of the diamonds rated &lt;em&gt;J&lt;/em&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;clarity&lt;/code&gt; is imbalanced at the extremes, with only 1.5% of the diamonds rated &lt;em&gt;I1&lt;/em&gt; and 3.3% of the diamonds rated &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;price&lt;/code&gt; is strongly correlated with &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; dimensions of the diamonds. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; appear to explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/li&gt;
+&lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight. Their apparent negative effect on &lt;code&gt;price&lt;/code&gt; overall is because diamonds of better grades tend to be smaller. &lt;code&gt;cut&lt;/code&gt; has little effect.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &amp;quot;diamondClean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
