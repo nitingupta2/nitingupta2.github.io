@@ -522,7 +522,7 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 <pre><code>Linear Regression Model Specification (regression)
 
 Computational engine: lm </code></pre>
-<pre class="r"><code>cv_results_lm %&gt;% select(-dummy)</code></pre>
+<pre class="r"><code>cv_results_lm</code></pre>
 <pre><code># A tibble: 1 × 1
   mean_rmse
       &lt;dbl&gt;
@@ -531,7 +531,7 @@ Computational engine: lm </code></pre>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1467</strong>.</li>
+<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1468</strong>.</li>
 <li>This is the simplest and fastest model with no hyperparameters to tune.</li>
 </ul>
 </div>
@@ -565,13 +565,13 @@ Computational engine: glmnet </code></pre>
  7 1.15e- 4  0.798      0.138
  8 7.37e- 7  0.0221     0.138
  9 1.23e-10  0.333      0.138
-10 3.37e-10  0.0573     0.138</code></pre>
+10 2.07e- 9  0.950      0.138</code></pre>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>After hyperparameter tuning with cross validation, the best <code>glmnet</code> model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.</li>
-<li>It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1467.</li>
-<li><code>glmnet</code> cross validation takes under a minute to execute.</li>
+<li>It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.</li>
+<li><code>glmnet</code> cross validation is fast, taking about 13 seconds to execute.</li>
 <li>But the presence of outliers can significantly affect its performance.</li>
 </ul>
 <p>Here a plot of the <code>glmnet</code> hyperparameter grid along with the best hyperparameter combination:</p>
@@ -587,9 +587,9 @@ Computational engine: glmnet </code></pre>
 <div id="non-linear-models" class="section level2">
 <h2>Non-linear Models</h2>
 <p>Next, we will train a couple of tree-based algorithms, which are not very sensitive to outliers and skewed data.</p>
-<div id="randomforest" class="section level3">
-<h3><em>randomForest</em></h3>
-<p>In each ensemble, we have 1000 trees and do a grid search of the following hyperparameters:</p>
+<div id="ranger-random-forest" class="section level3">
+<h3><em>ranger</em> (Random Forest)</h3>
+<p>We use the <code>ranger</code> implementation of random forests, which gives the same results as the <code>randomForest</code> package but runs about 3 times faster. In each ensemble, we have 500 trees (random forest error levels off well before that on a dataset of this size) and do a grid search of the following hyperparameters:</p>
 <ul>
 <li><code>mtry</code>: The number of predictors to randomly sample at each split.</li>
 <li><code>min_n</code>: The minimum number of data points in a node required to further split the node.</li>
@@ -599,35 +599,35 @@ Computational engine: glmnet </code></pre>
 
 Main Arguments:
   mtry = tune()
-  trees = 1000
+  trees = 500
   min_n = tune()
 
 Engine-Specific Arguments:
-  objective = reg:squarederror
+  num.threads = 1
 
-Computational engine: randomForest </code></pre>
+Computational engine: ranger </code></pre>
 <p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_rf %&gt;% head(10)</code></pre>
 <pre><code># A tibble: 10 × 3
    min_n  mtry mean_rmse
    &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
- 1     2    84     0.135
- 2     5   135     0.135
- 3    12   111     0.136
- 4    15    56     0.136
- 5     9    36     0.137
- 6     8   200     0.138
- 7    18   137     0.138
+ 1     2    84     0.134
+ 2     5   134     0.136
+ 3     9    36     0.136
+ 4    12   110     0.136
+ 5    15    55     0.136
+ 6    18   136     0.137
+ 7     8   199     0.138
  8    22    69     0.138
- 9    19   180     0.139
-10    29   124     0.140</code></pre>
+ 9    19   179     0.139
+10    29   123     0.139</code></pre>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.135 with mtry = 84 and min_n = 2.</li>
-<li>This is no improvement in RMSE compared to <code>glmnet</code> and <code>randomForest</code> cross validation takes much longer to execute than <code>glmnet</code>.</li>
+<li>After cross validation, we get the best RMSE of 0.134 with mtry = 84 and min_n = 2.</li>
+<li>This is no improvement in RMSE compared to <code>glmnet</code>, and <code>ranger</code> cross validation takes much longer to execute (about 371 seconds, versus 13 seconds for <code>glmnet</code>).</li>
 </ul>
-<p>Here a plot of the <code>randomForest</code> hyperparameter grid along with the best hyperparameter combination:</p>
+<p>Here a plot of the <code>ranger</code> hyperparameter grid along with the best hyperparameter combination:</p>
 <pre class="r"><code>eda_plot_scatter(param_grid_rf, &quot;min_n&quot;, &quot;mtry&quot;, alpha = 1, add_lm = F) +
   geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;) +
   ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&quot;mtry: {mtry}, min_n:{min_n}&quot;)), family = &quot;Roboto Condensed&quot;)</code></pre>
@@ -653,6 +653,7 @@ Main Arguments:
 
 Engine-Specific Arguments:
   objective = reg:squarederror
+  nthread = 1
 
 Computational engine: xgboost </code></pre>
 <p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
@@ -660,22 +661,22 @@ Computational engine: xgboost </code></pre>
 <pre><code># A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1    12          5  0.0689        0.130
- 2    36         10  0.0308        0.131
- 3    26         13  0.0217        0.133
- 4    18         10  0.0150        0.133
- 5     4         13  0.0128        0.141
- 6    24          1  0.0101        0.143
- 7    33          5  0.000872      0.226
- 8     4          1  0.000303      0.353
- 9    11          5  0.0000379     0.387
-10    37         14  0.0000164     0.394</code></pre>
+ 1    33          2    0.0289      0.126
+ 2    23          4    0.0254      0.127
+ 3     3          2    0.0171      0.127
+ 4    24          1    0.190       0.128
+ 5    38          9    0.0270      0.130
+ 6     4          1    0.0872      0.131
+ 7    23          9    0.0405      0.131
+ 8    32          9    0.00605     0.131
+ 9    19         11    0.00482     0.131
+10    11          5    0.0549      0.131</code></pre>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.13 with min_n = 12, tree_depth = 5 and learn_rate = 0.0689.</li>
-<li>It improves on <code>randomForest</code>, but its RMSE is slightly higher than that of <code>glmnet</code> (0.128).</li>
-<li>However, <code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>randomForest</code></li>
+<li>After cross validation, we get the best RMSE of 0.126 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
+<li>This is the best cross validated RMSE of all the models, slightly ahead of <code>glmnet</code> (0.128) and <code>ranger</code> (0.134).</li>
+<li><code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>ranger</code> (about 168 seconds).</li>
 </ul>
 <!-- Here a 3D plot of the `xgboost` hyperparameter grid: -->
 <!-- <center> -->
@@ -711,11 +712,11 @@ dfResults_train &lt;- dfTrain %&gt;%
   mutate(actual = log(SalePrice)) %&gt;% 
   select(Id, actual) %&gt;% 
   mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTrain_Proc),
-         randomForest = get_predicted(model_final = model_final_rf, dfTrain_Proc),
+         ranger = get_predicted(model_final = model_final_rf, dfTrain_Proc),
          xgboost = get_predicted(model_final = model_final_xgboost, dfTrain_Proc))</code></pre>
 <pre class="r"><code>dfPlot &lt;- dfResults_train %&gt;% 
   gather(model, predicted, -actual, -Id) %&gt;% 
-  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;)))
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
 
 ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
   geom_point(alpha = 0.3, size = 2) +
@@ -729,7 +730,7 @@ ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Both <code>randomForest</code> and <code>xgboost</code> models do a fantastic job of predicting log(SalePrice) with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees.</li>
+<li>Both <code>ranger</code> and <code>xgboost</code> models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. <code>ranger</code> fits it most closely, with a training RMSE of 0.051 versus 0.094 for <code>xgboost</code>.</li>
 <li>The <code>glmnet</code> model shows a couple of outliers with Ids <strong>524</strong> and <strong>1299</strong> whose predicted values are far in excess of their actual values. Even properties whose <code>SalePrice</code> is at the lower end, show a wide dispersion in prediced values.</li>
 <li>But the true performance can only be measured on unseen testing data.</li>
 </ul>
@@ -741,11 +742,11 @@ ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
   mutate(actual = log(SalePrice)) %&gt;% 
   select(Id, actual) %&gt;% 
   mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTest_Proc),
-         randomForest = get_predicted(model_final = model_final_rf, dfTest_Proc),
+         ranger = get_predicted(model_final = model_final_rf, dfTest_Proc),
          xgboost = get_predicted(model_final = model_final_xgboost, dfTest_Proc))</code></pre>
 <pre class="r"><code>dfPlot &lt;- dfResults_test %&gt;% 
   gather(model, predicted, -actual, -Id) %&gt;% 
-  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;)))
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
 
 ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
   geom_point(alpha = 0.3, size = 2) +
@@ -756,7 +757,7 @@ ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
   scale_color_quant(palette = &quot;metro&quot;, name = &quot;model&quot;) +
   labs(title = &quot;Scatterplot of actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png" alt="" width="768" /></p>
-<pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;randomForest&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
+<pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
   bind_rows() %&gt;%
   mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&gt;%
   select(-.estimator, -.metric) %&gt;%
@@ -765,18 +766,18 @@ ggplot(dfPlot, aes(x = actual, y = predicted, color = model)) +
 
 dfRMSE</code></pre>
 <pre><code># A tibble: 3 × 3
-  model        test_rmse cv_rmse
-  &lt;chr&gt;            &lt;dbl&gt;   &lt;dbl&gt;
-1 glmnet           0.130   0.128
-2 randomForest     0.138   0.135
-3 xgboost          0.135   0.130</code></pre>
+  model   test_rmse cv_rmse
+  &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;
+1 glmnet      0.130   0.128
+2 ranger      0.138   0.134
+3 xgboost     0.131   0.126</code></pre>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.</li>
 <li>Records with Ids <strong>1537</strong> and <strong>2217</strong> are outliers, as none of the models are able to predict close to actual values.</li>
-<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.135.</li>
-<li>However, <code>glmnet</code> is sensitive to outliers, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. Since the difference in test RMSE is small, we could finalize <code>xgboost</code>, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.</li>
+<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.131.</li>
+<li>However, <code>glmnet</code> is sensitive to outliers, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. Since <code>xgboost</code> had the best cross validated RMSE and the difference in test RMSE is small, we could finalize <code>xgboost</code>, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.</li>
 </ul>
 <pre class="r"><code>model_final &lt;- model_final_xgboost</code></pre>
 </div>
@@ -787,11 +788,11 @@ dfRMSE</code></pre>
 <p>Let’s take a look at the top 10 most important features of our finalized <code>xgboost</code> model:</p>
 <pre class="r"><code>library(vip)
 
-p1 &lt;- vip(model_final, aesthetics = list(fill = &quot;#00AED8&quot;)) +
+p1 &lt;- vip(extract_fit_parsnip(model_final), aesthetics = list(fill = &quot;#00AED8&quot;)) +
   labs(title = &quot;xgboost model Feature Importance in Training&quot;) +
   theme_quant()
 
-vFeaturesImp &lt;- vip::vi(model_final) %&gt;% top_n(10, Importance) %&gt;% pull(Variable)
+vFeaturesImp &lt;- vip::vi(extract_fit_parsnip(model_final)) %&gt;% top_n(10, Importance) %&gt;% pull(Variable)
 
 p2 &lt;- eda_plot_correlation_matrix(dfTrain %&gt;% select(SalePrice, one_of(vFeaturesImp)), 
                             outlineVar = &quot;SalePrice&quot;, plotTitle = &quot;Correlations with SalePrice&quot;)
@@ -799,8 +800,8 @@ p2 &lt;- eda_plot_correlation_matrix(dfTrain %&gt;% select(SalePrice, one_of(vFe
 cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png" alt="" width="1152" /></p>
 <ul>
-<li>Correlations of numerical features are plotted side-by-side. Most of them have a correlation of 0.5 or more (in absolute terms) with <code>SalePrice</code>. <code>LotArea</code> is the exception with a weaker correlation, though it still ranks among the top 10 features.</li>
-<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, central air conditioning, age of property, kitchen quality, etc.</li>
+<li>Correlations of numerical features are plotted side-by-side. All of them have a correlation of 0.5 or more (in absolute terms) with <code>SalePrice</code>.</li>
+<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, fireplace quality, etc.</li>
 <li>This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.</li>
 </ul>
 </div>
@@ -862,7 +863,7 @@ get_preprocessing_recipe(dfSample) %&gt;%
   
   <a class="badge badge-light" href="/tags/glmnet/">glmnet</a>
   
-  <a class="badge badge-light" href="/tags/randomforest/">randomForest</a>
+  <a class="badge badge-light" href="/tags/ranger/">ranger</a>
   
   <a class="badge badge-light" href="/tags/xgboost/">xgboost</a>
   
