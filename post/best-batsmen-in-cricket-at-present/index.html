@@ -576,8 +576,8 @@ Who’re the best batsmen in cricket today? Is there a way to define a set of ob
 <p>Every metric defined here is a ratio instead of an absolute number. So it is useful to evaluate relative ability.</p>
 <p>Among the 42 top batsmen selected before, I calculate percentile scores of these metrics for each batsman grouped by the format of the game. This means we have a score ranging from 0-100 for each metric, where each batsman in the list has been scored relative to the best batsman in each criteria.</p>
 <p>Let’s see the percentile scores for the 6 champion batsmen in our final list.</p>
-<!-- html table generated in R 3.6.3 by xtable 1.8-4 package -->
-<!-- Thu Jun 11 14:56:45 2020 -->
+<!-- html table generated in R 4.6.0 by xtable 1.8-8 package -->
+<!-- Sat Oct 17 19:35:00 2026 -->
 <table border="1">
 <caption align="bottom">
 Percentile Scores
@@ -1136,7 +1136,7 @@ V Kohli
 <p>Here we can see how each champion scored relative to the rest of the elite group. AB de Villiers has the best career batting average and strike rate in ODIs so he gets a score of 100 in SCORING CONSISTENCY &amp; STRIKE RATE. All other batsmen are scored relative to AB in these 2 criteria. With his astounding batting average of 99.94 in Tests, Sir Don Bradman gets a score of 100 in SCORING CONSISTENCY in Tests. And being at number 5 in all time highest batting averages in Tests, Steve Smith gets a high score of 91 in this criteria, relative to Sir Don.</p>
 <p>This is all well and good, but how do we see the forest from trees? It is very difficult to make sense of high dimensional data in a table or in a single bar plot. This is where the visualization technique shown in the <a href="https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/">fivethirtyeight</a> article shines. We build a wagon wheel with segments denoting each metric and within each segment, the data is binned by quartiles.</p>
 <p>Here’s how a wagon wheel would look like for each batsman. Each segment would be filled depending upon the percentile score in each criteria.</p>
-<p><img src="/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png" width="1056" /></p>
+<p><img src="https://www.nitingupta.com/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png" alt="" width="1056" /></p>
 <p>So let’s see how the wagon wheels of our champions look like:</p>
 <p><img src="/img/player_facets_Tests.png" />
 <img src="/img/player_facets_ODIs.png" />

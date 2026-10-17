@@ -4527,8 +4527,8 @@ predictNextWords(&amp;quot;Beware the ides of march&amp;quot;)
 &lt;p&gt;Every metric defined here is a ratio instead of an absolute number. So it is useful to evaluate relative ability.&lt;/p&gt;
 &lt;p&gt;Among the 42 top batsmen selected before, I calculate percentile scores of these metrics for each batsman grouped by the format of the game. This means we have a score ranging from 0-100 for each metric, where each batsman in the list has been scored relative to the best batsman in each criteria.&lt;/p&gt;
 &lt;p&gt;Let’s see the percentile scores for the 6 champion batsmen in our final list.&lt;/p&gt;
-&lt;!-- html table generated in R 3.6.3 by xtable 1.8-4 package --&gt;
-&lt;!-- Thu Jun 11 14:56:45 2020 --&gt;
+&lt;!-- html table generated in R 4.6.0 by xtable 1.8-8 package --&gt;
+&lt;!-- Sat Oct 17 19:35:00 2026 --&gt;
 &lt;table border=&#34;1&#34;&gt;
 &lt;caption align=&#34;bottom&#34;&gt;
 Percentile Scores
@@ -5087,7 +5087,7 @@ V Kohli
 &lt;p&gt;Here we can see how each champion scored relative to the rest of the elite group. AB de Villiers has the best career batting average and strike rate in ODIs so he gets a score of 100 in SCORING CONSISTENCY &amp;amp; STRIKE RATE. All other batsmen are scored relative to AB in these 2 criteria. With his astounding batting average of 99.94 in Tests, Sir Don Bradman gets a score of 100 in SCORING CONSISTENCY in Tests. And being at number 5 in all time highest batting averages in Tests, Steve Smith gets a high score of 91 in this criteria, relative to Sir Don.&lt;/p&gt;
 &lt;p&gt;This is all well and good, but how do we see the forest from trees? It is very difficult to make sense of high dimensional data in a table or in a single bar plot. This is where the visualization technique shown in the &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; article shines. We build a wagon wheel with segments denoting each metric and within each segment, the data is binned by quartiles.&lt;/p&gt;
 &lt;p&gt;Here’s how a wagon wheel would look like for each batsman. Each segment would be filled depending upon the percentile score in each criteria.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/best-batsmen-in-cricket-at-present/index_files/figure-html/plotWagonWheel-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;So let’s see how the wagon wheels of our champions look like:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/img/player_facets_Tests.png&#34; /&gt;
 &lt;img src=&#34;https://www.nitingupta.com/img/player_facets_ODIs.png&#34; /&gt;
@@ -5125,7 +5125,7 @@ Format: ODIs
 Format: T20Is
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     1.0     2.0     7.0    13.9    18.5    98.0 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesPlayed-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesPlayed-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The distribution appears to be heavily skewed towards the right. In simple terms, there are a handful of players who go on to play 100+ Tests and 200+ ODIs. A majority of the players have played very few matches. The mean and median are hardly indicative of players who established themselves in their teams.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;distribution-of-innings-to-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
@@ -5135,17 +5135,17 @@ Format: T20Is
 &lt;p&gt;Here are the summary statistics of this ratio. The ratio is greater than 1 in Tests because each player could play upto 2 innings. The peaks in each plot are indicative of batsmen who have batted in the top 3 and have gotten a chance to bat in nearly every innings of every match they played.&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;Ratio of innings to matches of all players in each format
 Format: Tests
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
   0.250   1.429   1.667   1.623   1.923   2.000      19 
 --------------------------------------------------------------------------- 
 Format: ODIs
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
  0.1250  0.5714  0.8421  0.7670  1.0000  1.0000      62 
 --------------------------------------------------------------------------- 
 Format: T20Is
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&amp;#39;s 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
 0.05556 0.50000 0.85714 0.73084 1.00000 1.00000      73 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/inningsToMatches-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/inningsToMatches-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;distinguish-batsmen-from-bowlers&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Distinguish batsmen from bowlers&lt;/h3&gt;
@@ -5156,7 +5156,7 @@ Format: T20Is
 &lt;/ul&gt;
 &lt;p&gt;The first filter eliminates newcomers and players who have had very short-lived careers. The second filter eliminates specialist bowlers from the dataset.&lt;/p&gt;
 &lt;p&gt;Let’s take a look at the distribution of these metrics for these batsmen. These numbers appear more reasonable.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-2.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/matchesByBatsmen-2.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;career-averages-of-batsmen&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Career averages of batsmen&lt;/h3&gt;
@@ -5173,7 +5173,7 @@ Format: ODIs
 Format: T20Is
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    4.10   18.15   21.91   23.27   28.44   53.40 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/careerAverages-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/careerAverages-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;top-batsmen&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Top batsmen&lt;/h3&gt;
@@ -5184,7 +5184,7 @@ Format: T20Is
 &lt;div id=&#34;career-span&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Career Span&lt;/h4&gt;
 &lt;p&gt;The career span of these elite batsmen is plotted in the order in which they debuted in their international career. Career spans of batsmen who are still actively playing in any format are labeled with blue color.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareCareerSpan-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareCareerSpan-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;Summary of career spans in years of top batsmen
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    5.00   11.00   16.00   14.71   18.75   24.00 &lt;/code&gt;&lt;/pre&gt;
@@ -5197,13 +5197,13 @@ Format: T20Is
 &lt;p&gt;Among the many records in Tendulkar’s name, the number of Tests and ODIs played are at the forefront. He played a single T20I, because he, Dravid and other senior members of the then Indian team used to withdraw their names for team selection in T20Is. His records of playing in 200 Tests and 463 ODIs are a testament to his brilliance, his passion for the game and his fitness over the years. Among the active players only AB de Villiers and Hashim Amla are at the halfway mark relatively to Tendulkar’s mark in Tests. But both AB and Amla are already well into their prime years. Younis Khan is on the verge of riding into the sunset. The rest of the pack including Virat Kohli, Kane Williamson, Steve Smith have a looong way to catch up.&lt;/p&gt;
 &lt;p&gt;It could be observed how few matches did the early era greats play relatively. Not only were few teams competing at the time, but also interruptions by world wars.&lt;/p&gt;
 &lt;p&gt;Michael Bevan established himself as an ODI specialist and played only 18 tests. Cheteshwar Pujara appears to have barely made the cutoffs for this list. He is a Tests specialist.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareTopBatsmen-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareTopBatsmen-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;career-runs-scored&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Career runs scored&lt;/h4&gt;
 &lt;p&gt;Once again Tendulkar’s records here are at the top. It is highly unlikely that any other batsman could ever come close in the next 5-10 years.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareRuns-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareRuns-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;career-batting-averages&#34; class=&#34;section level4&#34;&gt;
@@ -5211,14 +5211,14 @@ Format: T20Is
 &lt;p&gt;First and foremost is Sir Don Bradman’s career batting average record of 99.94 in Tests. He is widely regarded to be the greatest batsman of all time. This is one record that’s impossible to beat. The second batsman on this list is Graeme Pollock at 60.97. Steve Smith is the only active batsman who is anywhere close to second, a phenomenal achievement in its own right.&lt;/p&gt;
 &lt;p&gt;Secondly, it becomes clear why each batsman was selected for this list, a batting average of 50 or more in any single format. Though most batsmen have a Tests average above 50, Jonathan Trott, MS Dhoni and Michael Bevan made it by virtue of their superlative averages in the ODIs.&lt;/p&gt;
 &lt;p&gt;Virat Kohli is the only batsman who has averaged above 50 in all the 3 formats.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareAverage-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareAverage-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;hundreds-scored-in-career&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Hundreds scored in career&lt;/h4&gt;
 &lt;p&gt;Once again Tendulkar leads in the standings with 51 hundreds in Tests and 49 hundreds in ODIs. Sir Don’s record Test average of 99.94, Tendulkar’s records of number of matches played, runs scored and hundreds scored in career are some of the records that are going to be next to impossible to beat.&lt;/p&gt;
 &lt;p&gt;Surprisingly none of the batsmen on this list have scored a hundred in T20Is. There are a few other batsmen who have scored hundreds in T20Is but none of them were consistent enough to make it to this list.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareHundreds-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareHundreds-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;highest-scores-in-an-innings&#34; class=&#34;section level4&#34;&gt;
@@ -5226,7 +5226,7 @@ Format: T20Is
 &lt;p&gt;Here we see the great Brian Lara at the top of the Tests table with a highest score of 400 not out. I remember Sir Garfield Sobers’ score of 365 not out was one of the longest standing records in Test cricket until Lara surpassed it. Only Matthew Hayden was able to come any closer to Lara.&lt;/p&gt;
 &lt;p&gt;In ODIs, it was apt that the champion, Sachin Tendulkar was the first one to score a double hundred. A few other batsmen have scored 200+ scores in ODIs since, but none have had the consistency that Tendulkar had.&lt;/p&gt;
 &lt;p&gt;In T20Is, as mentioned above none of these batsman scored a hundred. Though a few have come close. I expect some of the active players to reach this milestone in the near future.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareHighestScores-1.png&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/index_files/figure-html/compareHighestScores-1.png&#34; alt=&#34;&#34; width=&#34;1056&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -7977,7 +7977,7 @@ plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
   labs(title = bquote(log(price) == log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degrees line, although the variance between actual and predicted prices increases at the high end.
-The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs $18,804 and the highest predicted price is $28,130, whereas the cube root model predicts prices as high as $59,082 on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
+The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs $18,804. The highest predicted price is $28,130, whereas the cube root model predicts prices as high as $59,082 on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>

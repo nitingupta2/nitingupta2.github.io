@@ -672,7 +672,7 @@ plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
   labs(title = bquote(log(price) == log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degrees line, although the variance between actual and predicted prices increases at the high end.
-The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs $18,804 and the highest predicted price is $28,130, whereas the cube root model predicts prices as high as $59,082 on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
+The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs $18,804. The highest predicted price is $28,130, whereas the cube root model predicts prices as high as $59,082 on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
