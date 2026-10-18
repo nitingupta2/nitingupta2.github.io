@@ -541,12 +541,12 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &lt;0.0000000000000002</code
 3 mae     standard     740.   </code></pre>
 <p>The model summary shows that this model is overfitted. An overfitted model learns the noise in the data, not only the true patterns, so it does not work well on new data. For example, we know that <code>depth</code> and <code>table</code> have no effect on <code>price</code>, but the model says that they are very important.</p>
 <p>The table above also shows the root mean squared error (RMSE) and other metrics. RMSE is the typical size of a prediction error, in the same units as the price. A lower RMSE means better predictions.</p>
-<p>Let’s plot the actual prices against the predicted prices, to see how well this base model works.</p>
+<p>Let’s plot the predicted prices against the actual prices, to see how well this base model works.</p>
 <pre class="r"><code>augment(model_lm, diamonds) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;.fitted&quot;, nLabel = 0, labelsScale = scales::label_dollar(accuracy = 1)) +
-  labs(title = &quot;Actual v/s predicted price from a base linear model&quot;)</code></pre>
+  eda_plot_predicted_vs_actual(&quot;price&quot;, &quot;.fitted&quot;, nLabel = 0, labelsScale = scales::label_dollar(accuracy = 1)) +
+  labs(title = &quot;Predicted v/s actual price from a base linear model&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png" alt="" width="768" /></p>
-<p>If the predictions are good, the points are close to the dashed line at 45 degrees, where the predicted price is equal to the actual price. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use <code>log(price)</code> instead of <code>price</code>.</p>
+<p>If the predictions are good, the points are close to the red line at 45 degrees, where the predicted price is equal to the actual price. A point above the line is a diamond whose predicted price is too high, and a point below the line is a diamond whose predicted price is too low. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use <code>log(price)</code> instead of <code>price</code>.</p>
 </div>
 <div id="feature-engineering" class="section level2">
 <h2>Feature Engineering</h2>
@@ -773,10 +773,10 @@ vCooks &lt;- cooks.distance(fit_lm[[1]])</code></pre>
 <li><strong>Residuals vs Leverage:</strong> No diamond has a high leverage. The largest Cook’s distance is only 0.0067. A point needs a Cook’s distance of about 0.5 or more to pull the model strongly, so the plot does not even reach the dashed contours that mark 0.5 and 1. No single diamond controls the model.</li>
 </ul>
 <p>If <code>clarity</code> and <code>color</code> do not change, a 1% increase in <code>carat</code> increases the predicted <code>price</code> by about <code>1.88</code>%.</p>
-<p>Here is a scatter plot of the actual prices against the prices that our final model predicts for the testing set:</p>
+<p>Here is a scatter plot of the prices that our final model predicts for the testing set, against the actual prices:</p>
 <pre class="r"><code>fit_lm[[2]] %&gt;%
   rename(price = actual) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, nLabel = 0, xLog = T, yLog = T,
+  eda_plot_predicted_vs_actual(&quot;price&quot;, &quot;estimate&quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = bquote(log(price) == log(carat) + clarity + color))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png" alt="" width="672" /></p>

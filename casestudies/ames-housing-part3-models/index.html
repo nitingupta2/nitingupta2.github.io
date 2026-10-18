@@ -806,8 +806,8 @@ dfResults_train &lt;- dfTrain %&gt;%
 
 dfPlot %&gt;%
   rename(`log(SalePrice)` = actual) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
-  labs(title = &quot;Actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
+  eda_plot_predicted_vs_actual(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Predicted v/s actual log(SalePrice) on training set&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_train-1.png" alt="" width="960" /></p>
 <pre class="r"><code># properties among the 3 largest errors of more than one model
 dfWorst_train &lt;- dfPlot %&gt;%
@@ -829,7 +829,7 @@ worst_train_sentence &lt;- if (nrow(dfWorst_train) == 0) {
 <h4>What’s notable?</h4>
 <ul>
 <li><code>ranger</code> and <code>xgboost</code> fit the training data closely: their predictions are near the 45-degree line, where the predicted value is equal to the actual value. <code>ranger</code> fits the training data most closely, with a training RMSE of 0.050, against 0.096 for <code>xgboost</code>.</li>
-<li>The <code>glmnet</code> model has two outliers, Ids <strong>524</strong> and <strong>1299</strong>. Their predicted prices are much higher than their actual prices. Also, for the cheaper properties, the predicted values are very spread out.</li>
+<li>The <code>glmnet</code> model has two outliers, Ids <strong>524</strong> and <strong>1299</strong>. Their predicted prices are much higher than their actual prices, so their points are far above the line. Also, for the cheaper properties, the predicted values are very spread out.</li>
 <li>The plots label the three largest errors of each model. The properties with Ids <strong>31</strong> and <strong>1299</strong> are each among them for 2 of the 3 models, so we should check their data for errors.</li>
 <li>But a good fit on the training data does not prove that a model is good. We can only measure its true performance on data that it has not seen: the testing set.</li>
 </ul>
@@ -849,8 +849,8 @@ worst_train_sentence &lt;- if (nrow(dfWorst_train) == 0) {
 
 dfPlot %&gt;%
   rename(`log(SalePrice)` = actual) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
-  labs(title = &quot;Actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
+  eda_plot_predicted_vs_actual(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Predicted v/s actual log(SalePrice) on testing set&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_test-1.png" alt="" width="960" /></p>
 <pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
   bind_rows() %&gt;%

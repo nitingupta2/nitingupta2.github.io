@@ -345,8 +345,8 @@ dfResults_train &amp;lt;- dfTrain %&amp;gt;%
 
 dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
-  labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+  eda_plot_predicted_vs_actual(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
+  labs(title = &amp;quot;Predicted v/s actual log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# properties among the 3 largest errors of more than one model
 dfWorst_train &amp;lt;- dfPlot %&amp;gt;%
@@ -368,7 +368,7 @@ worst_train_sentence &amp;lt;- if (nrow(dfWorst_train) == 0) {
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ranger&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; fit the training data closely: their predictions are near the 45-degree line, where the predicted value is equal to the actual value. &lt;code&gt;ranger&lt;/code&gt; fits the training data most closely, with a training RMSE of 0.050, against 0.096 for &lt;code&gt;xgboost&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;The &lt;code&gt;glmnet&lt;/code&gt; model has two outliers, Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt;. Their predicted prices are much higher than their actual prices. Also, for the cheaper properties, the predicted values are very spread out.&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;glmnet&lt;/code&gt; model has two outliers, Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt;. Their predicted prices are much higher than their actual prices, so their points are far above the line. Also, for the cheaper properties, the predicted values are very spread out.&lt;/li&gt;
 &lt;li&gt;The plots label the three largest errors of each model. The properties with Ids &lt;strong&gt;31&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; are each among them for 2 of the 3 models, so we should check their data for errors.&lt;/li&gt;
 &lt;li&gt;But a good fit on the training data does not prove that a model is good. We can only measure its true performance on data that it has not seen: the testing set.&lt;/li&gt;
 &lt;/ul&gt;
@@ -388,8 +388,8 @@ worst_train_sentence &amp;lt;- if (nrow(dfWorst_train) == 0) {
 
 dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
-  labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+  eda_plot_predicted_vs_actual(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
+  labs(title = &amp;quot;Predicted v/s actual log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRMSE &amp;lt;- map(list(&amp;quot;glmnet&amp;quot;,&amp;quot;ranger&amp;quot;,&amp;quot;xgboost&amp;quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&amp;gt;% mutate(model = .x)) %&amp;gt;%
   bind_rows() %&amp;gt;%
@@ -883,7 +883,7 @@ dfModels_xgb &amp;lt;- dfModels %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;q
 best_model_results_xgb &amp;lt;- best_model_results
 dfResults_xgb &amp;lt;- best_model_results_xgb$dfResults %&amp;gt;% mutate(type = &amp;quot;xgboost&amp;quot;)
 
-# combine the actual v/s predicted results from the best model using the 3 methods
+# combine the predicted v/s actual results from the best model using the 3 methods
 dfResults &amp;lt;- map_df(list(dfResults_keras, dfResults_rf, dfResults_xgb), bind_rows) %&amp;gt;% 
   select(type, everything()) %&amp;gt;% 
   mutate_if(is.numeric, ~ round(.x, digits = 2)) %&amp;gt;% 
@@ -1201,13 +1201,13 @@ plot_explanations(explanation_keras) +
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;We know that &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; have a very strong correlation with &lt;code&gt;carat&lt;/code&gt;, so they repeat the same information. That is why it is good practice to remove such repeated features before we train a model. For &lt;code&gt;keras&lt;/code&gt;, the model with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; has the best metrics. For the decision tree models, the model with all the features is a little more accurate, but it needs many more features.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;actual-vs-predicted&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Actual v/s Predicted&lt;/h2&gt;
-&lt;p&gt;Finally, here are the scatter plots of the actual prices against the predicted prices, for the best model of each type on the testing set:&lt;/p&gt;
+&lt;div id=&#34;predicted-vs-actual&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Predicted v/s Actual&lt;/h2&gt;
+&lt;p&gt;Finally, here are the scatter plots of the predicted prices against the actual prices, for the best model of each type on the testing set:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dfResults %&amp;gt;%
   ungroup() %&amp;gt;%
   rename(price = actual) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, feature_model = &amp;quot;type&amp;quot;, nLabel = 0,
+  eda_plot_predicted_vs_actual(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, feature_model = &amp;quot;type&amp;quot;, nLabel = 0,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = paste(formulaString_best, &amp;quot;(linear scale)&amp;quot;)) +
   theme(panel.spacing.x = unit(2, &amp;quot;lines&amp;quot;), plot.margin = margin(5, 25, 5, 5))
@@ -1215,7 +1215,7 @@ plot_explanations(explanation_keras) +
 p2 &amp;lt;- dfResults %&amp;gt;%
   ungroup() %&amp;gt;%
   rename(price = actual) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, feature_model = &amp;quot;type&amp;quot;, nLabel = 0, xLog = T, yLog = T,
+  eda_plot_predicted_vs_actual(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, feature_model = &amp;quot;type&amp;quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = paste(formulaString_best, &amp;quot;(log scale)&amp;quot;)) +
   theme(panel.spacing.x = unit(2, &amp;quot;lines&amp;quot;), plot.margin = margin(5, 25, 5, 5))
@@ -1308,12 +1308,12 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
 3 mae     standard     740.   &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The model summary shows that this model is overfitted. An overfitted model learns the noise in the data, not only the true patterns, so it does not work well on new data. For example, we know that &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; have no effect on &lt;code&gt;price&lt;/code&gt;, but the model says that they are very important.&lt;/p&gt;
 &lt;p&gt;The table above also shows the root mean squared error (RMSE) and other metrics. RMSE is the typical size of a prediction error, in the same units as the price. A lower RMSE means better predictions.&lt;/p&gt;
-&lt;p&gt;Let’s plot the actual prices against the predicted prices, to see how well this base model works.&lt;/p&gt;
+&lt;p&gt;Let’s plot the predicted prices against the actual prices, to see how well this base model works.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;augment(model_lm, diamonds) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;price&amp;quot;, &amp;quot;.fitted&amp;quot;, nLabel = 0, labelsScale = scales::label_dollar(accuracy = 1)) +
-  labs(title = &amp;quot;Actual v/s predicted price from a base linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+  eda_plot_predicted_vs_actual(&amp;quot;price&amp;quot;, &amp;quot;.fitted&amp;quot;, nLabel = 0, labelsScale = scales::label_dollar(accuracy = 1)) +
+  labs(title = &amp;quot;Predicted v/s actual price from a base linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;If the predictions are good, the points are close to the dashed line at 45 degrees, where the predicted price is equal to the actual price. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use &lt;code&gt;log(price)&lt;/code&gt; instead of &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;If the predictions are good, the points are close to the red line at 45 degrees, where the predicted price is equal to the actual price. A point above the line is a diamond whose predicted price is too high, and a point below the line is a diamond whose predicted price is too low. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use &lt;code&gt;log(price)&lt;/code&gt; instead of &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;feature-engineering&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Feature Engineering&lt;/h2&gt;
@@ -1540,10 +1540,10 @@ vCooks &amp;lt;- cooks.distance(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;strong&gt;Residuals vs Leverage:&lt;/strong&gt; No diamond has a high leverage. The largest Cook’s distance is only 0.0067. A point needs a Cook’s distance of about 0.5 or more to pull the model strongly, so the plot does not even reach the dashed contours that mark 0.5 and 1. No single diamond controls the model.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;If &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; do not change, a 1% increase in &lt;code&gt;carat&lt;/code&gt; increases the predicted &lt;code&gt;price&lt;/code&gt; by about &lt;code&gt;1.88&lt;/code&gt;%.&lt;/p&gt;
-&lt;p&gt;Here is a scatter plot of the actual prices against the prices that our final model predicts for the testing set:&lt;/p&gt;
+&lt;p&gt;Here is a scatter plot of the prices that our final model predicts for the testing set, against the actual prices:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_lm[[2]] %&amp;gt;%
   rename(price = actual) %&amp;gt;%
-  eda_plot_actual_vs_predicted(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, nLabel = 0, xLog = T, yLog = T,
+  eda_plot_predicted_vs_actual(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = bquote(log(price) == log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;

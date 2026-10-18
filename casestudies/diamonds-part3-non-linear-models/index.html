@@ -530,7 +530,7 @@ dfModels_xgb &lt;- dfModels %&gt;% mutate(type = &quot;xgboost&quot;)
 best_model_results_xgb &lt;- best_model_results
 dfResults_xgb &lt;- best_model_results_xgb$dfResults %&gt;% mutate(type = &quot;xgboost&quot;)
 
-# combine the actual v/s predicted results from the best model using the 3 methods
+# combine the predicted v/s actual results from the best model using the 3 methods
 dfResults &lt;- map_df(list(dfResults_keras, dfResults_rf, dfResults_xgb), bind_rows) %&gt;% 
   select(type, everything()) %&gt;% 
   mutate_if(is.numeric, ~ round(.x, digits = 2)) %&gt;% 
@@ -848,13 +848,13 @@ plot_explanations(explanation_keras) +
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png" alt="" width="672" /></p>
 <p>We know that <code>x</code> and <code>y</code> have a very strong correlation with <code>carat</code>, so they repeat the same information. That is why it is good practice to remove such repeated features before we train a model. For <code>keras</code>, the model with <code>carat</code>, <code>clarity</code> and <code>color</code> has the best metrics. For the decision tree models, the model with all the features is a little more accurate, but it needs many more features.</p>
 </div>
-<div id="actual-vs-predicted" class="section level2">
-<h2>Actual v/s Predicted</h2>
-<p>Finally, here are the scatter plots of the actual prices against the predicted prices, for the best model of each type on the testing set:</p>
+<div id="predicted-vs-actual" class="section level2">
+<h2>Predicted v/s Actual</h2>
+<p>Finally, here are the scatter plots of the predicted prices against the actual prices, for the best model of each type on the testing set:</p>
 <pre class="r"><code>p1 &lt;- dfResults %&gt;%
   ungroup() %&gt;%
   rename(price = actual) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0,
+  eda_plot_predicted_vs_actual(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = paste(formulaString_best, &quot;(linear scale)&quot;)) +
   theme(panel.spacing.x = unit(2, &quot;lines&quot;), plot.margin = margin(5, 25, 5, 5))
@@ -862,7 +862,7 @@ plot_explanations(explanation_keras) +
 p2 &lt;- dfResults %&gt;%
   ungroup() %&gt;%
   rename(price = actual) %&gt;%
-  eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0, xLog = T, yLog = T,
+  eda_plot_predicted_vs_actual(&quot;price&quot;, &quot;estimate&quot;, feature_model = &quot;type&quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = paste(formulaString_best, &quot;(log scale)&quot;)) +
   theme(panel.spacing.x = unit(2, &quot;lines&quot;), plot.margin = margin(5, 25, 5, 5))
