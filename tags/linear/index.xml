@@ -908,7 +908,7 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
 &lt;p&gt;As a first estimate, we can treat a diamond as a box with the dimensions &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. Then its &lt;code&gt;volume&lt;/code&gt; is x * y * z.
 These 3 dimensions have a strong correlation with each other. So we can calculate one average dimension as the cube root of &lt;code&gt;volume&lt;/code&gt;. This average dimension keeps a straight-line relationship with &lt;code&gt;log(price)&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can also calculate an average dimension with high school chemistry. Mass, volume and density are related by this equation:&lt;/p&gt;
-&lt;p&gt;$ density = mass/volume $&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[density = \frac{mass}{volume}\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;1 carat is 0.2 grams. If we divide the mass by the density of diamond (3.51 grams per cubic centimeter), we get the volume. The cube root of the volume gives an average dimension.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfInput &amp;lt;- diamonds %&amp;gt;%
   mutate(row = row_number(),
