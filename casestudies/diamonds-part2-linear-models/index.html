@@ -28,8 +28,13 @@
   
     
   
-  <meta name="description" content="In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price.
-In this post, we build linear models and find out how well they predict the price of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data.">
+  <meta name="description" content="
+Other posts in this series:
+
+Diamonds - Part 1 - In the rough - An Exploratory Data Analysis
+Diamonds - Part 3 - A polished gem - Building Non-linear Models
+
+In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price.">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">
@@ -127,8 +132,13 @@ In this post, we build linear models and find out how well they predict the pric
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">
   <meta property="og:title" content="Diamonds - Part 2 - A cut above - Building Linear Models | Nitin Gupta">
-  <meta property="og:description" content="In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price.
-In this post, we build linear models and find out how well they predict the price of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="og:description" content="
+Other posts in this series:
+
+Diamonds - Part 1 - In the rough - An Exploratory Data Analysis
+Diamonds - Part 3 - A polished gem - Building Non-linear Models
+
+In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -469,6 +479,12 @@ In this post, we build linear models and find out how well they predict the pric
       
 
 
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+</ul>
 <p>In a <a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">previous post</a> in this series, we explored the <code>diamonds</code> dataset. We found that <code>price</code> has a strong correlation with <code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code>, and that <code>log(price)</code> has an almost straight-line relationship with <code>log(carat)</code>. For diamonds of similar weight, <code>clarity</code> and <code>color</code> also seemed to help predict the price.</p>
 <p>In this post, we build linear models and find out how well they predict the <code>price</code> of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data.</p>
 <p>First, let’s build a simple base model that uses all the features, without any changes to them. Its results give us a starting point to compare with:</p>
@@ -531,6 +547,7 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &lt;0.0000000000000002</code
   labs(title = &quot;Actual v/s predicted price from a base linear model&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png" alt="" width="768" /></p>
 <p>If the predictions are good, the points are close to the dashed line at 45 degrees, where the predicted price is equal to the actual price. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use <code>log(price)</code> instead of <code>price</code>.</p>
+</div>
 <div id="feature-engineering" class="section level2">
 <h2>Feature Engineering</h2>
 <p>Feature engineering means that we create new features from the existing features, to make the patterns easier for a model to learn.</p>
@@ -766,6 +783,10 @@ vCooks &lt;- cooks.distance(fit_lm[[1]])</code></pre>
 <p>The points are close to the 45-degree line. But at the high end, the differences between the actual and predicted prices become larger.
 The predictions of the final model are also much less extreme. The most expensive diamond in the testing set costs <code>$18,804</code>. The highest predicted price is <code>$28,130</code>. But the cube root model predicts prices as high as <code>$59,082</code> for the same testing set. Like all linear models, the final model can still predict prices above the highest prices in the data (this is called extrapolation).</p>
 <pre class="r"><code>stopCluster(cl)</code></pre>
+</div>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<p>In <a href="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/">Part 3</a>, we build non-linear models (random forests, gradient boosting and neural networks), and we compare them with our final linear model.</p>
 </div>
 
     </div>

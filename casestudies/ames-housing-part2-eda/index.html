@@ -732,6 +732,17 @@ vSparse &lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &lt; 10))</code></pre>
 </ul>
 </div>
 </div>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<p>This analysis gives us several results to use when we build models:</p>
+<ul>
+<li>The total area, the overall quality, the neighborhood and the number of bathrooms have the strongest relationships with <code>SalePrice</code>.</li>
+<li>Very skewed features, such as <code>LotArea</code>, should be transformed with a log before we fit linear models.</li>
+<li>A few very large properties that sold at low prices, such as 524 and 1299, pull a straight-line fit strongly.</li>
+<li>Many combinations of categories are rare, so a model cannot learn them reliably.</li>
+</ul>
+<p>In <a href="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">Part 3</a>, we use these results to build linear and non-linear models that predict the sale price, and we compare how well they work.</p>
+</div>
 
     </div>
 

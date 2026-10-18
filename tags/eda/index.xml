@@ -273,6 +273,17 @@ vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/co
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;This analysis gives us several results to use when we build models:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The total area, the overall quality, the neighborhood and the number of bathrooms have the strongest relationships with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Very skewed features, such as &lt;code&gt;LotArea&lt;/code&gt;, should be transformed with a log before we fit linear models.&lt;/li&gt;
+&lt;li&gt;A few very large properties that sold at low prices, such as 524 and 1299, pull a straight-line fit strongly.&lt;/li&gt;
+&lt;li&gt;Many combinations of categories are rare, so a model cannot learn them reliably.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Part 3&lt;/a&gt;, we use these results to build linear and non-linear models that predict the sale price, and we compare how well they work.&lt;/p&gt;
+&lt;/div&gt;
 </description>
     </item>
     
@@ -284,7 +295,14 @@ vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/co
       <description>
 
 
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/&#34;&gt;Diamonds - Part 2 - A cut above - Building Linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/&#34;&gt;Diamonds - Part 3 - A polished gem - Building Non-linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;In this case study, we explore the &lt;code&gt;diamonds&lt;/code&gt; dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).&lt;/p&gt;
+&lt;/div&gt;
 &lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Description&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.&lt;/p&gt;
@@ -604,6 +622,10 @@ cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2,
 &lt;li&gt;For diamonds of the same weight, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; explain some of the differences in &lt;code&gt;price&lt;/code&gt;. Overall, better grades seem to lower the price only because diamonds with better grades are usually smaller. &lt;code&gt;cut&lt;/code&gt; has little effect.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &amp;quot;diamondClean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/&#34;&gt;Part 2&lt;/a&gt;, we use these results to build linear models that predict the price of a diamond. We start with all the features, then we use &lt;code&gt;log(price)&lt;/code&gt;, &lt;code&gt;log(carat)&lt;/code&gt;, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>

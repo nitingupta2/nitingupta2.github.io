@@ -28,10 +28,13 @@
   
     
   
-  <meta name="description" content="In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).
+  <meta name="description" content="
+Other posts in this series:
 
-Data Description
-The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.">
+Diamonds - Part 2 - A cut above - Building Linear Models
+Diamonds - Part 3 - A polished gem - Building Non-linear Models
+
+In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">
@@ -129,10 +132,13 @@ The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the 
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">
   <meta property="og:title" content="Diamonds - Part 1 - In the rough - An Exploratory Data Analysis | Nitin Gupta">
-  <meta property="og:description" content="In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).
+  <meta property="og:description" content="
+Other posts in this series:
 
-Data Description
-The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+Diamonds - Part 2 - A cut above - Building Linear Models
+Diamonds - Part 3 - A polished gem - Building Non-linear Models
+
+In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves)."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -473,7 +479,14 @@ The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the 
       
 
 
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+</ul>
 <p>In this case study, we explore the <code>diamonds</code> dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).</p>
+</div>
 <div id="data-description" class="section level2">
 <h2>Data Description</h2>
 <p>The <code>diamonds</code> dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.</p>
@@ -793,6 +806,10 @@ cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2,
 <li>For diamonds of the same weight, <code>clarity</code> and <code>color</code> explain some of the differences in <code>price</code>. Overall, better grades seem to lower the price only because diamonds with better grades are usually smaller. <code>cut</code> has little effect.</li>
 </ul>
 <pre class="r"><code>save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &quot;diamondClean.Rda&quot;)</code></pre>
+</div>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<p>In <a href="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">Part 2</a>, we use these results to build linear models that predict the price of a diamond. We start with all the features, then we use <code>log(price)</code>, <code>log(carat)</code>, <code>clarity</code> and <code>color</code>.</p>
 </div>
 
     </div>

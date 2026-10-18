@@ -832,6 +832,12 @@ rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
       <description>
 
 
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;Diamonds - Part 1 - In the rough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/&#34;&gt;Diamonds - Part 3 - A polished gem - Building Non-linear Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we explored the &lt;code&gt;diamonds&lt;/code&gt; dataset. We found that &lt;code&gt;price&lt;/code&gt; has a strong correlation with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;, and that &lt;code&gt;log(price)&lt;/code&gt; has an almost straight-line relationship with &lt;code&gt;log(carat)&lt;/code&gt;. For diamonds of similar weight, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; also seemed to help predict the price.&lt;/p&gt;
 &lt;p&gt;In this post, we build linear models and find out how well they predict the &lt;code&gt;price&lt;/code&gt; of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data.&lt;/p&gt;
 &lt;p&gt;First, let’s build a simple base model that uses all the features, without any changes to them. Its results give us a starting point to compare with:&lt;/p&gt;
@@ -894,6 +900,7 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &amp;lt;0.0000000000000002&l
   labs(title = &amp;quot;Actual v/s predicted price from a base linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;If the predictions are good, the points are close to the dashed line at 45 degrees, where the predicted price is equal to the actual price. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use &lt;code&gt;log(price)&lt;/code&gt; instead of &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
 &lt;div id=&#34;feature-engineering&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Feature Engineering&lt;/h2&gt;
 &lt;p&gt;Feature engineering means that we create new features from the existing features, to make the patterns easier for a model to learn.&lt;/p&gt;
@@ -1129,6 +1136,10 @@ vCooks &amp;lt;- cooks.distance(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The points are close to the 45-degree line. But at the high end, the differences between the actual and predicted prices become larger.
 The predictions of the final model are also much less extreme. The most expensive diamond in the testing set costs &lt;code&gt;$18,804&lt;/code&gt;. The highest predicted price is &lt;code&gt;$28,130&lt;/code&gt;. But the cube root model predicts prices as high as &lt;code&gt;$59,082&lt;/code&gt; for the same testing set. Like all linear models, the final model can still predict prices above the highest prices in the data (this is called extrapolation).&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/&#34;&gt;Part 3&lt;/a&gt;, we build non-linear models (random forests, gradient boosting and neural networks), and we compare them with our final linear model.&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
