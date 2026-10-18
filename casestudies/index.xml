@@ -189,7 +189,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;After we choose the hyperparameters with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model has an RMSE of 0.129, with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
 &lt;li&gt;This is better than the ordinary least squares model, which had an RMSE of 0.1336. The regularization makes the coefficients of the less useful features smaller. This helps when there are so many features.&lt;/li&gt;
-&lt;li&gt;Cross validation of &lt;code&gt;glmnet&lt;/code&gt; is fast. It takes about 11 seconds.&lt;/li&gt;
+&lt;li&gt;Cross validation of &lt;code&gt;glmnet&lt;/code&gt; is fast. It takes about 13 seconds.&lt;/li&gt;
 &lt;li&gt;But outliers can strongly affect its results.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here is a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid, with the best combination:&lt;/p&gt;
@@ -243,7 +243,7 @@ Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;After cross validation, the best RMSE is 0.132, with mtry = 51 and min_n = 2.&lt;/li&gt;
-&lt;li&gt;This is not better than &lt;code&gt;glmnet&lt;/code&gt;. Also, cross validation of &lt;code&gt;ranger&lt;/code&gt; takes much longer: about 164 seconds, against 11 seconds for &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;This is not better than &lt;code&gt;glmnet&lt;/code&gt;. Also, cross validation of &lt;code&gt;ranger&lt;/code&gt; takes much longer: about 279 seconds, against 13 seconds for &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here is a plot of the &lt;code&gt;ranger&lt;/code&gt; hyperparameter grid, with the best combination:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
@@ -294,7 +294,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;After cross validation, the best RMSE is 0.125, with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.&lt;/li&gt;
 &lt;li&gt;This is the best cross validated RMSE of all the models. It is a little better than &lt;code&gt;glmnet&lt;/code&gt; (0.129) and &lt;code&gt;ranger&lt;/code&gt; (0.132).&lt;/li&gt;
-&lt;li&gt;Cross validation of &lt;code&gt;xgboost&lt;/code&gt; takes longer than &lt;code&gt;glmnet&lt;/code&gt;, but it is faster than &lt;code&gt;ranger&lt;/code&gt; (about 137 seconds).&lt;/li&gt;
+&lt;li&gt;Cross validation of &lt;code&gt;xgboost&lt;/code&gt; takes longer than &lt;code&gt;glmnet&lt;/code&gt;, but it is faster than &lt;code&gt;ranger&lt;/code&gt; (about 177 seconds).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
 &lt;!-- &lt;center&gt; --&gt;
@@ -466,6 +466,354 @@ bake(preprocessing_recipe, new_data = dfSample) %&amp;gt;%
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div id=&#34;appendix-tuning-code&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Appendix: Tuning Code&lt;/h2&gt;
+&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
+&lt;li&gt;If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To tune the models again without any change, delete &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These are the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Why the tuning code is built the way it is (speed):
+# The dataset is small (1,460 rows x ~150 predictors after encoding), so run time is driven by the
+# number of model fits (5 models x 25 grid points x 5 folds) and by how expensive each fit is, not by data size.
+# The earlier version took ~35 minutes; this version takes ~11 minutes with 6 workers, tuning the same models and
+# hyperparameters (with randomForest replaced by the equivalent ranger engine). The changes:
+#   1. tune_grid() parallelises over every fold x grid-point combination (&amp;quot;everything&amp;quot;), instead of a manual
+#      for-loop over grid points that only ran the 5 folds in parallel and left the remaining cores idle.
+#   2. Random forest uses only the `ranger` engine with 500 trees. The `randomForest` package was tuned in addition
+#      to ranger and gave the same cross-validated RMSE (0.135 vs 0.134). On one fold with mtry = 84, min_n = 2:
+#        randomForest, 1,000 trees: 46.9s, RMSE 0.1305
+#        ranger,       1,000 trees: 15.1s, RMSE 0.1303
+#        ranger,         500 trees:  7.2s, RMSE 0.1293
+#      Random forest error levels off well before 500 trees on data of this size, so 1,000 trees only doubled the cost.
+#   3. xgboost searches a sensible learning-rate range, instead of spending much of the grid on learning rates as
+#      small as 1e-10 that cannot converge in 1,000 rounds (see get_model_param_grid). Early stopping was tried and
+#      rejected; see the note in get_model_spec.
+#   4. The number of parallel workers is capped by available RAM as well as CPU cores (see &amp;quot;Parallel backend&amp;quot;).
+#
+# Unrelated to speed: the earlier version used Id as a predictor. It is now excluded (see get_workflow).
+# It also had 21 predictors that were exact linear combinations of others, which lm reported as a rank-deficient
+# fit. They are now removed (see &amp;quot;Collinear predictors&amp;quot; and get_preprocessing_recipe), leaving a full-rank design.
+# Ordered factors are encoded as integer scores instead of polynomial contrasts (see get_preprocessing_recipe).
+
+# load the clean dataset from Part 1 (ames_data_file is set in the &amp;quot;tuning_cache&amp;quot; chunk)
+load(ames_data_file)
+
+# Collinear predictors
+########################################################################################################################################################
+# With the earlier set of features, 21 of the ~250 predictors were exact linear combinations of others (the design
+# matrix had rank 229 of 250), so lm could not estimate them and warned of a rank-deficient fit. Tree models are not
+# affected by duplicated information, but linear models are: the coefficients of collinear predictors are unstable.
+# These features are dropped because other features already carry their information (see the association matrix
+# in Part 1):
+#   HasGarage, HasFireplace, HasMasVnr: the same as the &amp;quot;None&amp;quot; category of GarageType, FireplaceQu and MasVnrType.
+#   MSSubClass: combines the building type and style, already in BldgType and HouseStyle (bias-corrected Cramer&amp;#39;s V
+#               of 0.89 and 0.83). Its &amp;quot;duplex&amp;quot; category is identical to BldgType&amp;#39;s.
+#   HalfBath:   TotalBath = FullBath + 0.5 * HalfBath + BsmtBath exactly. Dropping HalfBath rather than TotalBath
+#               keeps the total, one of the most important features for the tree models, and loses no information
+#               because HalfBath can be recovered from the other three.
+vFeaturesCollinear &amp;lt;- c(&amp;quot;HasGarage&amp;quot;, &amp;quot;HasFireplace&amp;quot;, &amp;quot;HasMasVnr&amp;quot;, &amp;quot;MSSubClass&amp;quot;, &amp;quot;HalfBath&amp;quot;)
+
+# Categories that no property has (e.g. a Poor exterior quality) are dropped too, so that the scores of ordered factors
+# are consecutive (see get_preprocessing_recipe).
+dfClean &amp;lt;- dfClean %&amp;gt;%
+    select(-all_of(vFeaturesCollinear)) %&amp;gt;%
+    mutate(across(where(is.factor), droplevels))
+
+# Determine skewed features
+vFeaturesSkew &amp;lt;- dfClean %&amp;gt;%
+    select_if(is.numeric) %&amp;gt;%
+    select_if(function(Z) abs(timeDate::skewness(Z, na.rm = T)) &amp;gt; 0.75) %&amp;gt;%
+    colnames() %&amp;gt;%
+    setdiff(c(&amp;quot;Id&amp;quot;,&amp;quot;PropertyAge&amp;quot;))
+
+# Remove Outliers and split clean data
+########################################################################################################################################################
+# dfClean &amp;lt;- dfClean %&amp;gt;% dplyr::filter(!(Id %in% c(524, 1299))) # glmnet cv_rmse improves to 0.117 but test_rmse is 0.135
+dfTrain &amp;lt;- dfClean %&amp;gt;% filter(!(Id %in% vTestIDs))
+dfTest &amp;lt;- dfClean %&amp;gt;% filter(Id %in% vTestIDs)
+
+# Preprocessing Recipe
+########################################################################################################################################################
+# Ordered factors (quality and condition grades, etc.) are encoded as integer scores, one predictor per feature, in
+# the order of their categories. The alternative, step_dummy&amp;#39;s polynomial contrasts, creates one predictor per category
+# but one. Grades that only a handful of properties have can then be missing from a cross validation fold, which makes
+# the highest-order contrasts collinear: with that encoding lm reported a rank-deficient fit in 4 of the 5 folds. Scores
+# assume the grades are equally spaced, which is a reasonable approximation for these grades, and they cut the
+# number of predictors from ~214 to ~151. dfEncodingComparison below compares the two encodings.
+#
+# step_lincomb removes any remaining exact linear combinations among the predictors. These can arise because properties
+# without a basement or garage share the &amp;quot;None&amp;quot; category of every basement or garage feature. An intercept column is
+# added for the check, because such combinations can include a constant, and removed afterwards.
+get_preprocessing_recipe &amp;lt;- function(df, ordinalScores = TRUE) {
+
+    preprocessing_recipe &amp;lt;- recipe(SalePrice ~ ., data = df) %&amp;gt;%
+        update_role(Id, new_role = &amp;quot;ID&amp;quot;) %&amp;gt;%
+        step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L))
+    if(ordinalScores) {
+        preprocessing_recipe &amp;lt;- preprocessing_recipe %&amp;gt;%
+            step_ordinalscore(all_ordered_predictors())
+    }
+    preprocessing_recipe &amp;lt;- preprocessing_recipe %&amp;gt;%
+        step_dummy(all_nominal()) %&amp;gt;%
+        step_intercept() %&amp;gt;%
+        step_lincomb(all_numeric_predictors()) %&amp;gt;%
+        step_rm(any_of(&amp;quot;intercept&amp;quot;)) %&amp;gt;%
+        step_log(all_outcomes()) %&amp;gt;%
+        prep()
+    return(preprocessing_recipe)
+}
+
+# The recipe is prepared on the training set only, and the same recipe is applied to the testing set (and to any new
+# data), so that both have exactly the same predictors.
+preprocessing_recipe &amp;lt;- get_preprocessing_recipe(dfTrain)
+
+# Preprocessed data for training models
+dfTrain_Proc &amp;lt;- preprocessing_recipe %&amp;gt;%
+    bake(new_data = NULL) %&amp;gt;%
+    rename(target = SalePrice) %&amp;gt;%
+    select(target, everything())
+
+dfTest_Proc &amp;lt;- preprocessing_recipe %&amp;gt;%
+    bake(new_data = dfTest) %&amp;gt;%
+    rename(target = SalePrice) %&amp;gt;%
+    select(target, everything())
+
+
+# Create cv folds
+########################################################################################################################################################
+get_cv_folds &amp;lt;- function(df, numFolds, strataVar, randomSeed, shuffleData) {
+    # shuffle the rows
+    if(shuffleData) {
+        set.seed(randomSeed)
+        df &amp;lt;- df[sample(nrow(df)), ]
+    }
+
+    # split dataset into folds where each fold has the same distribution of target
+    lFolds &amp;lt;- df %&amp;gt;% vfold_cv(v = numFolds, strata = all_of(strataVar))
+    return(lFolds)
+}
+
+
+# Parsnip Model Specification
+########################################################################################################################################################
+get_model_spec &amp;lt;- function(modelType) {
+
+    model_spec &amp;lt;- switch(modelType,
+                         lm = linear_reg(mode = &amp;quot;regression&amp;quot;) %&amp;gt;%
+                             set_engine(&amp;quot;lm&amp;quot;),
+
+                         glmnet = linear_reg(mode = &amp;quot;regression&amp;quot;, penalty = tune(), mixture = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;glmnet&amp;quot;),
+
+                         # No early stopping. It was tried (stop after 50 rounds without improvement on a 10% validation split)
+                         # and roughly halved xgboost tuning time, but the final model was unstable: refitting the same best
+                         # parameters with different random validation splits stopped anywhere from 195 to 687 rounds, with test
+                         # RMSE between 0.133 and 0.151, versus 0.131 for a fixed 1,000 trees. With only ~146 validation rows the
+                         # stopping point is too noisy. The narrower learn_rate range already removes the wasted fits.
+                         # nthread = 1 because parallelism comes from running many fits at once (one per worker).
+                         xgboost = boost_tree(mode=&amp;quot;regression&amp;quot;, trees=1000, min_n=tune(), tree_depth=tune(), learn_rate=tune()) %&amp;gt;%
+                             set_engine(&amp;quot;xgboost&amp;quot;, objective = &amp;quot;reg:squarederror&amp;quot;, nthread = 1),
+
+                         kernlab = svm_rbf(mode=&amp;quot;regression&amp;quot;, cost=tune(), rbf_sigma=tune(), margin=tune()) %&amp;gt;%
+                             set_engine(&amp;quot;kernlab&amp;quot;),
+
+                         # ranger replaces the randomForest engine: same algorithm, ~3x faster implementation, and 500 trees
+                         # instead of 1,000 with no loss of accuracy (see the timings at the top of this code).
+                         # num.threads = 1 for the same reason as xgboost&amp;#39;s nthread above.
+                         ranger = rand_forest(mode = &amp;quot;regression&amp;quot;, trees = 500, mtry = tune(), min_n = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;ranger&amp;quot;, num.threads = 1))
+
+    return(model_spec)
+}
+
+
+# Parameter Grid Search
+########################################################################################################################################################
+get_model_param_grid &amp;lt;- function(df, modelType, numParams, randomSeed) {
+
+    # mtry is finalized on the predictors only, so its upper bound is the number of predictors (excludes target and Id)
+    dfPredictors &amp;lt;- df %&amp;gt;% select(-target, -Id)
+
+    set.seed(randomSeed)
+    param_spec &amp;lt;- switch(modelType,
+                         glmnet = parameters(penalty(), mixture()),
+                         kernlab = parameters(cost(), rbf_sigma(), svm_margin()),
+                         # learn_rate is on a log10 scale. The dials default (1e-10 to 1e-1) spends most of the grid on rates
+                         # so small that 1,000 trees barely move from the starting prediction: those fits take the full time
+                         # and are never competitive. 10^-2.5 to 10^-0.5 (~0.003 to ~0.3) covers the useful range; the best
+                         # rate found with the default range was ~0.07, comfortably inside it.
+                         xgboost = parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))),
+                         ranger = parameters(min_n(), finalize(mtry(), dfPredictors)))
+
+    dfParamGrid &amp;lt;- grid_space_filling(param_spec, size = numParams, type = &amp;quot;max_entropy&amp;quot;)
+    return(dfParamGrid)
+}
+
+
+# Workflow for a model
+########################################################################################################################################################
+# The data is already preprocessed, so the workflow only names the outcome and predictors.
+# Id is excluded from the predictors: it is a row identifier, and with training Ids 1-1460 and test Ids 1461-2919,
+# tree models would otherwise split on it and treat every test property as lying beyond the training range.
+get_workflow &amp;lt;- function(model_spec) {
+    workflow() %&amp;gt;%
+        add_variables(outcomes = target, predictors = -Id) %&amp;gt;%
+        add_model(model_spec)
+}
+
+
+# Cross Validation Results
+########################################################################################################################################################
+# tune_grid() fits every grid point on every fold. With parallel_over = &amp;quot;everything&amp;quot;, each (fold, grid point)
+# combination is a separate task, so all workers stay busy until the end of the run.
+# The mean RMSE across folds is the same metric as before (mean of the per-fold RMSE).
+cross_validate_model &amp;lt;- function(cv_folds, model_spec, param_grid) {
+
+    tune_results &amp;lt;- get_workflow(model_spec) %&amp;gt;%
+        tune_grid(resamples = cv_folds,
+                  grid = param_grid,
+                  metrics = metric_set(rmse),
+                  control = control_grid(parallel_over = &amp;quot;everything&amp;quot;))
+
+    dfResults &amp;lt;- tune_results %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(all_of(names(param_grid)), mean_rmse = mean) %&amp;gt;%
+        arrange(mean_rmse)
+    return(dfResults)
+}
+
+
+# Fitted model with parameters
+########################################################################################################################################################
+# Returns a fitted workflow; predict() on it selects the predictor columns from new data, so Id can stay in the data.
+# The seed makes the final ranger and xgboost fits reproducible between runs.
+get_fitted_model &amp;lt;- function(df, model_spec, dfParams, randomSeed = 2300) {
+
+    model_wf &amp;lt;- get_workflow(model_spec)
+    if(!is.null(dfParams)) model_wf &amp;lt;- model_wf %&amp;gt;% finalize_workflow(dfParams)
+    set.seed(randomSeed)
+    fit(model_wf, data = df)
+}
+
+
+# Parallel backend
+########################################################################################################################################################
+# Each worker is a separate R session with tidymodels and the model packages loaded. In a full run with 5 workers,
+# no R process exceeded 0.6 GB and all R processes together (main session + workers) peaked at 3.2 GB. Budgeting
+# 0.75 GB per worker leaves headroom. Workers are capped at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM
+# available when the run starts, so the run cannot push the machine into swapping even if other applications are open.
+gb_per_worker &amp;lt;- 0.75
+gb_available &amp;lt;- ps::ps_system_memory()$avail / 1024^3
+num_workers &amp;lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
+message(sprintf(&amp;quot;Using %d parallel workers (%.1f GB RAM available)&amp;quot;, num_workers, gb_available))
+plan(multisession, workers = num_workers)
+
+# Create cross validation folds
+cv_folds &amp;lt;- get_cv_folds(dfTrain_Proc, numFolds = 5, strataVar = &amp;quot;target&amp;quot;, randomSeed = 2300, shuffleData = T)
+
+# Compare the encodings of ordered factors with a linear model on the same folds (reported in the post)
+compare_encoding &amp;lt;- function(ordinalScores) {
+
+    df &amp;lt;- get_preprocessing_recipe(dfTrain, ordinalScores) %&amp;gt;%
+        bake(new_data = NULL) %&amp;gt;%
+        rename(target = SalePrice) %&amp;gt;%
+        select(target, everything())
+    folds &amp;lt;- get_cv_folds(df, numFolds = 5, strataVar = &amp;quot;target&amp;quot;, randomSeed = 2300, shuffleData = T)
+    vAliased &amp;lt;- map_int(folds$splits, ~ sum(is.na(coef(lm(target ~ ., data = analysis(.x) %&amp;gt;% select(-Id))))))
+
+    tibble(encoding = if(ordinalScores) &amp;quot;ordinal scores&amp;quot; else &amp;quot;polynomial contrasts&amp;quot;,
+           predictors = ncol(df) - 2,
+           folds_rank_deficient = sum(vAliased &amp;gt; 0),
+           lm_cv_rmse = suppressWarnings(get_workflow(get_model_spec(&amp;quot;lm&amp;quot;)) %&amp;gt;%
+                                             fit_resamples(resamples = folds, metrics = metric_set(rmse)) %&amp;gt;%
+                                             collect_metrics() %&amp;gt;%
+                                             pull(mean)))
+}
+dfEncodingComparison &amp;lt;- bind_rows(compare_encoding(ordinalScores = FALSE), compare_encoding(ordinalScores = TRUE))
+
+# Time each model so the post can report relative run times
+dfTimings &amp;lt;- tibble(model = character(), seconds = numeric())
+time_model &amp;lt;- function(model, expr) {
+    t0 &amp;lt;- Sys.time()
+    result &amp;lt;- force(expr)
+    dfTimings &amp;lt;&amp;lt;- dfTimings %&amp;gt;% add_row(model = model, seconds = as.numeric(difftime(Sys.time(), t0, units = &amp;quot;secs&amp;quot;)))
+    result
+}
+
+# lm model (no hyperparameters, so fit_resamples instead of tune_grid)
+model_spec_lm &amp;lt;- get_model_spec(modelType = &amp;quot;lm&amp;quot;)
+cv_results_lm &amp;lt;- time_model(&amp;quot;lm&amp;quot;,
+    get_workflow(model_spec_lm) %&amp;gt;%
+        fit_resamples(resamples = cv_folds, metrics = metric_set(rmse)) %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(mean_rmse = mean))
+
+# glmnet model
+model_spec_glmnet &amp;lt;- get_model_spec(modelType = &amp;quot;glmnet&amp;quot;)
+param_grid_glmnet &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;glmnet&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_glmnet &amp;lt;- time_model(&amp;quot;glmnet&amp;quot;, cross_validate_model(cv_folds, model_spec_glmnet, param_grid_glmnet))
+param_best_glmnet &amp;lt;- cv_results_glmnet %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_glmnet &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_glmnet, param_best_glmnet)
+
+# kernlab model
+model_spec_kernlab &amp;lt;- get_model_spec(modelType = &amp;quot;kernlab&amp;quot;)
+param_grid_kernlab &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;kernlab&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_kernlab &amp;lt;- time_model(&amp;quot;kernlab&amp;quot;, cross_validate_model(cv_folds, model_spec_kernlab, param_grid_kernlab))
+param_best_kernlab &amp;lt;- cv_results_kernlab %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_kernlab &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_kernlab, param_best_kernlab)
+
+# random forest model (ranger engine; objects keep the _rf names used in index.Rmd)
+model_spec_rf &amp;lt;- get_model_spec(modelType = &amp;quot;ranger&amp;quot;)
+param_grid_rf &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;ranger&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_rf &amp;lt;- time_model(&amp;quot;ranger&amp;quot;, cross_validate_model(cv_folds, model_spec_rf, param_grid_rf))
+param_best_rf &amp;lt;- cv_results_rf %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_rf &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_rf, param_best_rf)
+
+# xgboost model
+model_spec_xgboost &amp;lt;- get_model_spec(modelType = &amp;quot;xgboost&amp;quot;)
+param_grid_xgboost &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;xgboost&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_xgboost &amp;lt;- time_model(&amp;quot;xgboost&amp;quot;, cross_validate_model(cv_folds, model_spec_xgboost, param_grid_xgboost))
+param_best_xgboost &amp;lt;- cv_results_xgboost %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_xgboost &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_xgboost, param_best_xgboost)
+
+plan(sequential)
+
+# the results that the post uses, which are saved to Ames_Tuning.Rda
+vTuningResults &amp;lt;- c(&amp;quot;model_spec_lm&amp;quot;, &amp;quot;model_spec_glmnet&amp;quot;, &amp;quot;model_spec_rf&amp;quot;, &amp;quot;model_spec_xgboost&amp;quot;, &amp;quot;model_spec_kernlab&amp;quot;,
+                    &amp;quot;model_final_glmnet&amp;quot;, &amp;quot;model_final_rf&amp;quot;, &amp;quot;model_final_xgboost&amp;quot;, &amp;quot;model_final_kernlab&amp;quot;, &amp;quot;cv_results_lm&amp;quot;,
+                    &amp;quot;cv_results_glmnet&amp;quot;, &amp;quot;cv_results_rf&amp;quot;, &amp;quot;cv_results_xgboost&amp;quot;, &amp;quot;cv_results_kernlab&amp;quot;, &amp;quot;param_grid_glmnet&amp;quot;,
+                    &amp;quot;param_grid_rf&amp;quot;, &amp;quot;param_grid_xgboost&amp;quot;, &amp;quot;param_grid_kernlab&amp;quot;, &amp;quot;param_best_glmnet&amp;quot;, &amp;quot;param_best_rf&amp;quot;,
+                    &amp;quot;param_best_xgboost&amp;quot;, &amp;quot;param_best_kernlab&amp;quot;, &amp;quot;dfTrain&amp;quot;, &amp;quot;dfTest&amp;quot;, &amp;quot;dfTrain_Proc&amp;quot;,
+                    &amp;quot;dfTest_Proc&amp;quot;, &amp;quot;dfTimings&amp;quot;, &amp;quot;get_preprocessing_recipe&amp;quot;, &amp;quot;preprocessing_recipe&amp;quot;, &amp;quot;vFeaturesCollinear&amp;quot;,
+                    &amp;quot;dfEncodingComparison&amp;quot;, &amp;quot;cv_folds&amp;quot;, &amp;quot;vFeaturesSkew&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And this code decides whether to load the saved results or to run the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1
+ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-eda/Ames_Housing_Clean.Rda&amp;quot;
+
+# Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &amp;quot;tuning_steps&amp;quot;
+# chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so
+# editing them does not start a new tuning run.
+envData &amp;lt;- new.env()
+load(ames_data_file, envir = envData)
+tuning_steps &amp;lt;- knitr::knit_code$get(&amp;quot;tuning_steps&amp;quot;)
+tuning_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$vTestIDs),
+                                code = deparse(parse(text = tuning_steps, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, tune the models again and save
+# the new results together with the fingerprint of their inputs.
+envSaved &amp;lt;- new.env()
+if (file.exists(&amp;quot;Ames_Tuning.Rda&amp;quot;)) load(&amp;quot;Ames_Tuning.Rda&amp;quot;, envir = envSaved)
+if (identical(envSaved$tuning_hash, tuning_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  eval(parse(text = tuning_steps))
+  save(list = c(vTuningResults, &amp;quot;tuning_hash&amp;quot;), file = &amp;quot;Ames_Tuning.Rda&amp;quot;)
+}
+rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 </description>
     </item>
     
@@ -494,18 +842,922 @@ print(&amp;quot;Dimensions of the testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTestIDs &amp;lt;- dfTest$Id
 
 dfClean &amp;lt;- dfTrain %&amp;gt;% bind_rows(dfTest)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# dfDescription &amp;lt;- read.delim(&amp;quot;data_description.txt&amp;quot;, header = F, sep = &amp;quot;:&amp;quot;, na.strings = &amp;quot;&amp;quot;) %&amp;gt;% 
-#   as_tibble() %&amp;gt;% 
-#   set_names(c(&amp;quot;Feature&amp;quot;, &amp;quot;Description&amp;quot;)) %&amp;gt;% 
-#   map_df(str_trim) %&amp;gt;% 
-#   mutate(Feature = ifelse(Feature == &amp;quot;&amp;quot;, NA, Feature)) %&amp;gt;% 
-#   drop_na(Feature) %&amp;gt;% 
-#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&amp;gt;% 
-#   mutate(Feature = ifelse(Feature == Description, &amp;quot;&amp;quot;, Feature))
+&lt;p&gt;The data description explains each feature, and the meaning of each category. It is long, so it is folded:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# data_description.txt has one line &amp;quot;Feature: description&amp;quot; for each feature,
+# followed by one line &amp;quot;code&amp;lt;TAB&amp;gt;meaning&amp;quot; for each of its categories, if it has any
+vLines &amp;lt;- readLines(&amp;quot;data_description.txt&amp;quot;)
+vStarts &amp;lt;- grep(&amp;quot;^[[:alnum:]]+:&amp;quot;, vLines)
+vEnds &amp;lt;- c(vStarts[-1] - 1, length(vLines))
 
-# knitr::kable(dfDescription)
+dfDescription &amp;lt;- map2_dfr(vStarts, vEnds, function(iStart, iEnd) {
+  vParts &amp;lt;- str_split_fixed(vLines[iStart], &amp;quot;:&amp;quot;, 2)
+  vCategories &amp;lt;- trimws(vLines[seq_len(iEnd - iStart) + iStart])
+  vCategories &amp;lt;- vCategories[vCategories != &amp;quot;&amp;quot;]
+  vCodes &amp;lt;- str_split_fixed(vCategories, &amp;quot;	&amp;quot;, 2)
+  tibble(Feature = vParts[1],
+         Description = trimws(vParts[2]),
+         Categories = paste0(&amp;quot;&amp;lt;b&amp;gt;&amp;quot;, trimws(vCodes[, 1]), &amp;quot;&amp;lt;/b&amp;gt;: &amp;quot;, trimws(vCodes[, 2]), collapse = &amp;quot;&amp;lt;br&amp;gt;&amp;quot;))
+})
 
-# Hmisc::describe(dfClean)&lt;/code&gt;&lt;/pre&gt;
+cat(&amp;#39;&amp;lt;details class=&amp;quot;code-fold&amp;quot;&amp;gt;&amp;lt;summary&amp;gt;Show the data description&amp;lt;/summary&amp;gt;
+
+&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;details class=&#34;code-fold&#34;&gt;
+&lt;summary&gt;
+Show the data description
+&lt;/summary&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat(knitr::kable(dfDescription, format = &amp;quot;html&amp;quot;, escape = FALSE), sep = &amp;quot;
+&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Feature
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Description
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Categories
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MSSubClass
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Identifies the type of dwelling involved in the sale.
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;20&lt;/b&gt;: 1-STORY 1946 &amp;amp; NEWER ALL STYLES&lt;br&gt;&lt;b&gt;30&lt;/b&gt;: 1-STORY 1945 &amp;amp; OLDER&lt;br&gt;&lt;b&gt;40&lt;/b&gt;: 1-STORY W/FINISHED ATTIC ALL AGES&lt;br&gt;&lt;b&gt;45&lt;/b&gt;: 1-1/2 STORY - UNFINISHED ALL AGES&lt;br&gt;&lt;b&gt;50&lt;/b&gt;: 1-1/2 STORY FINISHED ALL AGES&lt;br&gt;&lt;b&gt;60&lt;/b&gt;: 2-STORY 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;70&lt;/b&gt;: 2-STORY 1945 &amp;amp; OLDER&lt;br&gt;&lt;b&gt;75&lt;/b&gt;: 2-1/2 STORY ALL AGES&lt;br&gt;&lt;b&gt;80&lt;/b&gt;: SPLIT OR MULTI-LEVEL&lt;br&gt;&lt;b&gt;85&lt;/b&gt;: SPLIT FOYER&lt;br&gt;&lt;b&gt;90&lt;/b&gt;: DUPLEX - ALL STYLES AND AGES&lt;br&gt;&lt;b&gt;120&lt;/b&gt;: 1-STORY PUD (Planned Unit Development) - 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;150&lt;/b&gt;: 1-1/2 STORY PUD - ALL AGES&lt;br&gt;&lt;b&gt;160&lt;/b&gt;: 2-STORY PUD - 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;180&lt;/b&gt;: PUD - MULTILEVEL - INCL SPLIT LEV/FOYER&lt;br&gt;&lt;b&gt;190&lt;/b&gt;: 2 FAMILY CONVERSION - ALL STYLES AND AGES
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MSZoning
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Identifies the general zoning classification of the sale.
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;A&lt;/b&gt;: Agriculture&lt;br&gt;&lt;b&gt;C&lt;/b&gt;: Commercial&lt;br&gt;&lt;b&gt;FV&lt;/b&gt;: Floating Village Residential&lt;br&gt;&lt;b&gt;I&lt;/b&gt;: Industrial&lt;br&gt;&lt;b&gt;RH&lt;/b&gt;: Residential High Density&lt;br&gt;&lt;b&gt;RL&lt;/b&gt;: Residential Low Density&lt;br&gt;&lt;b&gt;RP&lt;/b&gt;: Residential Low Density Park&lt;br&gt;&lt;b&gt;RM&lt;/b&gt;: Residential Medium Density
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotFrontage
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Linear feet of street connected to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Lot size in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Street
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of road access to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Grvl&lt;/b&gt;: Gravel&lt;br&gt;&lt;b&gt;Pave&lt;/b&gt;: Paved
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Alley
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of alley access to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Grvl&lt;/b&gt;: Gravel&lt;br&gt;&lt;b&gt;Pave&lt;/b&gt;: Paved&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No alley access
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotShape
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+General shape of property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Reg&lt;/b&gt;: Regular&lt;br&gt;&lt;b&gt;IR1&lt;/b&gt;: Slightly irregular&lt;br&gt;&lt;b&gt;IR2&lt;/b&gt;: Moderately Irregular&lt;br&gt;&lt;b&gt;IR3&lt;/b&gt;: Irregular
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LandContour
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Flatness of the property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Lvl&lt;/b&gt;: Near Flat/Level&lt;br&gt;&lt;b&gt;Bnk&lt;/b&gt;: Banked - Quick and significant rise from street grade to building&lt;br&gt;&lt;b&gt;HLS&lt;/b&gt;: Hillside - Significant slope from side to side&lt;br&gt;&lt;b&gt;Low&lt;/b&gt;: Depression
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Utilities
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of utilities available
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AllPub&lt;/b&gt;: All public Utilities (E,G,W,&amp;amp; S)&lt;br&gt;&lt;b&gt;NoSewr&lt;/b&gt;: Electricity, Gas, and Water (Septic Tank)&lt;br&gt;&lt;b&gt;NoSeWa&lt;/b&gt;: Electricity and Gas Only&lt;br&gt;&lt;b&gt;ELO&lt;/b&gt;: Electricity only
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotConfig
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Lot configuration
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Inside&lt;/b&gt;: Inside lot&lt;br&gt;&lt;b&gt;Corner&lt;/b&gt;: Corner lot&lt;br&gt;&lt;b&gt;CulDSac&lt;/b&gt;: Cul-de-sac&lt;br&gt;&lt;b&gt;FR2&lt;/b&gt;: Frontage on 2 sides of property&lt;br&gt;&lt;b&gt;FR3&lt;/b&gt;: Frontage on 3 sides of property
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LandSlope
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Slope of property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Gtl&lt;/b&gt;: Gentle slope&lt;br&gt;&lt;b&gt;Mod&lt;/b&gt;: Moderate Slope&lt;br&gt;&lt;b&gt;Sev&lt;/b&gt;: Severe Slope
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Neighborhood
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Physical locations within Ames city limits
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Blmngtn&lt;/b&gt;: Bloomington Heights&lt;br&gt;&lt;b&gt;Blueste&lt;/b&gt;: Bluestem&lt;br&gt;&lt;b&gt;BrDale&lt;/b&gt;: Briardale&lt;br&gt;&lt;b&gt;BrkSide&lt;/b&gt;: Brookside&lt;br&gt;&lt;b&gt;ClearCr&lt;/b&gt;: Clear Creek&lt;br&gt;&lt;b&gt;CollgCr&lt;/b&gt;: College Creek&lt;br&gt;&lt;b&gt;Crawfor&lt;/b&gt;: Crawford&lt;br&gt;&lt;b&gt;Edwards&lt;/b&gt;: Edwards&lt;br&gt;&lt;b&gt;Gilbert&lt;/b&gt;: Gilbert&lt;br&gt;&lt;b&gt;IDOTRR&lt;/b&gt;: Iowa DOT and Rail Road&lt;br&gt;&lt;b&gt;MeadowV&lt;/b&gt;: Meadow Village&lt;br&gt;&lt;b&gt;Mitchel&lt;/b&gt;: Mitchell&lt;br&gt;&lt;b&gt;Names&lt;/b&gt;: North Ames&lt;br&gt;&lt;b&gt;NoRidge&lt;/b&gt;: Northridge&lt;br&gt;&lt;b&gt;NPkVill&lt;/b&gt;: Northpark Villa&lt;br&gt;&lt;b&gt;NridgHt&lt;/b&gt;: Northridge Heights&lt;br&gt;&lt;b&gt;NWAmes&lt;/b&gt;: Northwest Ames&lt;br&gt;&lt;b&gt;OldTown&lt;/b&gt;: Old Town&lt;br&gt;&lt;b&gt;SWISU&lt;/b&gt;: South &amp;amp; West of Iowa State University&lt;br&gt;&lt;b&gt;Sawyer&lt;/b&gt;: Sawyer&lt;br&gt;&lt;b&gt;SawyerW&lt;/b&gt;: Sawyer West&lt;br&gt;&lt;b&gt;Somerst&lt;/b&gt;: Somerset&lt;br&gt;&lt;b&gt;StoneBr&lt;/b&gt;: Stone Brook&lt;br&gt;&lt;b&gt;Timber&lt;/b&gt;: Timberland&lt;br&gt;&lt;b&gt;Veenker&lt;/b&gt;: Veenker
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Proximity to various conditions
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Artery&lt;/b&gt;: Adjacent to arterial street&lt;br&gt;&lt;b&gt;Feedr&lt;/b&gt;: Adjacent to feeder street&lt;br&gt;&lt;b&gt;Norm&lt;/b&gt;: Normal&lt;br&gt;&lt;b&gt;RRNn&lt;/b&gt;: Within 200’ of North-South Railroad&lt;br&gt;&lt;b&gt;RRAn&lt;/b&gt;: Adjacent to North-South Railroad&lt;br&gt;&lt;b&gt;PosN&lt;/b&gt;: Near positive off-site feature–park, greenbelt, etc.&lt;br&gt;&lt;b&gt;PosA&lt;/b&gt;: Adjacent to postive off-site feature&lt;br&gt;&lt;b&gt;RRNe&lt;/b&gt;: Within 200’ of East-West Railroad&lt;br&gt;&lt;b&gt;RRAe&lt;/b&gt;: Adjacent to East-West Railroad
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Proximity to various conditions (if more than one is present)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Artery&lt;/b&gt;: Adjacent to arterial street&lt;br&gt;&lt;b&gt;Feedr&lt;/b&gt;: Adjacent to feeder street&lt;br&gt;&lt;b&gt;Norm&lt;/b&gt;: Normal&lt;br&gt;&lt;b&gt;RRNn&lt;/b&gt;: Within 200’ of North-South Railroad&lt;br&gt;&lt;b&gt;RRAn&lt;/b&gt;: Adjacent to North-South Railroad&lt;br&gt;&lt;b&gt;PosN&lt;/b&gt;: Near positive off-site feature–park, greenbelt, etc.&lt;br&gt;&lt;b&gt;PosA&lt;/b&gt;: Adjacent to postive off-site feature&lt;br&gt;&lt;b&gt;RRNe&lt;/b&gt;: Within 200’ of East-West Railroad&lt;br&gt;&lt;b&gt;RRAe&lt;/b&gt;: Adjacent to East-West Railroad
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BldgType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of dwelling
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;1Fam&lt;/b&gt;: Single-family Detached&lt;br&gt;&lt;b&gt;2FmCon&lt;/b&gt;: Two-family Conversion; originally built as one-family dwelling&lt;br&gt;&lt;b&gt;Duplx&lt;/b&gt;: Duplex&lt;br&gt;&lt;b&gt;TwnhsE&lt;/b&gt;: Townhouse End Unit&lt;br&gt;&lt;b&gt;TwnhsI&lt;/b&gt;: Townhouse Inside Unit
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HouseStyle
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Style of dwelling
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;1Story&lt;/b&gt;: One story&lt;br&gt;&lt;b&gt;1.5Fin&lt;/b&gt;: One and one-half story - 2nd level finished&lt;br&gt;&lt;b&gt;1.5Unf&lt;/b&gt;: One and one-half story - 2nd level unfinished&lt;br&gt;&lt;b&gt;2Story&lt;/b&gt;: Two story&lt;br&gt;&lt;b&gt;2.5Fin&lt;/b&gt;: Two and one-half story - 2nd level finished&lt;br&gt;&lt;b&gt;2.5Unf&lt;/b&gt;: Two and one-half story - 2nd level unfinished&lt;br&gt;&lt;b&gt;SFoyer&lt;/b&gt;: Split Foyer&lt;br&gt;&lt;b&gt;SLvl&lt;/b&gt;: Split Level
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OverallQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rates the overall material and finish of the house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;10&lt;/b&gt;: Very Excellent&lt;br&gt;&lt;b&gt;9&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;8&lt;/b&gt;: Very Good&lt;br&gt;&lt;b&gt;7&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;6&lt;/b&gt;: Above Average&lt;br&gt;&lt;b&gt;5&lt;/b&gt;: Average&lt;br&gt;&lt;b&gt;4&lt;/b&gt;: Below Average&lt;br&gt;&lt;b&gt;3&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;2&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;1&lt;/b&gt;: Very Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OverallCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rates the overall condition of the house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;10&lt;/b&gt;: Very Excellent&lt;br&gt;&lt;b&gt;9&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;8&lt;/b&gt;: Very Good&lt;br&gt;&lt;b&gt;7&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;6&lt;/b&gt;: Above Average&lt;br&gt;&lt;b&gt;5&lt;/b&gt;: Average&lt;br&gt;&lt;b&gt;4&lt;/b&gt;: Below Average&lt;br&gt;&lt;b&gt;3&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;2&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;1&lt;/b&gt;: Very Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YearBuilt
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Original construction date
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YearRemodAdd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Remodel date (same as construction date if no remodeling or additions)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+RoofStyle
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of roof
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Flat&lt;/b&gt;: Flat&lt;br&gt;&lt;b&gt;Gable&lt;/b&gt;: Gable&lt;br&gt;&lt;b&gt;Gambrel&lt;/b&gt;: Gabrel (Barn)&lt;br&gt;&lt;b&gt;Hip&lt;/b&gt;: Hip&lt;br&gt;&lt;b&gt;Mansard&lt;/b&gt;: Mansard&lt;br&gt;&lt;b&gt;Shed&lt;/b&gt;: Shed
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+RoofMatl
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Roof material
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;ClyTile&lt;/b&gt;: Clay or Tile&lt;br&gt;&lt;b&gt;CompShg&lt;/b&gt;: Standard (Composite) Shingle&lt;br&gt;&lt;b&gt;Membran&lt;/b&gt;: Membrane&lt;br&gt;&lt;b&gt;Metal&lt;/b&gt;: Metal&lt;br&gt;&lt;b&gt;Roll&lt;/b&gt;: Roll&lt;br&gt;&lt;b&gt;Tar&amp;amp;Grv&lt;/b&gt;: Gravel &amp;amp; Tar&lt;br&gt;&lt;b&gt;WdShake&lt;/b&gt;: Wood Shakes&lt;br&gt;&lt;b&gt;WdShngl&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior1st
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior covering on house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AsbShng&lt;/b&gt;: Asbestos Shingles&lt;br&gt;&lt;b&gt;AsphShn&lt;/b&gt;: Asphalt Shingles&lt;br&gt;&lt;b&gt;BrkComm&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;CemntBd&lt;/b&gt;: Cement Board&lt;br&gt;&lt;b&gt;HdBoard&lt;/b&gt;: Hard Board&lt;br&gt;&lt;b&gt;ImStucc&lt;/b&gt;: Imitation Stucco&lt;br&gt;&lt;b&gt;MetalSd&lt;/b&gt;: Metal Siding&lt;br&gt;&lt;b&gt;Other&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Plywood&lt;/b&gt;: Plywood&lt;br&gt;&lt;b&gt;PreCast&lt;/b&gt;: PreCast&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Stucco&lt;/b&gt;: Stucco&lt;br&gt;&lt;b&gt;VinylSd&lt;/b&gt;: Vinyl Siding&lt;br&gt;&lt;b&gt;Wd Sdng&lt;/b&gt;: Wood Siding&lt;br&gt;&lt;b&gt;WdShing&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior2nd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior covering on house (if more than one material)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AsbShng&lt;/b&gt;: Asbestos Shingles&lt;br&gt;&lt;b&gt;AsphShn&lt;/b&gt;: Asphalt Shingles&lt;br&gt;&lt;b&gt;BrkComm&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;CemntBd&lt;/b&gt;: Cement Board&lt;br&gt;&lt;b&gt;HdBoard&lt;/b&gt;: Hard Board&lt;br&gt;&lt;b&gt;ImStucc&lt;/b&gt;: Imitation Stucco&lt;br&gt;&lt;b&gt;MetalSd&lt;/b&gt;: Metal Siding&lt;br&gt;&lt;b&gt;Other&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Plywood&lt;/b&gt;: Plywood&lt;br&gt;&lt;b&gt;PreCast&lt;/b&gt;: PreCast&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Stucco&lt;/b&gt;: Stucco&lt;br&gt;&lt;b&gt;VinylSd&lt;/b&gt;: Vinyl Siding&lt;br&gt;&lt;b&gt;Wd Sdng&lt;/b&gt;: Wood Siding&lt;br&gt;&lt;b&gt;WdShing&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MasVnrType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Masonry veneer type
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;BrkCmn&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;None&lt;/b&gt;: None&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MasVnrArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Masonry veneer area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ExterQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the quality of the material on the exterior
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ExterCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the present condition of the material on the exterior
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Foundation
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of foundation
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;BrkTil&lt;/b&gt;: Brick &amp;amp; Tile&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;PConc&lt;/b&gt;: Poured Contrete&lt;br&gt;&lt;b&gt;Slab&lt;/b&gt;: Slab&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Wood&lt;/b&gt;: Wood
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the height of the basement
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent (100+ inches)&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good (90-99 inches)&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical (80-89 inches)&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair (70-79 inches)&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor (&amp;lt;70 inches&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the general condition of the basement
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical - slight dampness allowed&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair - dampness or some cracking or settling&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor - Severe cracking, settling, or wetness&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtExposure
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Refers to walkout or garden level walls
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Gd&lt;/b&gt;: Good Exposure&lt;br&gt;&lt;b&gt;Av&lt;/b&gt;: Average Exposure (split levels or foyers typically score average or above)&lt;br&gt;&lt;b&gt;Mn&lt;/b&gt;: Mimimum Exposure&lt;br&gt;&lt;b&gt;No&lt;/b&gt;: No Exposure&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinType1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rating of basement finished area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GLQ&lt;/b&gt;: Good Living Quarters&lt;br&gt;&lt;b&gt;ALQ&lt;/b&gt;: Average Living Quarters&lt;br&gt;&lt;b&gt;BLQ&lt;/b&gt;: Below Average Living Quarters&lt;br&gt;&lt;b&gt;Rec&lt;/b&gt;: Average Rec Room&lt;br&gt;&lt;b&gt;LwQ&lt;/b&gt;: Low Quality&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinshed&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinSF1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type 1 finished square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinType2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rating of basement finished area (if multiple types)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GLQ&lt;/b&gt;: Good Living Quarters&lt;br&gt;&lt;b&gt;ALQ&lt;/b&gt;: Average Living Quarters&lt;br&gt;&lt;b&gt;BLQ&lt;/b&gt;: Below Average Living Quarters&lt;br&gt;&lt;b&gt;Rec&lt;/b&gt;: Average Rec Room&lt;br&gt;&lt;b&gt;LwQ&lt;/b&gt;: Low Quality&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinshed&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinSF2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type 2 finished square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtUnfSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Unfinished square feet of basement area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+TotalBsmtSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Total square feet of basement area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Heating
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of heating
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Floor&lt;/b&gt;: Floor Furnace&lt;br&gt;&lt;b&gt;GasA&lt;/b&gt;: Gas forced warm air furnace&lt;br&gt;&lt;b&gt;GasW&lt;/b&gt;: Gas hot water or steam heat&lt;br&gt;&lt;b&gt;Grav&lt;/b&gt;: Gravity furnace&lt;br&gt;&lt;b&gt;OthW&lt;/b&gt;: Hot water or steam heat other than gas&lt;br&gt;&lt;b&gt;Wall&lt;/b&gt;: Wall furnace
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HeatingQC
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Heating quality and condition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+CentralAir
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Central air conditioning
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;N&lt;/b&gt;: No&lt;br&gt;&lt;b&gt;Y&lt;/b&gt;: Yes
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Electrical
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Electrical system
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;SBrkr&lt;/b&gt;: Standard Circuit Breakers &amp;amp; Romex&lt;br&gt;&lt;b&gt;FuseA&lt;/b&gt;: Fuse Box over 60 AMP and all Romex wiring (Average)&lt;br&gt;&lt;b&gt;FuseF&lt;/b&gt;: 60 AMP Fuse Box and mostly Romex wiring (Fair)&lt;br&gt;&lt;b&gt;FuseP&lt;/b&gt;: 60 AMP Fuse Box and mostly knob &amp;amp; tube wiring (poor)&lt;br&gt;&lt;b&gt;Mix&lt;/b&gt;: Mixed
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+1stFlrSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+First Floor square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+2ndFlrSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Second floor square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LowQualFinSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low quality finished square feet (all floors)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GrLivArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Above grade (ground) living area square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFullBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Basement full bathrooms
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtHalfBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Basement half bathrooms
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+FullBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Full bathrooms above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HalfBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Half baths above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Bedroom
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Bedrooms above grade (does NOT include basement bedrooms)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+KitchenAbvGr
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Kitchens above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+KitchenQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Kitchen quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+TotRmsAbvGrd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Total rooms above grade (does not include bathrooms)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Functional
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Home functionality (Assume typical unless deductions are warranted)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Typ&lt;/b&gt;: Typical Functionality&lt;br&gt;&lt;b&gt;Min1&lt;/b&gt;: Minor Deductions 1&lt;br&gt;&lt;b&gt;Min2&lt;/b&gt;: Minor Deductions 2&lt;br&gt;&lt;b&gt;Mod&lt;/b&gt;: Moderate Deductions&lt;br&gt;&lt;b&gt;Maj1&lt;/b&gt;: Major Deductions 1&lt;br&gt;&lt;b&gt;Maj2&lt;/b&gt;: Major Deductions 2&lt;br&gt;&lt;b&gt;Sev&lt;/b&gt;: Severely Damaged&lt;br&gt;&lt;b&gt;Sal&lt;/b&gt;: Salvage only
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fireplaces
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Number of fireplaces
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+FireplaceQu
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fireplace quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent - Exceptional Masonry Fireplace&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good - Masonry Fireplace in main level&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average - Prefabricated Fireplace in main living area or Masonry Fireplace in basement&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair - Prefabricated Fireplace in basement&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor - Ben Franklin Stove&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Fireplace
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage location
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;2Types&lt;/b&gt;: More than one type of garage&lt;br&gt;&lt;b&gt;Attchd&lt;/b&gt;: Attached to home&lt;br&gt;&lt;b&gt;Basment&lt;/b&gt;: Basement Garage&lt;br&gt;&lt;b&gt;BuiltIn&lt;/b&gt;: Built-In (Garage part of house - typically has room above garage)&lt;br&gt;&lt;b&gt;CarPort&lt;/b&gt;: Car Port&lt;br&gt;&lt;b&gt;Detchd&lt;/b&gt;: Detached from home&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageYrBlt
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Year garage was built
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageFinish
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Interior finish of the garage
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Fin&lt;/b&gt;: Finished&lt;br&gt;&lt;b&gt;RFn&lt;/b&gt;: Rough Finished&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinished&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageCars
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Size of garage in car capacity
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Size of garage in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage condition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PavedDrive
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Paved driveway
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Y&lt;/b&gt;: Paved&lt;br&gt;&lt;b&gt;P&lt;/b&gt;: Partial Pavement&lt;br&gt;&lt;b&gt;N&lt;/b&gt;: Dirt/Gravel
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+WoodDeckSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Wood deck area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OpenPorchSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Open porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+EnclosedPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Enclosed porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+3SsnPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Three season porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ScreenPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Screen porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PoolArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Pool area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PoolQC
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Pool quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Pool
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fence
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fence quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GdPrv&lt;/b&gt;: Good Privacy&lt;br&gt;&lt;b&gt;MnPrv&lt;/b&gt;: Minimum Privacy&lt;br&gt;&lt;b&gt;GdWo&lt;/b&gt;: Good Wood&lt;br&gt;&lt;b&gt;MnWw&lt;/b&gt;: Minimum Wood/Wire&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Fence
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MiscFeature
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Miscellaneous feature not covered in other categories
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Elev&lt;/b&gt;: Elevator&lt;br&gt;&lt;b&gt;Gar2&lt;/b&gt;: 2nd Garage (if not described in garage section)&lt;br&gt;&lt;b&gt;Othr&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Shed&lt;/b&gt;: Shed (over 100 SF)&lt;br&gt;&lt;b&gt;TenC&lt;/b&gt;: Tennis Court&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: None
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MiscVal
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+$Value of miscellaneous feature
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MoSold
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Month Sold (MM)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YrSold
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Year Sold (YYYY)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+SaleType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of sale
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;WD&lt;/b&gt;: Warranty Deed - Conventional&lt;br&gt;&lt;b&gt;CWD&lt;/b&gt;: Warranty Deed - Cash&lt;br&gt;&lt;b&gt;VWD&lt;/b&gt;: Warranty Deed - VA Loan&lt;br&gt;&lt;b&gt;New&lt;/b&gt;: Home just constructed and sold&lt;br&gt;&lt;b&gt;COD&lt;/b&gt;: Court Officer Deed/Estate&lt;br&gt;&lt;b&gt;Con&lt;/b&gt;: Contract 15% Down payment regular terms&lt;br&gt;&lt;b&gt;ConLw&lt;/b&gt;: Contract Low Down payment and low interest&lt;br&gt;&lt;b&gt;ConLI&lt;/b&gt;: Contract Low Interest&lt;br&gt;&lt;b&gt;ConLD&lt;/b&gt;: Contract Low Down&lt;br&gt;&lt;b&gt;Oth&lt;/b&gt;: Other
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+SaleCondition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition of sale
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Normal&lt;/b&gt;: Normal Sale&lt;br&gt;&lt;b&gt;Abnorml&lt;/b&gt;: Abnormal Sale - trade, foreclosure, short sale&lt;br&gt;&lt;b&gt;AdjLand&lt;/b&gt;: Adjoining Land Purchase&lt;br&gt;&lt;b&gt;Alloca&lt;/b&gt;: Allocation - two linked properties with separate deeds, typically condo with a garage unit&lt;br&gt;&lt;b&gt;Family&lt;/b&gt;: Sale between family members&lt;br&gt;&lt;b&gt;Partial&lt;/b&gt;: Home was not completed when last assessed (associated with New Homes)
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat(&amp;quot;
+&amp;lt;/details&amp;gt;
+&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/details&gt;
 &lt;p&gt;Now, let’s put the training set and the testing set together in one dataset, and count the missing values in each feature:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;

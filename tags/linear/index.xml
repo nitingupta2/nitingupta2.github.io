@@ -189,7 +189,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;After we choose the hyperparameters with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model has an RMSE of 0.129, with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
 &lt;li&gt;This is better than the ordinary least squares model, which had an RMSE of 0.1336. The regularization makes the coefficients of the less useful features smaller. This helps when there are so many features.&lt;/li&gt;
-&lt;li&gt;Cross validation of &lt;code&gt;glmnet&lt;/code&gt; is fast. It takes about 11 seconds.&lt;/li&gt;
+&lt;li&gt;Cross validation of &lt;code&gt;glmnet&lt;/code&gt; is fast. It takes about 13 seconds.&lt;/li&gt;
 &lt;li&gt;But outliers can strongly affect its results.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here is a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid, with the best combination:&lt;/p&gt;
@@ -243,7 +243,7 @@ Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;After cross validation, the best RMSE is 0.132, with mtry = 51 and min_n = 2.&lt;/li&gt;
-&lt;li&gt;This is not better than &lt;code&gt;glmnet&lt;/code&gt;. Also, cross validation of &lt;code&gt;ranger&lt;/code&gt; takes much longer: about 164 seconds, against 11 seconds for &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;This is not better than &lt;code&gt;glmnet&lt;/code&gt;. Also, cross validation of &lt;code&gt;ranger&lt;/code&gt; takes much longer: about 279 seconds, against 13 seconds for &lt;code&gt;glmnet&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here is a plot of the &lt;code&gt;ranger&lt;/code&gt; hyperparameter grid, with the best combination:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
@@ -294,7 +294,7 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
 &lt;li&gt;After cross validation, the best RMSE is 0.125, with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.&lt;/li&gt;
 &lt;li&gt;This is the best cross validated RMSE of all the models. It is a little better than &lt;code&gt;glmnet&lt;/code&gt; (0.129) and &lt;code&gt;ranger&lt;/code&gt; (0.132).&lt;/li&gt;
-&lt;li&gt;Cross validation of &lt;code&gt;xgboost&lt;/code&gt; takes longer than &lt;code&gt;glmnet&lt;/code&gt;, but it is faster than &lt;code&gt;ranger&lt;/code&gt; (about 137 seconds).&lt;/li&gt;
+&lt;li&gt;Cross validation of &lt;code&gt;xgboost&lt;/code&gt; takes longer than &lt;code&gt;glmnet&lt;/code&gt;, but it is faster than &lt;code&gt;ranger&lt;/code&gt; (about 177 seconds).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
 &lt;!-- &lt;center&gt; --&gt;
@@ -465,6 +465,354 @@ bake(preprocessing_recipe, new_data = dfSample) %&amp;gt;%
        title = &amp;quot;New Property Premium&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;appendix-tuning-code&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Appendix: Tuning Code&lt;/h2&gt;
+&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
+&lt;li&gt;If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To tune the models again without any change, delete &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These are the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Why the tuning code is built the way it is (speed):
+# The dataset is small (1,460 rows x ~150 predictors after encoding), so run time is driven by the
+# number of model fits (5 models x 25 grid points x 5 folds) and by how expensive each fit is, not by data size.
+# The earlier version took ~35 minutes; this version takes ~11 minutes with 6 workers, tuning the same models and
+# hyperparameters (with randomForest replaced by the equivalent ranger engine). The changes:
+#   1. tune_grid() parallelises over every fold x grid-point combination (&amp;quot;everything&amp;quot;), instead of a manual
+#      for-loop over grid points that only ran the 5 folds in parallel and left the remaining cores idle.
+#   2. Random forest uses only the `ranger` engine with 500 trees. The `randomForest` package was tuned in addition
+#      to ranger and gave the same cross-validated RMSE (0.135 vs 0.134). On one fold with mtry = 84, min_n = 2:
+#        randomForest, 1,000 trees: 46.9s, RMSE 0.1305
+#        ranger,       1,000 trees: 15.1s, RMSE 0.1303
+#        ranger,         500 trees:  7.2s, RMSE 0.1293
+#      Random forest error levels off well before 500 trees on data of this size, so 1,000 trees only doubled the cost.
+#   3. xgboost searches a sensible learning-rate range, instead of spending much of the grid on learning rates as
+#      small as 1e-10 that cannot converge in 1,000 rounds (see get_model_param_grid). Early stopping was tried and
+#      rejected; see the note in get_model_spec.
+#   4. The number of parallel workers is capped by available RAM as well as CPU cores (see &amp;quot;Parallel backend&amp;quot;).
+#
+# Unrelated to speed: the earlier version used Id as a predictor. It is now excluded (see get_workflow).
+# It also had 21 predictors that were exact linear combinations of others, which lm reported as a rank-deficient
+# fit. They are now removed (see &amp;quot;Collinear predictors&amp;quot; and get_preprocessing_recipe), leaving a full-rank design.
+# Ordered factors are encoded as integer scores instead of polynomial contrasts (see get_preprocessing_recipe).
+
+# load the clean dataset from Part 1 (ames_data_file is set in the &amp;quot;tuning_cache&amp;quot; chunk)
+load(ames_data_file)
+
+# Collinear predictors
+########################################################################################################################################################
+# With the earlier set of features, 21 of the ~250 predictors were exact linear combinations of others (the design
+# matrix had rank 229 of 250), so lm could not estimate them and warned of a rank-deficient fit. Tree models are not
+# affected by duplicated information, but linear models are: the coefficients of collinear predictors are unstable.
+# These features are dropped because other features already carry their information (see the association matrix
+# in Part 1):
+#   HasGarage, HasFireplace, HasMasVnr: the same as the &amp;quot;None&amp;quot; category of GarageType, FireplaceQu and MasVnrType.
+#   MSSubClass: combines the building type and style, already in BldgType and HouseStyle (bias-corrected Cramer&amp;#39;s V
+#               of 0.89 and 0.83). Its &amp;quot;duplex&amp;quot; category is identical to BldgType&amp;#39;s.
+#   HalfBath:   TotalBath = FullBath + 0.5 * HalfBath + BsmtBath exactly. Dropping HalfBath rather than TotalBath
+#               keeps the total, one of the most important features for the tree models, and loses no information
+#               because HalfBath can be recovered from the other three.
+vFeaturesCollinear &amp;lt;- c(&amp;quot;HasGarage&amp;quot;, &amp;quot;HasFireplace&amp;quot;, &amp;quot;HasMasVnr&amp;quot;, &amp;quot;MSSubClass&amp;quot;, &amp;quot;HalfBath&amp;quot;)
+
+# Categories that no property has (e.g. a Poor exterior quality) are dropped too, so that the scores of ordered factors
+# are consecutive (see get_preprocessing_recipe).
+dfClean &amp;lt;- dfClean %&amp;gt;%
+    select(-all_of(vFeaturesCollinear)) %&amp;gt;%
+    mutate(across(where(is.factor), droplevels))
+
+# Determine skewed features
+vFeaturesSkew &amp;lt;- dfClean %&amp;gt;%
+    select_if(is.numeric) %&amp;gt;%
+    select_if(function(Z) abs(timeDate::skewness(Z, na.rm = T)) &amp;gt; 0.75) %&amp;gt;%
+    colnames() %&amp;gt;%
+    setdiff(c(&amp;quot;Id&amp;quot;,&amp;quot;PropertyAge&amp;quot;))
+
+# Remove Outliers and split clean data
+########################################################################################################################################################
+# dfClean &amp;lt;- dfClean %&amp;gt;% dplyr::filter(!(Id %in% c(524, 1299))) # glmnet cv_rmse improves to 0.117 but test_rmse is 0.135
+dfTrain &amp;lt;- dfClean %&amp;gt;% filter(!(Id %in% vTestIDs))
+dfTest &amp;lt;- dfClean %&amp;gt;% filter(Id %in% vTestIDs)
+
+# Preprocessing Recipe
+########################################################################################################################################################
+# Ordered factors (quality and condition grades, etc.) are encoded as integer scores, one predictor per feature, in
+# the order of their categories. The alternative, step_dummy&amp;#39;s polynomial contrasts, creates one predictor per category
+# but one. Grades that only a handful of properties have can then be missing from a cross validation fold, which makes
+# the highest-order contrasts collinear: with that encoding lm reported a rank-deficient fit in 4 of the 5 folds. Scores
+# assume the grades are equally spaced, which is a reasonable approximation for these grades, and they cut the
+# number of predictors from ~214 to ~151. dfEncodingComparison below compares the two encodings.
+#
+# step_lincomb removes any remaining exact linear combinations among the predictors. These can arise because properties
+# without a basement or garage share the &amp;quot;None&amp;quot; category of every basement or garage feature. An intercept column is
+# added for the check, because such combinations can include a constant, and removed afterwards.
+get_preprocessing_recipe &amp;lt;- function(df, ordinalScores = TRUE) {
+
+    preprocessing_recipe &amp;lt;- recipe(SalePrice ~ ., data = df) %&amp;gt;%
+        update_role(Id, new_role = &amp;quot;ID&amp;quot;) %&amp;gt;%
+        step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L))
+    if(ordinalScores) {
+        preprocessing_recipe &amp;lt;- preprocessing_recipe %&amp;gt;%
+            step_ordinalscore(all_ordered_predictors())
+    }
+    preprocessing_recipe &amp;lt;- preprocessing_recipe %&amp;gt;%
+        step_dummy(all_nominal()) %&amp;gt;%
+        step_intercept() %&amp;gt;%
+        step_lincomb(all_numeric_predictors()) %&amp;gt;%
+        step_rm(any_of(&amp;quot;intercept&amp;quot;)) %&amp;gt;%
+        step_log(all_outcomes()) %&amp;gt;%
+        prep()
+    return(preprocessing_recipe)
+}
+
+# The recipe is prepared on the training set only, and the same recipe is applied to the testing set (and to any new
+# data), so that both have exactly the same predictors.
+preprocessing_recipe &amp;lt;- get_preprocessing_recipe(dfTrain)
+
+# Preprocessed data for training models
+dfTrain_Proc &amp;lt;- preprocessing_recipe %&amp;gt;%
+    bake(new_data = NULL) %&amp;gt;%
+    rename(target = SalePrice) %&amp;gt;%
+    select(target, everything())
+
+dfTest_Proc &amp;lt;- preprocessing_recipe %&amp;gt;%
+    bake(new_data = dfTest) %&amp;gt;%
+    rename(target = SalePrice) %&amp;gt;%
+    select(target, everything())
+
+
+# Create cv folds
+########################################################################################################################################################
+get_cv_folds &amp;lt;- function(df, numFolds, strataVar, randomSeed, shuffleData) {
+    # shuffle the rows
+    if(shuffleData) {
+        set.seed(randomSeed)
+        df &amp;lt;- df[sample(nrow(df)), ]
+    }
+
+    # split dataset into folds where each fold has the same distribution of target
+    lFolds &amp;lt;- df %&amp;gt;% vfold_cv(v = numFolds, strata = all_of(strataVar))
+    return(lFolds)
+}
+
+
+# Parsnip Model Specification
+########################################################################################################################################################
+get_model_spec &amp;lt;- function(modelType) {
+
+    model_spec &amp;lt;- switch(modelType,
+                         lm = linear_reg(mode = &amp;quot;regression&amp;quot;) %&amp;gt;%
+                             set_engine(&amp;quot;lm&amp;quot;),
+
+                         glmnet = linear_reg(mode = &amp;quot;regression&amp;quot;, penalty = tune(), mixture = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;glmnet&amp;quot;),
+
+                         # No early stopping. It was tried (stop after 50 rounds without improvement on a 10% validation split)
+                         # and roughly halved xgboost tuning time, but the final model was unstable: refitting the same best
+                         # parameters with different random validation splits stopped anywhere from 195 to 687 rounds, with test
+                         # RMSE between 0.133 and 0.151, versus 0.131 for a fixed 1,000 trees. With only ~146 validation rows the
+                         # stopping point is too noisy. The narrower learn_rate range already removes the wasted fits.
+                         # nthread = 1 because parallelism comes from running many fits at once (one per worker).
+                         xgboost = boost_tree(mode=&amp;quot;regression&amp;quot;, trees=1000, min_n=tune(), tree_depth=tune(), learn_rate=tune()) %&amp;gt;%
+                             set_engine(&amp;quot;xgboost&amp;quot;, objective = &amp;quot;reg:squarederror&amp;quot;, nthread = 1),
+
+                         kernlab = svm_rbf(mode=&amp;quot;regression&amp;quot;, cost=tune(), rbf_sigma=tune(), margin=tune()) %&amp;gt;%
+                             set_engine(&amp;quot;kernlab&amp;quot;),
+
+                         # ranger replaces the randomForest engine: same algorithm, ~3x faster implementation, and 500 trees
+                         # instead of 1,000 with no loss of accuracy (see the timings at the top of this code).
+                         # num.threads = 1 for the same reason as xgboost&amp;#39;s nthread above.
+                         ranger = rand_forest(mode = &amp;quot;regression&amp;quot;, trees = 500, mtry = tune(), min_n = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;ranger&amp;quot;, num.threads = 1))
+
+    return(model_spec)
+}
+
+
+# Parameter Grid Search
+########################################################################################################################################################
+get_model_param_grid &amp;lt;- function(df, modelType, numParams, randomSeed) {
+
+    # mtry is finalized on the predictors only, so its upper bound is the number of predictors (excludes target and Id)
+    dfPredictors &amp;lt;- df %&amp;gt;% select(-target, -Id)
+
+    set.seed(randomSeed)
+    param_spec &amp;lt;- switch(modelType,
+                         glmnet = parameters(penalty(), mixture()),
+                         kernlab = parameters(cost(), rbf_sigma(), svm_margin()),
+                         # learn_rate is on a log10 scale. The dials default (1e-10 to 1e-1) spends most of the grid on rates
+                         # so small that 1,000 trees barely move from the starting prediction: those fits take the full time
+                         # and are never competitive. 10^-2.5 to 10^-0.5 (~0.003 to ~0.3) covers the useful range; the best
+                         # rate found with the default range was ~0.07, comfortably inside it.
+                         xgboost = parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))),
+                         ranger = parameters(min_n(), finalize(mtry(), dfPredictors)))
+
+    dfParamGrid &amp;lt;- grid_space_filling(param_spec, size = numParams, type = &amp;quot;max_entropy&amp;quot;)
+    return(dfParamGrid)
+}
+
+
+# Workflow for a model
+########################################################################################################################################################
+# The data is already preprocessed, so the workflow only names the outcome and predictors.
+# Id is excluded from the predictors: it is a row identifier, and with training Ids 1-1460 and test Ids 1461-2919,
+# tree models would otherwise split on it and treat every test property as lying beyond the training range.
+get_workflow &amp;lt;- function(model_spec) {
+    workflow() %&amp;gt;%
+        add_variables(outcomes = target, predictors = -Id) %&amp;gt;%
+        add_model(model_spec)
+}
+
+
+# Cross Validation Results
+########################################################################################################################################################
+# tune_grid() fits every grid point on every fold. With parallel_over = &amp;quot;everything&amp;quot;, each (fold, grid point)
+# combination is a separate task, so all workers stay busy until the end of the run.
+# The mean RMSE across folds is the same metric as before (mean of the per-fold RMSE).
+cross_validate_model &amp;lt;- function(cv_folds, model_spec, param_grid) {
+
+    tune_results &amp;lt;- get_workflow(model_spec) %&amp;gt;%
+        tune_grid(resamples = cv_folds,
+                  grid = param_grid,
+                  metrics = metric_set(rmse),
+                  control = control_grid(parallel_over = &amp;quot;everything&amp;quot;))
+
+    dfResults &amp;lt;- tune_results %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(all_of(names(param_grid)), mean_rmse = mean) %&amp;gt;%
+        arrange(mean_rmse)
+    return(dfResults)
+}
+
+
+# Fitted model with parameters
+########################################################################################################################################################
+# Returns a fitted workflow; predict() on it selects the predictor columns from new data, so Id can stay in the data.
+# The seed makes the final ranger and xgboost fits reproducible between runs.
+get_fitted_model &amp;lt;- function(df, model_spec, dfParams, randomSeed = 2300) {
+
+    model_wf &amp;lt;- get_workflow(model_spec)
+    if(!is.null(dfParams)) model_wf &amp;lt;- model_wf %&amp;gt;% finalize_workflow(dfParams)
+    set.seed(randomSeed)
+    fit(model_wf, data = df)
+}
+
+
+# Parallel backend
+########################################################################################################################################################
+# Each worker is a separate R session with tidymodels and the model packages loaded. In a full run with 5 workers,
+# no R process exceeded 0.6 GB and all R processes together (main session + workers) peaked at 3.2 GB. Budgeting
+# 0.75 GB per worker leaves headroom. Workers are capped at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM
+# available when the run starts, so the run cannot push the machine into swapping even if other applications are open.
+gb_per_worker &amp;lt;- 0.75
+gb_available &amp;lt;- ps::ps_system_memory()$avail / 1024^3
+num_workers &amp;lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
+message(sprintf(&amp;quot;Using %d parallel workers (%.1f GB RAM available)&amp;quot;, num_workers, gb_available))
+plan(multisession, workers = num_workers)
+
+# Create cross validation folds
+cv_folds &amp;lt;- get_cv_folds(dfTrain_Proc, numFolds = 5, strataVar = &amp;quot;target&amp;quot;, randomSeed = 2300, shuffleData = T)
+
+# Compare the encodings of ordered factors with a linear model on the same folds (reported in the post)
+compare_encoding &amp;lt;- function(ordinalScores) {
+
+    df &amp;lt;- get_preprocessing_recipe(dfTrain, ordinalScores) %&amp;gt;%
+        bake(new_data = NULL) %&amp;gt;%
+        rename(target = SalePrice) %&amp;gt;%
+        select(target, everything())
+    folds &amp;lt;- get_cv_folds(df, numFolds = 5, strataVar = &amp;quot;target&amp;quot;, randomSeed = 2300, shuffleData = T)
+    vAliased &amp;lt;- map_int(folds$splits, ~ sum(is.na(coef(lm(target ~ ., data = analysis(.x) %&amp;gt;% select(-Id))))))
+
+    tibble(encoding = if(ordinalScores) &amp;quot;ordinal scores&amp;quot; else &amp;quot;polynomial contrasts&amp;quot;,
+           predictors = ncol(df) - 2,
+           folds_rank_deficient = sum(vAliased &amp;gt; 0),
+           lm_cv_rmse = suppressWarnings(get_workflow(get_model_spec(&amp;quot;lm&amp;quot;)) %&amp;gt;%
+                                             fit_resamples(resamples = folds, metrics = metric_set(rmse)) %&amp;gt;%
+                                             collect_metrics() %&amp;gt;%
+                                             pull(mean)))
+}
+dfEncodingComparison &amp;lt;- bind_rows(compare_encoding(ordinalScores = FALSE), compare_encoding(ordinalScores = TRUE))
+
+# Time each model so the post can report relative run times
+dfTimings &amp;lt;- tibble(model = character(), seconds = numeric())
+time_model &amp;lt;- function(model, expr) {
+    t0 &amp;lt;- Sys.time()
+    result &amp;lt;- force(expr)
+    dfTimings &amp;lt;&amp;lt;- dfTimings %&amp;gt;% add_row(model = model, seconds = as.numeric(difftime(Sys.time(), t0, units = &amp;quot;secs&amp;quot;)))
+    result
+}
+
+# lm model (no hyperparameters, so fit_resamples instead of tune_grid)
+model_spec_lm &amp;lt;- get_model_spec(modelType = &amp;quot;lm&amp;quot;)
+cv_results_lm &amp;lt;- time_model(&amp;quot;lm&amp;quot;,
+    get_workflow(model_spec_lm) %&amp;gt;%
+        fit_resamples(resamples = cv_folds, metrics = metric_set(rmse)) %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(mean_rmse = mean))
+
+# glmnet model
+model_spec_glmnet &amp;lt;- get_model_spec(modelType = &amp;quot;glmnet&amp;quot;)
+param_grid_glmnet &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;glmnet&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_glmnet &amp;lt;- time_model(&amp;quot;glmnet&amp;quot;, cross_validate_model(cv_folds, model_spec_glmnet, param_grid_glmnet))
+param_best_glmnet &amp;lt;- cv_results_glmnet %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_glmnet &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_glmnet, param_best_glmnet)
+
+# kernlab model
+model_spec_kernlab &amp;lt;- get_model_spec(modelType = &amp;quot;kernlab&amp;quot;)
+param_grid_kernlab &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;kernlab&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_kernlab &amp;lt;- time_model(&amp;quot;kernlab&amp;quot;, cross_validate_model(cv_folds, model_spec_kernlab, param_grid_kernlab))
+param_best_kernlab &amp;lt;- cv_results_kernlab %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_kernlab &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_kernlab, param_best_kernlab)
+
+# random forest model (ranger engine; objects keep the _rf names used in index.Rmd)
+model_spec_rf &amp;lt;- get_model_spec(modelType = &amp;quot;ranger&amp;quot;)
+param_grid_rf &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;ranger&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_rf &amp;lt;- time_model(&amp;quot;ranger&amp;quot;, cross_validate_model(cv_folds, model_spec_rf, param_grid_rf))
+param_best_rf &amp;lt;- cv_results_rf %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_rf &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_rf, param_best_rf)
+
+# xgboost model
+model_spec_xgboost &amp;lt;- get_model_spec(modelType = &amp;quot;xgboost&amp;quot;)
+param_grid_xgboost &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;xgboost&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_xgboost &amp;lt;- time_model(&amp;quot;xgboost&amp;quot;, cross_validate_model(cv_folds, model_spec_xgboost, param_grid_xgboost))
+param_best_xgboost &amp;lt;- cv_results_xgboost %&amp;gt;% slice(1) %&amp;gt;% select(-mean_rmse)
+model_final_xgboost &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_xgboost, param_best_xgboost)
+
+plan(sequential)
+
+# the results that the post uses, which are saved to Ames_Tuning.Rda
+vTuningResults &amp;lt;- c(&amp;quot;model_spec_lm&amp;quot;, &amp;quot;model_spec_glmnet&amp;quot;, &amp;quot;model_spec_rf&amp;quot;, &amp;quot;model_spec_xgboost&amp;quot;, &amp;quot;model_spec_kernlab&amp;quot;,
+                    &amp;quot;model_final_glmnet&amp;quot;, &amp;quot;model_final_rf&amp;quot;, &amp;quot;model_final_xgboost&amp;quot;, &amp;quot;model_final_kernlab&amp;quot;, &amp;quot;cv_results_lm&amp;quot;,
+                    &amp;quot;cv_results_glmnet&amp;quot;, &amp;quot;cv_results_rf&amp;quot;, &amp;quot;cv_results_xgboost&amp;quot;, &amp;quot;cv_results_kernlab&amp;quot;, &amp;quot;param_grid_glmnet&amp;quot;,
+                    &amp;quot;param_grid_rf&amp;quot;, &amp;quot;param_grid_xgboost&amp;quot;, &amp;quot;param_grid_kernlab&amp;quot;, &amp;quot;param_best_glmnet&amp;quot;, &amp;quot;param_best_rf&amp;quot;,
+                    &amp;quot;param_best_xgboost&amp;quot;, &amp;quot;param_best_kernlab&amp;quot;, &amp;quot;dfTrain&amp;quot;, &amp;quot;dfTest&amp;quot;, &amp;quot;dfTrain_Proc&amp;quot;,
+                    &amp;quot;dfTest_Proc&amp;quot;, &amp;quot;dfTimings&amp;quot;, &amp;quot;get_preprocessing_recipe&amp;quot;, &amp;quot;preprocessing_recipe&amp;quot;, &amp;quot;vFeaturesCollinear&amp;quot;,
+                    &amp;quot;dfEncodingComparison&amp;quot;, &amp;quot;cv_folds&amp;quot;, &amp;quot;vFeaturesSkew&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And this code decides whether to load the saved results or to run the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1
+ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-eda/Ames_Housing_Clean.Rda&amp;quot;
+
+# Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &amp;quot;tuning_steps&amp;quot;
+# chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so
+# editing them does not start a new tuning run.
+envData &amp;lt;- new.env()
+load(ames_data_file, envir = envData)
+tuning_steps &amp;lt;- knitr::knit_code$get(&amp;quot;tuning_steps&amp;quot;)
+tuning_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$vTestIDs),
+                                code = deparse(parse(text = tuning_steps, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, tune the models again and save
+# the new results together with the fingerprint of their inputs.
+envSaved &amp;lt;- new.env()
+if (file.exists(&amp;quot;Ames_Tuning.Rda&amp;quot;)) load(&amp;quot;Ames_Tuning.Rda&amp;quot;, envir = envSaved)
+if (identical(envSaved$tuning_hash, tuning_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  eval(parse(text = tuning_steps))
+  save(list = c(vTuningResults, &amp;quot;tuning_hash&amp;quot;), file = &amp;quot;Ames_Tuning.Rda&amp;quot;)
+}
+rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
     </item>

@@ -37,18 +37,922 @@ print(&amp;quot;Dimensions of the testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vTestIDs &amp;lt;- dfTest$Id
 
 dfClean &amp;lt;- dfTrain %&amp;gt;% bind_rows(dfTest)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# dfDescription &amp;lt;- read.delim(&amp;quot;data_description.txt&amp;quot;, header = F, sep = &amp;quot;:&amp;quot;, na.strings = &amp;quot;&amp;quot;) %&amp;gt;% 
-#   as_tibble() %&amp;gt;% 
-#   set_names(c(&amp;quot;Feature&amp;quot;, &amp;quot;Description&amp;quot;)) %&amp;gt;% 
-#   map_df(str_trim) %&amp;gt;% 
-#   mutate(Feature = ifelse(Feature == &amp;quot;&amp;quot;, NA, Feature)) %&amp;gt;% 
-#   drop_na(Feature) %&amp;gt;% 
-#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&amp;gt;% 
-#   mutate(Feature = ifelse(Feature == Description, &amp;quot;&amp;quot;, Feature))
+&lt;p&gt;The data description explains each feature, and the meaning of each category. It is long, so it is folded:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# data_description.txt has one line &amp;quot;Feature: description&amp;quot; for each feature,
+# followed by one line &amp;quot;code&amp;lt;TAB&amp;gt;meaning&amp;quot; for each of its categories, if it has any
+vLines &amp;lt;- readLines(&amp;quot;data_description.txt&amp;quot;)
+vStarts &amp;lt;- grep(&amp;quot;^[[:alnum:]]+:&amp;quot;, vLines)
+vEnds &amp;lt;- c(vStarts[-1] - 1, length(vLines))
 
-# knitr::kable(dfDescription)
+dfDescription &amp;lt;- map2_dfr(vStarts, vEnds, function(iStart, iEnd) {
+  vParts &amp;lt;- str_split_fixed(vLines[iStart], &amp;quot;:&amp;quot;, 2)
+  vCategories &amp;lt;- trimws(vLines[seq_len(iEnd - iStart) + iStart])
+  vCategories &amp;lt;- vCategories[vCategories != &amp;quot;&amp;quot;]
+  vCodes &amp;lt;- str_split_fixed(vCategories, &amp;quot;	&amp;quot;, 2)
+  tibble(Feature = vParts[1],
+         Description = trimws(vParts[2]),
+         Categories = paste0(&amp;quot;&amp;lt;b&amp;gt;&amp;quot;, trimws(vCodes[, 1]), &amp;quot;&amp;lt;/b&amp;gt;: &amp;quot;, trimws(vCodes[, 2]), collapse = &amp;quot;&amp;lt;br&amp;gt;&amp;quot;))
+})
 
-# Hmisc::describe(dfClean)&lt;/code&gt;&lt;/pre&gt;
+cat(&amp;#39;&amp;lt;details class=&amp;quot;code-fold&amp;quot;&amp;gt;&amp;lt;summary&amp;gt;Show the data description&amp;lt;/summary&amp;gt;
+
+&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;details class=&#34;code-fold&#34;&gt;
+&lt;summary&gt;
+Show the data description
+&lt;/summary&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat(knitr::kable(dfDescription, format = &amp;quot;html&amp;quot;, escape = FALSE), sep = &amp;quot;
+&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Feature
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Description
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Categories
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MSSubClass
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Identifies the type of dwelling involved in the sale.
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;20&lt;/b&gt;: 1-STORY 1946 &amp;amp; NEWER ALL STYLES&lt;br&gt;&lt;b&gt;30&lt;/b&gt;: 1-STORY 1945 &amp;amp; OLDER&lt;br&gt;&lt;b&gt;40&lt;/b&gt;: 1-STORY W/FINISHED ATTIC ALL AGES&lt;br&gt;&lt;b&gt;45&lt;/b&gt;: 1-1/2 STORY - UNFINISHED ALL AGES&lt;br&gt;&lt;b&gt;50&lt;/b&gt;: 1-1/2 STORY FINISHED ALL AGES&lt;br&gt;&lt;b&gt;60&lt;/b&gt;: 2-STORY 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;70&lt;/b&gt;: 2-STORY 1945 &amp;amp; OLDER&lt;br&gt;&lt;b&gt;75&lt;/b&gt;: 2-1/2 STORY ALL AGES&lt;br&gt;&lt;b&gt;80&lt;/b&gt;: SPLIT OR MULTI-LEVEL&lt;br&gt;&lt;b&gt;85&lt;/b&gt;: SPLIT FOYER&lt;br&gt;&lt;b&gt;90&lt;/b&gt;: DUPLEX - ALL STYLES AND AGES&lt;br&gt;&lt;b&gt;120&lt;/b&gt;: 1-STORY PUD (Planned Unit Development) - 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;150&lt;/b&gt;: 1-1/2 STORY PUD - ALL AGES&lt;br&gt;&lt;b&gt;160&lt;/b&gt;: 2-STORY PUD - 1946 &amp;amp; NEWER&lt;br&gt;&lt;b&gt;180&lt;/b&gt;: PUD - MULTILEVEL - INCL SPLIT LEV/FOYER&lt;br&gt;&lt;b&gt;190&lt;/b&gt;: 2 FAMILY CONVERSION - ALL STYLES AND AGES
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MSZoning
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Identifies the general zoning classification of the sale.
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;A&lt;/b&gt;: Agriculture&lt;br&gt;&lt;b&gt;C&lt;/b&gt;: Commercial&lt;br&gt;&lt;b&gt;FV&lt;/b&gt;: Floating Village Residential&lt;br&gt;&lt;b&gt;I&lt;/b&gt;: Industrial&lt;br&gt;&lt;b&gt;RH&lt;/b&gt;: Residential High Density&lt;br&gt;&lt;b&gt;RL&lt;/b&gt;: Residential Low Density&lt;br&gt;&lt;b&gt;RP&lt;/b&gt;: Residential Low Density Park&lt;br&gt;&lt;b&gt;RM&lt;/b&gt;: Residential Medium Density
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotFrontage
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Linear feet of street connected to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Lot size in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Street
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of road access to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Grvl&lt;/b&gt;: Gravel&lt;br&gt;&lt;b&gt;Pave&lt;/b&gt;: Paved
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Alley
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of alley access to property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Grvl&lt;/b&gt;: Gravel&lt;br&gt;&lt;b&gt;Pave&lt;/b&gt;: Paved&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No alley access
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotShape
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+General shape of property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Reg&lt;/b&gt;: Regular&lt;br&gt;&lt;b&gt;IR1&lt;/b&gt;: Slightly irregular&lt;br&gt;&lt;b&gt;IR2&lt;/b&gt;: Moderately Irregular&lt;br&gt;&lt;b&gt;IR3&lt;/b&gt;: Irregular
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LandContour
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Flatness of the property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Lvl&lt;/b&gt;: Near Flat/Level&lt;br&gt;&lt;b&gt;Bnk&lt;/b&gt;: Banked - Quick and significant rise from street grade to building&lt;br&gt;&lt;b&gt;HLS&lt;/b&gt;: Hillside - Significant slope from side to side&lt;br&gt;&lt;b&gt;Low&lt;/b&gt;: Depression
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Utilities
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of utilities available
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AllPub&lt;/b&gt;: All public Utilities (E,G,W,&amp;amp; S)&lt;br&gt;&lt;b&gt;NoSewr&lt;/b&gt;: Electricity, Gas, and Water (Septic Tank)&lt;br&gt;&lt;b&gt;NoSeWa&lt;/b&gt;: Electricity and Gas Only&lt;br&gt;&lt;b&gt;ELO&lt;/b&gt;: Electricity only
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LotConfig
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Lot configuration
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Inside&lt;/b&gt;: Inside lot&lt;br&gt;&lt;b&gt;Corner&lt;/b&gt;: Corner lot&lt;br&gt;&lt;b&gt;CulDSac&lt;/b&gt;: Cul-de-sac&lt;br&gt;&lt;b&gt;FR2&lt;/b&gt;: Frontage on 2 sides of property&lt;br&gt;&lt;b&gt;FR3&lt;/b&gt;: Frontage on 3 sides of property
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LandSlope
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Slope of property
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Gtl&lt;/b&gt;: Gentle slope&lt;br&gt;&lt;b&gt;Mod&lt;/b&gt;: Moderate Slope&lt;br&gt;&lt;b&gt;Sev&lt;/b&gt;: Severe Slope
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Neighborhood
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Physical locations within Ames city limits
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Blmngtn&lt;/b&gt;: Bloomington Heights&lt;br&gt;&lt;b&gt;Blueste&lt;/b&gt;: Bluestem&lt;br&gt;&lt;b&gt;BrDale&lt;/b&gt;: Briardale&lt;br&gt;&lt;b&gt;BrkSide&lt;/b&gt;: Brookside&lt;br&gt;&lt;b&gt;ClearCr&lt;/b&gt;: Clear Creek&lt;br&gt;&lt;b&gt;CollgCr&lt;/b&gt;: College Creek&lt;br&gt;&lt;b&gt;Crawfor&lt;/b&gt;: Crawford&lt;br&gt;&lt;b&gt;Edwards&lt;/b&gt;: Edwards&lt;br&gt;&lt;b&gt;Gilbert&lt;/b&gt;: Gilbert&lt;br&gt;&lt;b&gt;IDOTRR&lt;/b&gt;: Iowa DOT and Rail Road&lt;br&gt;&lt;b&gt;MeadowV&lt;/b&gt;: Meadow Village&lt;br&gt;&lt;b&gt;Mitchel&lt;/b&gt;: Mitchell&lt;br&gt;&lt;b&gt;Names&lt;/b&gt;: North Ames&lt;br&gt;&lt;b&gt;NoRidge&lt;/b&gt;: Northridge&lt;br&gt;&lt;b&gt;NPkVill&lt;/b&gt;: Northpark Villa&lt;br&gt;&lt;b&gt;NridgHt&lt;/b&gt;: Northridge Heights&lt;br&gt;&lt;b&gt;NWAmes&lt;/b&gt;: Northwest Ames&lt;br&gt;&lt;b&gt;OldTown&lt;/b&gt;: Old Town&lt;br&gt;&lt;b&gt;SWISU&lt;/b&gt;: South &amp;amp; West of Iowa State University&lt;br&gt;&lt;b&gt;Sawyer&lt;/b&gt;: Sawyer&lt;br&gt;&lt;b&gt;SawyerW&lt;/b&gt;: Sawyer West&lt;br&gt;&lt;b&gt;Somerst&lt;/b&gt;: Somerset&lt;br&gt;&lt;b&gt;StoneBr&lt;/b&gt;: Stone Brook&lt;br&gt;&lt;b&gt;Timber&lt;/b&gt;: Timberland&lt;br&gt;&lt;b&gt;Veenker&lt;/b&gt;: Veenker
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Proximity to various conditions
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Artery&lt;/b&gt;: Adjacent to arterial street&lt;br&gt;&lt;b&gt;Feedr&lt;/b&gt;: Adjacent to feeder street&lt;br&gt;&lt;b&gt;Norm&lt;/b&gt;: Normal&lt;br&gt;&lt;b&gt;RRNn&lt;/b&gt;: Within 200’ of North-South Railroad&lt;br&gt;&lt;b&gt;RRAn&lt;/b&gt;: Adjacent to North-South Railroad&lt;br&gt;&lt;b&gt;PosN&lt;/b&gt;: Near positive off-site feature–park, greenbelt, etc.&lt;br&gt;&lt;b&gt;PosA&lt;/b&gt;: Adjacent to postive off-site feature&lt;br&gt;&lt;b&gt;RRNe&lt;/b&gt;: Within 200’ of East-West Railroad&lt;br&gt;&lt;b&gt;RRAe&lt;/b&gt;: Adjacent to East-West Railroad
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Proximity to various conditions (if more than one is present)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Artery&lt;/b&gt;: Adjacent to arterial street&lt;br&gt;&lt;b&gt;Feedr&lt;/b&gt;: Adjacent to feeder street&lt;br&gt;&lt;b&gt;Norm&lt;/b&gt;: Normal&lt;br&gt;&lt;b&gt;RRNn&lt;/b&gt;: Within 200’ of North-South Railroad&lt;br&gt;&lt;b&gt;RRAn&lt;/b&gt;: Adjacent to North-South Railroad&lt;br&gt;&lt;b&gt;PosN&lt;/b&gt;: Near positive off-site feature–park, greenbelt, etc.&lt;br&gt;&lt;b&gt;PosA&lt;/b&gt;: Adjacent to postive off-site feature&lt;br&gt;&lt;b&gt;RRNe&lt;/b&gt;: Within 200’ of East-West Railroad&lt;br&gt;&lt;b&gt;RRAe&lt;/b&gt;: Adjacent to East-West Railroad
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BldgType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of dwelling
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;1Fam&lt;/b&gt;: Single-family Detached&lt;br&gt;&lt;b&gt;2FmCon&lt;/b&gt;: Two-family Conversion; originally built as one-family dwelling&lt;br&gt;&lt;b&gt;Duplx&lt;/b&gt;: Duplex&lt;br&gt;&lt;b&gt;TwnhsE&lt;/b&gt;: Townhouse End Unit&lt;br&gt;&lt;b&gt;TwnhsI&lt;/b&gt;: Townhouse Inside Unit
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HouseStyle
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Style of dwelling
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;1Story&lt;/b&gt;: One story&lt;br&gt;&lt;b&gt;1.5Fin&lt;/b&gt;: One and one-half story - 2nd level finished&lt;br&gt;&lt;b&gt;1.5Unf&lt;/b&gt;: One and one-half story - 2nd level unfinished&lt;br&gt;&lt;b&gt;2Story&lt;/b&gt;: Two story&lt;br&gt;&lt;b&gt;2.5Fin&lt;/b&gt;: Two and one-half story - 2nd level finished&lt;br&gt;&lt;b&gt;2.5Unf&lt;/b&gt;: Two and one-half story - 2nd level unfinished&lt;br&gt;&lt;b&gt;SFoyer&lt;/b&gt;: Split Foyer&lt;br&gt;&lt;b&gt;SLvl&lt;/b&gt;: Split Level
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OverallQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rates the overall material and finish of the house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;10&lt;/b&gt;: Very Excellent&lt;br&gt;&lt;b&gt;9&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;8&lt;/b&gt;: Very Good&lt;br&gt;&lt;b&gt;7&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;6&lt;/b&gt;: Above Average&lt;br&gt;&lt;b&gt;5&lt;/b&gt;: Average&lt;br&gt;&lt;b&gt;4&lt;/b&gt;: Below Average&lt;br&gt;&lt;b&gt;3&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;2&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;1&lt;/b&gt;: Very Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OverallCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rates the overall condition of the house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;10&lt;/b&gt;: Very Excellent&lt;br&gt;&lt;b&gt;9&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;8&lt;/b&gt;: Very Good&lt;br&gt;&lt;b&gt;7&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;6&lt;/b&gt;: Above Average&lt;br&gt;&lt;b&gt;5&lt;/b&gt;: Average&lt;br&gt;&lt;b&gt;4&lt;/b&gt;: Below Average&lt;br&gt;&lt;b&gt;3&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;2&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;1&lt;/b&gt;: Very Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YearBuilt
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Original construction date
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YearRemodAdd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Remodel date (same as construction date if no remodeling or additions)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+RoofStyle
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of roof
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Flat&lt;/b&gt;: Flat&lt;br&gt;&lt;b&gt;Gable&lt;/b&gt;: Gable&lt;br&gt;&lt;b&gt;Gambrel&lt;/b&gt;: Gabrel (Barn)&lt;br&gt;&lt;b&gt;Hip&lt;/b&gt;: Hip&lt;br&gt;&lt;b&gt;Mansard&lt;/b&gt;: Mansard&lt;br&gt;&lt;b&gt;Shed&lt;/b&gt;: Shed
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+RoofMatl
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Roof material
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;ClyTile&lt;/b&gt;: Clay or Tile&lt;br&gt;&lt;b&gt;CompShg&lt;/b&gt;: Standard (Composite) Shingle&lt;br&gt;&lt;b&gt;Membran&lt;/b&gt;: Membrane&lt;br&gt;&lt;b&gt;Metal&lt;/b&gt;: Metal&lt;br&gt;&lt;b&gt;Roll&lt;/b&gt;: Roll&lt;br&gt;&lt;b&gt;Tar&amp;amp;Grv&lt;/b&gt;: Gravel &amp;amp; Tar&lt;br&gt;&lt;b&gt;WdShake&lt;/b&gt;: Wood Shakes&lt;br&gt;&lt;b&gt;WdShngl&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior1st
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior covering on house
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AsbShng&lt;/b&gt;: Asbestos Shingles&lt;br&gt;&lt;b&gt;AsphShn&lt;/b&gt;: Asphalt Shingles&lt;br&gt;&lt;b&gt;BrkComm&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;CemntBd&lt;/b&gt;: Cement Board&lt;br&gt;&lt;b&gt;HdBoard&lt;/b&gt;: Hard Board&lt;br&gt;&lt;b&gt;ImStucc&lt;/b&gt;: Imitation Stucco&lt;br&gt;&lt;b&gt;MetalSd&lt;/b&gt;: Metal Siding&lt;br&gt;&lt;b&gt;Other&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Plywood&lt;/b&gt;: Plywood&lt;br&gt;&lt;b&gt;PreCast&lt;/b&gt;: PreCast&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Stucco&lt;/b&gt;: Stucco&lt;br&gt;&lt;b&gt;VinylSd&lt;/b&gt;: Vinyl Siding&lt;br&gt;&lt;b&gt;Wd Sdng&lt;/b&gt;: Wood Siding&lt;br&gt;&lt;b&gt;WdShing&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior2nd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Exterior covering on house (if more than one material)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;AsbShng&lt;/b&gt;: Asbestos Shingles&lt;br&gt;&lt;b&gt;AsphShn&lt;/b&gt;: Asphalt Shingles&lt;br&gt;&lt;b&gt;BrkComm&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;CemntBd&lt;/b&gt;: Cement Board&lt;br&gt;&lt;b&gt;HdBoard&lt;/b&gt;: Hard Board&lt;br&gt;&lt;b&gt;ImStucc&lt;/b&gt;: Imitation Stucco&lt;br&gt;&lt;b&gt;MetalSd&lt;/b&gt;: Metal Siding&lt;br&gt;&lt;b&gt;Other&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Plywood&lt;/b&gt;: Plywood&lt;br&gt;&lt;b&gt;PreCast&lt;/b&gt;: PreCast&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Stucco&lt;/b&gt;: Stucco&lt;br&gt;&lt;b&gt;VinylSd&lt;/b&gt;: Vinyl Siding&lt;br&gt;&lt;b&gt;Wd Sdng&lt;/b&gt;: Wood Siding&lt;br&gt;&lt;b&gt;WdShing&lt;/b&gt;: Wood Shingles
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MasVnrType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Masonry veneer type
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;BrkCmn&lt;/b&gt;: Brick Common&lt;br&gt;&lt;b&gt;BrkFace&lt;/b&gt;: Brick Face&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;None&lt;/b&gt;: None&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MasVnrArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Masonry veneer area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ExterQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the quality of the material on the exterior
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ExterCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the present condition of the material on the exterior
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Foundation
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of foundation
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;BrkTil&lt;/b&gt;: Brick &amp;amp; Tile&lt;br&gt;&lt;b&gt;CBlock&lt;/b&gt;: Cinder Block&lt;br&gt;&lt;b&gt;PConc&lt;/b&gt;: Poured Contrete&lt;br&gt;&lt;b&gt;Slab&lt;/b&gt;: Slab&lt;br&gt;&lt;b&gt;Stone&lt;/b&gt;: Stone&lt;br&gt;&lt;b&gt;Wood&lt;/b&gt;: Wood
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the height of the basement
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent (100+ inches)&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good (90-99 inches)&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical (80-89 inches)&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair (70-79 inches)&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor (&amp;lt;70 inches&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Evaluates the general condition of the basement
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical - slight dampness allowed&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair - dampness or some cracking or settling&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor - Severe cracking, settling, or wetness&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtExposure
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Refers to walkout or garden level walls
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Gd&lt;/b&gt;: Good Exposure&lt;br&gt;&lt;b&gt;Av&lt;/b&gt;: Average Exposure (split levels or foyers typically score average or above)&lt;br&gt;&lt;b&gt;Mn&lt;/b&gt;: Mimimum Exposure&lt;br&gt;&lt;b&gt;No&lt;/b&gt;: No Exposure&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinType1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rating of basement finished area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GLQ&lt;/b&gt;: Good Living Quarters&lt;br&gt;&lt;b&gt;ALQ&lt;/b&gt;: Average Living Quarters&lt;br&gt;&lt;b&gt;BLQ&lt;/b&gt;: Below Average Living Quarters&lt;br&gt;&lt;b&gt;Rec&lt;/b&gt;: Average Rec Room&lt;br&gt;&lt;b&gt;LwQ&lt;/b&gt;: Low Quality&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinshed&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinSF1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type 1 finished square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinType2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Rating of basement finished area (if multiple types)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GLQ&lt;/b&gt;: Good Living Quarters&lt;br&gt;&lt;b&gt;ALQ&lt;/b&gt;: Average Living Quarters&lt;br&gt;&lt;b&gt;BLQ&lt;/b&gt;: Below Average Living Quarters&lt;br&gt;&lt;b&gt;Rec&lt;/b&gt;: Average Rec Room&lt;br&gt;&lt;b&gt;LwQ&lt;/b&gt;: Low Quality&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinshed&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Basement
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFinSF2
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type 2 finished square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtUnfSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Unfinished square feet of basement area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+TotalBsmtSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Total square feet of basement area
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Heating
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of heating
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Floor&lt;/b&gt;: Floor Furnace&lt;br&gt;&lt;b&gt;GasA&lt;/b&gt;: Gas forced warm air furnace&lt;br&gt;&lt;b&gt;GasW&lt;/b&gt;: Gas hot water or steam heat&lt;br&gt;&lt;b&gt;Grav&lt;/b&gt;: Gravity furnace&lt;br&gt;&lt;b&gt;OthW&lt;/b&gt;: Hot water or steam heat other than gas&lt;br&gt;&lt;b&gt;Wall&lt;/b&gt;: Wall furnace
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HeatingQC
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Heating quality and condition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+CentralAir
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Central air conditioning
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;N&lt;/b&gt;: No&lt;br&gt;&lt;b&gt;Y&lt;/b&gt;: Yes
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Electrical
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Electrical system
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;SBrkr&lt;/b&gt;: Standard Circuit Breakers &amp;amp; Romex&lt;br&gt;&lt;b&gt;FuseA&lt;/b&gt;: Fuse Box over 60 AMP and all Romex wiring (Average)&lt;br&gt;&lt;b&gt;FuseF&lt;/b&gt;: 60 AMP Fuse Box and mostly Romex wiring (Fair)&lt;br&gt;&lt;b&gt;FuseP&lt;/b&gt;: 60 AMP Fuse Box and mostly knob &amp;amp; tube wiring (poor)&lt;br&gt;&lt;b&gt;Mix&lt;/b&gt;: Mixed
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+1stFlrSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+First Floor square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+2ndFlrSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Second floor square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+LowQualFinSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low quality finished square feet (all floors)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GrLivArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Above grade (ground) living area square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtFullBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Basement full bathrooms
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+BsmtHalfBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Basement half bathrooms
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+FullBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Full bathrooms above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+HalfBath
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Half baths above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Bedroom
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Bedrooms above grade (does NOT include basement bedrooms)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+KitchenAbvGr
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Kitchens above grade
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+KitchenQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Kitchen quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+TotRmsAbvGrd
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Total rooms above grade (does not include bathrooms)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Functional
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Home functionality (Assume typical unless deductions are warranted)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Typ&lt;/b&gt;: Typical Functionality&lt;br&gt;&lt;b&gt;Min1&lt;/b&gt;: Minor Deductions 1&lt;br&gt;&lt;b&gt;Min2&lt;/b&gt;: Minor Deductions 2&lt;br&gt;&lt;b&gt;Mod&lt;/b&gt;: Moderate Deductions&lt;br&gt;&lt;b&gt;Maj1&lt;/b&gt;: Major Deductions 1&lt;br&gt;&lt;b&gt;Maj2&lt;/b&gt;: Major Deductions 2&lt;br&gt;&lt;b&gt;Sev&lt;/b&gt;: Severely Damaged&lt;br&gt;&lt;b&gt;Sal&lt;/b&gt;: Salvage only
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fireplaces
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Number of fireplaces
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+FireplaceQu
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fireplace quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent - Exceptional Masonry Fireplace&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good - Masonry Fireplace in main level&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average - Prefabricated Fireplace in main living area or Masonry Fireplace in basement&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair - Prefabricated Fireplace in basement&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor - Ben Franklin Stove&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Fireplace
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage location
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;2Types&lt;/b&gt;: More than one type of garage&lt;br&gt;&lt;b&gt;Attchd&lt;/b&gt;: Attached to home&lt;br&gt;&lt;b&gt;Basment&lt;/b&gt;: Basement Garage&lt;br&gt;&lt;b&gt;BuiltIn&lt;/b&gt;: Built-In (Garage part of house - typically has room above garage)&lt;br&gt;&lt;b&gt;CarPort&lt;/b&gt;: Car Port&lt;br&gt;&lt;b&gt;Detchd&lt;/b&gt;: Detached from home&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageYrBlt
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Year garage was built
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageFinish
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Interior finish of the garage
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Fin&lt;/b&gt;: Finished&lt;br&gt;&lt;b&gt;RFn&lt;/b&gt;: Rough Finished&lt;br&gt;&lt;b&gt;Unf&lt;/b&gt;: Unfinished&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageCars
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Size of garage in car capacity
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Size of garage in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageQual
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+GarageCond
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Garage condition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Typical/Average&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;Po&lt;/b&gt;: Poor&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Garage
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PavedDrive
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Paved driveway
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Y&lt;/b&gt;: Paved&lt;br&gt;&lt;b&gt;P&lt;/b&gt;: Partial Pavement&lt;br&gt;&lt;b&gt;N&lt;/b&gt;: Dirt/Gravel
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+WoodDeckSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Wood deck area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+OpenPorchSF
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Open porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+EnclosedPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Enclosed porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+3SsnPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Three season porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+ScreenPorch
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Screen porch area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PoolArea
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Pool area in square feet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+PoolQC
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Pool quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Ex&lt;/b&gt;: Excellent&lt;br&gt;&lt;b&gt;Gd&lt;/b&gt;: Good&lt;br&gt;&lt;b&gt;TA&lt;/b&gt;: Average/Typical&lt;br&gt;&lt;b&gt;Fa&lt;/b&gt;: Fair&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Pool
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fence
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Fence quality
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;GdPrv&lt;/b&gt;: Good Privacy&lt;br&gt;&lt;b&gt;MnPrv&lt;/b&gt;: Minimum Privacy&lt;br&gt;&lt;b&gt;GdWo&lt;/b&gt;: Good Wood&lt;br&gt;&lt;b&gt;MnWw&lt;/b&gt;: Minimum Wood/Wire&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: No Fence
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MiscFeature
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Miscellaneous feature not covered in other categories
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Elev&lt;/b&gt;: Elevator&lt;br&gt;&lt;b&gt;Gar2&lt;/b&gt;: 2nd Garage (if not described in garage section)&lt;br&gt;&lt;b&gt;Othr&lt;/b&gt;: Other&lt;br&gt;&lt;b&gt;Shed&lt;/b&gt;: Shed (over 100 SF)&lt;br&gt;&lt;b&gt;TenC&lt;/b&gt;: Tennis Court&lt;br&gt;&lt;b&gt;NA&lt;/b&gt;: None
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MiscVal
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+$Value of miscellaneous feature
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+MoSold
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Month Sold (MM)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+YrSold
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Year Sold (YYYY)
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;&lt;/b&gt;:
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+SaleType
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Type of sale
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;WD&lt;/b&gt;: Warranty Deed - Conventional&lt;br&gt;&lt;b&gt;CWD&lt;/b&gt;: Warranty Deed - Cash&lt;br&gt;&lt;b&gt;VWD&lt;/b&gt;: Warranty Deed - VA Loan&lt;br&gt;&lt;b&gt;New&lt;/b&gt;: Home just constructed and sold&lt;br&gt;&lt;b&gt;COD&lt;/b&gt;: Court Officer Deed/Estate&lt;br&gt;&lt;b&gt;Con&lt;/b&gt;: Contract 15% Down payment regular terms&lt;br&gt;&lt;b&gt;ConLw&lt;/b&gt;: Contract Low Down payment and low interest&lt;br&gt;&lt;b&gt;ConLI&lt;/b&gt;: Contract Low Interest&lt;br&gt;&lt;b&gt;ConLD&lt;/b&gt;: Contract Low Down&lt;br&gt;&lt;b&gt;Oth&lt;/b&gt;: Other
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+SaleCondition
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Condition of sale
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;b&gt;Normal&lt;/b&gt;: Normal Sale&lt;br&gt;&lt;b&gt;Abnorml&lt;/b&gt;: Abnormal Sale - trade, foreclosure, short sale&lt;br&gt;&lt;b&gt;AdjLand&lt;/b&gt;: Adjoining Land Purchase&lt;br&gt;&lt;b&gt;Alloca&lt;/b&gt;: Allocation - two linked properties with separate deeds, typically condo with a garage unit&lt;br&gt;&lt;b&gt;Family&lt;/b&gt;: Sale between family members&lt;br&gt;&lt;b&gt;Partial&lt;/b&gt;: Home was not completed when last assessed (associated with New Homes)
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat(&amp;quot;
+&amp;lt;/details&amp;gt;
+&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/details&gt;
 &lt;p&gt;Now, let’s put the training set and the testing set together in one dataset, and count the missing values in each feature:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
