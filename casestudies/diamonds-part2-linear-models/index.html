@@ -745,9 +745,18 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 Residual standard error: 0.138 on 40438 degrees of freedom
 Multiple R-squared:  0.982,	Adjusted R-squared:  0.982 
 F-statistic: 1.53e+05 on 14 and 40438 DF,  p-value: &lt;0.0000000000000002</code></pre>
-<pre class="r"><code>par(mfrow = c(2,2))
-plot(fit_lm[[1]])</code></pre>
-<p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png" alt="" width="672" /></p>
+<p>A residual is the difference between the actual value and the predicted value, here of <code>log(price)</code>. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of our final model:</p>
+<pre class="r"><code># labels are off: the row numbers of a random training set do not identify the diamonds
+eda_plot_residuals(fit_lm[[1]], nLabel = 0)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_residuals-1.png" alt="" width="960" /></p>
+<pre class="r"><code>vStdResid &lt;- rstandard(fit_lm[[1]])
+vCooks &lt;- cooks.distance(fit_lm[[1]])</code></pre>
+<ul>
+<li><strong>Residuals vs Fitted:</strong> The residuals stay close to 0 for all predicted values, and the red smooth line is almost flat. So the model captures the relationship well. The small curve shows that a little non-linearity remains. At the highest predicted values, the residuals form a sloping edge below 0. The reason is that no diamond in the data costs more than $18,823, so for the largest predictions, the actual price can only be lower.</li>
+<li><strong>Normal Q-Q:</strong> In the middle, the points follow the dashed line, so most residuals are normally distributed. But the tails, especially the upper tail, are longer: some diamonds cost much more than the model predicts. 160 of the 40453 diamonds in the training set have a standardized residual larger than 3, or smaller than -3.</li>
+<li><strong>Scale-Location:</strong> The smooth line is almost flat, so the spread of the errors is about the same for cheap and expensive diamonds. The log of <code>price</code> makes the spread stable. Without it, the errors grow with the price.</li>
+<li><strong>Residuals vs Leverage:</strong> No diamond has a high leverage. The largest Cook’s distance is only 0.0067. A point needs a Cook’s distance of about 0.5 or more to pull the model strongly, so the plot does not even reach the dashed contours that mark 0.5 and 1. No single diamond controls the model.</li>
+</ul>
 <p>If <code>clarity</code> and <code>color</code> do not change, a 1% increase in <code>carat</code> increases the predicted <code>price</code> by about <code>1.88</code>%.</p>
 <p>Here is a scatter plot of the actual prices against the prices that our final model predicts for the testing set:</p>
 <pre class="r"><code>fit_lm[[2]] %&gt;%

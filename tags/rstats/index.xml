@@ -4069,6 +4069,22 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;A linear model with all the features gives an RMSE of &lt;strong&gt;0.1336&lt;/strong&gt;.&lt;/li&gt;
 &lt;li&gt;This is the simplest and fastest model, and it has no hyperparameters to choose.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;A residual is the difference between the actual value and the predicted value, here of &lt;code&gt;log(SalePrice)&lt;/code&gt;. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of the linear model, fitted on the complete training set. The labels show the &lt;code&gt;Id&lt;/code&gt; of the most extreme properties in each plot:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_residuals(model_lm_check, vLabels = dfTrain_Proc$Id, plotTitle = &amp;quot;Residual plots of the linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/lm_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# standardized residual, leverage and Cook&amp;#39;s distance of each property
+dfLmDiagnostics &amp;lt;- tibble(Id = dfTrain_Proc$Id,
+                          std_resid = rstandard(model_lm_check),
+                          leverage = hatvalues(model_lm_check),
+                          cooks = cooks.distance(model_lm_check)) %&amp;gt;%
+  arrange(desc(cooks))
+lm_diagnostic &amp;lt;- function(propertyId, column) dfLmDiagnostics[[column]][dfLmDiagnostics$Id == propertyId]&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids &lt;strong&gt;1299&lt;/strong&gt;, &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;633&lt;/strong&gt;. In the previous post, we saw that 1299 and 524 are very large properties that sold at low prices.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Normal Q-Q:&lt;/strong&gt; The lower tail is much longer than the dashed line. Property 1299 has a standardized residual of -12.4, and property 524 has -9.1. For normally distributed errors, values beyond -3 are very rare.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scale-Location:&lt;/strong&gt; The smooth line goes up at both ends, so the errors are larger for the cheapest and the most expensive properties.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Leverage:&lt;/strong&gt; Properties 1299 and 524 have both a large residual and a high leverage (0.22 and 0.16). So they have the largest Cook’s distances, 0.29 and 0.11. These are below the dashed contour at 0.5, but much larger than for most properties. They pull the straight-line fit, which is one reason why &lt;code&gt;glmnet&lt;/code&gt; and the tree-based models work better.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;regularized-linear-model&#34; class=&#34;section level3&#34;&gt;
@@ -6030,9 +6046,18 @@ Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39
 Residual standard error: 0.138 on 40438 degrees of freedom
 Multiple R-squared:  0.982,	Adjusted R-squared:  0.982 
 F-statistic: 1.53e+05 on 14 and 40438 DF,  p-value: &amp;lt;0.0000000000000002&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow = c(2,2))
-plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;A residual is the difference between the actual value and the predicted value, here of &lt;code&gt;log(price)&lt;/code&gt;. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of our final model:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# labels are off: the row numbers of a random training set do not identify the diamonds
+eda_plot_residuals(fit_lm[[1]], nLabel = 0)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vStdResid &amp;lt;- rstandard(fit_lm[[1]])
+vCooks &amp;lt;- cooks.distance(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; The residuals stay close to 0 for all predicted values, and the red smooth line is almost flat. So the model captures the relationship well. The small curve shows that a little non-linearity remains. At the highest predicted values, the residuals form a sloping edge below 0. The reason is that no diamond in the data costs more than $18,823, so for the largest predictions, the actual price can only be lower.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Normal Q-Q:&lt;/strong&gt; In the middle, the points follow the dashed line, so most residuals are normally distributed. But the tails, especially the upper tail, are longer: some diamonds cost much more than the model predicts. 160 of the 40453 diamonds in the training set have a standardized residual larger than 3, or smaller than -3.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scale-Location:&lt;/strong&gt; The smooth line is almost flat, so the spread of the errors is about the same for cheap and expensive diamonds. The log of &lt;code&gt;price&lt;/code&gt; makes the spread stable. Without it, the errors grow with the price.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Leverage:&lt;/strong&gt; No diamond has a high leverage. The largest Cook’s distance is only 0.0067. A point needs a Cook’s distance of about 0.5 or more to pull the model strongly, so the plot does not even reach the dashed contours that mark 0.5 and 1. No single diamond controls the model.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;If &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; do not change, a 1% increase in &lt;code&gt;carat&lt;/code&gt; increases the predicted &lt;code&gt;price&lt;/code&gt; by about &lt;code&gt;1.88&lt;/code&gt;%.&lt;/p&gt;
 &lt;p&gt;Here is a scatter plot of the actual prices against the prices that our final model predicts for the testing set:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_lm[[2]] %&amp;gt;%
@@ -6244,7 +6269,7 @@ dfInput &amp;lt;- dfInput %&amp;gt;% mutate_at(vFeaturesNum, makeOutliersNA)
 eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &amp;quot;Histograms of numerical features excluding outliers&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Without the outliers, the ranges of the values are more reasonable. &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are right skewed: most values are small, and a few values are much larger.&lt;/p&gt;
-&lt;p&gt;Let’s plot &lt;code&gt;price&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount (for example, from $100 to $1,000 to $10,000). This makes it easier to see the spread of skewed values:&lt;/p&gt;
+&lt;p&gt;Let’s plot &lt;code&gt;price&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount (for example, from &lt;code&gt;$100&lt;/code&gt; to &lt;code&gt;$1,000&lt;/code&gt; to &lt;code&gt;$10,000&lt;/code&gt;). This makes it easier to see the spread of skewed values:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, &amp;quot;price&amp;quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plot has two peaks. This means that two price ranges are the most common: one just below USD 1000 and one near USD 5000. Interestingly, almost no diamonds cost about USD 1500. So the plot shows a big gap at that price.&lt;/p&gt;

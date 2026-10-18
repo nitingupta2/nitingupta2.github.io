@@ -587,6 +587,22 @@ Computational engine: lm </code></pre>
 <li>A linear model with all the features gives an RMSE of <strong>0.1336</strong>.</li>
 <li>This is the simplest and fastest model, and it has no hyperparameters to choose.</li>
 </ul>
+<p>A residual is the difference between the actual value and the predicted value, here of <code>log(SalePrice)</code>. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of the linear model, fitted on the complete training set. The labels show the <code>Id</code> of the most extreme properties in each plot:</p>
+<pre class="r"><code>eda_plot_residuals(model_lm_check, vLabels = dfTrain_Proc$Id, plotTitle = &quot;Residual plots of the linear model&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/lm_residuals-1.png" alt="" width="960" /></p>
+<pre class="r"><code># standardized residual, leverage and Cook&#39;s distance of each property
+dfLmDiagnostics &lt;- tibble(Id = dfTrain_Proc$Id,
+                          std_resid = rstandard(model_lm_check),
+                          leverage = hatvalues(model_lm_check),
+                          cooks = cooks.distance(model_lm_check)) %&gt;%
+  arrange(desc(cooks))
+lm_diagnostic &lt;- function(propertyId, column) dfLmDiagnostics[[column]][dfLmDiagnostics$Id == propertyId]</code></pre>
+<ul>
+<li><strong>Residuals vs Fitted:</strong> Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids <strong>1299</strong>, <strong>524</strong> and <strong>633</strong>. In the previous post, we saw that 1299 and 524 are very large properties that sold at low prices.</li>
+<li><strong>Normal Q-Q:</strong> The lower tail is much longer than the dashed line. Property 1299 has a standardized residual of -12.4, and property 524 has -9.1. For normally distributed errors, values beyond -3 are very rare.</li>
+<li><strong>Scale-Location:</strong> The smooth line goes up at both ends, so the errors are larger for the cheapest and the most expensive properties.</li>
+<li><strong>Residuals vs Leverage:</strong> Properties 1299 and 524 have both a large residual and a high leverage (0.22 and 0.16). So they have the largest Cook’s distances, 0.29 and 0.11. These are below the dashed contour at 0.5, but much larger than for most properties. They pull the straight-line fit, which is one reason why <code>glmnet</code> and the tree-based models work better.</li>
+</ul>
 </div>
 </div>
 <div id="regularized-linear-model" class="section level3">
