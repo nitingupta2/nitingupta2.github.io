@@ -787,6 +787,35 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
                            &amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt; [1] &amp;quot;BsmtFullBath&amp;quot;  &amp;quot;GarageCars&amp;quot;    &amp;quot;GarageYrBlt&amp;quot;   &amp;quot;GrLivArea&amp;quot;     &amp;quot;PoolArea&amp;quot;      &amp;quot;YearBuilt&amp;quot;     &amp;quot;YearRemodAdd&amp;quot;  &amp;quot;Neighborhood&amp;quot;  &amp;quot;OpenPorchSF&amp;quot;  
 [10] &amp;quot;EnclosedPorch&amp;quot; &amp;quot;3SsnPorch&amp;quot;     &amp;quot;ScreenPorch&amp;quot;  &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s check these choices by measuring the association between every pair of features. A suitable measure is used for each pair: Pearson correlation between two numerical features, Cramer’s V between two categorical features, and the correlation ratio between a numerical and a categorical feature. Cramer’s V and the correlation ratio are bias-corrected, so that features with many categories do not look associated with everything.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mAssoc &amp;lt;- association_matrix(dfClean %&amp;gt;% select(-Id))
+
+# one row per pair of features, strongest association first
+mUpper &amp;lt;- which(upper.tri(mAssoc), arr.ind = T)
+dfAssocPairs &amp;lt;- tibble(feature1 = rownames(mAssoc)[mUpper[, 1]],
+                       feature2 = colnames(mAssoc)[mUpper[, 2]],
+                       association = mAssoc[mUpper],
+                       measure = attr(mAssoc, &amp;quot;measure&amp;quot;)[mUpper]) %&amp;gt;%
+  drop_na(association) %&amp;gt;%
+  arrange(desc(abs(association)))
+
+assoc_of &amp;lt;- function(f1, f2) {
+  dfAssocPairs %&amp;gt;%
+    filter((feature1 == f1 &amp;amp; feature2 == f2) | (feature1 == f2 &amp;amp; feature2 == f1)) %&amp;gt;%
+    pull(association) %&amp;gt;%
+    round(2)
+}
+
+vFeaturesAssoc &amp;lt;- dfAssocPairs %&amp;gt;% filter(abs(association) &amp;gt;= 0.85) %&amp;gt;% select(feature1, feature2) %&amp;gt;% unlist() %&amp;gt;% unique()
+vPorchAssoc &amp;lt;- map_dbl(c(&amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;), ~ assoc_of(.x, &amp;quot;PorchSF&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here are the 36 features that have an association of 0.85 or more with at least one other feature. They are clustered so that related features sit next to each other:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_association_matrix(dfClean[vFeaturesAssoc], plotTitle = &amp;quot;Features with an association of 0.85 or more with another feature&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Most of the features we drop are strongly associated with another feature: &lt;code&gt;GarageCars&lt;/code&gt; with &lt;code&gt;GarageArea&lt;/code&gt; (0.89), &lt;code&gt;GrLivArea&lt;/code&gt; with &lt;code&gt;TotalSF&lt;/code&gt; (0.87), &lt;code&gt;BsmtFullBath&lt;/code&gt; with &lt;code&gt;BsmtBath&lt;/code&gt; (0.97), &lt;code&gt;PoolArea&lt;/code&gt; with &lt;code&gt;HasPool&lt;/code&gt; (0.94), &lt;code&gt;YearBuilt&lt;/code&gt; with &lt;code&gt;Vintage&lt;/code&gt; (0.9), &lt;code&gt;GarageYrBlt&lt;/code&gt; with &lt;code&gt;YearBuilt&lt;/code&gt; (0.86), &lt;code&gt;YearRemodAdd&lt;/code&gt; with &lt;code&gt;PropertyAge&lt;/code&gt; (-1) and &lt;code&gt;Neighborhood&lt;/code&gt; with &lt;code&gt;NeighborhoodType&lt;/code&gt; (1).&lt;/li&gt;
+&lt;li&gt;The four porch features are only moderately associated with &lt;code&gt;PorchSF&lt;/code&gt; (between 0.19 and 0.61). They are not redundant with it; we drop them because &lt;code&gt;PorchSF&lt;/code&gt;, their total area, replaces them.&lt;/li&gt;
+&lt;li&gt;The matrix also finds redundant features that we have not dropped yet. &lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; carry the same information as the &lt;em&gt;None&lt;/em&gt; category of the garage, fireplace and masonry features (Cramer’s V of about 1), and &lt;code&gt;MSSubClass&lt;/code&gt; is closely associated with &lt;code&gt;BldgType&lt;/code&gt; (0.89) and &lt;code&gt;HouseStyle&lt;/code&gt; (0.83). Tree-based models are not affected by such duplicates, but they add collinear predictors to linear models, so we will remove them before fitting models in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/&#34;&gt;the next post&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
@@ -917,13 +946,23 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vOutliers_TotalSF &amp;lt;- dfClean %&amp;gt;% filter(TotalSF &amp;gt; 7000) %&amp;gt;% pull(Id)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a closer look at &lt;code&gt;TotalSF&lt;/code&gt;, labelling the properties with the largest Cook’s distance, which measures how much each point pulls the regression line:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar,
+                 nLabel = 3, feature_id = &amp;quot;Id&amp;quot;, labelBy = &amp;quot;cooks&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/influential_points-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Cook&amp;#39;s distance of each property in a linear fit of SalePrice on TotalSF
+dfInfluence &amp;lt;- dfClean %&amp;gt;% select(Id, TotalSF, SalePrice) %&amp;gt;% drop_na()
+dfInfluence &amp;lt;- dfInfluence %&amp;gt;%
+  mutate(cooks = cooks.distance(lm(SalePrice ~ TotalSF, data = dfInfluence))) %&amp;gt;%
+  arrange(desc(cooks))
+
+vOutliers_TotalSF &amp;lt;- dfInfluence$Id[1:3]&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;From the scatterplot of &lt;code&gt;TotalSF&lt;/code&gt; v/s &lt;code&gt;SalePrice&lt;/code&gt;, it is very clear there are &lt;em&gt;high leverage&lt;/em&gt; points where the target &lt;code&gt;SalePrice&lt;/code&gt; is unusually low relative to the area in sq. ft. These points have an outsized impact on the slope of the regression line, which otherwise would be higher.&lt;/li&gt;
 &lt;li&gt;The same set of points impact &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;The Ids of these records are 524,1299,2550. Out of these 524 and 1299 are in the training set.&lt;/li&gt;
+&lt;li&gt;The Ids of these records are 1299,2550,524, with Cook’s distances of 5.69, 2.46, 0.54. These are far above the usual cutoff of 4/n = 0.0014, and the next most influential property has a Cook’s distance of only 0.12. Out of these 524 and 1299 are in the training set.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -1055,9 +1094,9 @@ bin_median &amp;lt;- function(plotName, binNum, categoryName) {
 &lt;div id=&#34;whats-notable-11&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; ranges from $161,000 in Type5 neighborhoods to $327,000 in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.&lt;/li&gt;
-&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is $299,018 for built-in, $253,000 for attached and $140,000 for detached garages. Some garage types have very few properties, so their boxplots are less reliable.&lt;/li&gt;
-&lt;li&gt;Properties with central air conditioning sell for more at every size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is $262,140 with central air and $136,000 without it.&lt;/li&gt;
+&lt;li&gt;Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; ranges from &lt;code&gt;$161,000&lt;/code&gt; in Type5 neighborhoods to &lt;code&gt;$327,000&lt;/code&gt; in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$299,018&lt;/code&gt; for built-in, &lt;code&gt;$253,000&lt;/code&gt; for attached and &lt;code&gt;$140,000&lt;/code&gt; for detached garages. Some garage types have very few properties, so their boxplots are less reliable.&lt;/li&gt;
+&lt;li&gt;Properties with central air conditioning sell for more at every size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$262,140&lt;/code&gt; with central air and &lt;code&gt;$136,000&lt;/code&gt; without it.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -1069,10 +1108,15 @@ p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot
 p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
 cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# number of combinations, and those with fewer than 10 properties
+vCells &amp;lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
+vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Each tile shows the median &lt;code&gt;SalePrice&lt;/code&gt; and the number of properties. Combinations with fewer than 10 properties are greyed out, because their medians are not reliable.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
 &lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
 &lt;li&gt;Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.&lt;/li&gt;
+&lt;li&gt;Many combinations are rare: 11 of the 34 combinations of &lt;code&gt;OverallQual&lt;/code&gt; and &lt;code&gt;NeighborhoodType&lt;/code&gt;, and 20 of the 46 combinations of &lt;code&gt;MSSubClass&lt;/code&gt; and &lt;code&gt;MSZoning&lt;/code&gt;, have fewer than 10 properties. So only the common combinations can be compared reliably, and a model would struggle to learn interactions between these features.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# split the data back to training and testing sets
 # dfTrain &amp;lt;- dfClean %&amp;gt;% dplyr::slice(1:nrows_train)
@@ -1269,16 +1313,10 @@ lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 &lt;h4&gt;Numerical Features&lt;/h4&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.&lt;/p&gt;
+&lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers, i.e. values more than 2.5 interquartile ranges from the median, and plot them again. Unlike a rule based on the mean and standard deviation, the median and interquartile range are hardly moved by the outliers themselves.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;makeOutliersNA &amp;lt;- function(Z) {
-  min_value = min(Z, na.rm = T)
-  max_value = max(Z, na.rm = T)
-  median_value = median(Z, na.rm = T)
-  IQR = IQR(Z, na.rm = T)
-  lower_bound = max(min_value, median_value - 2.5*IQR)
-  upper_bound = min(max_value, median_value + 2.5*IQR)
-  
-  Z &amp;lt;- ifelse(Z &amp;gt;= lower_bound &amp;amp; Z &amp;lt;= upper_bound, Z, NA)
+  # values more than 2.5 interquartile ranges from the median become NA
+  ifelse(flag_outliers(Z, nIQR = 2.5), NA, Z)
 }
 
 # convert outliers to NA values
@@ -1354,6 +1392,19 @@ vR2_carat &amp;lt;- p_transforms$data %&amp;gt;%
 &lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div id=&#34;all-features&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;All Features&lt;/h4&gt;
+&lt;p&gt;Why do diamonds of better grades look cheaper in the bivariate analysis? Let’s measure the association between all the features, ranking the grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; from worst to best, so they can be correlated with the numerical features using Spearman’s rank correlation:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_association_matrix(dfInput, method = &amp;quot;spearman&amp;quot;, ordinalAsNumeric = T, outlineVar = &amp;quot;price&amp;quot;,
+                            plotTitle = &amp;quot;Spearman correlations, with grades ranked from worst to best&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mAssoc &amp;lt;- association_matrix(dfInput, method = &amp;quot;spearman&amp;quot;, ordinalAsNumeric = T)&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; is negatively correlated with &lt;code&gt;clarity&lt;/code&gt; (-0.37) and &lt;code&gt;color&lt;/code&gt; (-0.24): diamonds of better grades tend to be smaller.&lt;/li&gt;
+&lt;li&gt;Since &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt; (0.96), &lt;code&gt;price&lt;/code&gt; ends up negatively correlated with &lt;code&gt;clarity&lt;/code&gt; (-0.21) and &lt;code&gt;color&lt;/code&gt; (-0.13) too.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; form a tight cluster of almost perfectly correlated features, so they are largely redundant as predictors.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
 &lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Numerical-Numerical&lt;/h4&gt;
 &lt;p&gt;The overlap in the scatterplots makes it hard to see how much each grade matters. Let’s compare the grades among diamonds of similar weight, by splitting &lt;code&gt;carat&lt;/code&gt; into four quartile bins and plotting &lt;code&gt;price&lt;/code&gt; by grade within each bin:&lt;/p&gt;
@@ -1393,8 +1444,8 @@ cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2,
 &lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(c(&amp;quot;cut&amp;quot;,&amp;quot;color&amp;quot;), ~ eda_plot_heatmap(dfInput, .x, &amp;quot;clarity&amp;quot;, &amp;quot;price&amp;quot;)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. Nevertheless this counter-trend persists in the dataset.&lt;/p&gt;
-&lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the mean prices do not show any discernable pattern.&lt;/p&gt;
+&lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. As we saw above, this is because diamonds of better grades tend to be smaller.&lt;/p&gt;
+&lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the median prices do not show any discernable pattern. Each tile shows its number of diamonds, and the one combination with fewer than 10 diamonds (&lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; and &lt;em&gt;IF&lt;/em&gt; &lt;code&gt;clarity&lt;/code&gt;) is greyed out, because its median is not reliable.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;

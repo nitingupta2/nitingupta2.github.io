@@ -30,6 +30,7 @@
 &lt;h2&gt;Steps for Building Models&lt;/h2&gt;
 &lt;p&gt;Here are the steps for building models and determining the best hyperparameter combinations by K-fold cross validation:&lt;/p&gt;
 &lt;ul&gt;
+&lt;li&gt;Remove predictors that duplicate the information in other predictors, and encode ordinal features as scores.&lt;/li&gt;
 &lt;li&gt;Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Define linear and non-linear models.&lt;/li&gt;
 &lt;li&gt;For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.&lt;/li&gt;
@@ -39,6 +40,64 @@
 &lt;li&gt;Calculate RMSE of the each finalized model on the testing set.&lt;/li&gt;
 &lt;li&gt;Finally, choose the best model that gives the least RMSE.&lt;/li&gt;
 &lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;removing-collinear-predictors&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Removing Collinear Predictors&lt;/h2&gt;
+&lt;p&gt;Many features in this dataset describe the same thing in different ways, and some of the features we engineered in the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; duplicate others. When categorical features are converted to dummy variables, some predictors become exact linear combinations of others. A linear model cannot separate their effects, so its coefficients become unstable or cannot be estimated at all, and &lt;code&gt;lm&lt;/code&gt; warns of a “rank-deficient fit”. Tree-based models are not affected by duplicated information, but removing it makes linear models better defined and every model simpler.&lt;/p&gt;
+&lt;p&gt;Using the association matrix from the previous post, we drop these features because other features already carry their information:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; are the same, or almost the same, as the &lt;em&gt;None&lt;/em&gt; category of &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;FireplaceQu&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;MSSubClass&lt;/code&gt; combines the type and the style of a building, which &lt;code&gt;BldgType&lt;/code&gt; and &lt;code&gt;HouseStyle&lt;/code&gt; already describe. Its &lt;em&gt;duplex&lt;/em&gt; category is identical to that of &lt;code&gt;BldgType&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;TotalBath&lt;/code&gt; is exactly &lt;code&gt;FullBath + 0.5 * HalfBath + BsmtBath&lt;/code&gt;. We drop &lt;code&gt;HalfBath&lt;/code&gt; rather than &lt;code&gt;TotalBath&lt;/code&gt;, so we keep the total, which is among the most important features of the tree-based models, and lose no information, because &lt;code&gt;HalfBath&lt;/code&gt; can be recovered from the other three.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;encoding-ordinal-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Encoding Ordinal Features&lt;/h3&gt;
+&lt;p&gt;Features such as &lt;code&gt;OverallQual&lt;/code&gt; or &lt;code&gt;KitchenQual&lt;/code&gt; have categories that follow a natural order. By default, &lt;code&gt;step_dummy()&lt;/code&gt; encodes such an ordered factor with polynomial contrasts: one predictor for each category but one, capturing linear, quadratic, cubic and higher order trends across the categories. Some grades are so rare, such as an &lt;code&gt;OverallCond&lt;/code&gt; of 1, that they can be missing from a cross validation fold, and then the highest order contrasts are collinear in that fold.&lt;/p&gt;
+&lt;p&gt;Instead, we encode each ordered factor as a single integer score that follows the order of its categories, which assumes the grades are equally spaced. Categories that no property has, such as a &lt;em&gt;Poor&lt;/em&gt; exterior quality, are dropped first, so the scores are consecutive. Here’s how a linear model fares with each encoding, on the same cross validation folds:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfEncodingComparison %&amp;gt;% 
+  mutate(lm_cv_rmse = round(lm_cv_rmse, 4)) %&amp;gt;% 
+  knitr::kable(col.names = c(&amp;quot;Encoding of ordinal features&amp;quot;, &amp;quot;Predictors&amp;quot;, &amp;quot;Folds with a rank-deficient fit&amp;quot;, &amp;quot;lm cross validated RMSE&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;30%&#34; /&gt;
+&lt;col width=&#34;11%&#34; /&gt;
+&lt;col width=&#34;33%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Encoding of ordinal features&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Predictors&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Folds with a rank-deficient fit&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;lm cross validated RMSE&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;polynomial contrasts&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;214&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.1470&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;ordinal scores&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;151&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.1336&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;encoding_value &amp;lt;- function(encodingName, column) dfEncodingComparison[[column]][dfEncodingComparison$encoding == encodingName]&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;With polynomial contrasts, &lt;code&gt;lm&lt;/code&gt; cannot estimate every coefficient in 4 of the 5 folds. With scores, the fit is rank deficient in 0 folds.&lt;/li&gt;
+&lt;li&gt;Scores cut the number of predictors from 214 to 151, and the cross validated RMSE of &lt;code&gt;lm&lt;/code&gt; falls from 0.147 to 0.134. The simpler encoding generalizes better, because the model no longer has to estimate a separate effect for each rare grade.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Finally, &lt;code&gt;step_lincomb()&lt;/code&gt; checks for any remaining exact linear combinations among the predictors, such as those that could arise because properties without a basement or a garage share the &lt;em&gt;None&lt;/em&gt; category of every basement or garage feature. With scores, it finds none.&lt;/p&gt;
+&lt;p&gt;After preprocessing, there are 151 predictors, and a linear model can estimate a coefficient for every one of them:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_lm_check &amp;lt;- lm(target ~ ., data = dfTrain_Proc %&amp;gt;% select(-Id))
+print(glue::glue(&amp;quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_lm_check))} coefficients could not be estimated&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;0 of 152 coefficients could not be estimated&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;partitioning-training-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
@@ -69,12 +128,12 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 1 × 1
   mean_rmse
       &amp;lt;dbl&amp;gt;
-1     0.147&lt;/code&gt;&lt;/pre&gt;
+1     0.134&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rmse_val &amp;lt;- cv_results_lm %&amp;gt;% pull(mean_rmse)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1468&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;After training a linear model on all predictors, we get an RMSE of &lt;strong&gt;0.1336&lt;/strong&gt;.&lt;/li&gt;
 &lt;li&gt;This is the simplest and fastest model with no hyperparameters to tune.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -99,22 +158,22 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
     penalty mixture mean_rmse
       &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1 1.46e- 2  0.297      0.128
- 2 1.22e- 2  0.657      0.129
- 3 1.22e- 3  0.490      0.133
- 4 1.09e- 2  0.0439     0.133
- 5 3.47e- 4  0.992      0.134
- 6 8.18e- 4  0.0856     0.137
- 7 1.15e- 4  0.798      0.138
- 8 7.37e- 7  0.0221     0.138
- 9 1.23e-10  0.333      0.138
-10 2.07e- 9  0.950      0.138&lt;/code&gt;&lt;/pre&gt;
+ 1 1.46e- 2  0.297      0.129
+ 2 1.22e- 3  0.490      0.130
+ 3 1.09e- 2  0.0439     0.131
+ 4 3.47e- 4  0.992      0.131
+ 5 1.22e- 2  0.657      0.131
+ 6 8.18e- 4  0.0856     0.132
+ 7 7.37e- 7  0.0221     0.132
+ 8 1.15e- 4  0.798      0.132
+ 9 3.37e-10  0.0573     0.133
+10 1.57e- 5  0.0760     0.133&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After hyperparameter tuning with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
-&lt;li&gt;It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation is fast, taking about 13 seconds to execute.&lt;/li&gt;
+&lt;li&gt;After hyperparameter tuning with cross validation, the best &lt;code&gt;glmnet&lt;/code&gt; model gives an RMSE of 0.129 with penalty = 0.0146 and mixture = 0.2974.&lt;/li&gt;
+&lt;li&gt;It is an improvement over Ordinary Least Squares regression that had an RMSE of 0.1336. The regularization shrinks the coefficients of predictors that add little, which helps with so many predictors.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation is fast, taking about 11 seconds to execute.&lt;/li&gt;
 &lt;li&gt;But the presence of outliers can significantly affect its performance.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;glmnet&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
@@ -154,21 +213,21 @@ Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 10 × 3
    min_n  mtry mean_rmse
    &amp;lt;int&amp;gt; &amp;lt;int&amp;gt;     &amp;lt;dbl&amp;gt;
- 1     2    84     0.134
- 2     5   134     0.136
- 3     9    36     0.136
- 4    12   110     0.136
- 5    15    55     0.136
- 6    18   136     0.137
- 7     8   199     0.138
- 8    22    69     0.138
- 9    19   179     0.139
-10    29   123     0.139&lt;/code&gt;&lt;/pre&gt;
+ 1     2    51     0.132
+ 2    12    67     0.134
+ 3     5    81     0.134
+ 4    15    34     0.134
+ 5     9    22     0.135
+ 6    22    42     0.136
+ 7    18    82     0.136
+ 8     8   121     0.137
+ 9    19   108     0.138
+10    33    46     0.138&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.134 with mtry = 84 and min_n = 2.&lt;/li&gt;
-&lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt;, and &lt;code&gt;ranger&lt;/code&gt; cross validation takes much longer to execute (about 371 seconds, versus 13 seconds for &lt;code&gt;glmnet&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.132 with mtry = 51 and min_n = 2.&lt;/li&gt;
+&lt;li&gt;This is no improvement in RMSE compared to &lt;code&gt;glmnet&lt;/code&gt;, and &lt;code&gt;ranger&lt;/code&gt; cross validation takes much longer to execute (about 164 seconds, versus 11 seconds for &lt;code&gt;glmnet&lt;/code&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Here a plot of the &lt;code&gt;ranger&lt;/code&gt; hyperparameter grid along with the best hyperparameter combination:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
@@ -204,22 +263,22 @@ Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &amp;lt;int&amp;gt;      &amp;lt;int&amp;gt;      &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
- 1    33          2    0.0289      0.126
- 2    23          4    0.0254      0.127
- 3     3          2    0.0171      0.127
- 4    24          1    0.190       0.128
- 5    38          9    0.0270      0.130
- 6     4          1    0.0872      0.131
- 7    23          9    0.0405      0.131
- 8    32          9    0.00605     0.131
- 9    19         11    0.00482     0.131
-10    11          5    0.0549      0.131&lt;/code&gt;&lt;/pre&gt;
+ 1    33          2    0.0289      0.125
+ 2     3          2    0.0171      0.127
+ 3    23          4    0.0254      0.128
+ 4    24          1    0.190       0.129
+ 5    11          5    0.0549      0.129
+ 6    32          9    0.00605     0.130
+ 7    19         11    0.00482     0.130
+ 8    16         14    0.0121      0.131
+ 9    38          9    0.0270      0.131
+10    23          9    0.0405      0.131&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;After cross validation, we get the best RMSE of 0.126 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.&lt;/li&gt;
-&lt;li&gt;This is the best cross validated RMSE of all the models, slightly ahead of &lt;code&gt;glmnet&lt;/code&gt; (0.128) and &lt;code&gt;ranger&lt;/code&gt; (0.134).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;xgboost&lt;/code&gt; cross validation takes longer to execute than that of &lt;code&gt;glmnet&lt;/code&gt;, but is faster than that of &lt;code&gt;ranger&lt;/code&gt; (about 168 seconds).&lt;/li&gt;
+&lt;li&gt;After cross validation, we get the best RMSE of 0.125 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.&lt;/li&gt;
+&lt;li&gt;This is the best cross validated RMSE of all the models, slightly ahead of &lt;code&gt;glmnet&lt;/code&gt; (0.129) and &lt;code&gt;ranger&lt;/code&gt; (0.132).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;xgboost&lt;/code&gt; cross validation takes longer to execute than that of &lt;code&gt;glmnet&lt;/code&gt;, but is faster than that of &lt;code&gt;ranger&lt;/code&gt; (about 137 seconds).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;!-- Here a 3D plot of the `xgboost` hyperparameter grid: --&gt;
 &lt;!-- &lt;center&gt; --&gt;
@@ -266,20 +325,28 @@ dfPlot %&amp;gt;%
   eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
   labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# properties among the 3 largest errors of every model
-vWorst_train &amp;lt;- dfPlot %&amp;gt;% 
-  group_by(model) %&amp;gt;% 
-  slice_max(abs(predicted - actual), n = 3) %&amp;gt;% 
-  ungroup() %&amp;gt;% 
-  count(Id) %&amp;gt;% 
-  filter(n == n_distinct(dfPlot$model)) %&amp;gt;% 
-  pull(Id)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# properties among the 3 largest errors of more than one model
+dfWorst_train &amp;lt;- dfPlot %&amp;gt;%
+  group_by(model) %&amp;gt;%
+  slice_max(abs(predicted - actual), n = 3) %&amp;gt;%
+  ungroup() %&amp;gt;%
+  count(Id, name = &amp;quot;n_models&amp;quot;) %&amp;gt;%
+  filter(n_models &amp;gt; 1) %&amp;gt;%
+  arrange(desc(n_models))
+
+# sentence about the properties that are among the largest errors of the most models
+worst_train_sentence &amp;lt;- if (nrow(dfWorst_train) == 0) {
+  &amp;quot;No property is among them for more than one model.&amp;quot;
+} else {
+  vIds &amp;lt;- dfWorst_train$Id[dfWorst_train$n_models == max(dfWorst_train$n_models)]
+  glue::glue(&amp;quot;{if (length(vIds) == 1) &amp;#39;The property with Id&amp;#39; else &amp;#39;The properties with Ids&amp;#39;} {paste0(&amp;#39;__&amp;#39;, vIds, &amp;#39;__&amp;#39;, collapse = &amp;#39; and &amp;#39;)} {if (length(vIds) == 1) &amp;#39;is&amp;#39; else &amp;#39;are each&amp;#39;} among them for {max(dfWorst_train$n_models)} of the 3 models, so {if (length(vIds) == 1) &amp;#39;it is&amp;#39; else &amp;#39;they are&amp;#39;} worth checking for errors in the data.&amp;quot;)
+}&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Both &lt;code&gt;ranger&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. &lt;code&gt;ranger&lt;/code&gt; fits it most closely, with a training RMSE of 0.051 versus 0.094 for &lt;code&gt;xgboost&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Both &lt;code&gt;ranger&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. &lt;code&gt;ranger&lt;/code&gt; fits it most closely, with a training RMSE of 0.050 versus 0.096 for &lt;code&gt;xgboost&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;The &lt;code&gt;glmnet&lt;/code&gt; model shows a couple of outliers with Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; whose predicted values are far in excess of their actual values. Even properties whose &lt;code&gt;SalePrice&lt;/code&gt; is at the lower end, show a wide dispersion in prediced values.&lt;/li&gt;
-&lt;li&gt;The plots label the three largest errors of each model. The property with Id &lt;strong&gt;633&lt;/strong&gt; is among them for all three models, so it is worth checking for errors in its data.&lt;/li&gt;
+&lt;li&gt;The plots label the three largest errors of each model. The properties with Ids &lt;strong&gt;31&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; are each among them for 2 of the 3 models, so they are worth checking for errors in the data.&lt;/li&gt;
 &lt;li&gt;But the true performance can only be measured on unseen testing data.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -312,15 +379,15 @@ dfRMSE&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 3 × 3
   model   test_rmse cv_rmse
   &amp;lt;chr&amp;gt;       &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
-1 glmnet      0.130   0.128
-2 ranger      0.138   0.134
-3 xgboost     0.131   0.126&lt;/code&gt;&lt;/pre&gt;
+1 glmnet      0.130   0.129
+2 ranger      0.138   0.132
+3 xgboost     0.132   0.125&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.&lt;/li&gt;
 &lt;li&gt;Records with Ids &lt;strong&gt;1537&lt;/strong&gt; and &lt;strong&gt;2217&lt;/strong&gt; are outliers, as none of the models are able to predict close to actual values.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; has the lowest test RMSE of 0.130, with &lt;code&gt;xgboost&lt;/code&gt; close behind at 0.131.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; has the lowest test RMSE of 0.130, with &lt;code&gt;xgboost&lt;/code&gt; close behind at 0.132.&lt;/li&gt;
 &lt;li&gt;However, &lt;code&gt;glmnet&lt;/code&gt; is sensitive to outliers, as we saw with Ids &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;1299&lt;/strong&gt; in the training set. Since &lt;code&gt;xgboost&lt;/code&gt; had the best cross validated RMSE and the difference in test RMSE is small, we could finalize &lt;code&gt;xgboost&lt;/code&gt;, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_final &amp;lt;- model_final_xgboost&lt;/code&gt;&lt;/pre&gt;
@@ -345,7 +412,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Correlations of numerical features are plotted side-by-side. All of them have a correlation of 0.5 or more (in absolute terms) with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, fireplace quality, etc.&lt;/li&gt;
+&lt;li&gt;All of the top 10 features make sense. To evaluate &lt;code&gt;SalePrice&lt;/code&gt;, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, overall condition, etc.&lt;/li&gt;
 &lt;li&gt;This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -366,9 +433,8 @@ cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
 
 dfSample &amp;lt;- getSampleProperty(1000) %&amp;gt;% bind_rows(getSampleProperty(2000))
 
-# preprocess the sample data and generated predicted values from the final model
-get_preprocessing_recipe(dfSample) %&amp;gt;% 
-  bake(dfSample) %&amp;gt;% 
+# preprocess the sample data with the recipe prepared on the training set and generate predicted values from the final model
+bake(preprocessing_recipe, new_data = dfSample) %&amp;gt;% 
   get_predicted(model_final, .) %&amp;gt;% 
   as_tibble() %&amp;gt;% 
   bind_cols(dfSample) %&amp;gt;% 
@@ -704,16 +770,24 @@ As these 3 dimensions are highly correlated, we can compute a geometrical averag
 &lt;p&gt;Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:&lt;/p&gt;
 &lt;p&gt;$ density = mass/volume $&lt;/p&gt;
 &lt;p&gt;We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfInput &amp;lt;- diamonds %&amp;gt;% 
-  mutate(volume = x*y*z,
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfInput &amp;lt;- diamonds %&amp;gt;%
+  mutate(row = row_number(),
+         volume = x*y*z,
          `average dimension` = volume ^ (1/3),
          volume2 = carat * 0.2/3.51,
          `average dimension2` = (volume2 ^ (1/3)) * 10)   # Multiply by 10 to convert from cm to mm
 
-eda_plot_scatter(dfInput, c(&amp;quot;average dimension&amp;quot;, &amp;quot;average dimension2&amp;quot;), &amp;quot;price&amp;quot;, yLabelsScale = scales::dollar) + 
+eda_plot_scatter(dfInput, c(&amp;quot;average dimension&amp;quot;, &amp;quot;average dimension2&amp;quot;), &amp;quot;price&amp;quot;, yLabelsScale = scales::dollar,
+                 nLabel = 3, feature_id = &amp;quot;row&amp;quot;, labelBy = &amp;quot;leverage&amp;quot;) +
   labs(title = &amp;quot;Scatterplot of price v/s average dimension&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/feature_engineering-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# the point with the most leverage on the linear fit of price on the dimension-based feature
+dfLeverage &amp;lt;- dfInput %&amp;gt;%
+  mutate(leverage = hatvalues(lm(price ~ `average dimension`, data = dfInput))) %&amp;gt;%
+  slice_max(leverage, n = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
+Each panel labels, by row number, the diamonds with the most leverage on a linear fit, i.e. the points that are furthest from the rest along the x axis.
+With the dimensions, the most extreme point is the diamond in row 24068: a 2 carat diamond with a recorded width &lt;code&gt;y&lt;/code&gt; of 58.9 mm, which is clearly a recording error. The other labelled points are diamonds with an average dimension of 0. With the density method, the labelled points are simply the largest diamonds in the dataset.
 Keep in mind there are 20 &lt;code&gt;z&lt;/code&gt; values that are 0. In 7 of these records both &lt;code&gt;x&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; are 0 too, which means these values were not recorded reliably.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;diamonds %&amp;gt;% dplyr::filter(x == 0 | y == 0 | z == 0)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 20 × 10
@@ -902,7 +976,7 @@ F-statistic: 1.53e+05 on 14 and 40438 DF,  p-value: &amp;lt;0.0000000000000002&l
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow = c(2,2))
 plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Holding &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; constant, a 1% increase in &lt;code&gt;carat&lt;/code&gt; raises the predicted &lt;code&gt;price&lt;/code&gt; by about 1.88%.&lt;/p&gt;
+&lt;p&gt;Holding &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; constant, a 1% increase in &lt;code&gt;carat&lt;/code&gt; raises the predicted &lt;code&gt;price&lt;/code&gt; by about &lt;code&gt;1.88&lt;/code&gt;%.&lt;/p&gt;
 &lt;p&gt;Here’s a scatterplot of actual v/s predicted price from our final model on the testing set:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit_lm[[2]] %&amp;gt;%
   rename(price = actual) %&amp;gt;%
@@ -911,7 +985,7 @@ plot(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
   labs(title = bquote(log(price) == log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points lie close to the 45 degrees line, although the variance between actual and predicted prices increases at the high end.
-The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs $18,804. The highest predicted price is $28,130, whereas the cube root model predicts prices as high as $59,082 on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
+The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs &lt;code&gt;$18,804&lt;/code&gt;. The highest predicted price is &lt;code&gt;$28,130&lt;/code&gt;, whereas the cube root model predicts prices as high as &lt;code&gt;$59,082&lt;/code&gt; on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;stopCluster(cl)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>

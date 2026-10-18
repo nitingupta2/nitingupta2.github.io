@@ -2,7 +2,7 @@
 # Produces Ames_Tuning.Rda, which index.Rmd loads to build the post.
 #
 # Why this script is built the way it is (speed):
-# The dataset is small (1,460 rows x ~250 predictors after dummy encoding), so run time is driven by the
+# The dataset is small (1,460 rows x ~150 predictors after encoding), so run time is driven by the
 # number of model fits (5 models x 25 grid points x 5 folds) and by how expensive each fit is, not by data size.
 # The earlier version took ~35 minutes; this version takes ~11 minutes with 6 workers, tuning the same models and
 # hyperparameters (with randomForest replaced by the equivalent ranger engine). The changes:
@@ -20,6 +20,9 @@
 #   4. The number of parallel workers is capped by available RAM as well as CPU cores (see "Parallel backend").
 #
 # Unrelated to speed: the earlier version used Id as a predictor. It is now excluded (see get_workflow).
+# It also had 21 predictors that were exact linear combinations of others, which lm reported as a rank-deficient
+# fit. They are now removed (see "Collinear predictors" and get_preprocessing_recipe), leaving a full-rank design.
+# Ordered factors are encoded as integer scores instead of polynomial contrasts (see get_preprocessing_recipe).
 
 library(nglib)
 library(tidyselect)
@@ -38,6 +41,27 @@ conflict_prefer("setdiff", "dplyr")
 # load clean dataset
 load("Ames_Housing_Clean.Rda")
 
+# Collinear predictors
+########################################################################################################################################################
+# With the earlier set of features, 21 of the ~250 predictors were exact linear combinations of others (the design
+# matrix had rank 229 of 250), so lm could not estimate them and warned of a rank-deficient fit. Tree models are not
+# affected by duplicated information, but linear models are: the coefficients of collinear predictors are unstable.
+# These features are dropped because other features already carry their information (see the association matrix
+# in Part 1):
+#   HasGarage, HasFireplace, HasMasVnr: the same as the "None" category of GarageType, FireplaceQu and MasVnrType.
+#   MSSubClass: combines the building type and style, already in BldgType and HouseStyle (bias-corrected Cramer's V
+#               of 0.89 and 0.83). Its "duplex" category is identical to BldgType's.
+#   HalfBath:   TotalBath = FullBath + 0.5 * HalfBath + BsmtBath exactly. Dropping HalfBath rather than TotalBath
+#               keeps the total, one of the most important features for the tree models, and loses no information
+#               because HalfBath can be recovered from the other three.
+vFeaturesCollinear <- c("HasGarage", "HasFireplace", "HasMasVnr", "MSSubClass", "HalfBath")
+
+# Categories that no property has (e.g. a Poor exterior quality) are dropped too, so that the scores of ordered factors
+# are consecutive (see get_preprocessing_recipe).
+dfClean <- dfClean %>%
+    select(-all_of(vFeaturesCollinear)) %>%
+    mutate(across(where(is.factor), droplevels))
+
 # Determine skewed features
 vFeaturesSkew <- dfClean %>%
     select_if(is.numeric) %>%
@@ -53,24 +77,46 @@ dfTest <- dfClean %>% filter(Id %in% vTestIDs)
 
 # Preprocessing Recipe
 ########################################################################################################################################################
-get_preprocessing_recipe <- function(df) {
+# Ordered factors (quality and condition grades, etc.) are encoded as integer scores, one predictor per feature, in
+# the order of their categories. The alternative, step_dummy's polynomial contrasts, creates one predictor per category
+# but one. Grades that only a handful of properties have can then be missing from a cross validation fold, which makes
+# the highest-order contrasts collinear: with that encoding lm reported a rank-deficient fit in 4 of the 5 folds. Scores
+# assume the grades are equally spaced, which is a reasonable approximation for these grades, and they cut the
+# number of predictors from ~214 to ~151. dfEncodingComparison below compares the two encodings.
+#
+# step_lincomb removes any remaining exact linear combinations among the predictors. These can arise because properties
+# without a basement or garage share the "None" category of every basement or garage feature. An intercept column is
+# added for the check, because such combinations can include a constant, and removed afterwards.
+get_preprocessing_recipe <- function(df, ordinalScores = TRUE) {
 
     preprocessing_recipe <- recipe(SalePrice ~ ., data = df) %>%
         update_role(Id, new_role = "ID") %>%
-        step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L)) %>%
+        step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L))
+    if(ordinalScores) {
+        preprocessing_recipe <- preprocessing_recipe %>%
+            step_ordinalscore(all_ordered_predictors())
+    }
+    preprocessing_recipe <- preprocessing_recipe %>%
         step_dummy(all_nominal()) %>%
+        step_intercept() %>%
+        step_lincomb(all_numeric_predictors()) %>%
+        step_rm(any_of("intercept")) %>%
         step_log(all_outcomes()) %>%
         prep()
     return(preprocessing_recipe)
 }
 
+# The recipe is prepared on the training set only, and the same recipe is applied to the testing set (and to any new
+# data), so that both have exactly the same predictors.
+preprocessing_recipe <- get_preprocessing_recipe(dfTrain)
+
 # Preprocessed data for training models
-dfTrain_Proc <- get_preprocessing_recipe(dfTrain) %>%
+dfTrain_Proc <- preprocessing_recipe %>%
     bake(new_data = NULL) %>%
     rename(target = SalePrice) %>%
     select(target, everything())
 
-dfTest_Proc <- get_preprocessing_recipe(dfTest) %>%
+dfTest_Proc <- preprocessing_recipe %>%
     bake(new_data = dfTest) %>%
     rename(target = SalePrice) %>%
     select(target, everything())
@@ -213,6 +259,27 @@ plan(multisession, workers = num_workers)
 # Create cross validation folds
 cv_folds <- get_cv_folds(dfTrain_Proc, numFolds = 5, strataVar = "target", randomSeed = 2300, shuffleData = T)
 
+# Compare the encodings of ordered factors with a linear model on the same folds (reported in the post)
+compare_encoding <- function(ordinalScores) {
+
+    df <- get_preprocessing_recipe(dfTrain, ordinalScores) %>%
+        bake(new_data = NULL) %>%
+        rename(target = SalePrice) %>%
+        select(target, everything())
+    folds <- get_cv_folds(df, numFolds = 5, strataVar = "target", randomSeed = 2300, shuffleData = T)
+    vAliased <- map_int(folds$splits, ~ sum(is.na(coef(lm(target ~ ., data = analysis(.x) %>% select(-Id))))))
+
+    tibble(encoding = if(ordinalScores) "ordinal scores" else "polynomial contrasts",
+           predictors = ncol(df) - 2,
+           folds_rank_deficient = sum(vAliased > 0),
+           lm_cv_rmse = suppressWarnings(get_workflow(get_model_spec("lm")) %>%
+                                             fit_resamples(resamples = folds, metrics = metric_set(rmse)) %>%
+                                             collect_metrics() %>%
+                                             pull(mean)))
+}
+dfEncodingComparison <- bind_rows(compare_encoding(ordinalScores = FALSE), compare_encoding(ordinalScores = TRUE))
+print(dfEncodingComparison)
+
 # Time each model so the post can report relative run times
 dfTimings <- tibble(model = character(), seconds = numeric())
 time_model <- function(model, expr) {
@@ -269,5 +336,5 @@ save(model_spec_lm, model_spec_glmnet, model_spec_rf, model_spec_xgboost, model_
      param_grid_glmnet, param_grid_rf, param_grid_xgboost, param_grid_kernlab,
      param_best_glmnet, param_best_rf, param_best_xgboost, param_best_kernlab,
      dfTrain, dfTest, dfTrain_Proc, dfTest_Proc, dfTimings,
-     get_preprocessing_recipe, cv_folds, vFeaturesSkew,
+     get_preprocessing_recipe, preprocessing_recipe, vFeaturesCollinear, dfEncodingComparison, cv_folds, vFeaturesSkew,
      file = "Ames_Tuning.Rda")

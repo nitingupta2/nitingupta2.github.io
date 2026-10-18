@@ -789,16 +789,10 @@ lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 <h4>Numerical Features</h4>
 <pre class="r"><code>eda_plot_histograms(dfInput, vFeaturesNum)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png" alt="" width="672" /></p>
-<p>The plots show presence of outliers within each feature. Let’s exclude the outliers and plot them again.</p>
+<p>The plots show presence of outliers within each feature. Let’s exclude the outliers, i.e. values more than 2.5 interquartile ranges from the median, and plot them again. Unlike a rule based on the mean and standard deviation, the median and interquartile range are hardly moved by the outliers themselves.</p>
 <pre class="r"><code>makeOutliersNA &lt;- function(Z) {
-  min_value = min(Z, na.rm = T)
-  max_value = max(Z, na.rm = T)
-  median_value = median(Z, na.rm = T)
-  IQR = IQR(Z, na.rm = T)
-  lower_bound = max(min_value, median_value - 2.5*IQR)
-  upper_bound = min(max_value, median_value + 2.5*IQR)
-  
-  Z &lt;- ifelse(Z &gt;= lower_bound &amp; Z &lt;= upper_bound, Z, NA)
+  # values more than 2.5 interquartile ranges from the median become NA
+  ifelse(flag_outliers(Z, nIQR = 2.5), NA, Z)
 }
 
 # convert outliers to NA values
@@ -874,6 +868,19 @@ vR2_carat &lt;- p_transforms$data %&gt;%
 <p>Although there is a lot of overlap, but there is a clear trend of <code>price</code> increasing with <code>clarity</code>, at a given <code>carat</code> weight. The same pattern could also be observed in the plot with increasing grades of <code>color</code>, though not to the same extent. There is no evidence of any relationship between <code>price</code> and <code>carat</code> with <code>cut</code>.</p>
 <p>We can conclude both <code>color</code> and <code>clarity</code> explain some variance in <code>price</code> at a given <code>carat</code> weight.</p>
 </div>
+<div id="all-features" class="section level4">
+<h4>All Features</h4>
+<p>Why do diamonds of better grades look cheaper in the bivariate analysis? Let’s measure the association between all the features, ranking the grades of <code>cut</code>, <code>color</code> and <code>clarity</code> from worst to best, so they can be correlated with the numerical features using Spearman’s rank correlation:</p>
+<pre class="r"><code>eda_plot_association_matrix(dfInput, method = &quot;spearman&quot;, ordinalAsNumeric = T, outlineVar = &quot;price&quot;,
+                            plotTitle = &quot;Spearman correlations, with grades ranked from worst to best&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/association_matrix-1.png" alt="" width="768" /></p>
+<pre class="r"><code>mAssoc &lt;- association_matrix(dfInput, method = &quot;spearman&quot;, ordinalAsNumeric = T)</code></pre>
+<ul>
+<li><code>carat</code> is negatively correlated with <code>clarity</code> (-0.37) and <code>color</code> (-0.24): diamonds of better grades tend to be smaller.</li>
+<li>Since <code>price</code> is very strongly correlated with <code>carat</code> (0.96), <code>price</code> ends up negatively correlated with <code>clarity</code> (-0.21) and <code>color</code> (-0.13) too.</li>
+<li><code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code> form a tight cluster of almost perfectly correlated features, so they are largely redundant as predictors.</li>
+</ul>
+</div>
 <div id="categorical-numerical-numerical" class="section level4">
 <h4>Categorical-Numerical-Numerical</h4>
 <p>The overlap in the scatterplots makes it hard to see how much each grade matters. Let’s compare the grades among diamonds of similar weight, by splitting <code>carat</code> into four quartile bins and plotting <code>price</code> by grade within each bin:</p>
@@ -913,8 +920,8 @@ cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2,
 <p>We want to see if there is any interaction of <code>clarity</code> with <code>cut</code> and <code>color</code>, that could provide any additional explanatory power to predict <code>price</code>:</p>
 <pre class="r"><code>cowplot::plot_grid(plotlist = map(c(&quot;cut&quot;,&quot;color&quot;), ~ eda_plot_heatmap(dfInput, .x, &quot;clarity&quot;, &quot;price&quot;)), nrow = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" alt="" width="672" /></p>
-<p>The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of <code>color</code> and <code>clarity</code>, <code>price</code> tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best <code>color</code> and <code>clarity</code> should be the highest. Nevertheless this counter-trend persists in the dataset.</p>
-<p>With respect to <code>cut</code> and <code>clarity</code>, the mean prices do not show any discernable pattern.</p>
+<p>The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of <code>color</code> and <code>clarity</code>, <code>price</code> tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best <code>color</code> and <code>clarity</code> should be the highest. As we saw above, this is because diamonds of better grades tend to be smaller.</p>
+<p>With respect to <code>cut</code> and <code>clarity</code>, the median prices do not show any discernable pattern. Each tile shows its number of diamonds, and the one combination with fewer than 10 diamonds (<em>Fair</em> <code>cut</code> and <em>IF</em> <code>clarity</code>) is greyed out, because its median is not reliable.</p>
 </div>
 </div>
 <div id="summary" class="section level2">

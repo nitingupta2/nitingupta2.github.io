@@ -487,6 +487,7 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 <h2>Steps for Building Models</h2>
 <p>Here are the steps for building models and determining the best hyperparameter combinations by K-fold cross validation:</p>
 <ul>
+<li>Remove predictors that duplicate the information in other predictors, and encode ordinal features as scores.</li>
 <li>Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - <code>SalePrice</code>.</li>
 <li>Define linear and non-linear models.</li>
 <li>For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.</li>
@@ -496,6 +497,64 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 <li>Calculate RMSE of the each finalized model on the testing set.</li>
 <li>Finally, choose the best model that gives the least RMSE.</li>
 </ul>
+</div>
+<div id="removing-collinear-predictors" class="section level2">
+<h2>Removing Collinear Predictors</h2>
+<p>Many features in this dataset describe the same thing in different ways, and some of the features we engineered in the <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> duplicate others. When categorical features are converted to dummy variables, some predictors become exact linear combinations of others. A linear model cannot separate their effects, so its coefficients become unstable or cannot be estimated at all, and <code>lm</code> warns of a “rank-deficient fit”. Tree-based models are not affected by duplicated information, but removing it makes linear models better defined and every model simpler.</p>
+<p>Using the association matrix from the previous post, we drop these features because other features already carry their information:</p>
+<ul>
+<li><code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> are the same, or almost the same, as the <em>None</em> category of <code>GarageType</code>, <code>FireplaceQu</code> and <code>MasVnrType</code>.</li>
+<li><code>MSSubClass</code> combines the type and the style of a building, which <code>BldgType</code> and <code>HouseStyle</code> already describe. Its <em>duplex</em> category is identical to that of <code>BldgType</code>.</li>
+<li><code>TotalBath</code> is exactly <code>FullBath + 0.5 * HalfBath + BsmtBath</code>. We drop <code>HalfBath</code> rather than <code>TotalBath</code>, so we keep the total, which is among the most important features of the tree-based models, and lose no information, because <code>HalfBath</code> can be recovered from the other three.</li>
+</ul>
+<div id="encoding-ordinal-features" class="section level3">
+<h3>Encoding Ordinal Features</h3>
+<p>Features such as <code>OverallQual</code> or <code>KitchenQual</code> have categories that follow a natural order. By default, <code>step_dummy()</code> encodes such an ordered factor with polynomial contrasts: one predictor for each category but one, capturing linear, quadratic, cubic and higher order trends across the categories. Some grades are so rare, such as an <code>OverallCond</code> of 1, that they can be missing from a cross validation fold, and then the highest order contrasts are collinear in that fold.</p>
+<p>Instead, we encode each ordered factor as a single integer score that follows the order of its categories, which assumes the grades are equally spaced. Categories that no property has, such as a <em>Poor</em> exterior quality, are dropped first, so the scores are consecutive. Here’s how a linear model fares with each encoding, on the same cross validation folds:</p>
+<pre class="r"><code>dfEncodingComparison %&gt;% 
+  mutate(lm_cv_rmse = round(lm_cv_rmse, 4)) %&gt;% 
+  knitr::kable(col.names = c(&quot;Encoding of ordinal features&quot;, &quot;Predictors&quot;, &quot;Folds with a rank-deficient fit&quot;, &quot;lm cross validated RMSE&quot;))</code></pre>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="11%" />
+<col width="33%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Encoding of ordinal features</th>
+<th align="right">Predictors</th>
+<th align="right">Folds with a rank-deficient fit</th>
+<th align="right">lm cross validated RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">polynomial contrasts</td>
+<td align="right">214</td>
+<td align="right">4</td>
+<td align="right">0.1470</td>
+</tr>
+<tr class="even">
+<td align="left">ordinal scores</td>
+<td align="right">151</td>
+<td align="right">0</td>
+<td align="right">0.1336</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>encoding_value &lt;- function(encodingName, column) dfEncodingComparison[[column]][dfEncodingComparison$encoding == encodingName]</code></pre>
+<ul>
+<li>With polynomial contrasts, <code>lm</code> cannot estimate every coefficient in 4 of the 5 folds. With scores, the fit is rank deficient in 0 folds.</li>
+<li>Scores cut the number of predictors from 214 to 151, and the cross validated RMSE of <code>lm</code> falls from 0.147 to 0.134. The simpler encoding generalizes better, because the model no longer has to estimate a separate effect for each rare grade.</li>
+</ul>
+<p>Finally, <code>step_lincomb()</code> checks for any remaining exact linear combinations among the predictors, such as those that could arise because properties without a basement or a garage share the <em>None</em> category of every basement or garage feature. With scores, it finds none.</p>
+<p>After preprocessing, there are 151 predictors, and a linear model can estimate a coefficient for every one of them:</p>
+<pre class="r"><code>model_lm_check &lt;- lm(target ~ ., data = dfTrain_Proc %&gt;% select(-Id))
+print(glue::glue(&quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_lm_check))} coefficients could not be estimated&quot;))</code></pre>
+<pre><code>0 of 152 coefficients could not be estimated</code></pre>
+</div>
 </div>
 <div id="partitioning-training-data" class="section level2">
 <h2>Partitioning Training Data</h2>
@@ -526,12 +585,12 @@ Computational engine: lm </code></pre>
 <pre><code># A tibble: 1 × 1
   mean_rmse
       &lt;dbl&gt;
-1     0.147</code></pre>
+1     0.134</code></pre>
 <pre class="r"><code>rmse_val &lt;- cv_results_lm %&gt;% pull(mean_rmse)</code></pre>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1468</strong>.</li>
+<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1336</strong>.</li>
 <li>This is the simplest and fastest model with no hyperparameters to tune.</li>
 </ul>
 </div>
@@ -556,22 +615,22 @@ Computational engine: glmnet </code></pre>
 <pre><code># A tibble: 10 × 3
     penalty mixture mean_rmse
       &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
- 1 1.46e- 2  0.297      0.128
- 2 1.22e- 2  0.657      0.129
- 3 1.22e- 3  0.490      0.133
- 4 1.09e- 2  0.0439     0.133
- 5 3.47e- 4  0.992      0.134
- 6 8.18e- 4  0.0856     0.137
- 7 1.15e- 4  0.798      0.138
- 8 7.37e- 7  0.0221     0.138
- 9 1.23e-10  0.333      0.138
-10 2.07e- 9  0.950      0.138</code></pre>
+ 1 1.46e- 2  0.297      0.129
+ 2 1.22e- 3  0.490      0.130
+ 3 1.09e- 2  0.0439     0.131
+ 4 3.47e- 4  0.992      0.131
+ 5 1.22e- 2  0.657      0.131
+ 6 8.18e- 4  0.0856     0.132
+ 7 7.37e- 7  0.0221     0.132
+ 8 1.15e- 4  0.798      0.132
+ 9 3.37e-10  0.0573     0.133
+10 1.57e- 5  0.0760     0.133</code></pre>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After hyperparameter tuning with cross validation, the best <code>glmnet</code> model gives an RMSE of 0.128 with penalty = 0.0146 and mixture = 0.2974.</li>
-<li>It is a significant improvement over Ordinary Least Squares regression that had an RMSE of 0.1468.</li>
-<li><code>glmnet</code> cross validation is fast, taking about 13 seconds to execute.</li>
+<li>After hyperparameter tuning with cross validation, the best <code>glmnet</code> model gives an RMSE of 0.129 with penalty = 0.0146 and mixture = 0.2974.</li>
+<li>It is an improvement over Ordinary Least Squares regression that had an RMSE of 0.1336. The regularization shrinks the coefficients of predictors that add little, which helps with so many predictors.</li>
+<li><code>glmnet</code> cross validation is fast, taking about 11 seconds to execute.</li>
 <li>But the presence of outliers can significantly affect its performance.</li>
 </ul>
 <p>Here a plot of the <code>glmnet</code> hyperparameter grid along with the best hyperparameter combination:</p>
@@ -611,21 +670,21 @@ Computational engine: ranger </code></pre>
 <pre><code># A tibble: 10 × 3
    min_n  mtry mean_rmse
    &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
- 1     2    84     0.134
- 2     5   134     0.136
- 3     9    36     0.136
- 4    12   110     0.136
- 5    15    55     0.136
- 6    18   136     0.137
- 7     8   199     0.138
- 8    22    69     0.138
- 9    19   179     0.139
-10    29   123     0.139</code></pre>
+ 1     2    51     0.132
+ 2    12    67     0.134
+ 3     5    81     0.134
+ 4    15    34     0.134
+ 5     9    22     0.135
+ 6    22    42     0.136
+ 7    18    82     0.136
+ 8     8   121     0.137
+ 9    19   108     0.138
+10    33    46     0.138</code></pre>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.134 with mtry = 84 and min_n = 2.</li>
-<li>This is no improvement in RMSE compared to <code>glmnet</code>, and <code>ranger</code> cross validation takes much longer to execute (about 371 seconds, versus 13 seconds for <code>glmnet</code>).</li>
+<li>After cross validation, we get the best RMSE of 0.132 with mtry = 51 and min_n = 2.</li>
+<li>This is no improvement in RMSE compared to <code>glmnet</code>, and <code>ranger</code> cross validation takes much longer to execute (about 164 seconds, versus 11 seconds for <code>glmnet</code>).</li>
 </ul>
 <p>Here a plot of the <code>ranger</code> hyperparameter grid along with the best hyperparameter combination:</p>
 <pre class="r"><code>eda_plot_scatter(param_grid_rf, &quot;min_n&quot;, &quot;mtry&quot;, alpha = 1, add_lm = F) +
@@ -661,22 +720,22 @@ Computational engine: xgboost </code></pre>
 <pre><code># A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
    &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;     &lt;dbl&gt;
- 1    33          2    0.0289      0.126
- 2    23          4    0.0254      0.127
- 3     3          2    0.0171      0.127
- 4    24          1    0.190       0.128
- 5    38          9    0.0270      0.130
- 6     4          1    0.0872      0.131
- 7    23          9    0.0405      0.131
- 8    32          9    0.00605     0.131
- 9    19         11    0.00482     0.131
-10    11          5    0.0549      0.131</code></pre>
+ 1    33          2    0.0289      0.125
+ 2     3          2    0.0171      0.127
+ 3    23          4    0.0254      0.128
+ 4    24          1    0.190       0.129
+ 5    11          5    0.0549      0.129
+ 6    32          9    0.00605     0.130
+ 7    19         11    0.00482     0.130
+ 8    16         14    0.0121      0.131
+ 9    38          9    0.0270      0.131
+10    23          9    0.0405      0.131</code></pre>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.126 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
-<li>This is the best cross validated RMSE of all the models, slightly ahead of <code>glmnet</code> (0.128) and <code>ranger</code> (0.134).</li>
-<li><code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>ranger</code> (about 168 seconds).</li>
+<li>After cross validation, we get the best RMSE of 0.125 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
+<li>This is the best cross validated RMSE of all the models, slightly ahead of <code>glmnet</code> (0.129) and <code>ranger</code> (0.132).</li>
+<li><code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>ranger</code> (about 137 seconds).</li>
 </ul>
 <!-- Here a 3D plot of the `xgboost` hyperparameter grid: -->
 <!-- <center> -->
@@ -723,20 +782,28 @@ dfPlot %&gt;%
   eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
   labs(title = &quot;Actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png" alt="" width="960" /></p>
-<pre class="r"><code># properties among the 3 largest errors of every model
-vWorst_train &lt;- dfPlot %&gt;% 
-  group_by(model) %&gt;% 
-  slice_max(abs(predicted - actual), n = 3) %&gt;% 
-  ungroup() %&gt;% 
-  count(Id) %&gt;% 
-  filter(n == n_distinct(dfPlot$model)) %&gt;% 
-  pull(Id)</code></pre>
+<pre class="r"><code># properties among the 3 largest errors of more than one model
+dfWorst_train &lt;- dfPlot %&gt;%
+  group_by(model) %&gt;%
+  slice_max(abs(predicted - actual), n = 3) %&gt;%
+  ungroup() %&gt;%
+  count(Id, name = &quot;n_models&quot;) %&gt;%
+  filter(n_models &gt; 1) %&gt;%
+  arrange(desc(n_models))
+
+# sentence about the properties that are among the largest errors of the most models
+worst_train_sentence &lt;- if (nrow(dfWorst_train) == 0) {
+  &quot;No property is among them for more than one model.&quot;
+} else {
+  vIds &lt;- dfWorst_train$Id[dfWorst_train$n_models == max(dfWorst_train$n_models)]
+  glue::glue(&quot;{if (length(vIds) == 1) &#39;The property with Id&#39; else &#39;The properties with Ids&#39;} {paste0(&#39;__&#39;, vIds, &#39;__&#39;, collapse = &#39; and &#39;)} {if (length(vIds) == 1) &#39;is&#39; else &#39;are each&#39;} among them for {max(dfWorst_train$n_models)} of the 3 models, so {if (length(vIds) == 1) &#39;it is&#39; else &#39;they are&#39;} worth checking for errors in the data.&quot;)
+}</code></pre>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Both <code>ranger</code> and <code>xgboost</code> models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. <code>ranger</code> fits it most closely, with a training RMSE of 0.051 versus 0.094 for <code>xgboost</code>.</li>
+<li>Both <code>ranger</code> and <code>xgboost</code> models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. <code>ranger</code> fits it most closely, with a training RMSE of 0.050 versus 0.096 for <code>xgboost</code>.</li>
 <li>The <code>glmnet</code> model shows a couple of outliers with Ids <strong>524</strong> and <strong>1299</strong> whose predicted values are far in excess of their actual values. Even properties whose <code>SalePrice</code> is at the lower end, show a wide dispersion in prediced values.</li>
-<li>The plots label the three largest errors of each model. The property with Id <strong>633</strong> is among them for all three models, so it is worth checking for errors in its data.</li>
+<li>The plots label the three largest errors of each model. The properties with Ids <strong>31</strong> and <strong>1299</strong> are each among them for 2 of the 3 models, so they are worth checking for errors in the data.</li>
 <li>But the true performance can only be measured on unseen testing data.</li>
 </ul>
 </div>
@@ -769,15 +836,15 @@ dfRMSE</code></pre>
 <pre><code># A tibble: 3 × 3
   model   test_rmse cv_rmse
   &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;
-1 glmnet      0.130   0.128
-2 ranger      0.138   0.134
-3 xgboost     0.131   0.126</code></pre>
+1 glmnet      0.130   0.129
+2 ranger      0.138   0.132
+3 xgboost     0.132   0.125</code></pre>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.</li>
 <li>Records with Ids <strong>1537</strong> and <strong>2217</strong> are outliers, as none of the models are able to predict close to actual values.</li>
-<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.131.</li>
+<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.132.</li>
 <li>However, <code>glmnet</code> is sensitive to outliers, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. Since <code>xgboost</code> had the best cross validated RMSE and the difference in test RMSE is small, we could finalize <code>xgboost</code>, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.</li>
 </ul>
 <pre class="r"><code>model_final &lt;- model_final_xgboost</code></pre>
@@ -802,7 +869,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png" alt="" width="1152" /></p>
 <ul>
 <li>Correlations of numerical features are plotted side-by-side. All of them have a correlation of 0.5 or more (in absolute terms) with <code>SalePrice</code>.</li>
-<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, fireplace quality, etc.</li>
+<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, overall condition, etc.</li>
 <li>This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.</li>
 </ul>
 </div>
@@ -823,9 +890,8 @@ cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
 
 dfSample &lt;- getSampleProperty(1000) %&gt;% bind_rows(getSampleProperty(2000))
 
-# preprocess the sample data and generated predicted values from the final model
-get_preprocessing_recipe(dfSample) %&gt;% 
-  bake(dfSample) %&gt;% 
+# preprocess the sample data with the recipe prepared on the training set and generate predicted values from the final model
+bake(preprocessing_recipe, new_data = dfSample) %&gt;% 
   get_predicted(model_final, .) %&gt;% 
   as_tibble() %&gt;% 
   bind_cols(dfSample) %&gt;% 

@@ -1294,6 +1294,35 @@ dfClean &lt;- dfClean %&gt;%
                            &quot;OpenPorchSF&quot;,&quot;EnclosedPorch&quot;,&quot;3SsnPorch&quot;,&quot;ScreenPorch&quot;))</code></pre>
 <pre><code> [1] &quot;BsmtFullBath&quot;  &quot;GarageCars&quot;    &quot;GarageYrBlt&quot;   &quot;GrLivArea&quot;     &quot;PoolArea&quot;      &quot;YearBuilt&quot;     &quot;YearRemodAdd&quot;  &quot;Neighborhood&quot;  &quot;OpenPorchSF&quot;  
 [10] &quot;EnclosedPorch&quot; &quot;3SsnPorch&quot;     &quot;ScreenPorch&quot;  </code></pre>
+<p>Let’s check these choices by measuring the association between every pair of features. A suitable measure is used for each pair: Pearson correlation between two numerical features, Cramer’s V between two categorical features, and the correlation ratio between a numerical and a categorical feature. Cramer’s V and the correlation ratio are bias-corrected, so that features with many categories do not look associated with everything.</p>
+<pre class="r"><code>mAssoc &lt;- association_matrix(dfClean %&gt;% select(-Id))
+
+# one row per pair of features, strongest association first
+mUpper &lt;- which(upper.tri(mAssoc), arr.ind = T)
+dfAssocPairs &lt;- tibble(feature1 = rownames(mAssoc)[mUpper[, 1]],
+                       feature2 = colnames(mAssoc)[mUpper[, 2]],
+                       association = mAssoc[mUpper],
+                       measure = attr(mAssoc, &quot;measure&quot;)[mUpper]) %&gt;%
+  drop_na(association) %&gt;%
+  arrange(desc(abs(association)))
+
+assoc_of &lt;- function(f1, f2) {
+  dfAssocPairs %&gt;%
+    filter((feature1 == f1 &amp; feature2 == f2) | (feature1 == f2 &amp; feature2 == f1)) %&gt;%
+    pull(association) %&gt;%
+    round(2)
+}
+
+vFeaturesAssoc &lt;- dfAssocPairs %&gt;% filter(abs(association) &gt;= 0.85) %&gt;% select(feature1, feature2) %&gt;% unlist() %&gt;% unique()
+vPorchAssoc &lt;- map_dbl(c(&quot;OpenPorchSF&quot;,&quot;EnclosedPorch&quot;,&quot;3SsnPorch&quot;,&quot;ScreenPorch&quot;), ~ assoc_of(.x, &quot;PorchSF&quot;))</code></pre>
+<p>Here are the 36 features that have an association of 0.85 or more with at least one other feature. They are clustered so that related features sit next to each other:</p>
+<pre class="r"><code>eda_plot_association_matrix(dfClean[vFeaturesAssoc], plotTitle = &quot;Features with an association of 0.85 or more with another feature&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_association_matrix-1.png" alt="" width="960" /></p>
+<ul>
+<li>Most of the features we drop are strongly associated with another feature: <code>GarageCars</code> with <code>GarageArea</code> (0.89), <code>GrLivArea</code> with <code>TotalSF</code> (0.87), <code>BsmtFullBath</code> with <code>BsmtBath</code> (0.97), <code>PoolArea</code> with <code>HasPool</code> (0.94), <code>YearBuilt</code> with <code>Vintage</code> (0.9), <code>GarageYrBlt</code> with <code>YearBuilt</code> (0.86), <code>YearRemodAdd</code> with <code>PropertyAge</code> (-1) and <code>Neighborhood</code> with <code>NeighborhoodType</code> (1).</li>
+<li>The four porch features are only moderately associated with <code>PorchSF</code> (between 0.19 and 0.61). They are not redundant with it; we drop them because <code>PorchSF</code>, their total area, replaces them.</li>
+<li>The matrix also finds redundant features that we have not dropped yet. <code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> carry the same information as the <em>None</em> category of the garage, fireplace and masonry features (Cramer’s V of about 1), and <code>MSSubClass</code> is closely associated with <code>BldgType</code> (0.89) and <code>HouseStyle</code> (0.83). Tree-based models are not affected by such duplicates, but they add collinear predictors to linear models, so we will remove them before fitting models in <a href="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">the next post</a>.</li>
+</ul>
 </div>
 <div id="skewed-categorical-features" class="section level4">
 <h4>Skewed Categorical Features</h4>
@@ -1424,13 +1453,23 @@ print(&quot;Dimensions of the finalized dataset&quot;)</code></pre>
 <p>Let’s examine the relationship of <code>SalePrice</code> with other numerical features:</p>
 <pre class="r"><code>eda_plot_scatter(dfClean, vFeaturesNum, &quot;SalePrice&quot;, yLabelsScale = scales::dollar)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" alt="" width="960" /></p>
-<pre class="r"><code>vOutliers_TotalSF &lt;- dfClean %&gt;% filter(TotalSF &gt; 7000) %&gt;% pull(Id)</code></pre>
+<p>Let’s take a closer look at <code>TotalSF</code>, labelling the properties with the largest Cook’s distance, which measures how much each point pulls the regression line:</p>
+<pre class="r"><code>eda_plot_scatter(dfClean, &quot;TotalSF&quot;, &quot;SalePrice&quot;, yLabelsScale = scales::dollar,
+                 nLabel = 3, feature_id = &quot;Id&quot;, labelBy = &quot;cooks&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/influential_points-1.png" alt="" width="960" /></p>
+<pre class="r"><code># Cook&#39;s distance of each property in a linear fit of SalePrice on TotalSF
+dfInfluence &lt;- dfClean %&gt;% select(Id, TotalSF, SalePrice) %&gt;% drop_na()
+dfInfluence &lt;- dfInfluence %&gt;%
+  mutate(cooks = cooks.distance(lm(SalePrice ~ TotalSF, data = dfInfluence))) %&gt;%
+  arrange(desc(cooks))
+
+vOutliers_TotalSF &lt;- dfInfluence$Id[1:3]</code></pre>
 <div id="whats-notable-6" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>From the scatterplot of <code>TotalSF</code> v/s <code>SalePrice</code>, it is very clear there are <em>high leverage</em> points where the target <code>SalePrice</code> is unusually low relative to the area in sq. ft. These points have an outsized impact on the slope of the regression line, which otherwise would be higher.</li>
 <li>The same set of points impact <code>TotalBsmtSF</code>.</li>
-<li>The Ids of these records are 524,1299,2550. Out of these 524 and 1299 are in the training set.</li>
+<li>The Ids of these records are 1299,2550,524, with Cook’s distances of 5.69, 2.46, 0.54. These are far above the usual cutoff of 4/n = 0.0014, and the next most influential property has a Cook’s distance of only 0.12. Out of these 524 and 1299 are in the training set.</li>
 </ul>
 </div>
 </div>
@@ -1562,9 +1601,9 @@ bin_median &lt;- function(plotName, binNum, categoryName) {
 <div id="whats-notable-11" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median <code>SalePrice</code> ranges from $161,000 in Type5 neighborhoods to $327,000 in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.</li>
-<li>For the same <code>GarageArea</code>, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median <code>SalePrice</code> is $299,018 for built-in, $253,000 for attached and $140,000 for detached garages. Some garage types have very few properties, so their boxplots are less reliable.</li>
-<li>Properties with central air conditioning sell for more at every size. Among the largest properties, the median <code>SalePrice</code> is $262,140 with central air and $136,000 without it.</li>
+<li>Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median <code>SalePrice</code> ranges from <code>$161,000</code> in Type5 neighborhoods to <code>$327,000</code> in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.</li>
+<li>For the same <code>GarageArea</code>, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median <code>SalePrice</code> is <code>$299,018</code> for built-in, <code>$253,000</code> for attached and <code>$140,000</code> for detached garages. Some garage types have very few properties, so their boxplots are less reliable.</li>
+<li>Properties with central air conditioning sell for more at every size. Among the largest properties, the median <code>SalePrice</code> is <code>$262,140</code> with central air and <code>$136,000</code> without it.</li>
 </ul>
 </div>
 </div>
@@ -1576,10 +1615,15 @@ p2 &lt;- eda_plot_heatmap(dfClean, &quot;GarageType&quot;, &quot;NeighborhoodTyp
 p3 &lt;- eda_plot_heatmap(dfClean, &quot;MSSubClass&quot;, &quot;MSZoning&quot;, &quot;SalePrice&quot;)
 cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" alt="" width="960" /></p>
+<pre class="r"><code># number of combinations, and those with fewer than 10 properties
+vCells &lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
+vSparse &lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &lt; 10))</code></pre>
+<p>Each tile shows the median <code>SalePrice</code> and the number of properties. Combinations with fewer than 10 properties are greyed out, because their medians are not reliable.</p>
 <ul>
 <li>It is evident that some neighborhoods have higher <code>OverallQual</code> and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in <code>SalePrice</code> by quality of property.</li>
 <li>It is less clear if <code>GarageType</code> has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by <code>NeighborhoodType</code> itself.</li>
 <li>Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.</li>
+<li>Many combinations are rare: 11 of the 34 combinations of <code>OverallQual</code> and <code>NeighborhoodType</code>, and 20 of the 46 combinations of <code>MSSubClass</code> and <code>MSZoning</code>, have fewer than 10 properties. So only the common combinations can be compared reliably, and a model would struggle to learn interactions between these features.</li>
 </ul>
 <pre class="r"><code># split the data back to training and testing sets
 # dfTrain &lt;- dfClean %&gt;% dplyr::slice(1:nrows_train)
