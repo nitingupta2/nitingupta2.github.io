@@ -499,9 +499,8 @@ Distribution of matches played by all playersLet’s take a look at the summary
     <h2><a href="/casestudies/ames-housing-part2-models/">Ames Housing - Part 2 - Building Models</a></h2>
     <div class="article-style">
       
-      In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
-Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.
+      In a previous post in this series, we explored the Ames Housing dataset.
+In this post, we build linear and non-linear models, and we find out how well they predict the SalePrice of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.
 
       
     </div>
@@ -511,9 +510,8 @@ Evaluation CriteriaRoot-Mean-Squared-Error (RMSE) between the logarithm of the 
     <h2><a href="/casestudies/ames-housing-part1-eda/">Ames Housing - Part 1 - Exploratory Data Analysis</a></h2>
     <div class="article-style">
       
-      In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
-Data SummariesThe Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
-print(&quot;Dimensions of the training set&quot;)[1] &quot;Dimensions of the training set&quot;dim(dfTrain)[1] 1460 81vTrainIDs &lt;- dfTrain$Idprint(&quot;Dimensions of the testing set&quot;)[1] &quot;Dimensions of the testing set&quot;dim(dfTest)[1] 1459 81vTestIDs &lt;- dfTest$IddfClean &lt;- dfTrain %&gt;% bind_rows(dfTest)# dfDescription &lt;- read.delim(&quot;data_description.txt&quot;, header = F, sep = &quot;:&quot;, na.strings = &quot;&quot;) %&gt;% # as_tibble() %&gt;% # set_names(c(&quot;Feature&quot;, &quot;Description&quot;)) %&gt;% # map_df(str_trim) %&gt;% # mutate(Feature = ifelse(Feature == &quot;&quot;, NA, Feature)) %&gt;% # drop_na(Feature) %&gt;% # mutate(Description = ifelse(is.na(Description), Feature, Description)) %&gt;% # mutate(Feature = ifelse(Feature == Description, &quot;&quot;, Feature))# knitr::kable(dfDescription)# Hmisc::describe(dfClean)Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:
+      In this case study, we use the Ames Housing dataset to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.
+Data SummariesThe Ames Housing dataset has the sale prices of properties in Ames, Iowa, and 80 other attributes of each property. We call each attribute a feature. Each property has an Id number. The data comes in two parts: a training set and a testing set. Here are the number of rows (properties) and columns (features) in each set:
 
       
     </div>

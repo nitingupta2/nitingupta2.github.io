@@ -28,36 +28,10 @@
   
     
   
-  <meta name="description" content="In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
+  <meta name="description" content="In this case study, we use the Ames Housing dataset to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.
 
 Data Summaries
-The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
-print(&quot;Dimensions of the training set&quot;)
-[1] &quot;Dimensions of the training set&quot;
-dim(dfTrain)
-[1] 1460   81
-vTrainIDs &lt;- dfTrain$Id
-
-print(&quot;Dimensions of the testing set&quot;)
-[1] &quot;Dimensions of the testing set&quot;
-dim(dfTest)
-[1] 1459   81
-vTestIDs &lt;- dfTest$Id
-
-dfClean &lt;- dfTrain %&gt;% bind_rows(dfTest)
-# dfDescription &lt;- read.delim(&quot;data_description.txt&quot;, header = F, sep = &quot;:&quot;, na.strings = &quot;&quot;) %&gt;% 
-#   as_tibble() %&gt;% 
-#   set_names(c(&quot;Feature&quot;, &quot;Description&quot;)) %&gt;% 
-#   map_df(str_trim) %&gt;% 
-#   mutate(Feature = ifelse(Feature == &quot;&quot;, NA, Feature)) %&gt;% 
-#   drop_na(Feature) %&gt;% 
-#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&gt;% 
-#   mutate(Feature = ifelse(Feature == Description, &quot;&quot;, Feature))
-
-# knitr::kable(dfDescription)
-
-# Hmisc::describe(dfClean)
-Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:">
+The Ames Housing dataset has the sale prices of properties in Ames, Iowa, and 80 other attributes of each property. We call each attribute a feature. Each property has an Id number. The data comes in two parts: a training set and a testing set. Here are the number of rows (properties) and columns (features) in each set:">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">
@@ -157,36 +131,10 @@ Now, let’s combine training and testing into a single dataset and take a look 
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">
   <meta property="og:title" content="Ames Housing - Part 1 - Exploratory Data Analysis | Nitin Gupta">
-  <meta property="og:description" content="In this case study, we will use the Ames Housing dataset to explore regression techniques and predict the sale price of houses.
+  <meta property="og:description" content="In this case study, we use the Ames Housing dataset to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.
 
 Data Summaries
-The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an Id associated with it. Here are the dimensions of the training and testing sets respectively:
-print(&quot;Dimensions of the training set&quot;)
-[1] &quot;Dimensions of the training set&quot;
-dim(dfTrain)
-[1] 1460   81
-vTrainIDs &lt;- dfTrain$Id
-
-print(&quot;Dimensions of the testing set&quot;)
-[1] &quot;Dimensions of the testing set&quot;
-dim(dfTest)
-[1] 1459   81
-vTestIDs &lt;- dfTest$Id
-
-dfClean &lt;- dfTrain %&gt;% bind_rows(dfTest)
-# dfDescription &lt;- read.delim(&quot;data_description.txt&quot;, header = F, sep = &quot;:&quot;, na.strings = &quot;&quot;) %&gt;% 
-#   as_tibble() %&gt;% 
-#   set_names(c(&quot;Feature&quot;, &quot;Description&quot;)) %&gt;% 
-#   map_df(str_trim) %&gt;% 
-#   mutate(Feature = ifelse(Feature == &quot;&quot;, NA, Feature)) %&gt;% 
-#   drop_na(Feature) %&gt;% 
-#   mutate(Description = ifelse(is.na(Description), Feature, Description)) %&gt;% 
-#   mutate(Feature = ifelse(Feature == Description, &quot;&quot;, Feature))
-
-# knitr::kable(dfDescription)
-
-# Hmisc::describe(dfClean)
-Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:"><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+The Ames Housing dataset has the sale prices of properties in Ames, Iowa, and 80 other attributes of each property. We call each attribute a feature. Each property has an Id number. The data comes in two parts: a training set and a testing set. Here are the number of rows (properties) and columns (features) in each set:"><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -527,10 +475,10 @@ Now, let’s combine training and testing into a single dataset and take a look 
       
 
 
-<p>In this case study, we will use the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a> to explore regression techniques and predict the sale price of houses.</p>
+<p>In this case study, we use the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a> to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.</p>
 <div id="data-summaries" class="section level2">
 <h2>Data Summaries</h2>
-<p>The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an <strong>Id</strong> associated with it. Here are the dimensions of the training and testing sets respectively:</p>
+<p>The Ames Housing dataset has the sale prices of properties in Ames, Iowa, and 80 other attributes of each property. We call each attribute a feature. Each property has an <strong>Id</strong> number. The data comes in two parts: a training set and a testing set. Here are the number of rows (properties) and columns (features) in each set:</p>
 <pre class="r"><code>print(&quot;Dimensions of the training set&quot;)</code></pre>
 <pre><code>[1] &quot;Dimensions of the training set&quot;</code></pre>
 <pre class="r"><code>dim(dfTrain)</code></pre>
@@ -556,28 +504,28 @@ dfClean &lt;- dfTrain %&gt;% bind_rows(dfTest)</code></pre>
 # knitr::kable(dfDescription)
 
 # Hmisc::describe(dfClean)</code></pre>
-<p>Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:</p>
+<p>Now, let’s put the training set and the testing set together in one dataset, and count the missing values in each feature:</p>
 <pre class="r"><code>eda_plot_missing_counts(dfClean)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png" alt="" width="672" /></p>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>The combined dataset has 2919 property records.</li>
-<li>Very few properties have a pool, fence or an alley access to the property.</li>
-<li>Very few properties have a miscellaneous feature that has not been covered by other features.</li>
-<li>More than a dozen features have atleast 1 missing value. Since we have a tiny dataset, we will try to impute the missing values.</li>
+<li>The combined dataset has 2919 properties.</li>
+<li>Very few properties have a pool, a fence or access to an alley.</li>
+<li>Very few properties have a special feature that other features do not describe (<code>MiscFeature</code>).</li>
+<li>More than 12 features have at least 1 missing value. The dataset is small, so we do not want to remove properties. Instead, we fill in each missing value with a likely value. This is called imputation.</li>
 </ul>
 </div>
 </div>
 <div id="data-cleaning-transformation" class="section level2">
 <h2>Data Cleaning &amp; Transformation</h2>
-<p>We will visualize features of the complete dataset and create a data cleaning pipeline.</p>
+<p>In this section, we look at the features of the complete dataset, and we make a set of steps to clean the data.</p>
 <div id="fixing-data-errors" class="section level3">
 <h3>Fixing Data Errors</h3>
-<p>First, a few data integrity checks need to be done to ensure the quality of the data:</p>
+<p>First, we check that the data makes sense:</p>
 <ul>
-<li><code>YearRemodAdd</code> should not be earlier than <code>YearBuilt</code>: 1 record to be fixed</li>
-<li><code>YrSold</code> should not be earlier than <code>YearRemodAdd</code>: 3 records to be fixed</li>
+<li><code>YearRemodAdd</code> (the year of the last remodel) must not be earlier than <code>YearBuilt</code>: 1 property to fix</li>
+<li><code>YrSold</code> (the year of the sale) must not be earlier than <code>YearRemodAdd</code>: 3 properties to fix</li>
 </ul>
 <pre class="r"><code>dfClean %&gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&gt;% dplyr::filter(YearRemodAdd &lt; YearBuilt)</code></pre>
 <pre><code># A tibble: 1 × 4
@@ -596,8 +544,8 @@ dfClean &lt;- dfClean %&gt;%
   mutate(YearRemodAdd = ifelse(YearRemodAdd &lt; YearBuilt, YearBuilt, YearRemodAdd)) %&gt;% 
   mutate(YrSold = ifelse(YrSold &lt; YearRemodAdd, YearRemodAdd, YrSold))</code></pre>
 <ul>
-<li><code>GarageYrBlt</code> should not be earlier than <code>YearBuilt</code>: 18 records to be fixed</li>
-<li><code>GarageYrBlt</code> should not be later than <code>YrSold</code>: 1 record to be fixed</li>
+<li><code>GarageYrBlt</code> (the year the garage was built) must not be earlier than <code>YearBuilt</code>: 18 properties to fix</li>
+<li><code>GarageYrBlt</code> must not be later than <code>YrSold</code>: 1 property to fix</li>
 </ul>
 <pre class="r"><code>dfClean %&gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&gt;% dplyr::filter(GarageYrBlt &lt; YearBuilt)</code></pre>
 <pre><code># A tibble: 18 × 4
@@ -637,9 +585,9 @@ dfClean &lt;- dfClean %&gt;%
 <div id="basement-features" class="section level4">
 <h4>Basement Features</h4>
 <ol style="list-style-type: decimal">
-<li><p>There is one property (<code>Id</code> = 2121) where all the basement features are NA. <code>TotalBsmtSF</code> is replaced by 0.</p></li>
-<li><p>Now there are 79 properties which have no basement (<code>TotalBsmtSF</code> = 0). All other basement features having NA values are changed to <strong>None</strong>.</p></li>
-<li><p>Since qualitative features do not have the same distribution across neighborhoods, any remaining <strong>NA</strong> values are imputed to be the most common value in that <code>Neighborhood</code>.</p></li>
+<li><p>For one property (<code>Id</code> = 2121), all the basement features are missing (NA). We set <code>TotalBsmtSF</code> (the total basement area) to 0.</p></li>
+<li><p>Now 79 properties have no basement (<code>TotalBsmtSF</code> = 0). For these properties, we change all the missing basement values to <strong>None</strong>.</p></li>
+<li><p>The quality of basements is different in different neighborhoods. So we fill in each remaining missing value with the most common value in the same <code>Neighborhood</code>.</p></li>
 </ol>
 <pre class="r"><code># 1. Change TotalBsmtSF to 0 when all basement features are NA
 #####################################################################################################################
@@ -709,9 +657,9 @@ dfClean &lt;- dfClean %&gt;%
 # cleanup
 rm(vFeaturesChr_bsmt, vFeaturesNum_bsmt)
 rm(dfNeighborhood_mcv, bsmt_fintype2_mcv)</code></pre>
-<p>Histograms of numerical basement features and their correlations with <code>SalePrice</code> are plotted below.</p>
-<p>It could be verified that: <code>TotalBsmtSF</code> = <code>BsmtFinSF1</code> + <code>BsmtFinSF2</code> + <code>BsmtUnfSF</code></p>
-<p>Additionally, new features are generated where:</p>
+<p>Below are histograms of the numerical basement features, and their correlations with <code>SalePrice</code>. A histogram shows how many properties have values in each range. A correlation is a number from -1 to 1. It tells how closely two features move together in a straight line: near 1, they go up together; near -1, one goes down when the other goes up; near 0, they have no straight-line relationship.</p>
+<p>We can check that: <code>TotalBsmtSF</code> = <code>BsmtFinSF1</code> + <code>BsmtFinSF2</code> + <code>BsmtUnfSF</code></p>
+<p>We also create new features:</p>
 <ul>
 <li><code>BsmtBath</code> = <code>BsmtFullBath</code> + 0.5 * <code>BsmtHalfBath</code></li>
 <li><code>HasBsmt</code> = <code>TotalBsmtSF</code> &gt; 0</li>
@@ -733,7 +681,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png" alt="" width="960" /></p>
 <ul>
 <li>Most properties have a basement.</li>
-<li>Column plots show that <code>BsmtFinType2</code> and <code>BsmtCond</code> values are dominated by a single category.</li>
+<li>The column plots show that one category is much more common than the others in <code>BsmtFinType2</code> and in <code>BsmtCond</code>.</li>
 </ul>
 <pre class="r"><code>vFeaturesChr &lt;- dfBsmt %&gt;% select(-SalePrice) %&gt;% select_if(is.character) %&gt;% colnames()
 
@@ -745,7 +693,7 @@ rm(dfBsmt, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="bathroom-features" class="section level4">
 <h4>Bathroom Features</h4>
 <ul>
-<li>A new feature is generated to determine the total number of bathrooms: <code>TotalBath</code> = <code>FullBath</code> + <code>HalfBath</code> + <code>BsmtBath</code></li>
+<li>We create a new feature for the total number of bathrooms: <code>TotalBath</code> = <code>FullBath</code> + 0.5 * <code>HalfBath</code> + <code>BsmtBath</code></li>
 </ul>
 <pre class="r"><code># New features: HasFireplace
 dfClean &lt;- dfClean %&gt;% 
@@ -766,7 +714,7 @@ rm(dfBath, vFeaturesNum)</code></pre>
 <div id="fireplace-features" class="section level4">
 <h4>Fireplace Features</h4>
 <ol style="list-style-type: decimal">
-<li>There are 1420 properties that have no fireplaces. <code>FireplaceQu</code> is changed to <strong>None</strong>.</li>
+<li>1420 properties have no fireplace. For these properties, we change <code>FireplaceQu</code> (the fireplace quality) to <strong>None</strong>.</li>
 </ol>
 <pre class="r"><code># 1. Change FireplaceQu to None if there is no fireplace
 ###############################################################################################################
@@ -787,8 +735,8 @@ dfClean %&gt;% select(Id, Neighborhood, contains(&quot;Fire&quot;)) %&gt;% dplyr
 # ℹ 1,410 more rows</code></pre>
 <pre class="r"><code>dfClean &lt;- dfClean %&gt;% mutate_at(vars(&quot;FireplaceQu&quot;), ~ case_when(Fireplaces == 0 ~ &quot;None&quot;, TRUE ~ .))</code></pre>
 <ul>
-<li>A new feature is generated where: <code>HasFireplace</code> = <code>Fireplaces</code> &gt; 0</li>
-<li>A significant number of properties have fireplaces.</li>
+<li>We create a new feature: <code>HasFireplace</code> = <code>Fireplaces</code> &gt; 0</li>
+<li>Many properties have a fireplace.</li>
 </ul>
 <pre class="r"><code># New features: HasFireplace
 dfClean &lt;- dfClean %&gt;% 
@@ -812,9 +760,9 @@ rm(dfFireplace, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="garage-features" class="section level4">
 <h4>Garage Features</h4>
 <ol style="list-style-type: decimal">
-<li><p><code>GarageYrBlt</code> where NA is set to <code>YearBuilt</code>.</p></li>
-<li><p>There are 157 properties where the property has no garage. In these records, <code>GarageType</code>, <code>GarageFinish</code>, <code>GarageQual</code> and <code>GarageCond</code> are recorded as <strong>None</strong>.</p></li>
-<li><p>Since qualitative features do not have the same distribution across neighborhoods, any remaining <strong>NA</strong> values are imputed to be the most common or median value in the <code>Neighborhood</code> by <code>GarageType</code>.</p></li>
+<li><p>If <code>GarageYrBlt</code> is missing, we set it to <code>YearBuilt</code>.</p></li>
+<li><p>157 properties have no garage. For these properties, <code>GarageType</code>, <code>GarageFinish</code>, <code>GarageQual</code> and <code>GarageCond</code> are <strong>None</strong>.</p></li>
+<li><p>Garages are different in different neighborhoods. So we fill in each remaining missing value with the most common value (or the median value, for numbers) of the same <code>Neighborhood</code> and <code>GarageType</code>.</p></li>
 </ol>
 <pre class="r"><code># 1. Change GarageYrBlt to YearBuilt if it is NA
 ############################################################################################################
@@ -874,10 +822,10 @@ dfClean &lt;- dfClean %&gt;%
 # cleanup
 rm(vFeaturesChr_garage, dfNeighborhood_mcv, dfNeighborhood_med)</code></pre>
 <ul>
-<li><code>GarageArea</code> and <code>GarageCars</code> have almost similar correlation with <code>SalePrice</code>.</li>
-<li>A new feature is generated where: <code>HasGarage</code> = <code>GarageArea</code> &gt; 0</li>
+<li><code>GarageArea</code> and <code>GarageCars</code> have almost the same correlation with <code>SalePrice</code>.</li>
+<li>We create a new feature: <code>HasGarage</code> = <code>GarageArea</code> &gt; 0</li>
 <li>Most properties have a garage.</li>
-<li>Column plots show that <code>GarageQual</code> and <code>GarageCond</code> values are dominated by a single category.</li>
+<li>The column plots show that one category is much more common than the others in <code>GarageQual</code> and in <code>GarageCond</code>.</li>
 </ul>
 <pre class="r"><code># New features: HasGarage
 dfClean &lt;- dfClean %&gt;% 
@@ -901,9 +849,9 @@ rm(dfGarage, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="masonry-features" class="section level4">
 <h4>Masonry Features</h4>
 <ol style="list-style-type: decimal">
-<li><p>There is one property (<code>Id</code> = 2611) where <code>MasVnrArea</code> = 198 but <code>MasVnrType</code> = NA. Impute <code>MasVnrType</code> to be most common value in the neighborhood where <code>MasVnrArea</code> &gt; 0.</p></li>
-<li><p>Impute <strong>NA</strong> values in <code>MasVnrType</code> to be the most common values by <code>Neighborhood</code> and <code>YearRemodAdd</code>.</p></li>
-<li><p>Impute <strong>NA</strong> values in <code>MasVnrArea</code> to be the median values by <code>Neighborhood</code> and <code>MasVnrType</code>.</p></li>
+<li><p>For one property (<code>Id</code> = 2611), <code>MasVnrArea</code> (the area of the masonry veneer) is 198, but <code>MasVnrType</code> (the type of masonry) is missing. We set <code>MasVnrType</code> to the most common type in the same neighborhood, among the properties that have masonry.</p></li>
+<li><p>We fill in the missing values of <code>MasVnrType</code> with the most common values for the same <code>Neighborhood</code> and <code>YearRemodAdd</code>.</p></li>
+<li><p>We fill in the missing values of <code>MasVnrArea</code> with the median values for the same <code>Neighborhood</code> and <code>MasVnrType</code>. The median is the middle value: half the values are below it and half are above it.</p></li>
 </ol>
 <pre class="r"><code># 1. Change MasVnrType in Id 2611 as the most common value in the Neighborhood
 ###############################################################################################################
@@ -970,8 +918,8 @@ dfClean &lt;- dfClean %&gt;%
 # cleanup
 rm(masvnrtype_mcv, dfNeighborhood_mcv, dfNeighborhood_med)</code></pre>
 <ul>
-<li>A new feature is generated where: <code>HasMasVnr</code> = <code>MasVnrArea</code> &gt; 0</li>
-<li>A significant number of properties have masonry.</li>
+<li>We create a new feature: <code>HasMasVnr</code> = <code>MasVnrArea</code> &gt; 0</li>
+<li>Many properties have masonry.</li>
 </ul>
 <pre class="r"><code># New features: HasMasVnr
 dfClean &lt;- dfClean %&gt;% 
@@ -995,8 +943,8 @@ rm(dfMasVnr, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="pool-features" class="section level4">
 <h4>Pool Features</h4>
 <ol style="list-style-type: decimal">
-<li><p>Change values in <code>PoolQC</code> to <strong>None</strong> if the property has no pool</p></li>
-<li><p>Impute <strong>NA</strong> values in remaining <code>PoolQC</code> to the most common value in the Neighborhood in the properties that have a pool.</p></li>
+<li><p>If the property has no pool, we change <code>PoolQC</code> (the pool quality) to <strong>None</strong>.</p></li>
+<li><p>We fill in the remaining missing values of <code>PoolQC</code> with the most common value in the same neighborhood, among the properties that have a pool.</p></li>
 </ol>
 <pre class="r"><code># 1. Change NA values in PoolQC to None if there is no pool
 ###############################################################################################################
@@ -1037,7 +985,7 @@ dfClean$PoolQC[dfClean$Id %in% dfMissing$Id] &lt;- dfMissing$PoolQC
 # cleanup
 rm(dfNeighborhood_mcv, dfMissing)</code></pre>
 <ul>
-<li>A new feature is generated where: <code>HasPool</code> = <code>PoolArea</code> &gt; 0</li>
+<li>We create a new feature: <code>HasPool</code> = <code>PoolArea</code> &gt; 0</li>
 <li>Most properties do not have a pool.</li>
 </ul>
 <pre class="r"><code># New features: HasGarage
@@ -1062,10 +1010,10 @@ rm(dfPool, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="porch-features" class="section level4">
 <h4>Porch Features</h4>
 <ul>
-<li>New features are generated for:
+<li>We create new features for:
 <ul>
-<li>Total porch area: <code>PorchSF</code> = <code>OpenPorchSF</code> + <code>EnclosedPorch</code> + <code>3SsnPorch</code> + <code>ScreenPorch</code></li>
-<li>Whether property has a porch: <code>HasPorch</code> = <code>PorchSF</code> &gt; 0</li>
+<li>The total porch area: <code>PorchSF</code> = <code>OpenPorchSF</code> + <code>EnclosedPorch</code> + <code>3SsnPorch</code> + <code>ScreenPorch</code></li>
+<li>Whether the property has a porch: <code>HasPorch</code> = <code>PorchSF</code> &gt; 0</li>
 </ul></li>
 </ul>
 <pre class="r"><code># New features: PorchSF, HasPorch
@@ -1091,7 +1039,7 @@ rm(dfPorch, vFeaturesNum, vFeaturesChr)</code></pre>
 <div id="built-area-features" class="section level4">
 <h4>Built Area Features</h4>
 <ul>
-<li>A new feature is added to determine the total square footage of built area: <code>TotalSF</code> = <code>GrLivArea</code> + <code>TotalBsmtSF</code></li>
+<li>We create a new feature for the total built area in square feet: <code>TotalSF</code> = <code>GrLivArea</code> + <code>TotalBsmtSF</code></li>
 </ul>
 <pre class="r"><code>dfClean &lt;- dfClean %&gt;% 
   mutate(TotalSF = GrLivArea + TotalBsmtSF)
@@ -1109,12 +1057,12 @@ rm(vFeaturesNum)</code></pre>
 <div id="construction-year-features" class="section level4">
 <h4>Construction Year Features</h4>
 <ul>
-<li>New features are generated for:
+<li>We create new features for:
 <ul>
-<li>Vintage of year built: <strong>1945 or earlier, 1946-1999, 2000 or later</strong></li>
-<li>Age of property from when it was built to the time it was sold: <code>PropertyAge</code> = <code>YrSold</code> - <code>YearRemodAdd</code></li>
-<li>Indicate if the property is new or newly renovated: <code>IsNew</code> = <code>YearRemodAdd</code> == <code>YrSold</code></li>
-<li>Indicate if the property has been remodelled: <code>IsRemodAdd</code> = <code>YearRemodAdd</code> &gt; <code>YearBuilt</code></li>
+<li>The period when the property was built (<code>Vintage</code>): <strong>1945 or earlier, 1946-1999, 2000 or later</strong></li>
+<li>The age of the property when it was sold, counted from its last remodel (or from its construction, if it was never remodeled): <code>PropertyAge</code> = <code>YrSold</code> - <code>YearRemodAdd</code></li>
+<li>Whether the property was new or newly remodeled when it was sold: <code>IsNew</code> = <code>YearRemodAdd</code> == <code>YrSold</code></li>
+<li>Whether the property was ever remodeled: <code>IsRemod</code> = <code>YearRemodAdd</code> &gt; <code>YearBuilt</code></li>
 </ul></li>
 </ul>
 <pre class="r"><code># New feature: Vintage
@@ -1142,9 +1090,9 @@ rm(vFeaturesNum, vFeaturesChr)</code></pre>
 </div>
 <div id="neighborhood-features" class="section level4">
 <h4>Neighborhood Features</h4>
-<p>Type of Neighborhood: There are 25 neighborhoods in the dataset.
-As it is said, real estate is all about location, location, location. Clearly some neighborhoods command higher prices than others.</p>
-<p>Neighborhoods could be grouped together in fewer categories depending upon how they are ranked by their median SalePrice:</p>
+<p>Type of Neighborhood: The dataset has 25 neighborhoods.
+In real estate, location is very important. Some neighborhoods clearly have higher prices than others.</p>
+<p>We can put the neighborhoods into fewer groups, by their median <code>SalePrice</code>:</p>
 <ul>
 <li><strong>Type1</strong>: StoneBr, NridgHt, NoRidge</li>
 <li><strong>Type2</strong>: Veenker, Timber, Somerst</li>
@@ -1170,10 +1118,10 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
 <div id="other-missing-features" class="section level4">
 <h4>Other Missing Features</h4>
 <ol style="list-style-type: decimal">
-<li><p>In <code>MiscFeature</code>, <code>Alley</code> and <code>Fence</code> <strong>NA</strong> values are recoded as <strong>None</strong>.</p></li>
-<li><p>In <code>Utilities</code>, <code>Functional</code>, <code>SaleType</code> <strong>NA</strong> values are imputed as the most common value of each feature.</p></li>
-<li><p>In <code>LotFrontage</code> <strong>NA</strong> values are imputed as the median values in the <code>Neighborhood</code>.</p></li>
-<li><p>In <code>MSZoning</code>, <code>KitchenQual</code>, <code>Exterior1st</code>, <code>Exterior2nd</code>, <code>Electrical</code> <strong>NA</strong> values are imputed as the most common value in the <code>Neighborhood</code>.</p></li>
+<li><p>In <code>MiscFeature</code>, <code>Alley</code> and <code>Fence</code>, we change the missing values to <strong>None</strong>.</p></li>
+<li><p>In <code>Utilities</code>, <code>Functional</code> and <code>SaleType</code>, we fill in the missing values with the most common value of each feature.</p></li>
+<li><p>In <code>LotFrontage</code>, we fill in the missing values with the median value of the same <code>Neighborhood</code>.</p></li>
+<li><p>In <code>MSZoning</code>, <code>KitchenQual</code>, <code>Exterior1st</code>, <code>Exterior2nd</code> and <code>Electrical</code>, we fill in the missing values with the most common value of the same <code>Neighborhood</code>.</p></li>
 </ol>
 <pre class="r"><code># 1. &amp; 2. change NA values to None or most common value of that feature
 ####################################################################################################################
@@ -1218,7 +1166,7 @@ rm(dfNeighborhood_med, dfNeighborhood_mcv)</code></pre>
 </div>
 <div id="label-encoding" class="section level3">
 <h3>Label Encoding</h3>
-<p>A quick look at the data description shows many features have categories that follow a specific order. These features are:</p>
+<p>The data description shows that the categories of many features have a natural order. These features are called ordinal features:</p>
 <ul>
 <li><code>LotShape</code>: Reg, IR1, IR2, IR3</li>
 <li><code>LandSlope</code>: Gtl, Mod, Sev</li>
@@ -1240,15 +1188,15 @@ rm(dfNeighborhood_med, dfNeighborhood_mcv)</code></pre>
 <li><code>Street</code>: Grvl, Pave</li>
 <li><code>PavedDrive</code>: Y, P, N</li>
 </ul>
-<p>Most of these features have a common order <strong>Ex, Gd, TA, Fa, Po</strong>, except some are missing <strong>None</strong> as a category. These features could be ordered with a common set of categories from <strong>Ex, Gd, TA, Fa, Po, None</strong>.</p>
-<p>Some categorical features are already ordered by an integer number. These features are:</p>
+<p>Most of these features use the same order: <strong>Ex</strong> (excellent), <strong>Gd</strong> (good), <strong>TA</strong> (typical/average), <strong>Fa</strong> (fair), <strong>Po</strong> (poor). Some of them also have the category <strong>None</strong>. So we can give these features one common set of ordered categories: <strong>Ex, Gd, TA, Fa, Po, None</strong>.</p>
+<p>Two features already use numbers for their order:</p>
 <ul>
 <li><code>OverallQual</code>: 10 to 1</li>
 <li><code>OverallCond</code>: 10 to 1</li>
 </ul>
-<p><code>MoSold</code> is cyclical and should be recoded as a factor.</p>
-<p><code>YrSold</code> has only 5 values from 2006-2010 and should also be recoded as a factor.</p>
-<p>Categorical features where several categories have less than 10 observations are lumped into a single category named <strong>Other</strong>.</p>
+<p><code>MoSold</code> (the month of the sale) repeats in a cycle every year, so we treat it as a category, not as a number.</p>
+<p><code>YrSold</code> has only 5 values, from 2006 to 2010, so we also treat it as a category.</p>
+<p>In categorical features where several categories have fewer than 10 properties, we put these rare categories together in one category named <strong>Other</strong>.</p>
 <pre class="r"><code>is.nominal &lt;- function(Z) {
   return(is.factor(Z) &amp; !is.ordered(Z))
 }
@@ -1287,14 +1235,14 @@ dfClean &lt;- dfClean %&gt;%
 <h3>Features to Drop</h3>
 <div id="highly-correlated-features" class="section level4">
 <h4>Highly Correlated Features</h4>
-<p>Some features could be dropped from further analysis because either they are too correlated or replaced by a similar feature.</p>
+<p>We drop some features from the rest of the analysis, because they are strongly correlated with other features, or because a similar new feature replaces them.</p>
 <pre class="r"><code>(vFeatures_to_exclude &lt;- c(&quot;BsmtFullBath&quot;,&quot;GarageCars&quot;,&quot;GarageYrBlt&quot;,
                            &quot;GrLivArea&quot;,&quot;PoolArea&quot;,
                            &quot;YearBuilt&quot;,&quot;YearRemodAdd&quot;,&quot;Neighborhood&quot;,
                            &quot;OpenPorchSF&quot;,&quot;EnclosedPorch&quot;,&quot;3SsnPorch&quot;,&quot;ScreenPorch&quot;))</code></pre>
 <pre><code> [1] &quot;BsmtFullBath&quot;  &quot;GarageCars&quot;    &quot;GarageYrBlt&quot;   &quot;GrLivArea&quot;     &quot;PoolArea&quot;      &quot;YearBuilt&quot;     &quot;YearRemodAdd&quot;  &quot;Neighborhood&quot;  &quot;OpenPorchSF&quot;  
 [10] &quot;EnclosedPorch&quot; &quot;3SsnPorch&quot;     &quot;ScreenPorch&quot;  </code></pre>
-<p>Let’s check these choices by measuring the association between every pair of features. A suitable measure is used for each pair: Pearson correlation between two numerical features, Cramer’s V between two categorical features, and the correlation ratio between a numerical and a categorical feature. Cramer’s V and the correlation ratio are bias-corrected, so that features with many categories do not look associated with everything.</p>
+<p>Let’s check these choices. For every pair of features, we measure their association, which tells how strongly the two features are related. We use a measure that suits each type of pair: the Pearson correlation for two numerical features, Cramer’s V for two categorical features, and the correlation ratio for one numerical and one categorical feature. All these measures are near 0 when there is no relationship. Features with many categories can seem related to everything by chance, so Cramer’s V and the correlation ratio include a correction (bias correction) for this.</p>
 <pre class="r"><code>mAssoc &lt;- association_matrix(dfClean %&gt;% select(-Id))
 
 # one row per pair of features, strongest association first
@@ -1315,27 +1263,27 @@ assoc_of &lt;- function(f1, f2) {
 
 vFeaturesAssoc &lt;- dfAssocPairs %&gt;% filter(abs(association) &gt;= 0.85) %&gt;% select(feature1, feature2) %&gt;% unlist() %&gt;% unique()
 vPorchAssoc &lt;- map_dbl(c(&quot;OpenPorchSF&quot;,&quot;EnclosedPorch&quot;,&quot;3SsnPorch&quot;,&quot;ScreenPorch&quot;), ~ assoc_of(.x, &quot;PorchSF&quot;))</code></pre>
-<p>Here are the 36 features that have an association of 0.85 or more with at least one other feature. They are clustered so that related features sit next to each other:</p>
+<p>Here are the 36 features that have an association of 0.85 or more with at least one other feature. Related features are next to each other:</p>
 <pre class="r"><code>eda_plot_association_matrix(dfClean[vFeaturesAssoc], plotTitle = &quot;Features with an association of 0.85 or more with another feature&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_association_matrix-1.png" alt="" width="960" /></p>
 <ul>
-<li>Most of the features we drop are strongly associated with another feature: <code>GarageCars</code> with <code>GarageArea</code> (0.89), <code>GrLivArea</code> with <code>TotalSF</code> (0.87), <code>BsmtFullBath</code> with <code>BsmtBath</code> (0.97), <code>PoolArea</code> with <code>HasPool</code> (0.94), <code>YearBuilt</code> with <code>Vintage</code> (0.9), <code>GarageYrBlt</code> with <code>YearBuilt</code> (0.86), <code>YearRemodAdd</code> with <code>PropertyAge</code> (-1) and <code>Neighborhood</code> with <code>NeighborhoodType</code> (1).</li>
-<li>The four porch features are only moderately associated with <code>PorchSF</code> (between 0.19 and 0.61). They are not redundant with it; we drop them because <code>PorchSF</code>, their total area, replaces them.</li>
-<li>The matrix also finds redundant features that we have not dropped yet. <code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> carry the same information as the <em>None</em> category of the garage, fireplace and masonry features (Cramer’s V of about 1), and <code>MSSubClass</code> is closely associated with <code>BldgType</code> (0.89) and <code>HouseStyle</code> (0.83). Tree-based models are not affected by such duplicates, but they add collinear predictors to linear models, so we will remove them before fitting models in <a href="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">the next post</a>.</li>
+<li>Most of the features that we drop have a strong association with another feature: <code>GarageCars</code> with <code>GarageArea</code> (0.89), <code>GrLivArea</code> with <code>TotalSF</code> (0.87), <code>BsmtFullBath</code> with <code>BsmtBath</code> (0.97), <code>PoolArea</code> with <code>HasPool</code> (0.94), <code>YearBuilt</code> with <code>Vintage</code> (0.9), <code>GarageYrBlt</code> with <code>YearBuilt</code> (0.86), <code>YearRemodAdd</code> with <code>PropertyAge</code> (-1), and <code>Neighborhood</code> with <code>NeighborhoodType</code> (1).</li>
+<li>The four porch features have only a medium association with <code>PorchSF</code> (between 0.19 and 0.61). So they do not repeat its information. We drop them because <code>PorchSF</code>, their total area, replaces them.</li>
+<li>The matrix also finds features that repeat information, which we have not dropped yet. <code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> give the same information as the <em>None</em> category of the garage, fireplace and masonry features (Cramer’s V of about 1). Also, <code>MSSubClass</code> has a strong association with <code>BldgType</code> (0.89) and with <code>HouseStyle</code> (0.83). Models that use decision trees are not affected by such repeated information. But in linear models, features that repeat each other (collinear features) make the results unreliable. So we will remove them before we build the models in <a href="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">the next post</a>.</li>
 </ul>
 </div>
 <div id="skewed-categorical-features" class="section level4">
 <h4>Skewed Categorical Features</h4>
-<p>Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is <code>Utilities</code> which has only 2 categories - <strong>AllPub</strong> and <strong>NoSeWa</strong> in the dataset. Only 1 record has <strong>NoSeWa</strong> and the rest of the records have <strong>AllPub</strong>. Therefore, features like these do not have any predictive value.</p>
-<p>Let’s see the share of the most common category in every categorical feature, along with the number of rare categories that have fewer than 10 records:</p>
+<p>If more than 95% of the properties have the same category in a feature, the feature probably does not help to predict the price. An extreme example is <code>Utilities</code>, which has only 2 categories in the dataset: <strong>AllPub</strong> and <strong>NoSeWa</strong>. Only 1 property has <strong>NoSeWa</strong>, and all the others have <strong>AllPub</strong>. So features like this one do not help to predict the price.</p>
+<p>For each categorical feature, let’s look at the share of its most common category. Let’s also count its rare categories, which have fewer than 10 properties:</p>
 <pre class="r"><code>p_dominance &lt;- eda_plot_category_dominance(dfClean, threshold = 0.95, minCount = 10)
 p_dominance</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_category_dominance-1.png" alt="" width="960" /></p>
 <pre class="r"><code>dfDominance &lt;- p_dominance$data
 dfRare &lt;- dfDominance %&gt;% filter(share &lt; 0.95, n_rare &gt; 0) %&gt;% arrange(desc(n_rare), desc(share))</code></pre>
 <ul>
-<li>11 features lie above the 95% line, so we will drop them. These are plotted below.</li>
-<li>Among the remaining features, 13 have at least one rare category with fewer than 10 records, such as Functional, GarageQual, Electrical. When these features are dummy encoded for modelling, the rare categories become predictors that are based on only a handful of records, so their effects cannot be estimated reliably. Combining rare categories into a single category is one way to deal with them.</li>
+<li>11 features are above the 95% line, so we drop them. The plots below show them.</li>
+<li>Of the other features, 13 have at least one rare category with fewer than 10 properties, such as Functional, GarageQual, Electrical. For a model, each category becomes a separate feature with the values 0 and 1 (a dummy variable). A dummy variable for a rare category has only a few properties, so the model cannot measure its effect reliably. One way to solve this problem is to put the rare categories together in one category.</li>
 </ul>
 <pre class="r"><code>vFeatures_skewed &lt;- dfClean %&gt;% 
   select_if(is.factor) %&gt;% 
@@ -1382,39 +1330,39 @@ print(&quot;Dimensions of the finalized dataset&quot;)</code></pre>
 <pre class="r"><code>print(glue::glue(&quot;There are {length(vFeaturesNum)} numerical, {length(vFeaturesCat1)} ordinal and {length(vFeaturesCat2)} nominal features.&quot;))</code></pre>
 <pre><code>There are 26 numerical, 26 ordinal and 20 nominal features.</code></pre>
 </div>
-<div id="univariate-analysis" class="section level2">
-<h2>Univariate Analysis</h2>
-<p>Let us look at each feature in the dataset in detail.</p>
+<div id="univariate-analysis-one-feature-at-a-time" class="section level2">
+<h2>Univariate Analysis: One Feature at a Time</h2>
+<p>In this section, we look at each feature by itself.</p>
 <div id="numerical-features" class="section level3">
 <h3>Numerical Features</h3>
-<p>First let’s plot all the features that are measured as area in square feet:</p>
+<p>First, let’s plot all the features that measure an area in square feet:</p>
 <pre class="r"><code>eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &quot;SF|Area&quot;)])</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png" alt="" width="960" /></p>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>All area features have outliers.</li>
-<li>Many features are heavily skewed so they need to be normalized before fitting models.</li>
+<li>All the area features have outliers, which are values that are very different from most other values.</li>
+<li>Many features are very skewed: most values are small and a few values are much larger. Before we build models, we must transform these features (for example, with a log) to make them less skewed.</li>
 </ul>
-<p>Now let’s see other numerical features:</p>
+<p>Now let’s look at the other numerical features:</p>
 <pre class="r"><code>eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &quot;SF|Area&quot;)], &quot;SalePrice&quot;))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png" alt="" width="960" /></p>
 </div>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Most of the properties have been built less than 20 years prior to their sale.</li>
+<li>Most properties were sold less than 20 years after they were built or remodeled.</li>
 </ul>
-<p>Let’s plot the distribution of <code>SalePrice</code> in log scale:</p>
+<p>Let’s plot <code>SalePrice</code> on a log scale. On a log scale, each step on the axis multiplies the value by the same amount:</p>
 <pre class="r"><code>eda_plot_histograms(dfClean, &quot;SalePrice&quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png" alt="" width="672" /></p>
 </div>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>We see long tailed distribution on both sides.</li>
-<li>There are 11 properties below USD 50,000 and 17 above USD 500,000.</li>
-<li>Linear models are very sensitive to the presence of outliers.</li>
+<li>The distribution has long tails on both sides: a few properties are much cheaper or much more expensive than most.</li>
+<li>11 properties cost less than USD 50,000, and 17 properties cost more than USD 500,000.</li>
+<li>Outliers have a strong effect on linear models.</li>
 </ul>
 </div>
 </div>
@@ -1428,7 +1376,7 @@ print(&quot;Dimensions of the finalized dataset&quot;)</code></pre>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Categorical imbalances exist in many features where 1 or 2 categories are dominant. This poses a big challenge for using these features as predictors, as categories with fewer counts tend to be underrepresented in the data.</li>
+<li>In many features, 1 or 2 categories are much more common than the others. This makes these features hard to use for predictions, because the data has only a few examples of the other categories.</li>
 </ul>
 </div>
 </div>
@@ -1439,21 +1387,21 @@ print(&quot;Dimensions of the finalized dataset&quot;)</code></pre>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Categorical imbalances exist in many features where 1 or 2 categories are dominant.</li>
-<li>Most of the properties are sold during the summer months, and the least during the winter months.</li>
-<li>The effect of housing market crisis are visible in the data, as the fewest properties were sold in 2010.</li>
+<li>In many features, 1 or 2 categories are much more common than the others.</li>
+<li>Most properties are sold in the summer months, and the fewest in the winter months.</li>
+<li>The data shows the effect of the housing market crisis: the fewest properties were sold in 2010.</li>
 </ul>
 </div>
 </div>
 </div>
-<div id="bivariate-analysis" class="section level2">
-<h2>Bivariate Analysis</h2>
+<div id="bivariate-analysis-two-features-at-a-time" class="section level2">
+<h2>Bivariate Analysis: Two Features at a Time</h2>
 <div id="numerical-numerical" class="section level3">
 <h3>Numerical-Numerical</h3>
-<p>Let’s examine the relationship of <code>SalePrice</code> with other numerical features:</p>
+<p>Let’s look at how <code>SalePrice</code> changes with each of the other numerical features. A scatter plot shows one dot for each property, and the line shows the best straight line through the dots (a regression line):</p>
 <pre class="r"><code>eda_plot_scatter(dfClean, vFeaturesNum, &quot;SalePrice&quot;, yLabelsScale = scales::dollar)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" alt="" width="960" /></p>
-<p>Let’s take a closer look at <code>TotalSF</code>, labelling the properties with the largest Cook’s distance, which measures how much each point pulls the regression line:</p>
+<p>Let’s look more closely at <code>TotalSF</code>. The labels show the properties with the largest Cook’s distance. Cook’s distance measures how much one point pulls the regression line towards itself:</p>
 <pre class="r"><code>eda_plot_scatter(dfClean, &quot;TotalSF&quot;, &quot;SalePrice&quot;, yLabelsScale = scales::dollar,
                  nLabel = 3, feature_id = &quot;Id&quot;, labelBy = &quot;cooks&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/influential_points-1.png" alt="" width="960" /></p>
@@ -1467,15 +1415,15 @@ vOutliers_TotalSF &lt;- dfInfluence$Id[1:3]</code></pre>
 <div id="whats-notable-6" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>From the scatterplot of <code>TotalSF</code> v/s <code>SalePrice</code>, it is very clear there are <em>high leverage</em> points where the target <code>SalePrice</code> is unusually low relative to the area in sq. ft. These points have an outsized impact on the slope of the regression line, which otherwise would be higher.</li>
-<li>The same set of points impact <code>TotalBsmtSF</code>.</li>
-<li>The Ids of these records are 1299,2550,524, with Cook’s distances of 5.69, 2.46, 0.54. These are far above the usual cutoff of 4/n = 0.0014, and the next most influential property has a Cook’s distance of only 0.12. Out of these 524 and 1299 are in the training set.</li>
+<li>The scatter plot of <code>TotalSF</code> and <code>SalePrice</code> clearly shows a few very large properties that sold at unusually low prices. These points have high leverage: they are far from the other points, so they pull the regression line strongly. Without them, the line would be steeper.</li>
+<li>The same properties also affect <code>TotalBsmtSF</code>.</li>
+<li>The Ids of these properties are 1299,2550,524. Their Cook’s distances are 5.69, 2.46, 0.54. These values are much higher than the usual limit of 4/n = 0.0014, where n is the number of properties. The next property has a Cook’s distance of only 0.12. Of these three properties, 524 and 1299 are in the training set.</li>
 </ul>
 </div>
 </div>
 <div id="transforming-skewed-features" class="section level3">
 <h3>Transforming Skewed Features</h3>
-<p>Many numerical features are right skewed. Would transforming them make their relationship with <code>log(SalePrice)</code> more linear? Let’s compare common transforms of the strongest area feature <code>TotalSF</code>, the heavily skewed <code>LotArea</code>, and <code>GarageArea</code>, which is barely skewed. Each panel is labelled with the R-squared of a linear fit of <code>log(SalePrice)</code> on the transformed feature:</p>
+<p>Many numerical features are right skewed. Can we change them with a simple formula (a transform), so that their relationship with <code>log(SalePrice)</code> becomes closer to a straight line? Let’s compare common transforms of three features: <code>TotalSF</code>, the strongest area feature; <code>LotArea</code>, which is very skewed; and <code>GarageArea</code>, which is almost not skewed. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in <code>log(SalePrice)</code> the line explains:</p>
 <pre class="r"><code>lTransformPlots &lt;- map(c(&quot;TotalSF&quot;, &quot;LotArea&quot;, &quot;GarageArea&quot;), ~ eda_plot_transforms(dfClean, .x, &quot;SalePrice&quot;))
 cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_transforms-1.png" alt="" width="960" /></p>
@@ -1492,16 +1440,16 @@ vSkew &lt;- map_dbl(c(TotalSF = &quot;TotalSF&quot;, LotArea = &quot;LotArea&quo
 <div id="whats-notable-7" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>A log transform roughly doubles the R-squared of <code>LotArea</code> (skewness 12.8), from 0.066 to 0.138. Its few very large lots dominate a linear fit until they are compressed.</li>
-<li><code>TotalSF</code> (skewness 1.5) gains modestly from any of the transforms, from 0.61 to 0.647 with a log.</li>
-<li><code>GarageArea</code> (skewness 0.2) is barely skewed, and transforming it makes the fit worse: the R-squared drops from 0.426 to 0.389 with a log, which also has to drop the properties without a garage.</li>
-<li>So only the heavily skewed features should be log transformed before fitting linear models, rather than all of them.</li>
+<li>A log transform almost doubles the R-squared of <code>LotArea</code> (skewness 12.8), from 0.066 to 0.138. Without the transform, a few very large lots control the line. The log makes these large values smaller.</li>
+<li>All the transforms improve <code>TotalSF</code> (skewness 1.5) a little. With a log, the R-squared goes from 0.61 to 0.647.</li>
+<li><code>GarageArea</code> (skewness 0.2) is almost not skewed, and the transforms make the fit worse. With a log, the R-squared goes down from 0.426 to 0.389. Also, the log cannot use the properties without a garage, because the log of 0 does not exist.</li>
+<li>So, before we build linear models, we should transform only the very skewed features, not all of them.</li>
 </ul>
 </div>
 </div>
 <div id="correlations-with-saleprice" class="section level3">
 <h3>Correlations with SalePrice</h3>
-<p>We isolate the features that have an absolute correlation of 0.1 or more with <code>SalePrice</code>. Pearson correlation measures how linear a relationship is, so it is sensitive to outliers and skewed features. Spearman correlation is computed on ranks, so it measures how monotonic a relationship is. Comparing the two shows which relationships are strong but not linear:</p>
+<p>We keep the features whose correlation with <code>SalePrice</code> is at least 0.1 or at most -0.1. The Pearson correlation measures how close a relationship is to a straight line, so outliers and skewed features affect it strongly. The Spearman correlation uses the ranks of the values (1st, 2nd, 3rd, …) instead of the values. So it measures whether one feature always goes up (or always goes down) when the other goes up, even along a curve. If we compare the two, we can see which relationships are strong but not straight lines:</p>
 <pre class="r"><code>library(corrr)
 
 dfCor &lt;- dfClean[vFeaturesNum] %&gt;% 
@@ -1529,10 +1477,10 @@ cor_of &lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMe
 <div id="whats-notable-8" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>The top 5 features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. Quite reasonably, a buyer would look at these features to evaluate a property and its <code>SalePrice</code>.</li>
-<li>It is somewhat counterintuitive that <code>PropertyAge</code> shows a strong negative correlation with <code>SalePrice</code>. It means properties that were more recently built, sell for higher prices than older properties.</li>
-<li>Most features have similar Pearson and Spearman correlations, but <code>LotArea</code> stands out: its correlation rises from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from linear, which the log transform above partly addresses.</li>
-<li>The opposite happens with <code>BsmtFinSF1</code>, whose correlation falls from 0.43 to 0.33. About 32% of the properties have no finished basement and share the same rank, while the largest finished basements carry extra weight in the Pearson correlation. So its linear relationship with <code>SalePrice</code> looks stronger than its rank relationship.</li>
+<li>The 5 most correlated features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. A buyer would naturally look at these features to judge a property and its price.</li>
+<li><code>PropertyAge</code> has a strong negative correlation with <code>SalePrice</code>. This means that newer properties sell for higher prices than older properties.</li>
+<li>For most features, the Pearson and Spearman correlations are similar. But <code>LotArea</code> is different: its correlation goes up from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from a straight line. The log transform above partly corrects this.</li>
+<li>For <code>BsmtFinSF1</code>, the correlation goes down from 0.43 to 0.33. About 32% of the properties have no finished basement, so they all have the same rank. Also, the largest finished basements have a large effect on the Pearson correlation. So the straight-line relationship with <code>SalePrice</code> seems stronger than the rank relationship.</li>
 </ul>
 </div>
 </div>
@@ -1543,45 +1491,45 @@ cor_of &lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMe
 <div id="whats-notable-9" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>We can spot clear trends in <code>SalePrice</code> v/s the order of the categories in almost all of these features.</li>
-<li>Overall quality and external quality show some of the strongest trends.</li>
+<li>In almost all of these features, <code>SalePrice</code> clearly changes with the order of the categories.</li>
+<li>The overall quality and the exterior quality show some of the strongest trends.</li>
 </ul>
 </div>
 </div>
 <div id="numerical-categorical-nominal" class="section level3">
 <h3>Numerical-Categorical (Nominal)</h3>
-<p>Let’s examine <code>SalePrice</code> with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median <code>SalePrice</code>. The <code>SalePrice</code> axis is truncated to exclude outliers.</p>
+<p>Now let’s look at <code>SalePrice</code> for the nominal features. The categories of a nominal feature have no natural order. But if we sort the categories by their median <code>SalePrice</code>, we can find trends. To show the trends better, the <code>SalePrice</code> axis does not show the outliers. A box plot shows the middle half of the prices as a box, with a line at the median:</p>
 <pre class="r"><code>cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&quot;SalePrice&quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png" alt="" width="960" /></p>
 <div id="whats-notable-10" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li><code>GarageType</code>: Builtin and attached garages are more preferred than detached or other types of garages.</li>
-<li>From <code>MSSubClass</code> categories, it is evident that 1946 or newer houses are higher priced than older houses.</li>
+<li><code>GarageType</code>: buyers prefer built-in and attached garages to detached garages and other types.</li>
+<li>The categories of <code>MSSubClass</code> show that houses built in 1946 or later have higher prices than older houses.</li>
 </ul>
 </div>
 </div>
 </div>
-<div id="multivariate-analysis" class="section level2">
-<h2>Multivariate Analysis</h2>
-<p>We will check variation of some related features with <code>SalePrice</code>.</p>
+<div id="multivariate-analysis-three-or-more-features-at-a-time" class="section level2">
+<h2>Multivariate Analysis: Three or More Features at a Time</h2>
+<p>In this section, we look at how some related features change <code>SalePrice</code> together.</p>
 <div id="numerical-numerical-categorical" class="section level3">
 <h3>Numerical-Numerical-Categorical</h3>
-<p>We have determined <code>TotalSF</code> and <code>GarageArea</code> have among the strongest correlations with <code>SalePrice</code>. Let’s see how they vary by <code>NeighborhoodType</code> and <code>GarageType</code> respectively:</p>
+<p><code>TotalSF</code> and <code>GarageArea</code> have some of the strongest correlations with <code>SalePrice</code>. Let’s see how these relationships change with <code>NeighborhoodType</code> and <code>GarageType</code>:</p>
 <pre class="r"><code>p1 &lt;- eda_plot_scatter_cat(dfClean, &quot;TotalSF&quot;, &quot;SalePrice&quot;, &quot;NeighborhoodType&quot;, yLabelsScale = scales::dollar)
 p2 &lt;- eda_plot_scatter_cat(dfClean, &quot;GarageArea&quot;, &quot;SalePrice&quot;, &quot;GarageType&quot;, yLabelsScale = scales::dollar)
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" alt="" width="960" /></p>
 <ul>
-<li>For the same total area, there are neighborhoods where <code>SalePrice</code> is higher than others.</li>
-<li>Properties with no garage are distinctly separated.</li>
-<li>Properties with built-in or attached garages tend to have higher <code>SalePrice</code> for the same <code>GarageArea</code>.</li>
-<li>Therefore, <code>NeighborhoodType</code> and <code>GarageType</code> explain some variance in <code>SalePrice</code>.</li>
+<li>For the same total area, properties in some neighborhoods sell for more than in others.</li>
+<li>The properties without a garage form a separate group.</li>
+<li>For the same <code>GarageArea</code>, properties with built-in or attached garages usually sell for more.</li>
+<li>So <code>NeighborhoodType</code> and <code>GarageType</code> explain some of the differences in <code>SalePrice</code>.</li>
 </ul>
 </div>
 <div id="categorical-numerical-numerical" class="section level3">
 <h3>Categorical-Numerical-Numerical</h3>
-<p>The scatterplots overlap a lot, so let’s check these observations by comparing categories among properties of similar size. <code>TotalSF</code> and <code>GarageArea</code> are split into four quartile bins, and <code>SalePrice</code> is plotted by category within each bin. We also check whether central air conditioning (<code>CentralAir</code>) matters for properties of the same size:</p>
+<p>The dots in the scatter plots overlap a lot. So let’s check these results in another way, and compare categories among properties of similar size. We split <code>TotalSF</code> and <code>GarageArea</code> into four groups (bins) with the same number of properties. Then we plot <code>SalePrice</code> for each category in each group. We also check whether central air conditioning (<code>CentralAir</code>) changes the price of properties of the same size:</p>
 <pre class="r"><code>p1 &lt;- eda_plot_box_by_bins(dfClean, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
 p2 &lt;- eda_plot_box_by_bins(dfClean, &quot;GarageType&quot;, &quot;SalePrice&quot;, &quot;GarageArea&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
 p3 &lt;- eda_plot_box_by_bins(dfClean, &quot;CentralAir&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
@@ -1601,15 +1549,15 @@ bin_median &lt;- function(plotName, binNum, categoryName) {
 <div id="whats-notable-11" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median <code>SalePrice</code> ranges from <code>$161,000</code> in Type5 neighborhoods to <code>$327,000</code> in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.</li>
-<li>For the same <code>GarageArea</code>, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median <code>SalePrice</code> is <code>$299,018</code> for built-in, <code>$253,000</code> for attached and <code>$140,000</code> for detached garages. Some garage types have very few properties, so their boxplots are less reliable.</li>
-<li>Properties with central air conditioning sell for more at every size. Among the largest properties, the median <code>SalePrice</code> is <code>$262,140</code> with central air and <code>$136,000</code> without it.</li>
+<li>The neighborhood is very important, even for properties of the same size. For the largest properties, the median <code>SalePrice</code> goes from <code>$161,000</code> in Type5 neighborhoods to <code>$327,000</code> in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest group, so the neighborhood and the size are also related.</li>
+<li>For the same <code>GarageArea</code>, built-in and attached garages go with higher prices than detached garages. For the largest garages, the median <code>SalePrice</code> is <code>$299,018</code> for built-in garages, <code>$253,000</code> for attached garages and <code>$140,000</code> for detached garages. Some garage types have very few properties, so their box plots are less reliable.</li>
+<li>Properties with central air conditioning sell for more, at every size. For the largest properties, the median <code>SalePrice</code> is <code>$262,140</code> with central air and <code>$136,000</code> without it.</li>
 </ul>
 </div>
 </div>
 <div id="categorical-categorical-numerical" class="section level3">
 <h3>Categorical-Categorical-Numerical</h3>
-<p>We want to see if there is any interaction of <code>SalePrice</code> with a combination of categorical features, that could provide any additional explanatory power for prediction:</p>
+<p>Does a combination of two categorical features tell us more about <code>SalePrice</code>? A heatmap answers this question. It is a grid of tiles, one tile for each combination of two categories:</p>
 <pre class="r"><code>p1 &lt;- eda_plot_heatmap(dfClean, &quot;OverallQual&quot;, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;)
 p2 &lt;- eda_plot_heatmap(dfClean, &quot;GarageType&quot;, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;)
 p3 &lt;- eda_plot_heatmap(dfClean, &quot;MSSubClass&quot;, &quot;MSZoning&quot;, &quot;SalePrice&quot;)
@@ -1618,12 +1566,12 @@ cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)</code></pre>
 <pre class="r"><code># number of combinations, and those with fewer than 10 properties
 vCells &lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
 vSparse &lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &lt; 10))</code></pre>
-<p>Each tile shows the median <code>SalePrice</code> and the number of properties. Combinations with fewer than 10 properties are greyed out, because their medians are not reliable.</p>
+<p>Each tile shows the median <code>SalePrice</code> (by its color) and the number of properties. A tile is grey if it has fewer than 10 properties, because a median of so few properties is not reliable.</p>
 <ul>
-<li>It is evident that some neighborhoods have higher <code>OverallQual</code> and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in <code>SalePrice</code> by quality of property.</li>
-<li>It is less clear if <code>GarageType</code> has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by <code>NeighborhoodType</code> itself.</li>
-<li>Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.</li>
-<li>Many combinations are rare: 11 of the 34 combinations of <code>OverallQual</code> and <code>NeighborhoodType</code>, and 20 of the 46 combinations of <code>MSSubClass</code> and <code>MSZoning</code>, have fewer than 10 properties. So only the common combinations can be compared reliably, and a model would struggle to learn interactions between these features.</li>
+<li>Some neighborhoods have more properties with a high <code>OverallQual</code>, so their prices are higher. But in Type4 neighborhoods, <code>SalePrice</code> clearly changes with the quality of the property.</li>
+<li>It is less clear whether <code>GarageType</code> has a large effect by itself. Buyers seem to prefer built-in and attached garages, but <code>NeighborhoodType</code> explains most of the differences.</li>
+<li>In both one-story and multi-story houses built after 1946, properties in low-density residential zones and floating village zones usually have higher prices.</li>
+<li>Many combinations are rare: 11 of the 34 combinations of <code>OverallQual</code> and <code>NeighborhoodType</code>, and 20 of the 46 combinations of <code>MSSubClass</code> and <code>MSZoning</code>, have fewer than 10 properties. So we can compare only the common combinations reliably. Also, a model would find it hard to learn how these features work together.</li>
 </ul>
 <pre class="r"><code># split the data back to training and testing sets
 # dfTrain &lt;- dfClean %&gt;% dplyr::slice(1:nrows_train)

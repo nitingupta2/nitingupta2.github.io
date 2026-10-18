@@ -28,79 +28,10 @@
   
     
   
-  <meta name="description" content="In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
+  <meta name="description" content="In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).
 
 Data Description
-The diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
-dfDescription &lt;- tribble(~ Attribute, ~ Description,
-                         &quot;price&quot;, &quot;price in 2008 USD&quot;,
-                         &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
-                         &quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,
-                         &quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,
-                         &quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,
-                         &quot;x&quot;, &quot;length in mm&quot;,
-                         &quot;y&quot;, &quot;width in mm&quot;,
-                         &quot;z&quot;, &quot;depth in mm&quot;,
-                         &quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,
-                         &quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)
-
-knitr::kable(dfDescription)
-
-
-
-
-
-
-
-Attribute
-Description
-
-
-
-
-price
-price in 2008 USD
-
-
-carat
-weight of a diamond (1 carat = 0.2 gms)
-
-
-cut
-quality of the cut (Fair, Good, Very Good, Premium, Ideal)
-
-
-color
-diamond color from D (best) to J (worst)
-
-
-clarity
-a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
-
-
-x
-length in mm
-
-
-y
-width in mm
-
-
-z
-depth in mm
-
-
-depth
-total depth percentage = z/mean(x, y)
-
-
-table
-width of the top of diamond relative to widest point
-
-
-
-
-">
+The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">
@@ -200,79 +131,10 @@ width of the top of diamond relative to widest point
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">
   <meta property="og:title" content="Diamonds - Part 1 - In the rough - An Exploratory Data Analysis | Nitin Gupta">
-  <meta property="og:description" content="In this case study, we will explore the diamonds dataset, then build linear and non-linear regression models to predict the price of diamonds.
+  <meta property="og:description" content="In this case study, we explore the diamonds dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).
 
 Data Description
-The diamonds dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.
-dfDescription &lt;- tribble(~ Attribute, ~ Description,
-                         &quot;price&quot;, &quot;price in 2008 USD&quot;,
-                         &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
-                         &quot;cut&quot;, &quot;quality of the cut (Fair, Good, Very Good, Premium, Ideal)&quot;,
-                         &quot;color&quot;, &quot;diamond color from D (best) to J (worst)&quot;,
-                         &quot;clarity&quot;, &quot;a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))&quot;,
-                         &quot;x&quot;, &quot;length in mm&quot;,
-                         &quot;y&quot;, &quot;width in mm&quot;,
-                         &quot;z&quot;, &quot;depth in mm&quot;,
-                         &quot;depth&quot;, &quot;total depth percentage = z/mean(x, y)&quot;,
-                         &quot;table&quot;, &quot;width of the top of diamond relative to widest point&quot;)
-
-knitr::kable(dfDescription)
-
-
-
-
-
-
-
-Attribute
-Description
-
-
-
-
-price
-price in 2008 USD
-
-
-carat
-weight of a diamond (1 carat = 0.2 gms)
-
-
-cut
-quality of the cut (Fair, Good, Very Good, Premium, Ideal)
-
-
-color
-diamond color from D (best) to J (worst)
-
-
-clarity
-a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
-
-
-x
-length in mm
-
-
-y
-width in mm
-
-
-z
-depth in mm
-
-
-depth
-total depth percentage = z/mean(x, y)
-
-
-table
-width of the top of diamond relative to widest point
-
-
-
-
-"><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+The diamonds dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -613,10 +475,10 @@ width of the top of diamond relative to widest point
       
 
 
-<p>In this case study, we will explore the <code>diamonds</code> dataset, then build linear and non-linear regression models to predict the price of diamonds.</p>
+<p>In this case study, we explore the <code>diamonds</code> dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).</p>
 <div id="data-description" class="section level2">
 <h2>Data Description</h2>
-<p>The <code>diamonds</code> dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.</p>
+<p>The <code>diamonds</code> dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.</p>
 <pre class="r"><code>dfDescription &lt;- tribble(~ Attribute, ~ Description,
                          &quot;price&quot;, &quot;price in 2008 USD&quot;,
                          &quot;carat&quot;, &quot;weight of a diamond (1 carat = 0.2 gms)&quot;,
@@ -696,8 +558,8 @@ knitr::kable(dfDescription)</code></pre>
 vFeaturesNum &lt;- dfInput %&gt;% select_if(is.numeric) %&gt;% colnames()</code></pre>
 <pre class="r"><code>visdat::vis_dat(dfInput) + theme_quant()</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png" alt="" width="672" /></p>
-<p>A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.</p>
-<p>Let’s examine each feature numerically:</p>
+<p>This chart shows all the features and their types. No values are missing in this dataset.</p>
+<p>Next, we look at the numbers for each feature:</p>
 <pre class="r"><code>Hmisc::describe(dfInput)</code></pre>
 <pre><code>dfInput 
 
@@ -770,26 +632,26 @@ z
 lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------</code></pre>
 <ul>
-<li><code>price</code>: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.</li>
-<li><code>carat</code>: The average carat weight is ~ 0.8. About 75% of the diamonds are under 1 carat. The top 5 values show presence of many outliers on the high end.</li>
-<li><code>cut</code>: About 40% of the diamonds are of <em>Ideal</em> cut. Only 3% are <em>Fair</em> cut. So there is a lot of imbalance in the categories.</li>
-<li><code>color</code>: Most of the diamonds are rated <em>E</em> to <em>H</em> color. Relatively fewer are rated <em>J</em> color.</li>
-<li><code>clarity</code>: Most of the diamonds are rated <em>SI2</em> to <em>VS1</em> clarity. About 1% are rated the worst <em>I1</em> clarity, where as only ~ 3% are rated <em>IF</em>.</li>
-<li><code>depth</code>: Most of the depth values are between 60 and 64. There are outliers on both low end and high end.</li>
-<li><code>table</code>: Most of the table values are between 54 and 65. There are outliers on both ends.</li>
-<li><code>x</code>: Denotes the dimension along the x-axis. Most values are between 4 and 8. There are some 0 values too which means they were not recorded.</li>
-<li><code>y</code>: Denotes the dimension along the y-axis. Most values are between 3.5 and 8. There are 7 records where the values are 0.</li>
-<li><code>z</code>: Denotes the dimension along the z-axis. Most values are between 2.5 and 8.5. There are 20 records where the values are 0.</li>
+<li><code>price</code>: The average price of a diamond is about USD 4000. Many diamonds are much more expensive than most others. We call such unusual values outliers.</li>
+<li><code>carat</code>: The average weight is about 0.8 carat. About 75% of the diamonds weigh less than 1 carat. The 5 largest values show that there are many outliers at the high end.</li>
+<li><code>cut</code>: About 40% of the diamonds have an <em>Ideal</em> cut. Only 3% have a <em>Fair</em> cut. So the categories are not balanced: some categories have many more diamonds than others.</li>
+<li><code>color</code>: Most diamonds have a color grade from <em>E</em> to <em>H</em>. Fewer diamonds have the color grade <em>J</em>.</li>
+<li><code>clarity</code>: Most diamonds have a clarity grade from <em>SI2</em> to <em>VS1</em>. About 1% have the worst grade, <em>I1</em>. Only about 3% have the best grade, <em>IF</em>.</li>
+<li><code>depth</code>: Most depth values are between 60 and 64. There are outliers at both the low end and the high end.</li>
+<li><code>table</code>: Most table values are between 54 and 65. There are outliers at both ends.</li>
+<li><code>x</code>: The length of the diamond in mm. Most values are between 4 and 8. Some values are 0, which means that nobody recorded them.</li>
+<li><code>y</code>: The width of the diamond in mm. Most values are between 3.5 and 8. 7 values are 0.</li>
+<li><code>z</code>: The depth of the diamond in mm. Most values are between 2.5 and 8.5. 20 values are 0.</li>
 </ul>
 </div>
-<div id="univariate-analysis" class="section level2">
-<h2>Univariate Analysis</h2>
-<p>Let us look at each feature in the dataset in detail.</p>
+<div id="univariate-analysis-one-feature-at-a-time" class="section level2">
+<h2>Univariate Analysis: One Feature at a Time</h2>
+<p>In this section, we look at each feature by itself.</p>
 <div id="numerical-features" class="section level4">
 <h4>Numerical Features</h4>
 <pre class="r"><code>eda_plot_histograms(dfInput, vFeaturesNum)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png" alt="" width="672" /></p>
-<p>The plots show presence of outliers within each feature. Let’s exclude the outliers, i.e. values more than 2.5 interquartile ranges from the median, and plot them again. Unlike a rule based on the mean and standard deviation, the median and interquartile range are hardly moved by the outliers themselves.</p>
+<p>The plots show outliers in each feature. Let’s remove the outliers and plot the features again. We use a common rule: a value is an outlier if it is more than 2.5 interquartile ranges from the median. The median is the middle value: half the values are below it and half are above it. The interquartile range is the width of the middle half of the values. The outliers themselves have almost no effect on these two numbers, so the rule is reliable. A rule that uses the average would be less reliable, because the outliers pull the average towards them.</p>
 <pre class="r"><code>makeOutliersNA &lt;- function(Z) {
   # values more than 2.5 interquartile ranges from the median become NA
   ifelse(flag_outliers(Z, nIQR = 2.5), NA, Z)
@@ -800,40 +662,36 @@ dfInput &lt;- dfInput %&gt;% mutate_at(vFeaturesNum, makeOutliersNA)
 
 eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &quot;Histograms of numerical features excluding outliers&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png" alt="" width="672" /></p>
-<p>Excluding outliers, the range of values are more reasonable. We can see that <code>carat</code> and <code>price</code> are heavily right skewed.</p>
-<p>Let’s plot the distribution of <code>price</code> in log scale:</p>
+<p>Without the outliers, the ranges of the values are more reasonable. <code>carat</code> and <code>price</code> are right skewed: most values are small, and a few values are much larger.</p>
+<p>Let’s plot <code>price</code> on a log scale. On a log scale, each step on the axis multiplies the value by the same amount (for example, from $100 to $1,000 to $10,000). This makes it easier to see the spread of skewed values:</p>
 <pre class="r"><code>eda_plot_histograms(dfInput, &quot;price&quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png" alt="" width="672" /></p>
-<p>Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
-one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.</p>
+<p>The plot has two peaks. This means that two price ranges are the most common: one just below USD 1000 and one near USD 5000. Interestingly, almost no diamonds cost about USD 1500. So the plot shows a big gap at that price.</p>
 </div>
 <div id="categorical-features" class="section level4">
 <h4>Categorical Features</h4>
 <pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_column(dfInput, .x)), ncol = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png" alt="" width="672" /></p>
-<p>The categorical imbalance in <code>cut</code> and <code>clarity</code> can be clearly noticed.</p>
+<p>The plots clearly show that the categories of <code>cut</code> and <code>clarity</code> are not balanced.</p>
 </div>
 </div>
-<div id="bivariate-analysis" class="section level2">
-<h2>Bivariate Analysis</h2>
-<p>Let’s examine the relationship of <code>price</code> with other features.</p>
+<div id="bivariate-analysis-two-features-at-a-time" class="section level2">
+<h2>Bivariate Analysis: Two Features at a Time</h2>
+<p>In this section, we look at how <code>price</code> changes with each of the other features.</p>
 <div id="numerical-numerical" class="section level4">
 <h4>Numerical-numerical</h4>
-<p>First and foremost, let’s do a correlation analysis to see how <code>price</code> is correlated with other numerical features:</p>
+<p>First, we measure the correlation of <code>price</code> with each numerical feature. A correlation is a number from -1 to 1. It tells how closely two features move together in a straight line. A value near 1 means that when one feature goes up, the other also goes up. A value near -1 means that the other goes down. A value near 0 means that there is no straight-line relationship.</p>
 <pre class="r"><code>eda_plot_correlation_matrix(dfInput[vFeaturesNum] %&gt;% drop_na(), outlineVar = &quot;price&quot;, plotTitle = &quot;Clustered correlations of numerical features&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png" alt="" width="672" /></p>
-<p>We can see that <code>price</code> is very strongly correlated with <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> dimensions. If a predictive linear regression model is built,
-some of these features would act as confounders. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code> so they are not so interesting for
-predictive modelling.</p>
-<p>Now let’s see the scatter plots:</p>
+<p><code>price</code> has a very strong correlation with <code>carat</code> and with the dimensions <code>x</code>, <code>y</code> and <code>z</code>. These four features are also strongly correlated with each other, because they all measure the size of a diamond. So a linear model cannot easily separate their effects. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code>. So they are not useful to predict the price.</p>
+<p>Now let’s look at the scatter plots. A scatter plot shows one dot for each diamond:</p>
 <pre class="r"><code>eda_plot_scatter(dfInput, vFeaturesNum, &quot;price&quot;, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png" alt="" width="672" /></p>
-<p>After removing outliers, it could be noted that <code>price</code> increases exponentially with <code>carat</code>, as well as <code>x</code>, <code>y</code> and <code>z</code> dimensions. So <code>price</code> should be plotted with a log tranformation. Let’s do that:</p>
+<p>Without the outliers, <code>price</code> grows faster and faster as <code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code> increase. So let’s plot <code>price</code> on a log scale:</p>
 <pre class="r"><code>eda_plot_scatter(dfInput, vFeaturesNum, &quot;price&quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png" alt="" width="672" /></p>
-<p>Now, the relationship between <code>log(price)</code> appears to be linear with <code>x</code>, <code>y</code> and <code>z</code>. But, not so much with <code>carat</code>. Variance in <code>price</code> tends to
-increase both by <code>carat</code> and its dimensions.</p>
-<p>Which transform of <code>carat</code> would make its relationship with <code>log(price)</code> linear? Let’s compare a few common transforms. Each panel is labelled with the R-squared of a linear fit of <code>log(price)</code> on the transformed <code>carat</code>:</p>
+<p>On a log scale, <code>log(price)</code> has an approximately straight-line (linear) relationship with <code>x</code>, <code>y</code> and <code>z</code>. But its relationship with <code>carat</code> is still curved. Also, the spread (variance) of <code>price</code> increases as the diamonds get larger.</p>
+<p>Can we change <code>carat</code> with a simple formula so that its relationship with <code>log(price)</code> becomes a straight line? We call such a change a transform. Let’s compare some common transforms. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in <code>log(price)</code> the straight line explains. A higher value means that the line fits the points better:</p>
 <pre class="r"><code>p_transforms &lt;- eda_plot_transforms(dfInput, &quot;carat&quot;, &quot;price&quot;)
 p_transforms</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/carat_transforms-1.png" alt="" width="960" /></p>
@@ -842,48 +700,48 @@ vR2_carat &lt;- p_transforms$data %&gt;%
   distinct(transform, r_squared) %&gt;%
   pull(r_squared) %&gt;%
   set_names(c(&quot;identity&quot;, &quot;log&quot;, &quot;sqrt&quot;, &quot;cuberoot&quot;))</code></pre>
-<p><code>log(carat)</code> makes the relationship the most linear, with an R-squared of 0.926, followed by the cube root (0.919) and the square root (0.91). Untransformed <code>carat</code> has the lowest R-squared of 0.862. So <code>log(price)</code> is close to linear in <code>log(carat)</code>: a given percentage increase in weight raises the price by a roughly constant percentage. We will make use of this when we do Feature Engineering.</p>
+<p><code>log(carat)</code> gives the best straight-line fit, with an R-squared of 0.926. The cube root is second (0.919) and the square root is third (0.91). <code>carat</code> without a transform has the lowest R-squared, 0.862. So <code>log(price)</code> has an almost straight-line relationship with <code>log(carat)</code>. This means that when the weight increases by a given percentage, the price increases by an approximately constant percentage. We will use this result when we create features for the models (Feature Engineering).</p>
 </div>
 <div id="numerical-categorical" class="section level4">
 <h4>Numerical-Categorical</h4>
-<p>Let’s examine <code>price</code> with respect to the categorical features in the dataset:</p>
+<p>Let’s look at <code>price</code> for each category of the categorical features. A box plot shows the middle half of the prices as a box, with a line at the median:</p>
 <pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &quot;price&quot;, yLimits = c(300, 8000), 
                                                                yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png" alt="" width="960" /></p>
-<p>The boxplots above are plotted with truncated <code>price</code> axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of <code>cut</code>, <code>color</code> and <code>clarity</code>. This is very odd. We will find out why in the multivariate analysis.</p>
+<p>To show the trends better, the <code>price</code> axis of these box plots does not show the most expensive diamonds. The box plots are surprising: for <code>cut</code>, <code>color</code> and <code>clarity</code>, the median price usually goes down as the grade gets better. This is very strange. We will find the reason in the multivariate analysis.</p>
 <ul>
-<li>The median <code>price</code> declines monotonically from <em>Fair</em> <code>cut</code> to <em>Ideal</em> <code>cut</code>.</li>
-<li>In terms of <code>color</code>, the median <code>price</code> decreases from <em>J</em> (worst) to <em>G</em> (mid-grade), then increases and finally decreases for <em>D</em> (best).</li>
-<li>The median <code>price</code> increases when <code>clarity</code> improves from <em>I1</em> to <em>SI2</em>, and then decreases monotonically to <em>IF</em> grade.</li>
+<li>The median <code>price</code> goes down steadily from a <em>Fair</em> <code>cut</code> to an <em>Ideal</em> <code>cut</code>.</li>
+<li>For <code>color</code>, the median <code>price</code> goes down from <em>J</em> (worst) to <em>G</em> (middle grade). Then it goes up, and it goes down again for <em>D</em> (best).</li>
+<li>For <code>clarity</code>, the median <code>price</code> goes up from <em>I1</em> to <em>SI2</em>. Then it goes down steadily to <em>IF</em>.</li>
 </ul>
 </div>
 </div>
-<div id="multivariate-analysis" class="section level2">
-<h2>Multivariate Analysis</h2>
-<p>So far, we have determined <code>carat</code>, <code>x</code>, <code>y</code>, and <code>z</code> have the strongest relationship with <code>price.</code> Different grades of <code>cut</code>, <code>color</code> and <code>clarity</code> also seem to have some impact on median <code>price</code>. So let’s make some scatter plots to see these relationships:</p>
+<div id="multivariate-analysis-three-or-more-features-at-a-time" class="section level2">
+<h2>Multivariate Analysis: Three or More Features at a Time</h2>
+<p>So far, we know that <code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code> have the strongest relationship with <code>price</code>. The grades of <code>cut</code>, <code>color</code> and <code>clarity</code> also seem to have some effect on the median <code>price</code>. Let’s use scatter plots to look at these relationships together:</p>
 <div id="numerical-numerical-categorical" class="section level4">
 <h4>Numerical-Numerical-Categorical</h4>
 <pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_scatter_cat(dfInput, &quot;carat&quot;, &quot;price&quot;, .x, yLabelsScale = scales::dollar)), ncol = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png" alt="" width="960" /></p>
-<p>Although there is a lot of overlap, but there is a clear trend of <code>price</code> increasing with <code>clarity</code>, at a given <code>carat</code> weight. The same pattern could also be observed in the plot with increasing grades of <code>color</code>, though not to the same extent. There is no evidence of any relationship between <code>price</code> and <code>carat</code> with <code>cut</code>.</p>
-<p>We can conclude both <code>color</code> and <code>clarity</code> explain some variance in <code>price</code> at a given <code>carat</code> weight.</p>
+<p>The dots overlap a lot. But for diamonds of the same <code>carat</code> weight, <code>price</code> clearly goes up as <code>clarity</code> gets better. <code>color</code> shows the same pattern, but it is weaker. <code>cut</code> does not show any effect.</p>
+<p>So, for diamonds of the same weight, both <code>color</code> and <code>clarity</code> explain some of the differences in <code>price</code>.</p>
 </div>
 <div id="all-features" class="section level4">
 <h4>All Features</h4>
-<p>Why do diamonds of better grades look cheaper in the bivariate analysis? Let’s measure the association between all the features, ranking the grades of <code>cut</code>, <code>color</code> and <code>clarity</code> from worst to best, so they can be correlated with the numerical features using Spearman’s rank correlation:</p>
+<p>Why do the diamonds with better grades seem cheaper in the bivariate analysis? To find out, we measure the association between every pair of features. An association tells how strongly two features are related. Here, we rank the grades of <code>cut</code>, <code>color</code> and <code>clarity</code> from worst to best. Then we can compare them with the numerical features with Spearman’s rank correlation. This correlation uses the ranks of the values instead of the values themselves, so it also works for grades:</p>
 <pre class="r"><code>eda_plot_association_matrix(dfInput, method = &quot;spearman&quot;, ordinalAsNumeric = T, outlineVar = &quot;price&quot;,
                             plotTitle = &quot;Spearman correlations, with grades ranked from worst to best&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/association_matrix-1.png" alt="" width="768" /></p>
 <pre class="r"><code>mAssoc &lt;- association_matrix(dfInput, method = &quot;spearman&quot;, ordinalAsNumeric = T)</code></pre>
 <ul>
-<li><code>carat</code> is negatively correlated with <code>clarity</code> (-0.37) and <code>color</code> (-0.24): diamonds of better grades tend to be smaller.</li>
-<li>Since <code>price</code> is very strongly correlated with <code>carat</code> (0.96), <code>price</code> ends up negatively correlated with <code>clarity</code> (-0.21) and <code>color</code> (-0.13) too.</li>
-<li><code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code> form a tight cluster of almost perfectly correlated features, so they are largely redundant as predictors.</li>
+<li><code>carat</code> has a negative correlation with <code>clarity</code> (-0.37) and with <code>color</code> (-0.24). This means that diamonds with better grades are usually smaller.</li>
+<li><code>price</code> has a very strong correlation with <code>carat</code> (0.96). So <code>price</code> also has a negative correlation with <code>clarity</code> (-0.21) and with <code>color</code> (-0.13).</li>
+<li><code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code> form a tight group, and they are almost perfectly correlated with each other. So, to predict the price, these features give almost the same information.</li>
 </ul>
 </div>
 <div id="categorical-numerical-numerical" class="section level4">
 <h4>Categorical-Numerical-Numerical</h4>
-<p>The overlap in the scatterplots makes it hard to see how much each grade matters. Let’s compare the grades among diamonds of similar weight, by splitting <code>carat</code> into four quartile bins and plotting <code>price</code> by grade within each bin:</p>
+<p>In the scatter plots, the dots overlap too much to show how much each grade matters. So let’s compare grades among diamonds of similar weight. We split the diamonds into four groups (bins) of equal size by <code>carat</code>. Then we plot <code>price</code> for each grade in each group:</p>
 <pre class="r"><code>lBinPlots &lt;- map(c(&quot;clarity&quot;, &quot;color&quot;, &quot;cut&quot;), ~ eda_plot_box_by_bins(dfInput, .x, &quot;price&quot;, &quot;carat&quot;, yLog = T,
                                                                        yLabelsScale = scales::label_dollar(accuracy = 1)))
 cowplot::plot_grid(plotlist = lBinPlots, ncol = 1)</code></pre>
@@ -901,40 +759,40 @@ bin_median &lt;- function(dfMedians, binNum, gradeName) {
 
 # median carat by clarity
 dfCarat_clarity &lt;- dfInput %&gt;% group_by(clarity) %&gt;% summarise(carat = median(carat, na.rm = T))</code></pre>
-<p>This resolves the paradox in the boxplots of the bivariate analysis:</p>
+<p>These plots explain the strange box plots of the bivariate analysis:</p>
 <ul>
-<li>Within each <code>carat</code> bin, the median <code>price</code> generally rises with <code>clarity</code>, most clearly among the heaviest diamonds, where it goes from $3,985 for <em>I1</em> to $10,332 for <em>IF</em>. The top grades (<em>VVS2</em> to <em>IF</em>) are priced close to each other and not always in order.</li>
-<li><code>price</code> also rises with <code>color</code> from <em>J</em> to <em>G</em> within each bin, but the top grades (<em>G</em> to <em>D</em>) are priced about the same. Among the heaviest diamonds, <em>D</em> and <em>E</em> are even slightly cheaper than <em>G</em>.</li>
-<li><code>cut</code> shows no consistent trend, even among diamonds of similar weight.</li>
+<li>In each <code>carat</code> group, the median <code>price</code> usually goes up as <code>clarity</code> gets better. The effect is clearest for the heaviest diamonds: the median price goes from $3,985 for <em>I1</em> to $10,332 for <em>IF</em>. The prices of the best grades (<em>VVS2</em> to <em>IF</em>) are close to each other, and they are not always in order.</li>
+<li>In each group, <code>price</code> also goes up as <code>color</code> gets better from <em>J</em> to <em>G</em>. But the best grades (<em>G</em> to <em>D</em>) have about the same price. For the heaviest diamonds, <em>D</em> and <em>E</em> are even a little cheaper than <em>G</em>.</li>
+<li><code>cut</code> does not show a clear trend, even for diamonds of similar weight.</li>
 </ul>
-<p>The reason better grades look cheaper overall is that they tend to be smaller. The median weight of an <em>I1</em> diamond is 1.07 carat, but only 0.35 carat for an <em>IF</em> diamond. <code>carat</code> confounds the relationship between <code>price</code> and the grades, so it has to be accounted for when we judge the effect of <code>clarity</code> or <code>color</code>.</p>
-<p>To be sure of any interaction between <code>table</code> and <code>depth</code>, with <code>color</code> and <code>clarity</code>, let’s plot these:</p>
+<p>Diamonds with better grades seem cheaper overall because they are usually smaller. The median weight of an <em>I1</em> diamond is 1.07 carat. The median weight of an <em>IF</em> diamond is only 0.35 carat. So <code>carat</code> is a confounder: it is related to both <code>price</code> and the grades, and it hides the true effect of the grades. To measure the effect of <code>clarity</code> or <code>color</code>, we must compare diamonds of similar weight.</p>
+<p>Next, let’s check whether <code>table</code> and <code>depth</code> affect <code>price</code> together with <code>color</code> and <code>clarity</code>:</p>
 <pre class="r"><code>dfFeatures &lt;- expand_grid(feat1 = c(&quot;depth&quot;,&quot;table&quot;), feat2 = c(&quot;color&quot;,&quot;clarity&quot;)) %&gt;% arrange(desc(feat2))
 cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
                                    ~ eda_plot_scatter_cat(dfInput, .x, &quot;price&quot;, .y, yLabelsScale = scales::dollar)), nrow = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png" alt="" width="1152" /></p>
-<p>There is no pattern in the interaction of <code>price</code> v/s <code>depth</code> and <code>table</code> values when plotted by <code>color</code> and <code>clarity</code>. So, these features do not have any predictive ability to determine <code>price</code>.</p>
+<p>These plots do not show any pattern. So <code>table</code> and <code>depth</code> do not help to predict <code>price</code>.</p>
 </div>
 <div id="categorical-categorical-numerical" class="section level4">
 <h4>Categorical-Categorical-Numerical</h4>
-<p>We want to see if there is any interaction of <code>clarity</code> with <code>cut</code> and <code>color</code>, that could provide any additional explanatory power to predict <code>price</code>:</p>
+<p>Does <code>clarity</code> together with <code>cut</code> or <code>color</code> tell us more about <code>price</code>? A heatmap answers this question. It shows a grid of tiles, one for each combination of two categories. The color of each tile shows the median <code>price</code> of the diamonds in that combination:</p>
 <pre class="r"><code>cowplot::plot_grid(plotlist = map(c(&quot;cut&quot;,&quot;color&quot;), ~ eda_plot_heatmap(dfInput, .x, &quot;clarity&quot;, &quot;price&quot;)), nrow = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" alt="" width="672" /></p>
-<p>The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of <code>color</code> and <code>clarity</code>, <code>price</code> tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best <code>color</code> and <code>clarity</code> should be the highest. As we saw above, this is because diamonds of better grades tend to be smaller.</p>
-<p>With respect to <code>cut</code> and <code>clarity</code>, the median prices do not show any discernable pattern. Each tile shows its number of diamonds, and the one combination with fewer than 10 diamonds (<em>Fair</em> <code>cut</code> and <em>IF</em> <code>clarity</code>) is greyed out, because its median is not reliable.</p>
+<p>The second heatmap is more interesting. From the bottom left to the top right, the grades of <code>color</code> and <code>clarity</code> get better, and the median <code>price</code> usually goes down. Again, this is the opposite of what we expect, because the diamonds with the best <code>color</code> and <code>clarity</code> should be the most expensive. As we saw above, the reason is that diamonds with better grades are usually smaller.</p>
+<p>For <code>cut</code> and <code>clarity</code>, the median prices do not show a clear pattern. Each tile shows its number of diamonds. One combination (<em>Fair</em> <code>cut</code> and <em>IF</em> <code>clarity</code>) has fewer than 10 diamonds. Its tile is grey, because a median of so few diamonds is not reliable.</p>
 </div>
 </div>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>To summarize, here’s what we found interesting in this dataset, after doing an exploratory data analysis:</p>
+<p>Here is what we found in this exploratory data analysis (EDA), which is the first study of a dataset before we build models:</p>
 <ul>
-<li><code>price</code> is heavily right-skewed, and when log tranformed, has a bimodal distribution which implies there is demand in 2 different price ranges.</li>
-<li><code>carat</code> about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight, and <code>log(price)</code> is close to linear in <code>log(carat)</code>.</li>
-<li><code>cut</code> is imbalanced with about 40% of the diamonds rated <em>Ideal</em>.</li>
-<li><code>color</code> is imbalanced with about 5% of the diamonds rated <em>J</em>.</li>
-<li><code>clarity</code> is imbalanced at the extremes, with only 1.5% of the diamonds rated <em>I1</em> and 3.3% of the diamonds rated <em>IF</em>.</li>
-<li><code>price</code> is strongly correlated with <code>carat</code> and <code>x</code>, <code>y</code>, <code>z</code> dimensions of the diamonds. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code>.</li>
-<li>Both <code>clarity</code> and <code>color</code> explain some variance in <code>price</code> for a given <code>carat</code> weight. Their apparent negative effect on <code>price</code> overall is because diamonds of better grades tend to be smaller. <code>cut</code> has little effect.</li>
+<li><code>price</code> is right skewed. On a log scale, it has two peaks, so diamonds are popular in two different price ranges.</li>
+<li><code>carat</code>: about 75% of the diamonds weigh less than 1 carat. The spread of prices increases with weight. <code>log(price)</code> has an almost straight-line relationship with <code>log(carat)</code>.</li>
+<li><code>cut</code> is not balanced: about 40% of the diamonds have an <em>Ideal</em> cut.</li>
+<li><code>color</code> is not balanced: only about 5% of the diamonds have the color grade <em>J</em>.</li>
+<li><code>clarity</code> is not balanced at the two ends: only 1.5% of the diamonds have the grade <em>I1</em>, and only 3.3% have the grade <em>IF</em>.</li>
+<li><code>price</code> has a strong correlation with <code>carat</code> and with the dimensions <code>x</code>, <code>y</code> and <code>z</code>. <code>table</code> and <code>depth</code> have almost no correlation with <code>price</code>.</li>
+<li>For diamonds of the same weight, <code>clarity</code> and <code>color</code> explain some of the differences in <code>price</code>. Overall, better grades seem to lower the price only because diamonds with better grades are usually smaller. <code>cut</code> has little effect.</li>
 </ul>
 <pre class="r"><code>save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &quot;diamondClean.Rda&quot;)</code></pre>
 </div>

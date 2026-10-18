@@ -20,10 +20,10 @@
       <description>
 
 
-&lt;p&gt;In this case study, we will use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to explore regression techniques and predict the sale price of houses.&lt;/p&gt;
+&lt;p&gt;In this case study, we use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.&lt;/p&gt;
 &lt;div id=&#34;data-summaries&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Summaries&lt;/h2&gt;
-&lt;p&gt;The Ames Housing dataset contains the sale prices of properties in Ames, Iowa along with 80 other features. Each property has an &lt;strong&gt;Id&lt;/strong&gt; associated with it. Here are the dimensions of the training and testing sets respectively:&lt;/p&gt;
+&lt;p&gt;The Ames Housing dataset has the sale prices of properties in Ames, Iowa, and 80 other attributes of each property. We call each attribute a feature. Each property has an &lt;strong&gt;Id&lt;/strong&gt; number. The data comes in two parts: a training set and a testing set. Here are the number of rows (properties) and columns (features) in each set:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(&amp;quot;Dimensions of the training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;[1] &amp;quot;Dimensions of the training set&amp;quot;&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dim(dfTrain)&lt;/code&gt;&lt;/pre&gt;
@@ -49,28 +49,28 @@ dfClean &amp;lt;- dfTrain %&amp;gt;% bind_rows(dfTest)&lt;/code&gt;&lt;/pre&gt;
 # knitr::kable(dfDescription)
 
 # Hmisc::describe(dfClean)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, let’s combine training and testing into a single dataset and take a look at the count of missing values:&lt;/p&gt;
+&lt;p&gt;Now, let’s put the training set and the testing set together in one dataset, and count the missing values in each feature:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;The combined dataset has 2919 property records.&lt;/li&gt;
-&lt;li&gt;Very few properties have a pool, fence or an alley access to the property.&lt;/li&gt;
-&lt;li&gt;Very few properties have a miscellaneous feature that has not been covered by other features.&lt;/li&gt;
-&lt;li&gt;More than a dozen features have atleast 1 missing value. Since we have a tiny dataset, we will try to impute the missing values.&lt;/li&gt;
+&lt;li&gt;The combined dataset has 2919 properties.&lt;/li&gt;
+&lt;li&gt;Very few properties have a pool, a fence or access to an alley.&lt;/li&gt;
+&lt;li&gt;Very few properties have a special feature that other features do not describe (&lt;code&gt;MiscFeature&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;More than 12 features have at least 1 missing value. The dataset is small, so we do not want to remove properties. Instead, we fill in each missing value with a likely value. This is called imputation.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;data-cleaning-transformation&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Cleaning &amp;amp; Transformation&lt;/h2&gt;
-&lt;p&gt;We will visualize features of the complete dataset and create a data cleaning pipeline.&lt;/p&gt;
+&lt;p&gt;In this section, we look at the features of the complete dataset, and we make a set of steps to clean the data.&lt;/p&gt;
 &lt;div id=&#34;fixing-data-errors&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Fixing Data Errors&lt;/h3&gt;
-&lt;p&gt;First, a few data integrity checks need to be done to ensure the quality of the data:&lt;/p&gt;
+&lt;p&gt;First, we check that the data makes sense:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;YearRemodAdd&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;YrSold&lt;/code&gt; should not be earlier than &lt;code&gt;YearRemodAdd&lt;/code&gt;: 3 records to be fixed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;YearRemodAdd&lt;/code&gt; (the year of the last remodel) must not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 1 property to fix&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;YrSold&lt;/code&gt; (the year of the sale) must not be earlier than &lt;code&gt;YearRemodAdd&lt;/code&gt;: 3 properties to fix&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, YearRemodAdd, YrSold) %&amp;gt;% dplyr::filter(YearRemodAdd &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 1 × 4
@@ -89,8 +89,8 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
   mutate(YearRemodAdd = ifelse(YearRemodAdd &amp;lt; YearBuilt, YearBuilt, YearRemodAdd)) %&amp;gt;% 
   mutate(YrSold = ifelse(YrSold &amp;lt; YearRemodAdd, YearRemodAdd, YrSold))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 18 records to be fixed&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; should not be later than &lt;code&gt;YrSold&lt;/code&gt;: 1 record to be fixed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; (the year the garage was built) must not be earlier than &lt;code&gt;YearBuilt&lt;/code&gt;: 18 properties to fix&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; must not be later than &lt;code&gt;YrSold&lt;/code&gt;: 1 property to fix&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean %&amp;gt;% select(Id, YearBuilt, GarageYrBlt, YrSold) %&amp;gt;% dplyr::filter(GarageYrBlt &amp;lt; YearBuilt)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;# A tibble: 18 × 4
@@ -130,9 +130,9 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 &lt;div id=&#34;basement-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Basement Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;&lt;p&gt;There is one property (&lt;code&gt;Id&lt;/code&gt; = 2121) where all the basement features are NA. &lt;code&gt;TotalBsmtSF&lt;/code&gt; is replaced by 0.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Now there are 79 properties which have no basement (&lt;code&gt;TotalBsmtSF&lt;/code&gt; = 0). All other basement features having NA values are changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common value in that &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For one property (&lt;code&gt;Id&lt;/code&gt; = 2121), all the basement features are missing (NA). We set &lt;code&gt;TotalBsmtSF&lt;/code&gt; (the total basement area) to 0.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Now 79 properties have no basement (&lt;code&gt;TotalBsmtSF&lt;/code&gt; = 0). For these properties, we change all the missing basement values to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The quality of basements is different in different neighborhoods. So we fill in each remaining missing value with the most common value in the same &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change TotalBsmtSF to 0 when all basement features are NA
 #####################################################################################################################
@@ -202,9 +202,9 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 # cleanup
 rm(vFeaturesChr_bsmt, vFeaturesNum_bsmt)
 rm(dfNeighborhood_mcv, bsmt_fintype2_mcv)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Histograms of numerical basement features and their correlations with &lt;code&gt;SalePrice&lt;/code&gt; are plotted below.&lt;/p&gt;
-&lt;p&gt;It could be verified that: &lt;code&gt;TotalBsmtSF&lt;/code&gt; = &lt;code&gt;BsmtFinSF1&lt;/code&gt; + &lt;code&gt;BsmtFinSF2&lt;/code&gt; + &lt;code&gt;BsmtUnfSF&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;Additionally, new features are generated where:&lt;/p&gt;
+&lt;p&gt;Below are histograms of the numerical basement features, and their correlations with &lt;code&gt;SalePrice&lt;/code&gt;. A histogram shows how many properties have values in each range. A correlation is a number from -1 to 1. It tells how closely two features move together in a straight line: near 1, they go up together; near -1, one goes down when the other goes up; near 0, they have no straight-line relationship.&lt;/p&gt;
+&lt;p&gt;We can check that: &lt;code&gt;TotalBsmtSF&lt;/code&gt; = &lt;code&gt;BsmtFinSF1&lt;/code&gt; + &lt;code&gt;BsmtFinSF2&lt;/code&gt; + &lt;code&gt;BsmtUnfSF&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;We also create new features:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;BsmtBath&lt;/code&gt; = &lt;code&gt;BsmtFullBath&lt;/code&gt; + 0.5 * &lt;code&gt;BsmtHalfBath&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;HasBsmt&lt;/code&gt; = &lt;code&gt;TotalBsmtSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
@@ -226,7 +226,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most properties have a basement.&lt;/li&gt;
-&lt;li&gt;Column plots show that &lt;code&gt;BsmtFinType2&lt;/code&gt; and &lt;code&gt;BsmtCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
+&lt;li&gt;The column plots show that one category is much more common than the others in &lt;code&gt;BsmtFinType2&lt;/code&gt; and in &lt;code&gt;BsmtCond&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
 
@@ -238,7 +238,7 @@ rm(dfBsmt, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;bathroom-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Bathroom Features&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;A new feature is generated to determine the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;We create a new feature for the total number of bathrooms: &lt;code&gt;TotalBath&lt;/code&gt; = &lt;code&gt;FullBath&lt;/code&gt; + 0.5 * &lt;code&gt;HalfBath&lt;/code&gt; + &lt;code&gt;BsmtBath&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
 dfClean &amp;lt;- dfClean %&amp;gt;% 
@@ -259,7 +259,7 @@ rm(dfBath, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;fireplace-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Fireplace Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;There are 1420 properties that have no fireplaces. &lt;code&gt;FireplaceQu&lt;/code&gt; is changed to &lt;strong&gt;None&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;1420 properties have no fireplace. For these properties, we change &lt;code&gt;FireplaceQu&lt;/code&gt; (the fireplace quality) to &lt;strong&gt;None&lt;/strong&gt;.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change FireplaceQu to None if there is no fireplace
 ###############################################################################################################
@@ -280,8 +280,8 @@ dfClean %&amp;gt;% select(Id, Neighborhood, contains(&amp;quot;Fire&amp;quot;)) 
 # ℹ 1,410 more rows&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% mutate_at(vars(&amp;quot;FireplaceQu&amp;quot;), ~ case_when(Fireplaces == 0 ~ &amp;quot;None&amp;quot;, TRUE ~ .))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;A new feature is generated where: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
-&lt;li&gt;A significant number of properties have fireplaces.&lt;/li&gt;
+&lt;li&gt;We create a new feature: &lt;code&gt;HasFireplace&lt;/code&gt; = &lt;code&gt;Fireplaces&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;Many properties have a fireplace.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasFireplace
 dfClean &amp;lt;- dfClean %&amp;gt;% 
@@ -305,9 +305,9 @@ rm(dfFireplace, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;garage-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Garage Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;&lt;p&gt;&lt;code&gt;GarageYrBlt&lt;/code&gt; where NA is set to &lt;code&gt;YearBuilt&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;There are 157 properties where the property has no garage. In these records, &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;GarageFinish&lt;/code&gt;, &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; are recorded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Since qualitative features do not have the same distribution across neighborhoods, any remaining &lt;strong&gt;NA&lt;/strong&gt; values are imputed to be the most common or median value in the &lt;code&gt;Neighborhood&lt;/code&gt; by &lt;code&gt;GarageType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If &lt;code&gt;GarageYrBlt&lt;/code&gt; is missing, we set it to &lt;code&gt;YearBuilt&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;157 properties have no garage. For these properties, &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;GarageFinish&lt;/code&gt;, &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; are &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Garages are different in different neighborhoods. So we fill in each remaining missing value with the most common value (or the median value, for numbers) of the same &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change GarageYrBlt to YearBuilt if it is NA
 ############################################################################################################
@@ -367,10 +367,10 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 # cleanup
 rm(vFeaturesChr_garage, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; and &lt;code&gt;GarageCars&lt;/code&gt; have almost similar correlation with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;A new feature is generated where: &lt;code&gt;HasGarage&lt;/code&gt; = &lt;code&gt;GarageArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; and &lt;code&gt;GarageCars&lt;/code&gt; have almost the same correlation with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;We create a new feature: &lt;code&gt;HasGarage&lt;/code&gt; = &lt;code&gt;GarageArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties have a garage.&lt;/li&gt;
-&lt;li&gt;Column plots show that &lt;code&gt;GarageQual&lt;/code&gt; and &lt;code&gt;GarageCond&lt;/code&gt; values are dominated by a single category.&lt;/li&gt;
+&lt;li&gt;The column plots show that one category is much more common than the others in &lt;code&gt;GarageQual&lt;/code&gt; and in &lt;code&gt;GarageCond&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
 dfClean &amp;lt;- dfClean %&amp;gt;% 
@@ -394,9 +394,9 @@ rm(dfGarage, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;masonry-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Masonry Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;&lt;p&gt;There is one property (&lt;code&gt;Id&lt;/code&gt; = 2611) where &lt;code&gt;MasVnrArea&lt;/code&gt; = 198 but &lt;code&gt;MasVnrType&lt;/code&gt; = NA. Impute &lt;code&gt;MasVnrType&lt;/code&gt; to be most common value in the neighborhood where &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrType&lt;/code&gt; to be the most common values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;YearRemodAdd&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in &lt;code&gt;MasVnrArea&lt;/code&gt; to be the median values by &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For one property (&lt;code&gt;Id&lt;/code&gt; = 2611), &lt;code&gt;MasVnrArea&lt;/code&gt; (the area of the masonry veneer) is 198, but &lt;code&gt;MasVnrType&lt;/code&gt; (the type of masonry) is missing. We set &lt;code&gt;MasVnrType&lt;/code&gt; to the most common type in the same neighborhood, among the properties that have masonry.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;We fill in the missing values of &lt;code&gt;MasVnrType&lt;/code&gt; with the most common values for the same &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;YearRemodAdd&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;We fill in the missing values of &lt;code&gt;MasVnrArea&lt;/code&gt; with the median values for the same &lt;code&gt;Neighborhood&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;. The median is the middle value: half the values are below it and half are above it.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change MasVnrType in Id 2611 as the most common value in the Neighborhood
 ###############################################################################################################
@@ -463,8 +463,8 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 # cleanup
 rm(masvnrtype_mcv, dfNeighborhood_mcv, dfNeighborhood_med)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;A new feature is generated where: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
-&lt;li&gt;A significant number of properties have masonry.&lt;/li&gt;
+&lt;li&gt;We create a new feature: &lt;code&gt;HasMasVnr&lt;/code&gt; = &lt;code&gt;MasVnrArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;Many properties have masonry.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasMasVnr
 dfClean &amp;lt;- dfClean %&amp;gt;% 
@@ -488,8 +488,8 @@ rm(dfMasVnr, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;pool-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Pool Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;&lt;p&gt;Change values in &lt;code&gt;PoolQC&lt;/code&gt; to &lt;strong&gt;None&lt;/strong&gt; if the property has no pool&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Impute &lt;strong&gt;NA&lt;/strong&gt; values in remaining &lt;code&gt;PoolQC&lt;/code&gt; to the most common value in the Neighborhood in the properties that have a pool.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If the property has no pool, we change &lt;code&gt;PoolQC&lt;/code&gt; (the pool quality) to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;We fill in the remaining missing values of &lt;code&gt;PoolQC&lt;/code&gt; with the most common value in the same neighborhood, among the properties that have a pool.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Change NA values in PoolQC to None if there is no pool
 ###############################################################################################################
@@ -530,7 +530,7 @@ dfClean$PoolQC[dfClean$Id %in% dfMissing$Id] &amp;lt;- dfMissing$PoolQC
 # cleanup
 rm(dfNeighborhood_mcv, dfMissing)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;A new feature is generated where: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;We create a new feature: &lt;code&gt;HasPool&lt;/code&gt; = &lt;code&gt;PoolArea&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;li&gt;Most properties do not have a pool.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: HasGarage
@@ -555,10 +555,10 @@ rm(dfPool, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;porch-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Porch Features&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;New features are generated for:
+&lt;li&gt;We create new features for:
 &lt;ul&gt;
-&lt;li&gt;Total porch area: &lt;code&gt;PorchSF&lt;/code&gt; = &lt;code&gt;OpenPorchSF&lt;/code&gt; + &lt;code&gt;EnclosedPorch&lt;/code&gt; + &lt;code&gt;3SsnPorch&lt;/code&gt; + &lt;code&gt;ScreenPorch&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Whether property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
+&lt;li&gt;The total porch area: &lt;code&gt;PorchSF&lt;/code&gt; = &lt;code&gt;OpenPorchSF&lt;/code&gt; + &lt;code&gt;EnclosedPorch&lt;/code&gt; + &lt;code&gt;3SsnPorch&lt;/code&gt; + &lt;code&gt;ScreenPorch&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Whether the property has a porch: &lt;code&gt;HasPorch&lt;/code&gt; = &lt;code&gt;PorchSF&lt;/code&gt; &amp;gt; 0&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New features: PorchSF, HasPorch
@@ -584,7 +584,7 @@ rm(dfPorch, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;built-area-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Built Area Features&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;A new feature is added to determine the total square footage of built area: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;We create a new feature for the total built area in square feet: &lt;code&gt;TotalSF&lt;/code&gt; = &lt;code&gt;GrLivArea&lt;/code&gt; + &lt;code&gt;TotalBsmtSF&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfClean %&amp;gt;% 
   mutate(TotalSF = GrLivArea + TotalBsmtSF)
@@ -602,12 +602,12 @@ rm(vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;construction-year-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Construction Year Features&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;New features are generated for:
+&lt;li&gt;We create new features for:
 &lt;ul&gt;
-&lt;li&gt;Vintage of year built: &lt;strong&gt;1945 or earlier, 1946-1999, 2000 or later&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;Age of property from when it was built to the time it was sold: &lt;code&gt;PropertyAge&lt;/code&gt; = &lt;code&gt;YrSold&lt;/code&gt; - &lt;code&gt;YearRemodAdd&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Indicate if the property is new or newly renovated: &lt;code&gt;IsNew&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; == &lt;code&gt;YrSold&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Indicate if the property has been remodelled: &lt;code&gt;IsRemodAdd&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The period when the property was built (&lt;code&gt;Vintage&lt;/code&gt;): &lt;strong&gt;1945 or earlier, 1946-1999, 2000 or later&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;The age of the property when it was sold, counted from its last remodel (or from its construction, if it was never remodeled): &lt;code&gt;PropertyAge&lt;/code&gt; = &lt;code&gt;YrSold&lt;/code&gt; - &lt;code&gt;YearRemodAdd&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Whether the property was new or newly remodeled when it was sold: &lt;code&gt;IsNew&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; == &lt;code&gt;YrSold&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Whether the property was ever remodeled: &lt;code&gt;IsRemod&lt;/code&gt; = &lt;code&gt;YearRemodAdd&lt;/code&gt; &amp;gt; &lt;code&gt;YearBuilt&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# New feature: Vintage
@@ -635,9 +635,9 @@ rm(vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;neighborhood-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Neighborhood Features&lt;/h4&gt;
-&lt;p&gt;Type of Neighborhood: There are 25 neighborhoods in the dataset.
-As it is said, real estate is all about location, location, location. Clearly some neighborhoods command higher prices than others.&lt;/p&gt;
-&lt;p&gt;Neighborhoods could be grouped together in fewer categories depending upon how they are ranked by their median SalePrice:&lt;/p&gt;
+&lt;p&gt;Type of Neighborhood: The dataset has 25 neighborhoods.
+In real estate, location is very important. Some neighborhoods clearly have higher prices than others.&lt;/p&gt;
+&lt;p&gt;We can put the neighborhoods into fewer groups, by their median &lt;code&gt;SalePrice&lt;/code&gt;:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Type1&lt;/strong&gt;: StoneBr, NridgHt, NoRidge&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Type2&lt;/strong&gt;: Veenker, Timber, Somerst&lt;/li&gt;
@@ -663,10 +663,10 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Other Missing Features&lt;/h4&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;&lt;p&gt;In &lt;code&gt;MiscFeature&lt;/code&gt;, &lt;code&gt;Alley&lt;/code&gt; and &lt;code&gt;Fence&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are recoded as &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;In &lt;code&gt;Utilities&lt;/code&gt;, &lt;code&gt;Functional&lt;/code&gt;, &lt;code&gt;SaleType&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value of each feature.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;In &lt;code&gt;LotFrontage&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the median values in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;In &lt;code&gt;MSZoning&lt;/code&gt;, &lt;code&gt;KitchenQual&lt;/code&gt;, &lt;code&gt;Exterior1st&lt;/code&gt;, &lt;code&gt;Exterior2nd&lt;/code&gt;, &lt;code&gt;Electrical&lt;/code&gt; &lt;strong&gt;NA&lt;/strong&gt; values are imputed as the most common value in the &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;MiscFeature&lt;/code&gt;, &lt;code&gt;Alley&lt;/code&gt; and &lt;code&gt;Fence&lt;/code&gt;, we change the missing values to &lt;strong&gt;None&lt;/strong&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;Utilities&lt;/code&gt;, &lt;code&gt;Functional&lt;/code&gt; and &lt;code&gt;SaleType&lt;/code&gt;, we fill in the missing values with the most common value of each feature.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;LotFrontage&lt;/code&gt;, we fill in the missing values with the median value of the same &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;MSZoning&lt;/code&gt;, &lt;code&gt;KitchenQual&lt;/code&gt;, &lt;code&gt;Exterior1st&lt;/code&gt;, &lt;code&gt;Exterior2nd&lt;/code&gt; and &lt;code&gt;Electrical&lt;/code&gt;, we fill in the missing values with the most common value of the same &lt;code&gt;Neighborhood&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. &amp;amp; 2. change NA values to None or most common value of that feature
 ####################################################################################################################
@@ -711,7 +711,7 @@ rm(dfNeighborhood_med, dfNeighborhood_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;label-encoding&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Label Encoding&lt;/h3&gt;
-&lt;p&gt;A quick look at the data description shows many features have categories that follow a specific order. These features are:&lt;/p&gt;
+&lt;p&gt;The data description shows that the categories of many features have a natural order. These features are called ordinal features:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;LotShape&lt;/code&gt;: Reg, IR1, IR2, IR3&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;LandSlope&lt;/code&gt;: Gtl, Mod, Sev&lt;/li&gt;
@@ -733,15 +733,15 @@ rm(dfNeighborhood_med, dfNeighborhood_mcv)&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;Street&lt;/code&gt;: Grvl, Pave&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;PavedDrive&lt;/code&gt;: Y, P, N&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Most of these features have a common order &lt;strong&gt;Ex, Gd, TA, Fa, Po&lt;/strong&gt;, except some are missing &lt;strong&gt;None&lt;/strong&gt; as a category. These features could be ordered with a common set of categories from &lt;strong&gt;Ex, Gd, TA, Fa, Po, None&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;Some categorical features are already ordered by an integer number. These features are:&lt;/p&gt;
+&lt;p&gt;Most of these features use the same order: &lt;strong&gt;Ex&lt;/strong&gt; (excellent), &lt;strong&gt;Gd&lt;/strong&gt; (good), &lt;strong&gt;TA&lt;/strong&gt; (typical/average), &lt;strong&gt;Fa&lt;/strong&gt; (fair), &lt;strong&gt;Po&lt;/strong&gt; (poor). Some of them also have the category &lt;strong&gt;None&lt;/strong&gt;. So we can give these features one common set of ordered categories: &lt;strong&gt;Ex, Gd, TA, Fa, Po, None&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Two features already use numbers for their order:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;OverallQual&lt;/code&gt;: 10 to 1&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;OverallCond&lt;/code&gt;: 10 to 1&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;MoSold&lt;/code&gt; is cyclical and should be recoded as a factor.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;YrSold&lt;/code&gt; has only 5 values from 2006-2010 and should also be recoded as a factor.&lt;/p&gt;
-&lt;p&gt;Categorical features where several categories have less than 10 observations are lumped into a single category named &lt;strong&gt;Other&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;MoSold&lt;/code&gt; (the month of the sale) repeats in a cycle every year, so we treat it as a category, not as a number.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;YrSold&lt;/code&gt; has only 5 values, from 2006 to 2010, so we also treat it as a category.&lt;/p&gt;
+&lt;p&gt;In categorical features where several categories have fewer than 10 properties, we put these rare categories together in one category named &lt;strong&gt;Other&lt;/strong&gt;.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;is.nominal &amp;lt;- function(Z) {
   return(is.factor(Z) &amp;amp; !is.ordered(Z))
 }
@@ -780,14 +780,14 @@ dfClean &amp;lt;- dfClean %&amp;gt;%
 &lt;h3&gt;Features to Drop&lt;/h3&gt;
 &lt;div id=&#34;highly-correlated-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Highly Correlated Features&lt;/h4&gt;
-&lt;p&gt;Some features could be dropped from further analysis because either they are too correlated or replaced by a similar feature.&lt;/p&gt;
+&lt;p&gt;We drop some features from the rest of the analysis, because they are strongly correlated with other features, or because a similar new feature replaces them.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(vFeatures_to_exclude &amp;lt;- c(&amp;quot;BsmtFullBath&amp;quot;,&amp;quot;GarageCars&amp;quot;,&amp;quot;GarageYrBlt&amp;quot;,
                            &amp;quot;GrLivArea&amp;quot;,&amp;quot;PoolArea&amp;quot;,
                            &amp;quot;YearBuilt&amp;quot;,&amp;quot;YearRemodAdd&amp;quot;,&amp;quot;Neighborhood&amp;quot;,
                            &amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt; [1] &amp;quot;BsmtFullBath&amp;quot;  &amp;quot;GarageCars&amp;quot;    &amp;quot;GarageYrBlt&amp;quot;   &amp;quot;GrLivArea&amp;quot;     &amp;quot;PoolArea&amp;quot;      &amp;quot;YearBuilt&amp;quot;     &amp;quot;YearRemodAdd&amp;quot;  &amp;quot;Neighborhood&amp;quot;  &amp;quot;OpenPorchSF&amp;quot;  
 [10] &amp;quot;EnclosedPorch&amp;quot; &amp;quot;3SsnPorch&amp;quot;     &amp;quot;ScreenPorch&amp;quot;  &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Let’s check these choices by measuring the association between every pair of features. A suitable measure is used for each pair: Pearson correlation between two numerical features, Cramer’s V between two categorical features, and the correlation ratio between a numerical and a categorical feature. Cramer’s V and the correlation ratio are bias-corrected, so that features with many categories do not look associated with everything.&lt;/p&gt;
+&lt;p&gt;Let’s check these choices. For every pair of features, we measure their association, which tells how strongly the two features are related. We use a measure that suits each type of pair: the Pearson correlation for two numerical features, Cramer’s V for two categorical features, and the correlation ratio for one numerical and one categorical feature. All these measures are near 0 when there is no relationship. Features with many categories can seem related to everything by chance, so Cramer’s V and the correlation ratio include a correction (bias correction) for this.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mAssoc &amp;lt;- association_matrix(dfClean %&amp;gt;% select(-Id))
 
 # one row per pair of features, strongest association first
@@ -808,27 +808,27 @@ assoc_of &amp;lt;- function(f1, f2) {
 
 vFeaturesAssoc &amp;lt;- dfAssocPairs %&amp;gt;% filter(abs(association) &amp;gt;= 0.85) %&amp;gt;% select(feature1, feature2) %&amp;gt;% unlist() %&amp;gt;% unique()
 vPorchAssoc &amp;lt;- map_dbl(c(&amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;), ~ assoc_of(.x, &amp;quot;PorchSF&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Here are the 36 features that have an association of 0.85 or more with at least one other feature. They are clustered so that related features sit next to each other:&lt;/p&gt;
+&lt;p&gt;Here are the 36 features that have an association of 0.85 or more with at least one other feature. Related features are next to each other:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_association_matrix(dfClean[vFeaturesAssoc], plotTitle = &amp;quot;Features with an association of 0.85 or more with another feature&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Most of the features we drop are strongly associated with another feature: &lt;code&gt;GarageCars&lt;/code&gt; with &lt;code&gt;GarageArea&lt;/code&gt; (0.89), &lt;code&gt;GrLivArea&lt;/code&gt; with &lt;code&gt;TotalSF&lt;/code&gt; (0.87), &lt;code&gt;BsmtFullBath&lt;/code&gt; with &lt;code&gt;BsmtBath&lt;/code&gt; (0.97), &lt;code&gt;PoolArea&lt;/code&gt; with &lt;code&gt;HasPool&lt;/code&gt; (0.94), &lt;code&gt;YearBuilt&lt;/code&gt; with &lt;code&gt;Vintage&lt;/code&gt; (0.9), &lt;code&gt;GarageYrBlt&lt;/code&gt; with &lt;code&gt;YearBuilt&lt;/code&gt; (0.86), &lt;code&gt;YearRemodAdd&lt;/code&gt; with &lt;code&gt;PropertyAge&lt;/code&gt; (-1) and &lt;code&gt;Neighborhood&lt;/code&gt; with &lt;code&gt;NeighborhoodType&lt;/code&gt; (1).&lt;/li&gt;
-&lt;li&gt;The four porch features are only moderately associated with &lt;code&gt;PorchSF&lt;/code&gt; (between 0.19 and 0.61). They are not redundant with it; we drop them because &lt;code&gt;PorchSF&lt;/code&gt;, their total area, replaces them.&lt;/li&gt;
-&lt;li&gt;The matrix also finds redundant features that we have not dropped yet. &lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; carry the same information as the &lt;em&gt;None&lt;/em&gt; category of the garage, fireplace and masonry features (Cramer’s V of about 1), and &lt;code&gt;MSSubClass&lt;/code&gt; is closely associated with &lt;code&gt;BldgType&lt;/code&gt; (0.89) and &lt;code&gt;HouseStyle&lt;/code&gt; (0.83). Tree-based models are not affected by such duplicates, but they add collinear predictors to linear models, so we will remove them before fitting models in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/&#34;&gt;the next post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Most of the features that we drop have a strong association with another feature: &lt;code&gt;GarageCars&lt;/code&gt; with &lt;code&gt;GarageArea&lt;/code&gt; (0.89), &lt;code&gt;GrLivArea&lt;/code&gt; with &lt;code&gt;TotalSF&lt;/code&gt; (0.87), &lt;code&gt;BsmtFullBath&lt;/code&gt; with &lt;code&gt;BsmtBath&lt;/code&gt; (0.97), &lt;code&gt;PoolArea&lt;/code&gt; with &lt;code&gt;HasPool&lt;/code&gt; (0.94), &lt;code&gt;YearBuilt&lt;/code&gt; with &lt;code&gt;Vintage&lt;/code&gt; (0.9), &lt;code&gt;GarageYrBlt&lt;/code&gt; with &lt;code&gt;YearBuilt&lt;/code&gt; (0.86), &lt;code&gt;YearRemodAdd&lt;/code&gt; with &lt;code&gt;PropertyAge&lt;/code&gt; (-1), and &lt;code&gt;Neighborhood&lt;/code&gt; with &lt;code&gt;NeighborhoodType&lt;/code&gt; (1).&lt;/li&gt;
+&lt;li&gt;The four porch features have only a medium association with &lt;code&gt;PorchSF&lt;/code&gt; (between 0.19 and 0.61). So they do not repeat its information. We drop them because &lt;code&gt;PorchSF&lt;/code&gt;, their total area, replaces them.&lt;/li&gt;
+&lt;li&gt;The matrix also finds features that repeat information, which we have not dropped yet. &lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; give the same information as the &lt;em&gt;None&lt;/em&gt; category of the garage, fireplace and masonry features (Cramer’s V of about 1). Also, &lt;code&gt;MSSubClass&lt;/code&gt; has a strong association with &lt;code&gt;BldgType&lt;/code&gt; (0.89) and with &lt;code&gt;HouseStyle&lt;/code&gt; (0.83). Models that use decision trees are not affected by such repeated information. But in linear models, features that repeat each other (collinear features) make the results unreliable. So we will remove them before we build the models in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/&#34;&gt;the next post&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Skewed Categorical Features&lt;/h4&gt;
-&lt;p&gt;Any feature where more than 95% of the records have the same category probably doesn’t have any predictive value. An extreme case is &lt;code&gt;Utilities&lt;/code&gt; which has only 2 categories - &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt; in the dataset. Only 1 record has &lt;strong&gt;NoSeWa&lt;/strong&gt; and the rest of the records have &lt;strong&gt;AllPub&lt;/strong&gt;. Therefore, features like these do not have any predictive value.&lt;/p&gt;
-&lt;p&gt;Let’s see the share of the most common category in every categorical feature, along with the number of rare categories that have fewer than 10 records:&lt;/p&gt;
+&lt;p&gt;If more than 95% of the properties have the same category in a feature, the feature probably does not help to predict the price. An extreme example is &lt;code&gt;Utilities&lt;/code&gt;, which has only 2 categories in the dataset: &lt;strong&gt;AllPub&lt;/strong&gt; and &lt;strong&gt;NoSeWa&lt;/strong&gt;. Only 1 property has &lt;strong&gt;NoSeWa&lt;/strong&gt;, and all the others have &lt;strong&gt;AllPub&lt;/strong&gt;. So features like this one do not help to predict the price.&lt;/p&gt;
+&lt;p&gt;For each categorical feature, let’s look at the share of its most common category. Let’s also count its rare categories, which have fewer than 10 properties:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p_dominance &amp;lt;- eda_plot_category_dominance(dfClean, threshold = 0.95, minCount = 10)
 p_dominance&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_category_dominance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDominance &amp;lt;- p_dominance$data
 dfRare &amp;lt;- dfDominance %&amp;gt;% filter(share &amp;lt; 0.95, n_rare &amp;gt; 0) %&amp;gt;% arrange(desc(n_rare), desc(share))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;11 features lie above the 95% line, so we will drop them. These are plotted below.&lt;/li&gt;
-&lt;li&gt;Among the remaining features, 13 have at least one rare category with fewer than 10 records, such as Functional, GarageQual, Electrical. When these features are dummy encoded for modelling, the rare categories become predictors that are based on only a handful of records, so their effects cannot be estimated reliably. Combining rare categories into a single category is one way to deal with them.&lt;/li&gt;
+&lt;li&gt;11 features are above the 95% line, so we drop them. The plots below show them.&lt;/li&gt;
+&lt;li&gt;Of the other features, 13 have at least one rare category with fewer than 10 properties, such as Functional, GarageQual, Electrical. For a model, each category becomes a separate feature with the values 0 and 1 (a dummy variable). A dummy variable for a rare category has only a few properties, so the model cannot measure its effect reliably. One way to solve this problem is to put the rare categories together in one category.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeatures_skewed &amp;lt;- dfClean %&amp;gt;% 
   select_if(is.factor) %&amp;gt;% 
@@ -875,39 +875,39 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;There are {length(vFeaturesNum)} numerical, {length(vFeaturesCat1)} ordinal and {length(vFeaturesCat2)} nominal features.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;There are 26 numerical, 26 ordinal and 20 nominal features.&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
-&lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Univariate Analysis&lt;/h2&gt;
-&lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
+&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at each feature by itself.&lt;/p&gt;
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical Features&lt;/h3&gt;
-&lt;p&gt;First let’s plot all the features that are measured as area in square feet:&lt;/p&gt;
+&lt;p&gt;First, let’s plot all the features that measure an area in square feet:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;All area features have outliers.&lt;/li&gt;
-&lt;li&gt;Many features are heavily skewed so they need to be normalized before fitting models.&lt;/li&gt;
+&lt;li&gt;All the area features have outliers, which are values that are very different from most other values.&lt;/li&gt;
+&lt;li&gt;Many features are very skewed: most values are small and a few values are much larger. Before we build models, we must transform these features (for example, with a log) to make them less skewed.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Now let’s see other numerical features:&lt;/p&gt;
+&lt;p&gt;Now let’s look at the other numerical features:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)], &amp;quot;SalePrice&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Most of the properties have been built less than 20 years prior to their sale.&lt;/li&gt;
+&lt;li&gt;Most properties were sold less than 20 years after they were built or remodeled.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Let’s plot the distribution of &lt;code&gt;SalePrice&lt;/code&gt; in log scale:&lt;/p&gt;
+&lt;p&gt;Let’s plot &lt;code&gt;SalePrice&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, &amp;quot;SalePrice&amp;quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;We see long tailed distribution on both sides.&lt;/li&gt;
-&lt;li&gt;There are 11 properties below USD 50,000 and 17 above USD 500,000.&lt;/li&gt;
-&lt;li&gt;Linear models are very sensitive to the presence of outliers.&lt;/li&gt;
+&lt;li&gt;The distribution has long tails on both sides: a few properties are much cheaper or much more expensive than most.&lt;/li&gt;
+&lt;li&gt;11 properties cost less than USD 50,000, and 17 properties cost more than USD 500,000.&lt;/li&gt;
+&lt;li&gt;Outliers have a strong effect on linear models.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -921,7 +921,7 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Categorical imbalances exist in many features where 1 or 2 categories are dominant. This poses a big challenge for using these features as predictors, as categories with fewer counts tend to be underrepresented in the data.&lt;/li&gt;
+&lt;li&gt;In many features, 1 or 2 categories are much more common than the others. This makes these features hard to use for predictions, because the data has only a few examples of the other categories.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -932,21 +932,21 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Categorical imbalances exist in many features where 1 or 2 categories are dominant.&lt;/li&gt;
-&lt;li&gt;Most of the properties are sold during the summer months, and the least during the winter months.&lt;/li&gt;
-&lt;li&gt;The effect of housing market crisis are visible in the data, as the fewest properties were sold in 2010.&lt;/li&gt;
+&lt;li&gt;In many features, 1 or 2 categories are much more common than the others.&lt;/li&gt;
+&lt;li&gt;Most properties are sold in the summer months, and the fewest in the winter months.&lt;/li&gt;
+&lt;li&gt;The data shows the effect of the housing market crisis: the fewest properties were sold in 2010.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;bivariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Bivariate Analysis&lt;/h2&gt;
+&lt;div id=&#34;bivariate-analysis-two-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis: Two Features at a Time&lt;/h2&gt;
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
-&lt;p&gt;Let’s examine the relationship of &lt;code&gt;SalePrice&lt;/code&gt; with other numerical features:&lt;/p&gt;
+&lt;p&gt;Let’s look at how &lt;code&gt;SalePrice&lt;/code&gt; changes with each of the other numerical features. A scatter plot shows one dot for each property, and the line shows the best straight line through the dots (a regression line):&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Let’s take a closer look at &lt;code&gt;TotalSF&lt;/code&gt;, labelling the properties with the largest Cook’s distance, which measures how much each point pulls the regression line:&lt;/p&gt;
+&lt;p&gt;Let’s look more closely at &lt;code&gt;TotalSF&lt;/code&gt;. The labels show the properties with the largest Cook’s distance. Cook’s distance measures how much one point pulls the regression line towards itself:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar,
                  nLabel = 3, feature_id = &amp;quot;Id&amp;quot;, labelBy = &amp;quot;cooks&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/influential_points-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
@@ -960,15 +960,15 @@ vOutliers_TotalSF &amp;lt;- dfInfluence$Id[1:3]&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;From the scatterplot of &lt;code&gt;TotalSF&lt;/code&gt; v/s &lt;code&gt;SalePrice&lt;/code&gt;, it is very clear there are &lt;em&gt;high leverage&lt;/em&gt; points where the target &lt;code&gt;SalePrice&lt;/code&gt; is unusually low relative to the area in sq. ft. These points have an outsized impact on the slope of the regression line, which otherwise would be higher.&lt;/li&gt;
-&lt;li&gt;The same set of points impact &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;The Ids of these records are 1299,2550,524, with Cook’s distances of 5.69, 2.46, 0.54. These are far above the usual cutoff of 4/n = 0.0014, and the next most influential property has a Cook’s distance of only 0.12. Out of these 524 and 1299 are in the training set.&lt;/li&gt;
+&lt;li&gt;The scatter plot of &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;SalePrice&lt;/code&gt; clearly shows a few very large properties that sold at unusually low prices. These points have high leverage: they are far from the other points, so they pull the regression line strongly. Without them, the line would be steeper.&lt;/li&gt;
+&lt;li&gt;The same properties also affect &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The Ids of these properties are 1299,2550,524. Their Cook’s distances are 5.69, 2.46, 0.54. These values are much higher than the usual limit of 4/n = 0.0014, where n is the number of properties. The next property has a Cook’s distance of only 0.12. Of these three properties, 524 and 1299 are in the training set.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;transforming-skewed-features&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Transforming Skewed Features&lt;/h3&gt;
-&lt;p&gt;Many numerical features are right skewed. Would transforming them make their relationship with &lt;code&gt;log(SalePrice)&lt;/code&gt; more linear? Let’s compare common transforms of the strongest area feature &lt;code&gt;TotalSF&lt;/code&gt;, the heavily skewed &lt;code&gt;LotArea&lt;/code&gt;, and &lt;code&gt;GarageArea&lt;/code&gt;, which is barely skewed. Each panel is labelled with the R-squared of a linear fit of &lt;code&gt;log(SalePrice)&lt;/code&gt; on the transformed feature:&lt;/p&gt;
+&lt;p&gt;Many numerical features are right skewed. Can we change them with a simple formula (a transform), so that their relationship with &lt;code&gt;log(SalePrice)&lt;/code&gt; becomes closer to a straight line? Let’s compare common transforms of three features: &lt;code&gt;TotalSF&lt;/code&gt;, the strongest area feature; &lt;code&gt;LotArea&lt;/code&gt;, which is very skewed; and &lt;code&gt;GarageArea&lt;/code&gt;, which is almost not skewed. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in &lt;code&gt;log(SalePrice)&lt;/code&gt; the line explains:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lTransformPlots &amp;lt;- map(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;), ~ eda_plot_transforms(dfClean, .x, &amp;quot;SalePrice&amp;quot;))
 cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
@@ -985,16 +985,16 @@ vSkew &amp;lt;- map_dbl(c(TotalSF = &amp;quot;TotalSF&amp;quot;, LotArea = &amp;
 &lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;A log transform roughly doubles the R-squared of &lt;code&gt;LotArea&lt;/code&gt; (skewness 12.8), from 0.066 to 0.138. Its few very large lots dominate a linear fit until they are compressed.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;TotalSF&lt;/code&gt; (skewness 1.5) gains modestly from any of the transforms, from 0.61 to 0.647 with a log.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; (skewness 0.2) is barely skewed, and transforming it makes the fit worse: the R-squared drops from 0.426 to 0.389 with a log, which also has to drop the properties without a garage.&lt;/li&gt;
-&lt;li&gt;So only the heavily skewed features should be log transformed before fitting linear models, rather than all of them.&lt;/li&gt;
+&lt;li&gt;A log transform almost doubles the R-squared of &lt;code&gt;LotArea&lt;/code&gt; (skewness 12.8), from 0.066 to 0.138. Without the transform, a few very large lots control the line. The log makes these large values smaller.&lt;/li&gt;
+&lt;li&gt;All the transforms improve &lt;code&gt;TotalSF&lt;/code&gt; (skewness 1.5) a little. With a log, the R-squared goes from 0.61 to 0.647.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; (skewness 0.2) is almost not skewed, and the transforms make the fit worse. With a log, the R-squared goes down from 0.426 to 0.389. Also, the log cannot use the properties without a garage, because the log of 0 does not exist.&lt;/li&gt;
+&lt;li&gt;So, before we build linear models, we should transform only the very skewed features, not all of them.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
-&lt;p&gt;We isolate the features that have an absolute correlation of 0.1 or more with &lt;code&gt;SalePrice&lt;/code&gt;. Pearson correlation measures how linear a relationship is, so it is sensitive to outliers and skewed features. Spearman correlation is computed on ranks, so it measures how monotonic a relationship is. Comparing the two shows which relationships are strong but not linear:&lt;/p&gt;
+&lt;p&gt;We keep the features whose correlation with &lt;code&gt;SalePrice&lt;/code&gt; is at least 0.1 or at most -0.1. The Pearson correlation measures how close a relationship is to a straight line, so outliers and skewed features affect it strongly. The Spearman correlation uses the ranks of the values (1st, 2nd, 3rd, …) instead of the values. So it measures whether one feature always goes up (or always goes down) when the other goes up, even along a curve. If we compare the two, we can see which relationships are strong but not straight lines:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
 
 dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
@@ -1022,10 +1022,10 @@ cor_of &amp;lt;- function(feature_name, method) round(dfCorMethods[[method]][dfC
 &lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;The top 5 features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. Quite reasonably, a buyer would look at these features to evaluate a property and its &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;It is somewhat counterintuitive that &lt;code&gt;PropertyAge&lt;/code&gt; shows a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. It means properties that were more recently built, sell for higher prices than older properties.&lt;/li&gt;
-&lt;li&gt;Most features have similar Pearson and Spearman correlations, but &lt;code&gt;LotArea&lt;/code&gt; stands out: its correlation rises from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from linear, which the log transform above partly addresses.&lt;/li&gt;
-&lt;li&gt;The opposite happens with &lt;code&gt;BsmtFinSF1&lt;/code&gt;, whose correlation falls from 0.43 to 0.33. About 32% of the properties have no finished basement and share the same rank, while the largest finished basements carry extra weight in the Pearson correlation. So its linear relationship with &lt;code&gt;SalePrice&lt;/code&gt; looks stronger than its rank relationship.&lt;/li&gt;
+&lt;li&gt;The 5 most correlated features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. A buyer would naturally look at these features to judge a property and its price.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PropertyAge&lt;/code&gt; has a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. This means that newer properties sell for higher prices than older properties.&lt;/li&gt;
+&lt;li&gt;For most features, the Pearson and Spearman correlations are similar. But &lt;code&gt;LotArea&lt;/code&gt; is different: its correlation goes up from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from a straight line. The log transform above partly corrects this.&lt;/li&gt;
+&lt;li&gt;For &lt;code&gt;BsmtFinSF1&lt;/code&gt;, the correlation goes down from 0.43 to 0.33. About 32% of the properties have no finished basement, so they all have the same rank. Also, the largest finished basements have a large effect on the Pearson correlation. So the straight-line relationship with &lt;code&gt;SalePrice&lt;/code&gt; seems stronger than the rank relationship.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -1036,45 +1036,45 @@ cor_of &amp;lt;- function(feature_name, method) round(dfCorMethods[[method]][dfC
 &lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;We can spot clear trends in &lt;code&gt;SalePrice&lt;/code&gt; v/s the order of the categories in almost all of these features.&lt;/li&gt;
-&lt;li&gt;Overall quality and external quality show some of the strongest trends.&lt;/li&gt;
+&lt;li&gt;In almost all of these features, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the order of the categories.&lt;/li&gt;
+&lt;li&gt;The overall quality and the exterior quality show some of the strongest trends.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
-&lt;p&gt;Let’s examine &lt;code&gt;SalePrice&lt;/code&gt; with respect to the nominal features in the dataset. None of these features have a natural order, but we can identify trends within categories by sorting with the median &lt;code&gt;SalePrice&lt;/code&gt;. The &lt;code&gt;SalePrice&lt;/code&gt; axis is truncated to exclude outliers.&lt;/p&gt;
+&lt;p&gt;Now let’s look at &lt;code&gt;SalePrice&lt;/code&gt; for the nominal features. The categories of a nominal feature have no natural order. But if we sort the categories by their median &lt;code&gt;SalePrice&lt;/code&gt;, we can find trends. To show the trends better, the &lt;code&gt;SalePrice&lt;/code&gt; axis does not show the outliers. A box plot shows the middle half of the prices as a box, with a line at the median:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-10&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: Builtin and attached garages are more preferred than detached or other types of garages.&lt;/li&gt;
-&lt;li&gt;From &lt;code&gt;MSSubClass&lt;/code&gt; categories, it is evident that 1946 or newer houses are higher priced than older houses.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: buyers prefer built-in and attached garages to detached garages and other types.&lt;/li&gt;
+&lt;li&gt;The categories of &lt;code&gt;MSSubClass&lt;/code&gt; show that houses built in 1946 or later have higher prices than older houses.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;multivariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Multivariate Analysis&lt;/h2&gt;
-&lt;p&gt;We will check variation of some related features with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/p&gt;
+&lt;div id=&#34;multivariate-analysis-three-or-more-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Multivariate Analysis: Three or More Features at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at how some related features change &lt;code&gt;SalePrice&lt;/code&gt; together.&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
-&lt;p&gt;We have determined &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have among the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how they vary by &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; respectively:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have some of the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how these relationships change with &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt;:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, yLabelsScale = scales::dollar)
 p2 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;GarageArea&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageType&amp;quot;, yLabelsScale = scales::dollar)
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;For the same total area, there are neighborhoods where &lt;code&gt;SalePrice&lt;/code&gt; is higher than others.&lt;/li&gt;
-&lt;li&gt;Properties with no garage are distinctly separated.&lt;/li&gt;
-&lt;li&gt;Properties with built-in or attached garages tend to have higher &lt;code&gt;SalePrice&lt;/code&gt; for the same &lt;code&gt;GarageArea&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Therefore, &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some variance in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;For the same total area, properties in some neighborhoods sell for more than in others.&lt;/li&gt;
+&lt;li&gt;The properties without a garage form a separate group.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, properties with built-in or attached garages usually sell for more.&lt;/li&gt;
+&lt;li&gt;So &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some of the differences in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Numerical-Numerical&lt;/h3&gt;
-&lt;p&gt;The scatterplots overlap a lot, so let’s check these observations by comparing categories among properties of similar size. &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; are split into four quartile bins, and &lt;code&gt;SalePrice&lt;/code&gt; is plotted by category within each bin. We also check whether central air conditioning (&lt;code&gt;CentralAir&lt;/code&gt;) matters for properties of the same size:&lt;/p&gt;
+&lt;p&gt;The dots in the scatter plots overlap a lot. So let’s check these results in another way, and compare categories among properties of similar size. We split &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; into four groups (bins) with the same number of properties. Then we plot &lt;code&gt;SalePrice&lt;/code&gt; for each category in each group. We also check whether central air conditioning (&lt;code&gt;CentralAir&lt;/code&gt;) changes the price of properties of the same size:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
 p2 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageArea&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
 p3 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;CentralAir&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
@@ -1094,15 +1094,15 @@ bin_median &amp;lt;- function(plotName, binNum, categoryName) {
 &lt;div id=&#34;whats-notable-11&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Neighborhood matters a lot even for properties of the same size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; ranges from &lt;code&gt;$161,000&lt;/code&gt; in Type5 neighborhoods to &lt;code&gt;$327,000&lt;/code&gt; in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest bin, so neighborhood and size are related too.&lt;/li&gt;
-&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages are associated with higher prices than detached ones. Among the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$299,018&lt;/code&gt; for built-in, &lt;code&gt;$253,000&lt;/code&gt; for attached and &lt;code&gt;$140,000&lt;/code&gt; for detached garages. Some garage types have very few properties, so their boxplots are less reliable.&lt;/li&gt;
-&lt;li&gt;Properties with central air conditioning sell for more at every size. Among the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$262,140&lt;/code&gt; with central air and &lt;code&gt;$136,000&lt;/code&gt; without it.&lt;/li&gt;
+&lt;li&gt;The neighborhood is very important, even for properties of the same size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; goes from &lt;code&gt;$161,000&lt;/code&gt; in Type5 neighborhoods to &lt;code&gt;$327,000&lt;/code&gt; in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest group, so the neighborhood and the size are also related.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages go with higher prices than detached garages. For the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$299,018&lt;/code&gt; for built-in garages, &lt;code&gt;$253,000&lt;/code&gt; for attached garages and &lt;code&gt;$140,000&lt;/code&gt; for detached garages. Some garage types have very few properties, so their box plots are less reliable.&lt;/li&gt;
+&lt;li&gt;Properties with central air conditioning sell for more, at every size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$262,140&lt;/code&gt; with central air and &lt;code&gt;$136,000&lt;/code&gt; without it.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
-&lt;p&gt;We want to see if there is any interaction of &lt;code&gt;SalePrice&lt;/code&gt; with a combination of categorical features, that could provide any additional explanatory power for prediction:&lt;/p&gt;
+&lt;p&gt;Does a combination of two categorical features tell us more about &lt;code&gt;SalePrice&lt;/code&gt;? A heatmap answers this question. It is a grid of tiles, one tile for each combination of two categories:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;OverallQual&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
 p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
 p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
@@ -1111,12 +1111,12 @@ cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&g
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# number of combinations, and those with fewer than 10 properties
 vCells &amp;lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
 vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Each tile shows the median &lt;code&gt;SalePrice&lt;/code&gt; and the number of properties. Combinations with fewer than 10 properties are greyed out, because their medians are not reliable.&lt;/p&gt;
+&lt;p&gt;Each tile shows the median &lt;code&gt;SalePrice&lt;/code&gt; (by its color) and the number of properties. A tile is grey if it has fewer than 10 properties, because a median of so few properties is not reliable.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;It is evident that some neighborhoods have higher &lt;code&gt;OverallQual&lt;/code&gt; and therefore command higher price. However in Type4 neighborhoods, we can see a clear variation in &lt;code&gt;SalePrice&lt;/code&gt; by quality of property.&lt;/li&gt;
-&lt;li&gt;It is less clear if &lt;code&gt;GarageType&lt;/code&gt; has a major impact by itself. Even though built-in and attached garages seem to be preferred, most of the variation can be explained by &lt;code&gt;NeighborhoodType&lt;/code&gt; itself.&lt;/li&gt;
-&lt;li&gt;Low density and floating village residential properties tend to be higher priced in both single and multi-storied properties built after 1946.&lt;/li&gt;
-&lt;li&gt;Many combinations are rare: 11 of the 34 combinations of &lt;code&gt;OverallQual&lt;/code&gt; and &lt;code&gt;NeighborhoodType&lt;/code&gt;, and 20 of the 46 combinations of &lt;code&gt;MSSubClass&lt;/code&gt; and &lt;code&gt;MSZoning&lt;/code&gt;, have fewer than 10 properties. So only the common combinations can be compared reliably, and a model would struggle to learn interactions between these features.&lt;/li&gt;
+&lt;li&gt;Some neighborhoods have more properties with a high &lt;code&gt;OverallQual&lt;/code&gt;, so their prices are higher. But in Type4 neighborhoods, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the quality of the property.&lt;/li&gt;
+&lt;li&gt;It is less clear whether &lt;code&gt;GarageType&lt;/code&gt; has a large effect by itself. Buyers seem to prefer built-in and attached garages, but &lt;code&gt;NeighborhoodType&lt;/code&gt; explains most of the differences.&lt;/li&gt;
+&lt;li&gt;In both one-story and multi-story houses built after 1946, properties in low-density residential zones and floating village zones usually have higher prices.&lt;/li&gt;
+&lt;li&gt;Many combinations are rare: 11 of the 34 combinations of &lt;code&gt;OverallQual&lt;/code&gt; and &lt;code&gt;NeighborhoodType&lt;/code&gt;, and 20 of the 46 combinations of &lt;code&gt;MSSubClass&lt;/code&gt; and &lt;code&gt;MSZoning&lt;/code&gt;, have fewer than 10 properties. So we can compare only the common combinations reliably. Also, a model would find it hard to learn how these features work together.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# split the data back to training and testing sets
 # dfTrain &amp;lt;- dfClean %&amp;gt;% dplyr::slice(1:nrows_train)
@@ -1137,10 +1137,10 @@ save(vFeaturesCat, vFeaturesNum, vFeaturesCor, dfClean, vTestIDs,
       <description>
 
 
-&lt;p&gt;In this case study, we will explore the &lt;code&gt;diamonds&lt;/code&gt; dataset, then build linear and non-linear regression models to predict the price of diamonds.&lt;/p&gt;
+&lt;p&gt;In this case study, we explore the &lt;code&gt;diamonds&lt;/code&gt; dataset. Then, in the next posts, we build models that predict the price of a diamond. A model is a formula that a computer learns from examples. Some models are linear (they use straight-line relationships) and some are non-linear (they can also learn curves).&lt;/p&gt;
 &lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Data Description&lt;/h2&gt;
-&lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset contains the prices in 2008 USD terms, and other attributes of almost 54,000 diamonds.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;diamonds&lt;/code&gt; dataset has almost 54,000 diamonds. For each diamond, it gives the price (in US dollars of 2008) and other attributes, such as the weight and the quality grades. We call each attribute a feature.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDescription &amp;lt;- tribble(~ Attribute, ~ Description,
                          &amp;quot;price&amp;quot;, &amp;quot;price in 2008 USD&amp;quot;,
                          &amp;quot;carat&amp;quot;, &amp;quot;weight of a diamond (1 carat = 0.2 gms)&amp;quot;,
@@ -1220,8 +1220,8 @@ knitr::kable(dfDescription)&lt;/code&gt;&lt;/pre&gt;
 vFeaturesNum &amp;lt;- dfInput %&amp;gt;% select_if(is.numeric) %&amp;gt;% colnames()&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;visdat::vis_dat(dfInput) + theme_quant()&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/summary_visual-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;A preliminary visual summary of the whole dataset shows all the features and their types. There are no missing values (NAs) in this dataset.&lt;/p&gt;
-&lt;p&gt;Let’s examine each feature numerically:&lt;/p&gt;
+&lt;p&gt;This chart shows all the features and their types. No values are missing in this dataset.&lt;/p&gt;
+&lt;p&gt;Next, we look at the numbers for each feature:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;Hmisc::describe(dfInput)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;dfInput 
 
@@ -1294,26 +1294,26 @@ z
 lowest : 0    1.07 1.41 1.53 2.06, highest: 6.43 6.72 6.98 8.06 31.8
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;price&lt;/code&gt;: The average price of a diamond in this dataset is ~ USD 4000. There are many outliers on the high end.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;: The average carat weight is ~ 0.8. About 75% of the diamonds are under 1 carat. The top 5 values show presence of many outliers on the high end.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cut&lt;/code&gt;: About 40% of the diamonds are of &lt;em&gt;Ideal&lt;/em&gt; cut. Only 3% are &lt;em&gt;Fair&lt;/em&gt; cut. So there is a lot of imbalance in the categories.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;color&lt;/code&gt;: Most of the diamonds are rated &lt;em&gt;E&lt;/em&gt; to &lt;em&gt;H&lt;/em&gt; color. Relatively fewer are rated &lt;em&gt;J&lt;/em&gt; color.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt;: Most of the diamonds are rated &lt;em&gt;SI2&lt;/em&gt; to &lt;em&gt;VS1&lt;/em&gt; clarity. About 1% are rated the worst &lt;em&gt;I1&lt;/em&gt; clarity, where as only ~ 3% are rated &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;depth&lt;/code&gt;: Most of the depth values are between 60 and 64. There are outliers on both low end and high end.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;table&lt;/code&gt;: Most of the table values are between 54 and 65. There are outliers on both ends.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;x&lt;/code&gt;: Denotes the dimension along the x-axis. Most values are between 4 and 8. There are some 0 values too which means they were not recorded.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;y&lt;/code&gt;: Denotes the dimension along the y-axis. Most values are between 3.5 and 8. There are 7 records where the values are 0.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;z&lt;/code&gt;: Denotes the dimension along the z-axis. Most values are between 2.5 and 8.5. There are 20 records where the values are 0.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt;: The average price of a diamond is about USD 4000. Many diamonds are much more expensive than most others. We call such unusual values outliers.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;: The average weight is about 0.8 carat. About 75% of the diamonds weigh less than 1 carat. The 5 largest values show that there are many outliers at the high end.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt;: About 40% of the diamonds have an &lt;em&gt;Ideal&lt;/em&gt; cut. Only 3% have a &lt;em&gt;Fair&lt;/em&gt; cut. So the categories are not balanced: some categories have many more diamonds than others.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;color&lt;/code&gt;: Most diamonds have a color grade from &lt;em&gt;E&lt;/em&gt; to &lt;em&gt;H&lt;/em&gt;. Fewer diamonds have the color grade &lt;em&gt;J&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt;: Most diamonds have a clarity grade from &lt;em&gt;SI2&lt;/em&gt; to &lt;em&gt;VS1&lt;/em&gt;. About 1% have the worst grade, &lt;em&gt;I1&lt;/em&gt;. Only about 3% have the best grade, &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;depth&lt;/code&gt;: Most depth values are between 60 and 64. There are outliers at both the low end and the high end.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;table&lt;/code&gt;: Most table values are between 54 and 65. There are outliers at both ends.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x&lt;/code&gt;: The length of the diamond in mm. Most values are between 4 and 8. Some values are 0, which means that nobody recorded them.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;y&lt;/code&gt;: The width of the diamond in mm. Most values are between 3.5 and 8. 7 values are 0.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;z&lt;/code&gt;: The depth of the diamond in mm. Most values are between 2.5 and 8.5. 20 values are 0.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-&lt;div id=&#34;univariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Univariate Analysis&lt;/h2&gt;
-&lt;p&gt;Let us look at each feature in the dataset in detail.&lt;/p&gt;
+&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at each feature by itself.&lt;/p&gt;
 &lt;div id=&#34;numerical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical Features&lt;/h4&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The plots show presence of outliers within each feature. Let’s exclude the outliers, i.e. values more than 2.5 interquartile ranges from the median, and plot them again. Unlike a rule based on the mean and standard deviation, the median and interquartile range are hardly moved by the outliers themselves.&lt;/p&gt;
+&lt;p&gt;The plots show outliers in each feature. Let’s remove the outliers and plot the features again. We use a common rule: a value is an outlier if it is more than 2.5 interquartile ranges from the median. The median is the middle value: half the values are below it and half are above it. The interquartile range is the width of the middle half of the values. The outliers themselves have almost no effect on these two numbers, so the rule is reliable. A rule that uses the average would be less reliable, because the outliers pull the average towards them.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;makeOutliersNA &amp;lt;- function(Z) {
   # values more than 2.5 interquartile ranges from the median become NA
   ifelse(flag_outliers(Z, nIQR = 2.5), NA, Z)
@@ -1324,40 +1324,36 @@ dfInput &amp;lt;- dfInput %&amp;gt;% mutate_at(vFeaturesNum, makeOutliersNA)
 
 eda_plot_histograms(dfInput, vFeaturesNum) + labs(title = &amp;quot;Histograms of numerical features excluding outliers&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/univariate_continuous_ex_outliers-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Excluding outliers, the range of values are more reasonable. We can see that &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are heavily right skewed.&lt;/p&gt;
-&lt;p&gt;Let’s plot the distribution of &lt;code&gt;price&lt;/code&gt; in log scale:&lt;/p&gt;
+&lt;p&gt;Without the outliers, the ranges of the values are more reasonable. &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;price&lt;/code&gt; are right skewed: most values are small, and a few values are much larger.&lt;/p&gt;
+&lt;p&gt;Let’s plot &lt;code&gt;price&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount (for example, from $100 to $1,000 to $10,000). This makes it easier to see the spread of skewed values:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfInput, &amp;quot;price&amp;quot;, nBins = 100, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/price_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Two peaks in the log transformed plot show a bimodal distribution of prices. This implies two price points of diamonds are most popular among customers -
-one at just below USD 1000 and the other around USD 5000. Intriguingly, there are no diamonds in the dataset that are around USD 1500. Hence, a big gap is visible around that price.&lt;/p&gt;
+&lt;p&gt;The plot has two peaks. This means that two price ranges are the most common: one just below USD 1000 and one near USD 5000. Interestingly, almost no diamonds cost about USD 1500. So the plot shows a big gap at that price.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical Features&lt;/h4&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_column(dfInput, .x)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Univariate_Categorical-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The categorical imbalance in &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; can be clearly noticed.&lt;/p&gt;
+&lt;p&gt;The plots clearly show that the categories of &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; are not balanced.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;bivariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Bivariate Analysis&lt;/h2&gt;
-&lt;p&gt;Let’s examine the relationship of &lt;code&gt;price&lt;/code&gt; with other features.&lt;/p&gt;
+&lt;div id=&#34;bivariate-analysis-two-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis: Two Features at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at how &lt;code&gt;price&lt;/code&gt; changes with each of the other features.&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-numerical&lt;/h4&gt;
-&lt;p&gt;First and foremost, let’s do a correlation analysis to see how &lt;code&gt;price&lt;/code&gt; is correlated with other numerical features:&lt;/p&gt;
+&lt;p&gt;First, we measure the correlation of &lt;code&gt;price&lt;/code&gt; with each numerical feature. A correlation is a number from -1 to 1. It tells how closely two features move together in a straight line. A value near 1 means that when one feature goes up, the other also goes up. A value near -1 means that the other goes down. A value near 0 means that there is no straight-line relationship.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_correlation_matrix(dfInput[vFeaturesNum] %&amp;gt;% drop_na(), outlineVar = &amp;quot;price&amp;quot;, plotTitle = &amp;quot;Clustered correlations of numerical features&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_correlations-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;We can see that &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; dimensions. If a predictive linear regression model is built,
-some of these features would act as confounders. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt; so they are not so interesting for
-predictive modelling.&lt;/p&gt;
-&lt;p&gt;Now let’s see the scatter plots:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;price&lt;/code&gt; has a very strong correlation with &lt;code&gt;carat&lt;/code&gt; and with the dimensions &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. These four features are also strongly correlated with each other, because they all measure the size of a diamond. So a linear model cannot easily separate their effects. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;. So they are not useful to predict the price.&lt;/p&gt;
+&lt;p&gt;Now let’s look at the scatter plots. A scatter plot shows one dot for each diamond:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;After removing outliers, it could be noted that &lt;code&gt;price&lt;/code&gt; increases exponentially with &lt;code&gt;carat&lt;/code&gt;, as well as &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; dimensions. So &lt;code&gt;price&lt;/code&gt; should be plotted with a log tranformation. Let’s do that:&lt;/p&gt;
+&lt;p&gt;Without the outliers, &lt;code&gt;price&lt;/code&gt; grows faster and faster as &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; increase. So let’s plot &lt;code&gt;price&lt;/code&gt; on a log scale:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfInput, vFeaturesNum, &amp;quot;price&amp;quot;, yLog = T, yLimits = c(200, 15000), yLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/log_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Now, the relationship between &lt;code&gt;log(price)&lt;/code&gt; appears to be linear with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But, not so much with &lt;code&gt;carat&lt;/code&gt;. Variance in &lt;code&gt;price&lt;/code&gt; tends to
-increase both by &lt;code&gt;carat&lt;/code&gt; and its dimensions.&lt;/p&gt;
-&lt;p&gt;Which transform of &lt;code&gt;carat&lt;/code&gt; would make its relationship with &lt;code&gt;log(price)&lt;/code&gt; linear? Let’s compare a few common transforms. Each panel is labelled with the R-squared of a linear fit of &lt;code&gt;log(price)&lt;/code&gt; on the transformed &lt;code&gt;carat&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;On a log scale, &lt;code&gt;log(price)&lt;/code&gt; has an approximately straight-line (linear) relationship with &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. But its relationship with &lt;code&gt;carat&lt;/code&gt; is still curved. Also, the spread (variance) of &lt;code&gt;price&lt;/code&gt; increases as the diamonds get larger.&lt;/p&gt;
+&lt;p&gt;Can we change &lt;code&gt;carat&lt;/code&gt; with a simple formula so that its relationship with &lt;code&gt;log(price)&lt;/code&gt; becomes a straight line? We call such a change a transform. Let’s compare some common transforms. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in &lt;code&gt;log(price)&lt;/code&gt; the straight line explains. A higher value means that the line fits the points better:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p_transforms &amp;lt;- eda_plot_transforms(dfInput, &amp;quot;carat&amp;quot;, &amp;quot;price&amp;quot;)
 p_transforms&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/carat_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
@@ -1366,48 +1362,48 @@ vR2_carat &amp;lt;- p_transforms$data %&amp;gt;%
   distinct(transform, r_squared) %&amp;gt;%
   pull(r_squared) %&amp;gt;%
   set_names(c(&amp;quot;identity&amp;quot;, &amp;quot;log&amp;quot;, &amp;quot;sqrt&amp;quot;, &amp;quot;cuberoot&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;log(carat)&lt;/code&gt; makes the relationship the most linear, with an R-squared of 0.926, followed by the cube root (0.919) and the square root (0.91). Untransformed &lt;code&gt;carat&lt;/code&gt; has the lowest R-squared of 0.862. So &lt;code&gt;log(price)&lt;/code&gt; is close to linear in &lt;code&gt;log(carat)&lt;/code&gt;: a given percentage increase in weight raises the price by a roughly constant percentage. We will make use of this when we do Feature Engineering.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;log(carat)&lt;/code&gt; gives the best straight-line fit, with an R-squared of 0.926. The cube root is second (0.919) and the square root is third (0.91). &lt;code&gt;carat&lt;/code&gt; without a transform has the lowest R-squared, 0.862. So &lt;code&gt;log(price)&lt;/code&gt; has an almost straight-line relationship with &lt;code&gt;log(carat)&lt;/code&gt;. This means that when the weight increases by a given percentage, the price increases by an approximately constant percentage. We will use this result when we create features for the models (Feature Engineering).&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Categorical&lt;/h4&gt;
-&lt;p&gt;Let’s examine &lt;code&gt;price&lt;/code&gt; with respect to the categorical features in the dataset:&lt;/p&gt;
+&lt;p&gt;Let’s look at &lt;code&gt;price&lt;/code&gt; for each category of the categorical features. A box plot shows the middle half of the prices as a box, with a line at the median:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_box(dfInput, .x, &amp;quot;price&amp;quot;, yLimits = c(300, 8000), 
                                                                yLabelsScale = scales::label_dollar(accuracy = 1))), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/Bivariate_Cont_Cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The boxplots above are plotted with truncated &lt;code&gt;price&lt;/code&gt; axis for better visualization of trends. All the boxplots are counter-intuitive - median prices tend to decline as we move from lowest grade to highest grade in terms of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. This is very odd. We will find out why in the multivariate analysis.&lt;/p&gt;
+&lt;p&gt;To show the trends better, the &lt;code&gt;price&lt;/code&gt; axis of these box plots does not show the most expensive diamonds. The box plots are surprising: for &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the median price usually goes down as the grade gets better. This is very strange. We will find the reason in the multivariate analysis.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; declines monotonically from &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;In terms of &lt;code&gt;color&lt;/code&gt;, the median &lt;code&gt;price&lt;/code&gt; decreases from &lt;em&gt;J&lt;/em&gt; (worst) to &lt;em&gt;G&lt;/em&gt; (mid-grade), then increases and finally decreases for &lt;em&gt;D&lt;/em&gt; (best).&lt;/li&gt;
-&lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; increases when &lt;code&gt;clarity&lt;/code&gt; improves from &lt;em&gt;I1&lt;/em&gt; to &lt;em&gt;SI2&lt;/em&gt;, and then decreases monotonically to &lt;em&gt;IF&lt;/em&gt; grade.&lt;/li&gt;
+&lt;li&gt;The median &lt;code&gt;price&lt;/code&gt; goes down steadily from a &lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; to an &lt;em&gt;Ideal&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;For &lt;code&gt;color&lt;/code&gt;, the median &lt;code&gt;price&lt;/code&gt; goes down from &lt;em&gt;J&lt;/em&gt; (worst) to &lt;em&gt;G&lt;/em&gt; (middle grade). Then it goes up, and it goes down again for &lt;em&gt;D&lt;/em&gt; (best).&lt;/li&gt;
+&lt;li&gt;For &lt;code&gt;clarity&lt;/code&gt;, the median &lt;code&gt;price&lt;/code&gt; goes up from &lt;em&gt;I1&lt;/em&gt; to &lt;em&gt;SI2&lt;/em&gt;. Then it goes down steadily to &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;multivariate-analysis&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Multivariate Analysis&lt;/h2&gt;
-&lt;p&gt;So far, we have determined &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price.&lt;/code&gt; Different grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some impact on median &lt;code&gt;price&lt;/code&gt;. So let’s make some scatter plots to see these relationships:&lt;/p&gt;
+&lt;div id=&#34;multivariate-analysis-three-or-more-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Multivariate Analysis: Three or More Features at a Time&lt;/h2&gt;
+&lt;p&gt;So far, we know that &lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; have the strongest relationship with &lt;code&gt;price&lt;/code&gt;. The grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; also seem to have some effect on the median &lt;code&gt;price&lt;/code&gt;. Let’s use scatter plots to look at these relationships together:&lt;/p&gt;
 &lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Numerical-Numerical-Categorical&lt;/h4&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat, ~ eda_plot_scatter_cat(dfInput, &amp;quot;carat&amp;quot;, &amp;quot;price&amp;quot;, .x, yLabelsScale = scales::dollar)), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Although there is a lot of overlap, but there is a clear trend of &lt;code&gt;price&lt;/code&gt; increasing with &lt;code&gt;clarity&lt;/code&gt;, at a given &lt;code&gt;carat&lt;/code&gt; weight. The same pattern could also be observed in the plot with increasing grades of &lt;code&gt;color&lt;/code&gt;, though not to the same extent. There is no evidence of any relationship between &lt;code&gt;price&lt;/code&gt; and &lt;code&gt;carat&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;We can conclude both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; at a given &lt;code&gt;carat&lt;/code&gt; weight.&lt;/p&gt;
+&lt;p&gt;The dots overlap a lot. But for diamonds of the same &lt;code&gt;carat&lt;/code&gt; weight, &lt;code&gt;price&lt;/code&gt; clearly goes up as &lt;code&gt;clarity&lt;/code&gt; gets better. &lt;code&gt;color&lt;/code&gt; shows the same pattern, but it is weaker. &lt;code&gt;cut&lt;/code&gt; does not show any effect.&lt;/p&gt;
+&lt;p&gt;So, for diamonds of the same weight, both &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; explain some of the differences in &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;all-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;All Features&lt;/h4&gt;
-&lt;p&gt;Why do diamonds of better grades look cheaper in the bivariate analysis? Let’s measure the association between all the features, ranking the grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; from worst to best, so they can be correlated with the numerical features using Spearman’s rank correlation:&lt;/p&gt;
+&lt;p&gt;Why do the diamonds with better grades seem cheaper in the bivariate analysis? To find out, we measure the association between every pair of features. An association tells how strongly two features are related. Here, we rank the grades of &lt;code&gt;cut&lt;/code&gt;, &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; from worst to best. Then we can compare them with the numerical features with Spearman’s rank correlation. This correlation uses the ranks of the values instead of the values themselves, so it also works for grades:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_association_matrix(dfInput, method = &amp;quot;spearman&amp;quot;, ordinalAsNumeric = T, outlineVar = &amp;quot;price&amp;quot;,
                             plotTitle = &amp;quot;Spearman correlations, with grades ranked from worst to best&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mAssoc &amp;lt;- association_matrix(dfInput, method = &amp;quot;spearman&amp;quot;, ordinalAsNumeric = T)&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; is negatively correlated with &lt;code&gt;clarity&lt;/code&gt; (-0.37) and &lt;code&gt;color&lt;/code&gt; (-0.24): diamonds of better grades tend to be smaller.&lt;/li&gt;
-&lt;li&gt;Since &lt;code&gt;price&lt;/code&gt; is very strongly correlated with &lt;code&gt;carat&lt;/code&gt; (0.96), &lt;code&gt;price&lt;/code&gt; ends up negatively correlated with &lt;code&gt;clarity&lt;/code&gt; (-0.21) and &lt;code&gt;color&lt;/code&gt; (-0.13) too.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; form a tight cluster of almost perfectly correlated features, so they are largely redundant as predictors.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; has a negative correlation with &lt;code&gt;clarity&lt;/code&gt; (-0.37) and with &lt;code&gt;color&lt;/code&gt; (-0.24). This means that diamonds with better grades are usually smaller.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; has a very strong correlation with &lt;code&gt;carat&lt;/code&gt; (0.96). So &lt;code&gt;price&lt;/code&gt; also has a negative correlation with &lt;code&gt;clarity&lt;/code&gt; (-0.21) and with &lt;code&gt;color&lt;/code&gt; (-0.13).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;, &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt; form a tight group, and they are almost perfectly correlated with each other. So, to predict the price, these features give almost the same information.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Numerical-Numerical&lt;/h4&gt;
-&lt;p&gt;The overlap in the scatterplots makes it hard to see how much each grade matters. Let’s compare the grades among diamonds of similar weight, by splitting &lt;code&gt;carat&lt;/code&gt; into four quartile bins and plotting &lt;code&gt;price&lt;/code&gt; by grade within each bin:&lt;/p&gt;
+&lt;p&gt;In the scatter plots, the dots overlap too much to show how much each grade matters. So let’s compare grades among diamonds of similar weight. We split the diamonds into four groups (bins) of equal size by &lt;code&gt;carat&lt;/code&gt;. Then we plot &lt;code&gt;price&lt;/code&gt; for each grade in each group:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lBinPlots &amp;lt;- map(c(&amp;quot;clarity&amp;quot;, &amp;quot;color&amp;quot;, &amp;quot;cut&amp;quot;), ~ eda_plot_box_by_bins(dfInput, .x, &amp;quot;price&amp;quot;, &amp;quot;carat&amp;quot;, yLog = T,
                                                                        yLabelsScale = scales::label_dollar(accuracy = 1)))
 cowplot::plot_grid(plotlist = lBinPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
@@ -1425,40 +1421,40 @@ bin_median &amp;lt;- function(dfMedians, binNum, gradeName) {
 
 # median carat by clarity
 dfCarat_clarity &amp;lt;- dfInput %&amp;gt;% group_by(clarity) %&amp;gt;% summarise(carat = median(carat, na.rm = T))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This resolves the paradox in the boxplots of the bivariate analysis:&lt;/p&gt;
+&lt;p&gt;These plots explain the strange box plots of the bivariate analysis:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Within each &lt;code&gt;carat&lt;/code&gt; bin, the median &lt;code&gt;price&lt;/code&gt; generally rises with &lt;code&gt;clarity&lt;/code&gt;, most clearly among the heaviest diamonds, where it goes from $3,985 for &lt;em&gt;I1&lt;/em&gt; to $10,332 for &lt;em&gt;IF&lt;/em&gt;. The top grades (&lt;em&gt;VVS2&lt;/em&gt; to &lt;em&gt;IF&lt;/em&gt;) are priced close to each other and not always in order.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;price&lt;/code&gt; also rises with &lt;code&gt;color&lt;/code&gt; from &lt;em&gt;J&lt;/em&gt; to &lt;em&gt;G&lt;/em&gt; within each bin, but the top grades (&lt;em&gt;G&lt;/em&gt; to &lt;em&gt;D&lt;/em&gt;) are priced about the same. Among the heaviest diamonds, &lt;em&gt;D&lt;/em&gt; and &lt;em&gt;E&lt;/em&gt; are even slightly cheaper than &lt;em&gt;G&lt;/em&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; shows no consistent trend, even among diamonds of similar weight.&lt;/li&gt;
+&lt;li&gt;In each &lt;code&gt;carat&lt;/code&gt; group, the median &lt;code&gt;price&lt;/code&gt; usually goes up as &lt;code&gt;clarity&lt;/code&gt; gets better. The effect is clearest for the heaviest diamonds: the median price goes from $3,985 for &lt;em&gt;I1&lt;/em&gt; to $10,332 for &lt;em&gt;IF&lt;/em&gt;. The prices of the best grades (&lt;em&gt;VVS2&lt;/em&gt; to &lt;em&gt;IF&lt;/em&gt;) are close to each other, and they are not always in order.&lt;/li&gt;
+&lt;li&gt;In each group, &lt;code&gt;price&lt;/code&gt; also goes up as &lt;code&gt;color&lt;/code&gt; gets better from &lt;em&gt;J&lt;/em&gt; to &lt;em&gt;G&lt;/em&gt;. But the best grades (&lt;em&gt;G&lt;/em&gt; to &lt;em&gt;D&lt;/em&gt;) have about the same price. For the heaviest diamonds, &lt;em&gt;D&lt;/em&gt; and &lt;em&gt;E&lt;/em&gt; are even a little cheaper than &lt;em&gt;G&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; does not show a clear trend, even for diamonds of similar weight.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;The reason better grades look cheaper overall is that they tend to be smaller. The median weight of an &lt;em&gt;I1&lt;/em&gt; diamond is 1.07 carat, but only 0.35 carat for an &lt;em&gt;IF&lt;/em&gt; diamond. &lt;code&gt;carat&lt;/code&gt; confounds the relationship between &lt;code&gt;price&lt;/code&gt; and the grades, so it has to be accounted for when we judge the effect of &lt;code&gt;clarity&lt;/code&gt; or &lt;code&gt;color&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;To be sure of any interaction between &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt;, with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, let’s plot these:&lt;/p&gt;
+&lt;p&gt;Diamonds with better grades seem cheaper overall because they are usually smaller. The median weight of an &lt;em&gt;I1&lt;/em&gt; diamond is 1.07 carat. The median weight of an &lt;em&gt;IF&lt;/em&gt; diamond is only 0.35 carat. So &lt;code&gt;carat&lt;/code&gt; is a confounder: it is related to both &lt;code&gt;price&lt;/code&gt; and the grades, and it hides the true effect of the grades. To measure the effect of &lt;code&gt;clarity&lt;/code&gt; or &lt;code&gt;color&lt;/code&gt;, we must compare diamonds of similar weight.&lt;/p&gt;
+&lt;p&gt;Next, let’s check whether &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; affect &lt;code&gt;price&lt;/code&gt; together with &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfFeatures &amp;lt;- expand_grid(feat1 = c(&amp;quot;depth&amp;quot;,&amp;quot;table&amp;quot;), feat2 = c(&amp;quot;color&amp;quot;,&amp;quot;clarity&amp;quot;)) %&amp;gt;% arrange(desc(feat2))
 cowplot::plot_grid(plotlist = map2(dfFeatures$feat1, dfFeatures$feat2, 
                                    ~ eda_plot_scatter_cat(dfInput, .x, &amp;quot;price&amp;quot;, .y, yLabelsScale = scales::dollar)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_plots_other-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;There is no pattern in the interaction of &lt;code&gt;price&lt;/code&gt; v/s &lt;code&gt;depth&lt;/code&gt; and &lt;code&gt;table&lt;/code&gt; values when plotted by &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;. So, these features do not have any predictive ability to determine &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These plots do not show any pattern. So &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; do not help to predict &lt;code&gt;price&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Categorical-Categorical-Numerical&lt;/h4&gt;
-&lt;p&gt;We want to see if there is any interaction of &lt;code&gt;clarity&lt;/code&gt; with &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt;, that could provide any additional explanatory power to predict &lt;code&gt;price&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Does &lt;code&gt;clarity&lt;/code&gt; together with &lt;code&gt;cut&lt;/code&gt; or &lt;code&gt;color&lt;/code&gt; tell us more about &lt;code&gt;price&lt;/code&gt;? A heatmap answers this question. It shows a grid of tiles, one for each combination of two categories. The color of each tile shows the median &lt;code&gt;price&lt;/code&gt; of the diamonds in that combination:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(c(&amp;quot;cut&amp;quot;,&amp;quot;color&amp;quot;), ~ eda_plot_heatmap(dfInput, .x, &amp;quot;clarity&amp;quot;, &amp;quot;price&amp;quot;)), nrow = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The second heatmap appears to be more interesting. From bottom left to top right, with increasing grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, &lt;code&gt;price&lt;/code&gt; tends to decrease on average. Once again, this runs counter to our intuition; after all prices of diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the highest. As we saw above, this is because diamonds of better grades tend to be smaller.&lt;/p&gt;
-&lt;p&gt;With respect to &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the median prices do not show any discernable pattern. Each tile shows its number of diamonds, and the one combination with fewer than 10 diamonds (&lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; and &lt;em&gt;IF&lt;/em&gt; &lt;code&gt;clarity&lt;/code&gt;) is greyed out, because its median is not reliable.&lt;/p&gt;
+&lt;p&gt;The second heatmap is more interesting. From the bottom left to the top right, the grades of &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; get better, and the median &lt;code&gt;price&lt;/code&gt; usually goes down. Again, this is the opposite of what we expect, because the diamonds with the best &lt;code&gt;color&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt; should be the most expensive. As we saw above, the reason is that diamonds with better grades are usually smaller.&lt;/p&gt;
+&lt;p&gt;For &lt;code&gt;cut&lt;/code&gt; and &lt;code&gt;clarity&lt;/code&gt;, the median prices do not show a clear pattern. Each tile shows its number of diamonds. One combination (&lt;em&gt;Fair&lt;/em&gt; &lt;code&gt;cut&lt;/code&gt; and &lt;em&gt;IF&lt;/em&gt; &lt;code&gt;clarity&lt;/code&gt;) has fewer than 10 diamonds. Its tile is grey, because a median of so few diamonds is not reliable.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Summary&lt;/h2&gt;
-&lt;p&gt;To summarize, here’s what we found interesting in this dataset, after doing an exploratory data analysis:&lt;/p&gt;
+&lt;p&gt;Here is what we found in this exploratory data analysis (EDA), which is the first study of a dataset before we build models:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;price&lt;/code&gt; is heavily right-skewed, and when log tranformed, has a bimodal distribution which implies there is demand in 2 different price ranges.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;carat&lt;/code&gt; about 75% of the diamonds are below 1 carat. The variance in price increases with carat weight, and &lt;code&gt;log(price)&lt;/code&gt; is close to linear in &lt;code&gt;log(carat)&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; is imbalanced with about 40% of the diamonds rated &lt;em&gt;Ideal&lt;/em&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;color&lt;/code&gt; is imbalanced with about 5% of the diamonds rated &lt;em&gt;J&lt;/em&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt; is imbalanced at the extremes, with only 1.5% of the diamonds rated &lt;em&gt;I1&lt;/em&gt; and 3.3% of the diamonds rated &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;price&lt;/code&gt; is strongly correlated with &lt;code&gt;carat&lt;/code&gt; and &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt;, &lt;code&gt;z&lt;/code&gt; dimensions of the diamonds. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Both &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; explain some variance in &lt;code&gt;price&lt;/code&gt; for a given &lt;code&gt;carat&lt;/code&gt; weight. Their apparent negative effect on &lt;code&gt;price&lt;/code&gt; overall is because diamonds of better grades tend to be smaller. &lt;code&gt;cut&lt;/code&gt; has little effect.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; is right skewed. On a log scale, it has two peaks, so diamonds are popular in two different price ranges.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;carat&lt;/code&gt;: about 75% of the diamonds weigh less than 1 carat. The spread of prices increases with weight. &lt;code&gt;log(price)&lt;/code&gt; has an almost straight-line relationship with &lt;code&gt;log(carat)&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cut&lt;/code&gt; is not balanced: about 40% of the diamonds have an &lt;em&gt;Ideal&lt;/em&gt; cut.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;color&lt;/code&gt; is not balanced: only about 5% of the diamonds have the color grade &lt;em&gt;J&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;clarity&lt;/code&gt; is not balanced at the two ends: only 1.5% of the diamonds have the grade &lt;em&gt;I1&lt;/em&gt;, and only 3.3% have the grade &lt;em&gt;IF&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;price&lt;/code&gt; has a strong correlation with &lt;code&gt;carat&lt;/code&gt; and with the dimensions &lt;code&gt;x&lt;/code&gt;, &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;z&lt;/code&gt;. &lt;code&gt;table&lt;/code&gt; and &lt;code&gt;depth&lt;/code&gt; have almost no correlation with &lt;code&gt;price&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;For diamonds of the same weight, &lt;code&gt;clarity&lt;/code&gt; and &lt;code&gt;color&lt;/code&gt; explain some of the differences in &lt;code&gt;price&lt;/code&gt;. Overall, better grades seem to lower the price only because diamonds with better grades are usually smaller. &lt;code&gt;cut&lt;/code&gt; has little effect.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(vFeaturesCat, vFeaturesNum, makeOutliersNA, file = &amp;quot;diamondClean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;

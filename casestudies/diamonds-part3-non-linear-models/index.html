@@ -34,7 +34,7 @@ Other posts in this series:
 Diamonds - Part 1 - In the rough - An Exploratory Data Analysis
 Diamonds - Part 2 - A cut above - Building Linear Models
 
-In a couple of previous posts, we tried to understand what attributes of diamonds are important to determine their prices. We showed that carat, clarity and color are the most important predictors of price. We arrived at this conclusion after doing a detailed exploratory data analysis. Finally we fit linear models to predict prices and determined the best model from the metrics.">
+In the previous posts, we found out which attributes of a diamond are important for its price. An exploratory data analysis showed that carat, clarity and color are the most important features to predict price. Then we built linear models to predict the prices, and we chose the best model by its metrics.">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/">
@@ -140,7 +140,7 @@ Other posts in this series:
 Diamonds - Part 1 - In the rough - An Exploratory Data Analysis
 Diamonds - Part 2 - A cut above - Building Linear Models
 
-In a couple of previous posts, we tried to understand what attributes of diamonds are important to determine their prices. We showed that carat, clarity and color are the most important predictors of price. We arrived at this conclusion after doing a detailed exploratory data analysis. Finally we fit linear models to predict prices and determined the best model from the metrics."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+In the previous posts, we found out which attributes of a diamond are important for its price. An exploratory data analysis showed that carat, clarity and color are the most important features to predict price. Then we built linear models to predict the prices, and we chose the best model by its metrics."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -487,27 +487,33 @@ In a couple of previous posts, we tried to understand what attributes of diamond
 <li><a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
 <li><a href="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
 </ul>
-<p>In a couple of previous posts, we tried to understand what attributes of diamonds are important to determine their prices. We showed that <code>carat</code>, <code>clarity</code> and <code>color</code> are the most important predictors of <code>price</code>. We arrived at this conclusion after doing a detailed exploratory data analysis. Finally we fit linear models to predict prices and determined the best model from the metrics.</p>
-<p>In this post, we will use non-linear regression models to predict diamond prices and compare them with those from linear models.</p>
+<p>In the previous posts, we found out which attributes of a diamond are important for its price. An exploratory data analysis showed that <code>carat</code>, <code>clarity</code> and <code>color</code> are the most important features to predict <code>price</code>. Then we built linear models to predict the prices, and we chose the best model by its metrics.</p>
+<p>In this post, we use non-linear models to predict the prices of diamonds, and we compare them with the linear models. A non-linear model can learn curved relationships and interactions between features by itself.</p>
 </div>
 <div id="training-non-linear-models" class="section level2">
 <h2>Training Non-linear Models</h2>
-<p>We’ll follow some of the same steps as we did for linear models, while transforming some predictors:</p>
+<p>We use three types of non-linear models:</p>
 <ul>
-<li>Partition the dataset into training and testing sets in the proportion 75% and 25% respectively.</li>
-<li>Stratify the partitioning by <code>clarity</code>, so both training and testing sets have the same distributions of this feature.</li>
-<li><code>clarity</code>, <code>color</code> and <code>cut</code> have ordered categories from lowest to highest grades. The <code>randomForest</code> method requires no change in representing this data before training the models, however <code>xgboost</code> and <code>keras</code> methods require all the predictors to be in numerical form. <a href="https://statmodeling.stat.columbia.edu/2009/10/06/coding_ordinal/">Two methods</a> could be used for transforming the categorical data:
-<ol style="list-style-type: decimal">
-<li>Use one-hot encoding to convert categorical data to sparse data with 0s and 1s. This way, each category in <code>clarity</code>, <code>color</code> and <code>cut</code> is converted to a new predictor in binary form. A disadvantage of this method is that it treates ordered categorical data the same as unordered categorical data, so the ordinality is lost in transformation. However, non-linear models should be able to infer the ordinality as our training sample is sufficiently large.</li>
-<li>Represent the ordinal categories from lowest to highest grades in integer form. However, this creates a linear gradation from one category to another, which may not be a suitable choice here.</li>
-</ol></li>
-<li>Center and scale all values in the training set and build a matrix of predictors.</li>
-<li>Fit a non-linear model with the training set.</li>
-<li>Make predictions on the testing set and determine model metrics.</li>
-<li>Wrap all the steps above inside a function in which the model formula, and a seed could be passed that randomizes the partition of training and testing sets.</li>
-<li>Run multiple iterations of models with different seeds, and compute their average metrics, that would reflect results on unseen data.</li>
+<li><code>randomForest</code> builds many decision trees and takes the average of their predictions. A decision tree predicts a value by asking a series of yes/no questions about the features, such as “Is <code>carat</code> more than 1?”.</li>
+<li><code>xgboost</code> (gradient boosting) builds many small decision trees one after the other. Each new tree corrects some of the errors of the trees before it.</li>
+<li><code>keras</code> builds a neural network. A neural network passes the features through layers of simple calculations, and it learns the strength of each connection from the data.</li>
 </ul>
-<p>Here are the average metrics for all the models trained with <code>keras</code>, <code>randomForest</code> and <code>xgboost</code> regression methods:</p>
+<p>We follow some of the same steps as for the linear models, and we change some features:</p>
+<ul>
+<li>Split the dataset into a training set with 75% of the diamonds and a testing set with 25%.</li>
+<li>Keep the same mix of <code>clarity</code> grades in both sets (stratified sampling).</li>
+<li><code>clarity</code>, <code>color</code> and <code>cut</code> have ordered categories, from the lowest grade to the highest grade. <code>randomForest</code> can use these categories directly. But <code>xgboost</code> and <code>keras</code> need all the features as numbers. There are <a href="https://statmodeling.stat.columbia.edu/2009/10/06/coding_ordinal/">two methods</a> to change categories into numbers:
+<ol style="list-style-type: decimal">
+<li>One-hot encoding: each category of <code>clarity</code>, <code>color</code> and <code>cut</code> becomes a new feature with the values 0 and 1. A disadvantage of this method is that the order of the grades is lost. But the training set is large, so the non-linear models can learn the order by themselves.</li>
+<li>Integer scores: the grades become the numbers 1, 2, 3 and so on, from the lowest grade to the highest. But this method assumes that the steps between all the grades are equal, which may not be correct here.</li>
+</ol></li>
+<li>Center and scale all the values in the training set, so that all the features have similar ranges. Then put the features in a matrix (a table of numbers).</li>
+<li>Train a non-linear model on the training set.</li>
+<li>Make predictions on the testing set and calculate the metrics.</li>
+<li>Put all the steps above in a function that takes the model formula and a random seed. The seed controls the random split into the training set and the testing set.</li>
+<li>Run each model several times with different seeds, and calculate its average metrics. These averages show how well the model works on new data.</li>
+</ul>
+<p>Here are the average metrics for all the models that we trained with <code>keras</code>, <code>randomForest</code> and <code>xgboost</code>:</p>
 <pre class="r"><code>load(&quot;fit_models_keras.Rda&quot;)
 
 dfModels_keras &lt;- dfModels %&gt;% mutate(type = &quot;keras&quot;)
@@ -629,23 +635,23 @@ c(“541.63”, “0.98”, “282.38”)
 </tr>
 </tbody>
 </table>
-<p>Looking at the r-squared terms, it is remarkable how well all the models have been able to infer the complex relationship between <code>price</code> and <code>carat</code>. To fit linear models, we needed to transform both <code>price</code> and <code>carat</code> to logarithmic terms. The neural network as well as the decision tree based models do this all on their own. The root mean squared error is in $ terms so it is easier to interpret. Considering the mean and standard deviation of <code>price</code> in the dataset is about $4000, the root mean squared errors of the models are very low. With <code>carat</code>, <code>clarity</code> and <code>color</code>, they range from $572 to $645, compared with about $816 for the best linear model with the same predictors.</p>
-<p>Exploratory data analysis adds value here, as the models with <code>carat</code>, <code>clarity</code> and <code>color</code> give excellent results. Including <code>cut</code> in the models does not provide any significant benefits and results in overfitted models.</p>
-<p>Even the base models with all predictors: <strong>price ~ .</strong> (where some of them are confounders), do a very good job of explaning the variance. Decision tree and neural network models are unaffected by multi-collinearity. We can use local model interpretations to determine the most important predictors from these models.</p>
+<p>The R-squared values (rsq) show that all the models learn the complex relationship between <code>price</code> and <code>carat</code> very well. For the linear models, we had to change both <code>price</code> and <code>carat</code> to a log scale. The neural network and the decision tree models learn this relationship by themselves. The root mean squared error (RMSE) is in dollars, so it is easy to understand. The average price of a diamond is about $4000, and the prices vary by about $4000 (the standard deviation). So the RMSE values of the models are very low. With <code>carat</code>, <code>clarity</code> and <code>color</code>, the RMSE is between $572 and $645. The best linear model with the same features has an RMSE of about $816.</p>
+<p>The exploratory data analysis helps here, because the models with only <code>carat</code>, <code>clarity</code> and <code>color</code> give excellent results. If we add <code>cut</code>, the RMSE goes down only a little.</p>
+<p>Even the base models with all the features (<strong>price ~ .</strong>) explain the variation in the prices very well, although some of their features repeat the same information. Decision trees and neural networks are not affected by such repeated information (multicollinearity) as much as linear models are. To find the most important features of these models, we can explain their predictions one at a time.</p>
 </div>
 <div id="local-interpretable-model-agnostic-explanations" class="section level2">
 <h2>Local Interpretable Model-agnostic Explanations</h2>
-<p>LIME is a method for explaining black-box machine learning models. It can help visualize and explain individual predictions. It makes the assumption that every complex model is linear on a local scale. So it is possible to fit a simple model around a single observation that will behave how the global model behaves at that locality. The simple model can be used to explain the predictions of the more complex model locally.</p>
-<p>The generalized algorithm LIME applies is:</p>
+<p>LIME is a method to explain the predictions of a “black box” model, which is a model whose calculations are too complex for a person to follow. LIME explains one prediction at a time. It assumes that, close to a single diamond, the complex model behaves like a simple linear model. So LIME fits a simple model around that one diamond. The simple model then explains how the complex model makes its prediction for that diamond.</p>
+<p>LIME uses these steps:</p>
 <ul>
-<li>Given an observation, permute it to create replicated feature data with slight value modifications.</li>
-<li>Compute similarity distance measure between original observation and permuted observations.</li>
-<li>Apply selected machine learning model to predict outcomes of permuted data.</li>
-<li>Select m number of features to best describe predicted outcomes.</li>
-<li>Fit a simple model to the permuted data, explaining the complex model outcome with m features from the permuted data weighted by its similarity to the original observation .</li>
-<li>Use the resulting feature weights to explain local behavior.</li>
+<li>Take one diamond, and make many copies of it with small random changes to its features.</li>
+<li>Measure how similar each copy is to the original diamond.</li>
+<li>Use the complex model to predict the price of each copy.</li>
+<li>Choose a small number (m) of features that best explain the predicted prices.</li>
+<li>Fit a simple model to the copies, with the m features. Give more weight to the copies that are more similar to the original diamond.</li>
+<li>Use the weights of the simple model to explain the prediction for the original diamond.</li>
 </ul>
-<p>Here we will select 5 features that best describe the predicted outcomes for 6 random observations from the testing set.</p>
+<p>Here, we choose the 5 features that best explain the predictions for 6 random diamonds from the testing set.</p>
 <pre class="r"><code># Plot Feature Importance by sample
 plot_features(explanation_keras, ncol = 3) + 
   labs(title = &quot;LIME Feature Importance from a keras model&quot;,
@@ -659,7 +665,7 @@ plot_features(explanation_keras, ncol = 3) +
   theme_quant() +
   theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_importance-2.png" alt="" width="960" /></p>
-<p>The features by importance that best explain the predictions in these 6 random samples are <code>carat</code>, <code>clarity</code>, <code>color</code>, <code>x</code> and <code>y</code>.</p>
+<p>For these 6 random diamonds, the most important features for the predictions are <code>carat</code>, <code>clarity</code>, <code>color</code>, <code>x</code> and <code>y</code>.</p>
 <pre class="r"><code># Plot Feature Importance Heatmap
 plot_explanations(explanation_keras) +
   labs(title = &quot;LIME Feature Importance Heatmap from a keras model&quot;,
@@ -673,11 +679,11 @@ plot_explanations(explanation_keras) +
   theme_quant() +
   theme(plot.subtitle = element_text(hjust = 0.5))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/plot_feature_heatmap-2.png" alt="" width="672" /></p>
-<p>We know that <code>x</code> and <code>y</code> are co-linear with <code>carat</code>, which is why it is good practice to remove any redundant features from the training data before applying any machine learning algorithm. We find the model with the best metrics turns out to be the one using <code>carat</code>, <code>clarity</code> and <code>color</code>.</p>
+<p>We know that <code>x</code> and <code>y</code> have a very strong correlation with <code>carat</code>, so they repeat the same information. That is why it is good practice to remove such repeated features before we train a model. For <code>keras</code>, the model with <code>carat</code>, <code>clarity</code> and <code>color</code> has the best metrics. For the decision tree models, the model with all the features is a little more accurate, but it needs many more features.</p>
 </div>
 <div id="actual-vs-predicted" class="section level2">
 <h2>Actual v/s Predicted</h2>
-<p>Finally, here are the scatterplots of actual v/s predicted <code>price</code> from the best model on the testing set, using the 3 regression methods:</p>
+<p>Finally, here are the scatter plots of the actual prices against the predicted prices, for the best model of each type on the testing set:</p>
 <pre class="r"><code>p1 &lt;- dfResults %&gt;%
   ungroup() %&gt;%
   rename(price = actual) %&gt;%
@@ -696,17 +702,17 @@ p2 &lt;- dfResults %&gt;%
 
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/index_files/figure-html/best_model_plot-1.png" alt="" width="960" /></p>
-<p>The scatterplots are shown with both linear and logarithmic axes. Even though the results from all the 3 methods have roughly similar <strong>r-squared</strong> and <strong>rmse</strong> values, we can see predicted prices from keras have more dispersion than the two decision-tree methods at the higher end. The decision-tree based methods appear do a better job of predicting prices at the lower end with lesser dispersion.</p>
-<p>As in the case with linear models, the variance in predicted diamond prices increases with <code>price</code>. The decision-tree based methods keep their predictions close to the range of prices in the data: their highest predictions are $18,340 (<code>randomForest</code>) and $19,118 (<code>xgboost</code>), while the most expensive diamond in the testing set costs $18,823. A <code>randomForest</code> prediction is an average of prices seen in the training data, so it cannot go beyond them, and <code>xgboost</code> adds up many small corrections, so it can exceed them only slightly. A neural network, like a linear model, can extrapolate further, and the highest price predicted by <code>keras</code> is $26,591. So, not only do non-linear methods do a fantastic job in inferring the relationships between <code>price</code> and its predictors, the decision-tree methods also predict prices within a reasonable range.</p>
+<p>The scatter plots use both normal (linear) axes and log axes. The R-squared and RMSE values of the 3 methods are similar. But for expensive diamonds, the predictions of <code>keras</code> are more spread out than the predictions of the two decision tree methods. For cheap diamonds, the decision tree methods seem to predict the prices better, with less spread.</p>
+<p>As with the linear models, the spread of the predicted prices increases with <code>price</code>. The decision tree methods keep their predictions close to the range of prices in the data. Their highest predictions are $18,340 (<code>randomForest</code>) and $19,118 (<code>xgboost</code>). The most expensive diamond in the testing set costs $18,823. A <code>randomForest</code> prediction is an average of prices from the training data, so it cannot be higher than those prices. <code>xgboost</code> adds up many small corrections, so its predictions can be only a little higher. A neural network, like a linear model, can predict prices far above the prices in the data (extrapolation). The highest price that <code>keras</code> predicts is $26,591. So the non-linear methods learn the relationships between <code>price</code> and the other features very well, and the decision tree methods also keep their predictions within a reasonable range.</p>
 </div>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <ul>
-<li>All the 3 non-linear regression methods can infer the complex relationship between <code>price</code>, <code>carat</code> and other predictors, without the need for feature engineering.</li>
-<li>Exploratory Data Analysis is useful in removing the redundant features from the training dataset, resulting in both faster execution, as well as much better metrics.</li>
-<li>In terms of time taken to train the models, <code>keras</code> neural network models execute the fastest by virtue of being able to use GPUs.</li>
-<li>Among the decision-tree based methods, <code>xgboost</code> models train much faster than <code>randomForest</code> models.</li>
-<li>Multiple CPUs can be used to run <code>randomForest</code> and <code>xgboost</code> methods. RAM is the only limiting constraint, when trained on a local machine.</li>
+<li>All 3 non-linear methods learn the complex relationship between <code>price</code>, <code>carat</code> and the other features by themselves. They do not need feature engineering.</li>
+<li>The exploratory data analysis helps us remove repeated features before we train the models. This makes the training faster. For <code>keras</code>, it also gives much better metrics.</li>
+<li><code>keras</code> neural networks train the fastest, because they can use a GPU (a graphics processor that does many calculations at the same time).</li>
+<li>Of the two decision tree methods, <code>xgboost</code> trains much faster than <code>randomForest</code>.</li>
+<li><code>randomForest</code> and <code>xgboost</code> can use several CPU cores at the same time. On a local computer, the amount of memory (RAM) is the only limit.</li>
 </ul>
 </div>
 

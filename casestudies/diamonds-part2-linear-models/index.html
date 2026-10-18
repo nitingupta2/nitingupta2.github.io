@@ -28,8 +28,8 @@
   
     
   
-  <meta name="description" content="In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price, and that log(price) was close to linear in log(carat). For diamonds of similar weight, clarity and color also appeared to provide some predictive ability.
-In this post, we will build linear models and see how well they predict the price of diamonds.">
+  <meta name="description" content="In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price.
+In this post, we build linear models and find out how well they predict the price of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data.">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">
@@ -129,8 +129,8 @@ In this post, we will build linear models and see how well they predict the pric
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/">
   <meta property="og:title" content="Diamonds - Part 2 - A cut above - Building Linear Models | Nitin Gupta">
-  <meta property="og:description" content="In a previous post in this series, we did an exploratory data analysis of the diamonds dataset and found that carat, x, y, z were strongly correlated with price, and that log(price) was close to linear in log(carat). For diamonds of similar weight, clarity and color also appeared to provide some predictive ability.
-In this post, we will build linear models and see how well they predict the price of diamonds."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="og:description" content="In a previous post in this series, we explored the diamonds dataset. We found that price has a strong correlation with carat, x, y and z, and that log(price) has an almost straight-line relationship with log(carat). For diamonds of similar weight, clarity and color also seemed to help predict the price.
+In this post, we build linear models and find out how well they predict the price of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -471,9 +471,9 @@ In this post, we will build linear models and see how well they predict the pric
       
 
 
-<p>In a <a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">previous post</a> in this series, we did an exploratory data analysis of the <code>diamonds</code> dataset and found that <code>carat</code>, <code>x</code>, <code>y</code>, <code>z</code> were strongly correlated with <code>price</code>, and that <code>log(price)</code> was close to linear in <code>log(carat)</code>. For diamonds of similar weight, <code>clarity</code> and <code>color</code> also appeared to provide some predictive ability.</p>
-<p>In this post, we will build linear models and see how well they predict the <code>price</code> of diamonds.</p>
-<p>Before we do any transformations, feature engineering or feature selections for our model, let’s see what kind of results we get from a base linear model, that uses all the features to predict <code>price</code>:</p>
+<p>In a <a href="https://www.nitingupta.com/casestudies/diamonds-part1-eda/">previous post</a> in this series, we explored the <code>diamonds</code> dataset. We found that <code>price</code> has a strong correlation with <code>carat</code>, <code>x</code>, <code>y</code> and <code>z</code>, and that <code>log(price)</code> has an almost straight-line relationship with <code>log(carat)</code>. For diamonds of similar weight, <code>clarity</code> and <code>color</code> also seemed to help predict the price.</p>
+<p>In this post, we build linear models and find out how well they predict the <code>price</code> of diamonds. A linear model predicts a value by adding up the features, each multiplied by a number (a coefficient) that the model learns from the data.</p>
+<p>First, let’s build a simple base model that uses all the features, without any changes to them. Its results give us a starting point to compare with:</p>
 <pre class="r"><code>model_lm &lt;- lm(price ~ ., data = diamonds)
 summary(model_lm)</code></pre>
 <pre><code>
@@ -525,22 +525,23 @@ F-statistic: 2.69e+04 on 23 and 53916 DF,  p-value: &lt;0.0000000000000002</code
 1 rmse    standard    1130.   
 2 rsq     standard       0.920
 3 mae     standard     740.   </code></pre>
-<p>The model summary shows it is an overfitted model. Among other things, we know that <code>depth</code> and <code>table</code> have no impact on <code>price</code>, yet these are shown to be highly significant. Root Mean Squared Error (rmse) and other metrics are also shown above.</p>
-<p>Let’s make a plot of actual v/s predicted prices to visualize how well this base model performs.</p>
+<p>The model summary shows that this model is overfitted. An overfitted model learns the noise in the data, not only the true patterns, so it does not work well on new data. For example, we know that <code>depth</code> and <code>table</code> have no effect on <code>price</code>, but the model says that they are very important.</p>
+<p>The table above also shows the root mean squared error (RMSE) and other metrics. RMSE is the typical size of a prediction error, in the same units as the price. A lower RMSE means better predictions.</p>
+<p>Let’s plot the actual prices against the predicted prices, to see how well this base model works.</p>
 <pre class="r"><code>augment(model_lm, diamonds) %&gt;%
   eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;.fitted&quot;, nLabel = 0, labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = &quot;Actual v/s predicted price from a base linear model&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/simple_lm_model_plot-1.png" alt="" width="768" /></p>
-<p>If the predictions are good, the points should lie close to a straight line drawn at 45 degrees. We can see this base model does a poor job of predicting prices. Worst of all, the model predicts negative prices on the lower end.
-It shows that <code>price</code> has to be log transformed to avoid these absurdities.</p>
+<p>If the predictions are good, the points are close to the dashed line at 45 degrees, where the predicted price is equal to the actual price. This base model predicts the prices badly. Worst of all, it predicts negative prices for cheap diamonds. To prevent such impossible results, we must use <code>log(price)</code> instead of <code>price</code>.</p>
 <div id="feature-engineering" class="section level2">
 <h2>Feature Engineering</h2>
-<p>We know the price of a diamond is strongly correlated with its size. All things equal, the larger the diamond, the greater its price.</p>
-<p>As a first approximation, we can assume a diamond is a cuboid with dimensions <code>x</code>, <code>y</code> and <code>z</code>. Then, we can compute its <code>volume</code> as x * y * z.
-As these 3 dimensions are highly correlated, we can compute a geometrical average dimension by taking the cube root of <code>volume</code>, and retain a linear relationship with <code>log(price)</code>.</p>
-<p>Another way to calculate an average dimension is by using high school chemistry. Mass, volume and density are related to each other by the equation:</p>
+<p>Feature engineering means that we create new features from the existing features, to make the patterns easier for a model to learn.</p>
+<p>We know that the price of a diamond has a strong correlation with its size. If all other things are equal, a larger diamond has a higher price.</p>
+<p>As a first estimate, we can treat a diamond as a box with the dimensions <code>x</code>, <code>y</code> and <code>z</code>. Then its <code>volume</code> is x * y * z.
+These 3 dimensions have a strong correlation with each other. So we can calculate one average dimension as the cube root of <code>volume</code>. This average dimension keeps a straight-line relationship with <code>log(price)</code>.</p>
+<p>We can also calculate an average dimension with high school chemistry. Mass, volume and density are related by this equation:</p>
 <p>$ density = mass/volume $</p>
-<p>We can find out that 1 carat = 0.2 gms. Dividing by the density of diamond (3.51 gms/cc) would give us its volume in cc, which could be converted to a geometrical average dimension by taking the cube root.</p>
+<p>1 carat is 0.2 grams. If we divide the mass by the density of diamond (3.51 grams per cubic centimeter), we get the volume. The cube root of the volume gives an average dimension.</p>
 <pre class="r"><code>dfInput &lt;- diamonds %&gt;%
   mutate(row = row_number(),
          volume = x*y*z,
@@ -556,10 +557,10 @@ eda_plot_scatter(dfInput, c(&quot;average dimension&quot;, &quot;average dimensi
 dfLeverage &lt;- dfInput %&gt;%
   mutate(leverage = hatvalues(lm(price ~ `average dimension`, data = dfInput))) %&gt;%
   slice_max(leverage, n = 1)</code></pre>
-<p>Even though both methods yield similar results, we could see that the density method results in a narrower range. But which method would be more robust?
-Each panel labels, by row number, the diamonds with the most leverage on a linear fit, i.e. the points that are furthest from the rest along the x axis.
-With the dimensions, the most extreme point is the diamond in row 24068: a 2 carat diamond with a recorded width <code>y</code> of 58.9 mm, which is clearly a recording error. The other labelled points are diamonds with an average dimension of 0. With the density method, the labelled points are simply the largest diamonds in the dataset.
-Keep in mind there are 20 <code>z</code> values that are 0. In 7 of these records both <code>x</code> and <code>y</code> are 0 too, which means these values were not recorded reliably.</p>
+<p>The two methods give similar results, but the density method gives a narrower range. Which method is more reliable?
+In each panel, the labels show the row numbers of the diamonds with the most leverage. Leverage tells how much a point can pull the straight line towards itself. Points that are far from the others along the x axis have the most leverage.
+With the dimensions, the most extreme point is the diamond in row 24068. It is a 2 carat diamond with a recorded width <code>y</code> of 58.9 mm. This value is clearly a recording error. The other labelled points are diamonds with an average dimension of 0. With the density method, the labelled points are simply the largest diamonds in the dataset.
+Also, 20 values of <code>z</code> are 0. In 7 of these diamonds, <code>x</code> and <code>y</code> are also 0. So these dimensions were not recorded correctly.</p>
 <pre class="r"><code>diamonds %&gt;% dplyr::filter(x == 0 | y == 0 | z == 0)</code></pre>
 <pre><code># A tibble: 20 × 10
    carat cut       color clarity depth table price     x     y     z
@@ -584,11 +585,11 @@ Keep in mind there are 20 <code>z</code> values that are 0. In 7 of these record
 18  0.71 Good      F     SI2      64.1    60  2130  0     0        0
 19  0.71 Good      F     SI2      64.1    60  2130  0     0        0
 20  1.12 Premium   G     I1       60.4    59  2383  6.71  6.67     0</code></pre>
-<p>In all of these records, the <code>carat</code> values were recorded reliably and are probably more accurate than the dimensions.
-Hence, we might prefer the density method of generating this feature.</p>
-<p>Furthermore, since density is a constant, dividing by a constant to calculate volume isn’t really necessary. Instead, a cube root transformation could be applied to <code>carat</code> itself for the purposes of predictive modelling that would result in a linear relationship between <span class="math inline">\(log(price)\)</span> and <span class="math inline">\(carat^{1/3}\)</span>.
-It is the reason why we’re fitting a linear model because the model is linear in its parameters.</p>
-<p>The geometric argument favours a cube root, but is it the transform that makes the relationship most linear? Let’s compare it with others, labelling each panel with the R-squared of a linear fit of <code>log(price)</code>:</p>
+<p>For all of these diamonds, the <code>carat</code> values are correct. So <code>carat</code> is probably more accurate than the dimensions,
+and we prefer the density method to create this feature.</p>
+<p>Also, the density is a constant. So we do not need to divide by it to calculate the volume. Instead, we can take the cube root of <code>carat</code> itself. Then we expect a straight-line relationship between <span class="math inline">\(log(price)\)</span> and <span class="math inline">\(carat^{1/3}\)</span>.
+A straight-line relationship is what a linear model needs, because the model adds up its features in a straight-line way.</p>
+<p>The geometry suggests a cube root. But does the cube root give the best straight line? Let’s compare it with other transforms. Each panel shows the R-squared of a straight line through the points of <code>log(price)</code>:</p>
 <pre class="r"><code>p_transforms &lt;- eda_plot_transforms(diamonds, &quot;carat&quot;, &quot;price&quot;)
 p_transforms</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/carat_transforms-1.png" alt="" width="960" /></p>
@@ -597,20 +598,20 @@ vR2_carat &lt;- p_transforms$data %&gt;%
   distinct(transform, r_squared) %&gt;%
   pull(r_squared) %&gt;%
   set_names(c(&quot;identity&quot;, &quot;log&quot;, &quot;sqrt&quot;, &quot;cuberoot&quot;))</code></pre>
-<p>The cube root (R-squared 0.924) is a big improvement on untransformed <code>carat</code> (0.847), but <code>log(carat)</code> does even better (0.933). A linear relationship between <span class="math inline">\(log(price)\)</span> and <span class="math inline">\(log(carat)\)</span> has a simple interpretation: the coefficient of <span class="math inline">\(log(carat)\)</span> is the percentage change in <code>price</code> for a 1% change in <code>carat</code>. We will try both transforms in our models.</p>
+<p>The cube root (R-squared 0.924) is much better than <code>carat</code> without a transform (0.847). But <code>log(carat)</code> is even better (0.933). A straight-line relationship between <span class="math inline">\(log(price)\)</span> and <span class="math inline">\(log(carat)\)</span> is easy to understand: the coefficient of <span class="math inline">\(log(carat)\)</span> is the percentage change in <code>price</code> when <code>carat</code> increases by 1%. We will try both transforms in our models.</p>
 </div>
 <div id="training-linear-models" class="section level2">
 <h2>Training Linear Models</h2>
-<p>Here are the steps for building linear models and computing metrics:</p>
+<p>These are the steps to build the linear models and measure how well they work:</p>
 <ul>
-<li>Partition the dataset into training and testing sets in the proportion 75% and 25% respectively.</li>
-<li>Since <code>clarity</code> is one of the main predictors, stratify the partitioning by <code>clarity</code>, so both training and testing sets have the same distributions of this feature.</li>
-<li>Fit a linear model with the training set.</li>
-<li>Make predictions on the testing set and determine model metrics.</li>
-<li>Wrap all the steps above inside a function in which the model formula and a seed could be passed. Since the seed determines the random partitioning, it helps to minimize vagaries in partitioning the training and testing sets before fitting models.</li>
-<li>Run multiple iterations of a model with different seeds, and compute its average metrics, that would reflect the results on unseen data.</li>
+<li>Split the dataset into two sets: a training set with 75% of the diamonds and a testing set with 25%. The model learns from the training set. Then we check its predictions on the testing set, which has diamonds that the model has not seen.</li>
+<li><code>clarity</code> is one of the most important features. So we split the data in a way that keeps the same mix of <code>clarity</code> grades in both sets. This is called stratified sampling.</li>
+<li>Train (fit) a linear model on the training set.</li>
+<li>Make predictions on the testing set and calculate the metrics.</li>
+<li>Put all the steps above in a function that takes the model formula and a random seed. The seed controls which diamonds go into each set. With different seeds, we get different random splits, so one lucky or unlucky split does not decide the results.</li>
+<li>Run each model several times with different seeds, and calculate its average metrics. These averages show how well the model works on new data.</li>
 </ul>
-<p>Here’s a sample split of training and testing set, stratified by <code>clarity</code>. As we can see, the training and testing sets have similar distributions.</p>
+<p>Here is one split into a training set and a testing set, stratified by <code>clarity</code>. Both sets have a similar mix of <code>clarity</code> grades.</p>
 <pre class="r"><code>set.seed(1333)
 train_split &lt;- diamonds %&gt;% 
   select(price, everything()) %&gt;% 
@@ -635,7 +636,7 @@ Proportion 0.014 0.171 0.243 0.227 0.151 0.094 0.068 0.033</code></pre>
 Value         I1   SI2   SI1   VS2   VS1  VVS2  VVS1    IF
 Frequency    184  2290  3255  3061  2062  1281   889   465
 Proportion 0.014 0.170 0.241 0.227 0.153 0.095 0.066 0.034</code></pre>
-<p>After running 5 iterations of each model with a different seed, here are the average metrics:</p>
+<p>We ran each model 5 times with different seeds. Here are the average metrics. R-squared (rsq) tells how much of the variation in <code>price</code> the model explains, and the mean absolute error (mae) is the average size of a prediction error:</p>
 <pre class="r"><code>fit_linear_model &lt;- function(randomSeed, model_formula, get_model = FALSE) {
 
   set.seed(randomSeed)
@@ -700,12 +701,12 @@ dfModels</code></pre>
 9 log(price) ~ log(carat) + clarity + color + cut       795. 0.961  402.</code></pre>
 <pre class="r"><code># average metric of a model
 model_metric &lt;- function(model_formula, metric) dfModels[[metric]][dfModels$model == model_formula]</code></pre>
-<p>The first model with all predictors is an overfitted one.</p>
-<p>Every model with <code>log(carat)</code> does much better than its counterpart with the cube root of <code>carat</code>. With <code>clarity</code> and <code>color</code>, the root mean squared error falls from $1,725 to $816, and r-squared rises from 0.888 to 0.959.</p>
-<p>The model with <code>log(carat)</code>, <code>clarity</code> and <code>color</code> provides the best combination of root mean squared error and r-squared, that explains the most variance.
+<p>The first model, with all the features, is overfitted.</p>
+<p>Each model with <code>log(carat)</code> is much better than the same model with the cube root of <code>carat</code>. With <code>clarity</code> and <code>color</code>, the RMSE goes down from $1,725 to $816, and the R-squared goes up from 0.888 to 0.959.</p>
+<p>The model with <code>log(carat)</code>, <code>clarity</code> and <code>color</code> gives the best combination of a low RMSE and a high R-squared, so it explains the most variation.
 This is our final model.
-Including <code>cut</code> in the model has diminishing benefits: it lowers the root mean squared error only to $795, so we leave it out for a simpler model.</p>
-<p>Here’s the summary of our final model:</p>
+If we add <code>cut</code>, the RMSE goes down only a little, to $795. So we do not use <code>cut</code>, and we keep the model simpler.</p>
+<p>Here is the summary of our final model:</p>
 <pre class="r"><code>formula_string &lt;- &quot;log(price) ~ log(carat) + clarity + color&quot;
 fit_lm &lt;- fit_linear_model(1333, as.formula(formula_string), get_model = T)
 
@@ -747,16 +748,16 @@ F-statistic: 1.53e+05 on 14 and 40438 DF,  p-value: &lt;0.0000000000000002</code
 <pre class="r"><code>par(mfrow = c(2,2))
 plot(fit_lm[[1]])</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_summary-1.png" alt="" width="672" /></p>
-<p>Holding <code>clarity</code> and <code>color</code> constant, a 1% increase in <code>carat</code> raises the predicted <code>price</code> by about <code>1.88</code>%.</p>
-<p>Here’s a scatterplot of actual v/s predicted price from our final model on the testing set:</p>
+<p>If <code>clarity</code> and <code>color</code> do not change, a 1% increase in <code>carat</code> increases the predicted <code>price</code> by about <code>1.88</code>%.</p>
+<p>Here is a scatter plot of the actual prices against the prices that our final model predicts for the testing set:</p>
 <pre class="r"><code>fit_lm[[2]] %&gt;%
   rename(price = actual) %&gt;%
   eda_plot_actual_vs_predicted(&quot;price&quot;, &quot;estimate&quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
   labs(title = bquote(log(price) == log(carat) + clarity + color))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png" alt="" width="672" /></p>
-<p>The points lie close to the 45 degrees line, although the variance between actual and predicted prices increases at the high end.
-The final model’s predictions are also far less extreme. The most expensive diamond in the testing set costs <code>$18,804</code>. The highest predicted price is <code>$28,130</code>, whereas the cube root model predicts prices as high as <code>$59,082</code> on the same testing set. Like any linear model, it can still extrapolate beyond the prices in the data at the high end.</p>
+<p>The points are close to the 45-degree line. But at the high end, the differences between the actual and predicted prices become larger.
+The predictions of the final model are also much less extreme. The most expensive diamond in the testing set costs <code>$18,804</code>. The highest predicted price is <code>$28,130</code>. But the cube root model predicts prices as high as <code>$59,082</code> for the same testing set. Like all linear models, the final model can still predict prices above the highest prices in the data (this is called extrapolation).</p>
 <pre class="r"><code>stopCluster(cl)</code></pre>
 </div>
 

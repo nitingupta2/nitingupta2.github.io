@@ -28,11 +28,8 @@
   
     
   
-  <meta name="description" content="In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
-
-Evaluation Criteria
-Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.">
+  <meta name="description" content="In a previous post in this series, we explored the Ames Housing dataset.
+In this post, we build linear and non-linear models, and we find out how well they predict the SalePrice of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.">
 
   
   <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">
@@ -132,11 +129,8 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
   <meta property="og:site_name" content="Nitin Gupta">
   <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part2-models/">
   <meta property="og:title" content="Ames Housing - Part 2 - Building Models | Nitin Gupta">
-  <meta property="og:description" content="In a previous post in this series, we did an exploratory data analysis of the Ames Housing dataset.
-In this post, we will build both linear and non-linear models and see how well they predict the SalePrice of properties.
-
-Evaluation Criteria
-Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed SalePrice will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="og:description" content="In a previous post in this series, we explored the Ames Housing dataset.
+In this post, we build linear and non-linear models, and we find out how well they predict the SalePrice of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
@@ -477,40 +471,40 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
       
 
 
-<p>In a <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> in this series, we did an exploratory data analysis of the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a>.</p>
-<p>In this post, we will build both linear and non-linear models and see how well they predict the <code>SalePrice</code> of properties.</p>
+<p>In a <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> in this series, we explored the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a>.</p>
+<p>In this post, we build linear and non-linear models, and we find out how well they predict the <code>SalePrice</code> of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.</p>
 <div id="evaluation-criteria" class="section level2">
 <h2>Evaluation Criteria</h2>
-<p>Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and the logarithm of the observed <code>SalePrice</code> will be our evaluation criteria. Taking the log ensures that errors in predicting expensive and cheap houses will affect the result equally.</p>
+<p>To measure how good a model is, we use the root mean squared error (RMSE) between the log of the predicted price and the log of the actual <code>SalePrice</code>. RMSE is the typical size of a prediction error, so a lower RMSE is better. We use the log of the prices so that an error of 10% counts the same for an expensive house and for a cheap house.</p>
 </div>
 <div id="steps-for-building-models" class="section level2">
 <h2>Steps for Building Models</h2>
-<p>Here are the steps for building models and determining the best hyperparameter combinations by K-fold cross validation:</p>
+<p>Each model has settings that it cannot learn from the data. We must choose them before training. These settings are called hyperparameters. To choose the best hyperparameters, we use K-fold cross validation, as described in the steps below:</p>
 <ul>
-<li>Remove predictors that duplicate the information in other predictors, and encode ordinal features as scores.</li>
-<li>Partition the training dataset into model training and validation sets. Use stratified sampling such that each partition has a similar distribution of the target variable - <code>SalePrice</code>.</li>
-<li>Define linear and non-linear models.</li>
-<li>For each model, create a space-filling (maximum entropy) grid of hyperparameter combinations.</li>
-<li>For each hyperparameter combination, fit a model on the training set and make predictions on the validation set. Repeat the process for all folds.</li>
-<li>Determine root mean squared errors (RMSE) and choose the best hyperparameter combination that corresponds to the minimum RMSE.</li>
-<li>Train each model with its best hyperparameter combination on the entire training set.</li>
-<li>Calculate RMSE of the each finalized model on the testing set.</li>
-<li>Finally, choose the best model that gives the least RMSE.</li>
+<li>Remove features that repeat the information of other features, and change ordinal features into scores.</li>
+<li>Split the training data into K parts (folds). Each time, the model learns from all the folds except one (the training part), and we check its predictions on the remaining fold (the validation part). We split the data in a way that keeps a similar mix of prices in each fold (stratified sampling).</li>
+<li>Choose the linear and non-linear models to use.</li>
+<li>For each model, make a set (a grid) of hyperparameter combinations that covers the possible values evenly (a space-filling grid).</li>
+<li>For each combination, train the model on the training part and make predictions on the validation part. Repeat this for all the folds.</li>
+<li>Calculate the RMSE, and choose the combination with the lowest RMSE.</li>
+<li>Train each model again, with its best combination, on the complete training set.</li>
+<li>Calculate the RMSE of each final model on the testing set, which has properties that the models have not seen.</li>
+<li>Choose the model with the lowest RMSE.</li>
 </ul>
 </div>
 <div id="removing-collinear-predictors" class="section level2">
 <h2>Removing Collinear Predictors</h2>
-<p>Many features in this dataset describe the same thing in different ways, and some of the features we engineered in the <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> duplicate others. When categorical features are converted to dummy variables, some predictors become exact linear combinations of others. A linear model cannot separate their effects, so its coefficients become unstable or cannot be estimated at all, and <code>lm</code> warns of a “rank-deficient fit”. Tree-based models are not affected by duplicated information, but removing it makes linear models better defined and every model simpler.</p>
-<p>Using the association matrix from the previous post, we drop these features because other features already carry their information:</p>
+<p>Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in the <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-eda/">previous post</a> repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and <code>lm</code> (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.</p>
+<p>The association matrix in the previous post showed which features repeat each other. We drop these features, because other features already give their information:</p>
 <ul>
-<li><code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> are the same, or almost the same, as the <em>None</em> category of <code>GarageType</code>, <code>FireplaceQu</code> and <code>MasVnrType</code>.</li>
-<li><code>MSSubClass</code> combines the type and the style of a building, which <code>BldgType</code> and <code>HouseStyle</code> already describe. Its <em>duplex</em> category is identical to that of <code>BldgType</code>.</li>
-<li><code>TotalBath</code> is exactly <code>FullBath + 0.5 * HalfBath + BsmtBath</code>. We drop <code>HalfBath</code> rather than <code>TotalBath</code>, so we keep the total, which is among the most important features of the tree-based models, and lose no information, because <code>HalfBath</code> can be recovered from the other three.</li>
+<li><code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> are the same as, or almost the same as, the <em>None</em> category of <code>GarageType</code>, <code>FireplaceQu</code> and <code>MasVnrType</code>.</li>
+<li><code>MSSubClass</code> combines the type and the style of a building. <code>BldgType</code> and <code>HouseStyle</code> already give this information. Its <em>duplex</em> category is identical to the <em>duplex</em> category of <code>BldgType</code>.</li>
+<li><code>TotalBath</code> is exactly <code>FullBath + 0.5 * HalfBath + BsmtBath</code>. We drop <code>HalfBath</code>, not <code>TotalBath</code>. So we keep the total, which is one of the most important features for the decision tree models. And we lose no information, because we can calculate <code>HalfBath</code> from the other three features.</li>
 </ul>
 <div id="encoding-ordinal-features" class="section level3">
 <h3>Encoding Ordinal Features</h3>
-<p>Features such as <code>OverallQual</code> or <code>KitchenQual</code> have categories that follow a natural order. By default, <code>step_dummy()</code> encodes such an ordered factor with polynomial contrasts: one predictor for each category but one, capturing linear, quadratic, cubic and higher order trends across the categories. Some grades are so rare, such as an <code>OverallCond</code> of 1, that they can be missing from a cross validation fold, and then the highest order contrasts are collinear in that fold.</p>
-<p>Instead, we encode each ordered factor as a single integer score that follows the order of its categories, which assumes the grades are equally spaced. Categories that no property has, such as a <em>Poor</em> exterior quality, are dropped first, so the scores are consecutive. Here’s how a linear model fares with each encoding, on the same cross validation folds:</p>
+<p>The categories of features such as <code>OverallQual</code> or <code>KitchenQual</code> have a natural order. These are ordinal features. By default, <code>step_dummy()</code> changes an ordinal feature into several features called polynomial contrasts. It makes one new feature for each category except one, and these features describe straight, curved and more complex trends across the grades. But some grades are very rare. For example, only one property has an <code>OverallCond</code> of 1. So a rare grade can be missing from a fold. Then some of these new features become collinear in that fold.</p>
+<p>Instead, we change each ordinal feature into one whole number (a score) that follows the order of its categories: 1, 2, 3 and so on. This assumes that the steps between the grades are equal. First, we drop the categories that no property has, such as a <em>Poor</em> exterior quality, so that the scores have no gaps. Here are the results of a linear model with each method, on the same folds:</p>
 <pre class="r"><code>dfEncodingComparison %&gt;% 
   mutate(lm_cv_rmse = round(lm_cv_rmse, 4)) %&gt;% 
   knitr::kable(col.names = c(&quot;Encoding of ordinal features&quot;, &quot;Predictors&quot;, &quot;Folds with a rank-deficient fit&quot;, &quot;lm cross validated RMSE&quot;))</code></pre>
@@ -546,11 +540,11 @@ Root-Mean-Squared-Error (RMSE) between the logarithm of the predicted value and 
 </table>
 <pre class="r"><code>encoding_value &lt;- function(encodingName, column) dfEncodingComparison[[column]][dfEncodingComparison$encoding == encodingName]</code></pre>
 <ul>
-<li>With polynomial contrasts, <code>lm</code> cannot estimate every coefficient in 4 of the 5 folds. With scores, the fit is rank deficient in 0 folds.</li>
-<li>Scores cut the number of predictors from 214 to 151, and the cross validated RMSE of <code>lm</code> falls from 0.147 to 0.134. The simpler encoding generalizes better, because the model no longer has to estimate a separate effect for each rare grade.</li>
+<li>With polynomial contrasts, <code>lm</code> cannot calculate all the coefficients in 4 of the 5 folds. With scores, this problem happens in 0 folds.</li>
+<li>With scores, the number of features goes down from 214 to 151, and the cross validated RMSE of <code>lm</code> goes down from 0.147 to 0.134. The simpler method works better on new data, because the model does not have to learn a separate effect for each rare grade.</li>
 </ul>
-<p>Finally, <code>step_lincomb()</code> checks for any remaining exact linear combinations among the predictors, such as those that could arise because properties without a basement or a garage share the <em>None</em> category of every basement or garage feature. With scores, it finds none.</p>
-<p>After preprocessing, there are 151 predictors, and a linear model can estimate a coefficient for every one of them:</p>
+<p>Finally, <code>step_lincomb()</code> checks whether any features are still exact combinations of other features. This could happen because properties without a basement or a garage have the <em>None</em> category in every basement or garage feature. With scores, it finds no such features.</p>
+<p>After these steps, there are 151 features, and a linear model can calculate a coefficient for each of them:</p>
 <pre class="r"><code>model_lm_check &lt;- lm(target ~ ., data = dfTrain_Proc %&gt;% select(-Id))
 print(glue::glue(&quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_lm_check))} coefficients could not be estimated&quot;))</code></pre>
 <pre><code>0 of 152 coefficients could not be estimated</code></pre>
@@ -558,8 +552,8 @@ print(glue::glue(&quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_
 </div>
 <div id="partitioning-training-data" class="section level2">
 <h2>Partitioning Training Data</h2>
-<p>We split the training data into 5 folds. Within each fold, 80% of the data is used for training models and 20% for validating the predicted values against the actual values.</p>
-<p>Let’s look at the distribution of the target variable across all folds:</p>
+<p>We split the training data into 5 folds. In each fold, the model learns from 80% of the data, and we compare its predictions with the actual prices on the other 20%.</p>
+<p>Let’s look at the spread (distribution) of the target, which is the value that we want to predict, in all the folds:</p>
 <pre class="r"><code>cv_folds %&gt;% 
   mutate(target = map(splits, function(Z) bind_rows(training(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;training&quot;), 
                                                     testing(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;validation&quot;)))) %&gt;% 
@@ -570,13 +564,13 @@ print(glue::glue(&quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_
   labs(x = &quot;log(SalePrice)&quot;) +
   facet_grid(type ~ id)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png" alt="" width="672" /></p>
-<p>By using stratified sampling, we ensure that the training and validation distributions of the target variable are similar.</p>
+<p>Because we use stratified sampling, the prices have similar distributions in the training part and in the validation part of each fold.</p>
 </div>
 <div id="linear-models" class="section level2">
 <h2>Linear Models</h2>
 <div id="ordinary-least-squares-regression" class="section level3">
 <h3>Ordinary Least Squares Regression</h3>
-<p>Before creating any new features or indulging in more complex modelling methods, we will cross validate a simple linear model on the training data to establish a benchmark. If more complex approaches do not have a significant improvement in the model validation metrics, then they are not worthwhile to be pursued.</p>
+<p>First, we use cross validation to test a simple linear model on the training data. This model, called ordinary least squares, finds the straight-line formula with the smallest squared errors. Its result is our starting point (benchmark). If more complex models are not much better than this result, they are not worth the extra effort.</p>
 <pre class="r"><code>model_spec_lm</code></pre>
 <pre><code>Linear Regression Model Specification (regression)
 
@@ -590,17 +584,17 @@ Computational engine: lm </code></pre>
 <div id="whats-notable" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After training a linear model on all predictors, we get an RMSE of <strong>0.1336</strong>.</li>
-<li>This is the simplest and fastest model with no hyperparameters to tune.</li>
+<li>A linear model with all the features gives an RMSE of <strong>0.1336</strong>.</li>
+<li>This is the simplest and fastest model, and it has no hyperparameters to choose.</li>
 </ul>
 </div>
 </div>
 <div id="regularized-linear-model" class="section level3">
 <h3>Regularized Linear Model</h3>
-<p>We will use <code>glmnet</code> that uses LASSO and Ridge Regression with regularization. We will do a grid search of the following hyperparameters that minimize RMSE:</p>
+<p>Next, we use <code>glmnet</code>, a linear model with regularization. Regularization adds a penalty for large coefficients. This makes the model keep only the effects that the data clearly supports. <code>glmnet</code> combines two types of regularization: LASSO (L1), which can reduce the coefficient of a feature to exactly 0, and Ridge (L2), which makes all the coefficients smaller. We search for the values of these hyperparameters that give the lowest RMSE:</p>
 <ul>
-<li><code>penalty</code>: The total amount of regularization in the model.</li>
-<li><code>mixture</code>: The proportion of L1 regularization in the model.</li>
+<li><code>penalty</code>: the total amount of regularization in the model.</li>
+<li><code>mixture</code>: the share of LASSO (L1) regularization in the model.</li>
 </ul>
 <pre class="r"><code>model_spec_glmnet</code></pre>
 <pre><code>Linear Regression Model Specification (regression)
@@ -610,7 +604,7 @@ Main Arguments:
   mixture = tune()
 
 Computational engine: glmnet </code></pre>
-<p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_glmnet %&gt;% head(10)</code></pre>
 <pre><code># A tibble: 10 × 3
     penalty mixture mean_rmse
@@ -628,12 +622,12 @@ Computational engine: glmnet </code></pre>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After hyperparameter tuning with cross validation, the best <code>glmnet</code> model gives an RMSE of 0.129 with penalty = 0.0146 and mixture = 0.2974.</li>
-<li>It is an improvement over Ordinary Least Squares regression that had an RMSE of 0.1336. The regularization shrinks the coefficients of predictors that add little, which helps with so many predictors.</li>
-<li><code>glmnet</code> cross validation is fast, taking about 11 seconds to execute.</li>
-<li>But the presence of outliers can significantly affect its performance.</li>
+<li>After we choose the hyperparameters with cross validation, the best <code>glmnet</code> model has an RMSE of 0.129, with penalty = 0.0146 and mixture = 0.2974.</li>
+<li>This is better than the ordinary least squares model, which had an RMSE of 0.1336. The regularization makes the coefficients of the less useful features smaller. This helps when there are so many features.</li>
+<li>Cross validation of <code>glmnet</code> is fast. It takes about 11 seconds.</li>
+<li>But outliers can strongly affect its results.</li>
 </ul>
-<p>Here a plot of the <code>glmnet</code> hyperparameter grid along with the best hyperparameter combination:</p>
+<p>Here is a plot of the <code>glmnet</code> hyperparameter grid, with the best combination:</p>
 <pre class="r"><code>eda_plot_scatter(param_grid_glmnet, &quot;mixture&quot;, &quot;penalty&quot;, alpha = 1, add_lm = F, yLog = T, yLabelsScale = scales::scientific) +
   geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &quot;red&quot;) +
   ggrepel::geom_label_repel(data = param_best_glmnet %&gt;% map_df(round, digits = 4), 
@@ -645,13 +639,13 @@ Computational engine: glmnet </code></pre>
 </div>
 <div id="non-linear-models" class="section level2">
 <h2>Non-linear Models</h2>
-<p>Next, we will train a couple of tree-based algorithms, which are not very sensitive to outliers and skewed data.</p>
+<p>Next, we train two types of models that use decision trees. A decision tree predicts a value by asking a series of yes/no questions about the features, such as “Is <code>TotalSF</code> more than 2000?”. These models are not very sensitive to outliers and skewed data.</p>
 <div id="ranger-random-forest" class="section level3">
 <h3><em>ranger</em> (Random Forest)</h3>
-<p>We use the <code>ranger</code> implementation of random forests, which gives the same results as the <code>randomForest</code> package but runs about 3 times faster. In each ensemble, we have 500 trees (random forest error levels off well before that on a dataset of this size) and do a grid search of the following hyperparameters:</p>
+<p>A random forest builds many decision trees, each from a random sample of the data, and takes the average of their predictions. We use <code>ranger</code>, a version of random forests that gives the same results as the <code>randomForest</code> package but runs about 3 times faster. Each forest has 500 trees. (On a dataset of this size, more trees do not improve the error.) We search for the best values of these hyperparameters:</p>
 <ul>
-<li><code>mtry</code>: The number of predictors to randomly sample at each split.</li>
-<li><code>min_n</code>: The minimum number of data points in a node required to further split the node.</li>
+<li><code>mtry</code>: the number of features that the tree chooses from at random at each question (split).</li>
+<li><code>min_n</code>: the minimum number of properties that a group (node) must have before the tree can split it again.</li>
 </ul>
 <pre class="r"><code>model_spec_rf</code></pre>
 <pre><code>Random Forest Model Specification (regression)
@@ -665,7 +659,7 @@ Engine-Specific Arguments:
   num.threads = 1
 
 Computational engine: ranger </code></pre>
-<p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_rf %&gt;% head(10)</code></pre>
 <pre><code># A tibble: 10 × 3
    min_n  mtry mean_rmse
@@ -683,10 +677,10 @@ Computational engine: ranger </code></pre>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.132 with mtry = 51 and min_n = 2.</li>
-<li>This is no improvement in RMSE compared to <code>glmnet</code>, and <code>ranger</code> cross validation takes much longer to execute (about 164 seconds, versus 11 seconds for <code>glmnet</code>).</li>
+<li>After cross validation, the best RMSE is 0.132, with mtry = 51 and min_n = 2.</li>
+<li>This is not better than <code>glmnet</code>. Also, cross validation of <code>ranger</code> takes much longer: about 164 seconds, against 11 seconds for <code>glmnet</code>.</li>
 </ul>
-<p>Here a plot of the <code>ranger</code> hyperparameter grid along with the best hyperparameter combination:</p>
+<p>Here is a plot of the <code>ranger</code> hyperparameter grid, with the best combination:</p>
 <pre class="r"><code>eda_plot_scatter(param_grid_rf, &quot;min_n&quot;, &quot;mtry&quot;, alpha = 1, add_lm = F) +
   geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;) +
   ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&quot;mtry: {mtry}, min_n:{min_n}&quot;)), family = &quot;Roboto Condensed&quot;)</code></pre>
@@ -695,11 +689,11 @@ Computational engine: ranger </code></pre>
 </div>
 <div id="xgboost" class="section level3">
 <h3><em>xgboost</em></h3>
-<p>In each ensemble we have 1000 trees and do a grid search of the following hyperparameters:</p>
+<p><code>xgboost</code> (gradient boosting) builds decision trees one after the other. Each new tree corrects some of the errors of the trees before it. Each model has 1000 trees, and we search for the best values of these hyperparameters:</p>
 <ul>
-<li><code>min_n</code>: The minimum number of data points in a node required to further split the node.</li>
-<li><code>tree_depth</code>: The maximum depth or the number of splits of the tree.</li>
-<li><code>learn_rate</code>: The rate at which the boosting algorithm adapts from one iteration to another.</li>
+<li><code>min_n</code>: the minimum number of properties that a group (node) must have before the tree can split it again.</li>
+<li><code>tree_depth</code>: the maximum number of questions (splits) from the top of a tree to its bottom.</li>
+<li><code>learn_rate</code>: how much each new tree can change the predictions. A smaller value makes the model learn more slowly and carefully.</li>
 </ul>
 <pre class="r"><code>model_spec_xgboost</code></pre>
 <pre><code>Boosted Tree Model Specification (regression)
@@ -715,7 +709,7 @@ Engine-Specific Arguments:
   nthread = 1
 
 Computational engine: xgboost </code></pre>
-<p>Let’s take a look at the top 10 RMSE values and hyperparameter combinations:</p>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_xgboost %&gt;% head(10)</code></pre>
 <pre><code># A tibble: 10 × 4
    min_n tree_depth learn_rate mean_rmse
@@ -733,9 +727,9 @@ Computational engine: xgboost </code></pre>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>After cross validation, we get the best RMSE of 0.125 with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
-<li>This is the best cross validated RMSE of all the models, slightly ahead of <code>glmnet</code> (0.129) and <code>ranger</code> (0.132).</li>
-<li><code>xgboost</code> cross validation takes longer to execute than that of <code>glmnet</code>, but is faster than that of <code>ranger</code> (about 137 seconds).</li>
+<li>After cross validation, the best RMSE is 0.125, with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
+<li>This is the best cross validated RMSE of all the models. It is a little better than <code>glmnet</code> (0.129) and <code>ranger</code> (0.132).</li>
+<li>Cross validation of <code>xgboost</code> takes longer than <code>glmnet</code>, but it is faster than <code>ranger</code> (about 137 seconds).</li>
 </ul>
 <!-- Here a 3D plot of the `xgboost` hyperparameter grid: -->
 <!-- <center> -->
@@ -755,7 +749,7 @@ Computational engine: xgboost </code></pre>
 </div>
 <div id="finalizing-models" class="section level2">
 <h2>Finalizing Models</h2>
-<p>For each model, we found the combination of hyperparameters that minimize RMSE. Using those parameters, we can now train the same models on the entire training dataset. Finally, we can use the trained models to predict log(SalePrice) on the entire training set to see the actual v/s predicted log(SalePrice) results.</p>
+<p>For each model, we now know the hyperparameters with the lowest RMSE. We use them to train each model again on the complete training set. Then we use the trained models to predict log(SalePrice) for the training set, and we compare the predictions with the actual values.</p>
 <pre class="r"><code># Get predicted estimates
 get_predicted &lt;- function(model_final, dfNew) {
 
@@ -796,15 +790,15 @@ worst_train_sentence &lt;- if (nrow(dfWorst_train) == 0) {
   &quot;No property is among them for more than one model.&quot;
 } else {
   vIds &lt;- dfWorst_train$Id[dfWorst_train$n_models == max(dfWorst_train$n_models)]
-  glue::glue(&quot;{if (length(vIds) == 1) &#39;The property with Id&#39; else &#39;The properties with Ids&#39;} {paste0(&#39;__&#39;, vIds, &#39;__&#39;, collapse = &#39; and &#39;)} {if (length(vIds) == 1) &#39;is&#39; else &#39;are each&#39;} among them for {max(dfWorst_train$n_models)} of the 3 models, so {if (length(vIds) == 1) &#39;it is&#39; else &#39;they are&#39;} worth checking for errors in the data.&quot;)
+  glue::glue(&quot;{if (length(vIds) == 1) &#39;The property with Id&#39; else &#39;The properties with Ids&#39;} {paste0(&#39;__&#39;, vIds, &#39;__&#39;, collapse = &#39; and &#39;)} {if (length(vIds) == 1) &#39;is&#39; else &#39;are each&#39;} among them for {max(dfWorst_train$n_models)} of the 3 models, so we should check {if (length(vIds) == 1) &#39;its&#39; else &#39;their&#39;} data for errors.&quot;)
 }</code></pre>
 <div id="whats-notable-4" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>Both <code>ranger</code> and <code>xgboost</code> models fit the training data closely with the tuned parameters, as the predictions lie close to the straight line drawn at 45 degrees. <code>ranger</code> fits it most closely, with a training RMSE of 0.050 versus 0.096 for <code>xgboost</code>.</li>
-<li>The <code>glmnet</code> model shows a couple of outliers with Ids <strong>524</strong> and <strong>1299</strong> whose predicted values are far in excess of their actual values. Even properties whose <code>SalePrice</code> is at the lower end, show a wide dispersion in prediced values.</li>
-<li>The plots label the three largest errors of each model. The properties with Ids <strong>31</strong> and <strong>1299</strong> are each among them for 2 of the 3 models, so they are worth checking for errors in the data.</li>
-<li>But the true performance can only be measured on unseen testing data.</li>
+<li><code>ranger</code> and <code>xgboost</code> fit the training data closely: their predictions are near the 45-degree line, where the predicted value is equal to the actual value. <code>ranger</code> fits the training data most closely, with a training RMSE of 0.050, against 0.096 for <code>xgboost</code>.</li>
+<li>The <code>glmnet</code> model has two outliers, Ids <strong>524</strong> and <strong>1299</strong>. Their predicted prices are much higher than their actual prices. Also, for the cheaper properties, the predicted values are very spread out.</li>
+<li>The plots label the three largest errors of each model. The properties with Ids <strong>31</strong> and <strong>1299</strong> are each among them for 2 of the 3 models, so we should check their data for errors.</li>
+<li>But a good fit on the training data does not prove that a model is good. We can only measure its true performance on data that it has not seen: the testing set.</li>
 </ul>
 </div>
 </div>
@@ -842,18 +836,18 @@ dfRMSE</code></pre>
 <div id="whats-notable-5" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>All models have similar RMSE on the unseen testing set as their cross validated RMSE, which shows the cross validation process and hyperparameters worked very well.</li>
-<li>Records with Ids <strong>1537</strong> and <strong>2217</strong> are outliers, as none of the models are able to predict close to actual values.</li>
-<li><code>glmnet</code> has the lowest test RMSE of 0.130, with <code>xgboost</code> close behind at 0.132.</li>
-<li>However, <code>glmnet</code> is sensitive to outliers, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. Since <code>xgboost</code> had the best cross validated RMSE and the difference in test RMSE is small, we could finalize <code>xgboost</code>, which is robust to outliers and captures non-linear relationships, as the model that generalizes well on this dataset.</li>
+<li>For all the models, the RMSE on the testing set is similar to the cross validated RMSE. This shows that cross validation correctly estimated how well the models work on new data, and that the hyperparameters are good.</li>
+<li>The properties with Ids <strong>1537</strong> and <strong>2217</strong> are outliers: no model predicts a price close to their actual prices.</li>
+<li><code>glmnet</code> has the lowest RMSE on the testing set, 0.130. <code>xgboost</code> is close, with 0.132.</li>
+<li>But outliers affect <code>glmnet</code>, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. <code>xgboost</code> had the best cross validated RMSE, and the difference on the testing set is small. Also, <code>xgboost</code> is less affected by outliers, and it can learn curved relationships. So we choose <code>xgboost</code> as our final model, because it works well on new data.</li>
 </ul>
 <pre class="r"><code>model_final &lt;- model_final_xgboost</code></pre>
 </div>
 </div>
 <div id="feature-importance" class="section level2">
 <h2>Feature Importance</h2>
-<p>Even though <code>xgboost</code> is not as easily interpretable as a linear model, we could use variable importance plots to determine the most important features selected by the model.</p>
-<p>Let’s take a look at the top 10 most important features of our finalized <code>xgboost</code> model:</p>
+<p>It is harder to understand how <code>xgboost</code> makes its predictions than how a linear model makes them. But a variable importance plot can show which features are the most important for the model.</p>
+<p>Here are the 10 most important features of our final <code>xgboost</code> model:</p>
 <pre class="r"><code>library(vip)
 
 p1 &lt;- vip(extract_fit_parsnip(model_final), aesthetics = list(fill = &quot;#00AED8&quot;)) +
@@ -868,16 +862,16 @@ p2 &lt;- eda_plot_correlation_matrix(dfTrain %&gt;% select(SalePrice, one_of(vFe
 cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png" alt="" width="1152" /></p>
 <ul>
-<li>Correlations of numerical features are plotted side-by-side. All of them have a correlation of 0.5 or more (in absolute terms) with <code>SalePrice</code>.</li>
-<li>All of the top 10 features make sense. To evaluate <code>SalePrice</code>, a buyer would definitely look at total square footage, overall quality, neighborhood, number of bathrooms, kitchen quality, age of property, garage size and finish, central air conditioning, overall condition, etc.</li>
-<li>This shows, our finalized model generalizes well and makes very reasonable choices in terms of features.</li>
+<li>The plot on the right shows the correlations of the numerical features. All of them have a correlation of at least 0.5, or at most -0.5, with <code>SalePrice</code>.</li>
+<li>All of the 10 most important features make sense. To judge the price of a property, a buyer would look at the total area, the overall quality, the neighborhood, the number of bathrooms, the kitchen quality, the age of the property, the size and finish of the garage, central air conditioning, the overall condition, and so on.</li>
+<li>So our final model works well on new data, and it chooses very reasonable features.</li>
 </ul>
 </div>
 <div id="new-property-premium" class="section level2">
 <h2>New Property Premium</h2>
-<p>Among the top 10 features by importance in our final model, most of the features like square footage, neighborhood and number of bathrooms remain the same throughout the life of the property. Quality and condition of property does change but their evaluation is mostly subjective. The only other feature that cannot be disputed to change over time is <code>PropertyAge</code>.</p>
-<p>So, how would the predicted <code>SalePrice</code> differ if a property was newly constructed vis-a-vis the same property if it were constructed more than 30 years earlier, and all the times in between?</p>
-<p>We could pick a couple of properties at random, change <code>PropertyAge</code> and see its impact on <code>SalePrice</code>.</p>
+<p>Of the 10 most important features in our final model, most do not change during the life of a property, such as the area, the neighborhood and the number of bathrooms. The quality and the condition of a property can change, but people judge them in different ways. The only feature that clearly changes over time is <code>PropertyAge</code>.</p>
+<p>So, how does the predicted <code>SalePrice</code> change with the age of a property? We compare the same property when it is new, when it is more than 30 years old, and at all the ages in between.</p>
+<p>We choose two properties at random, change their <code>PropertyAge</code>, and look at the effect on the predicted <code>SalePrice</code>.</p>
 <pre class="r"><code>getSampleProperty &lt;- function(randomSeed) {
   
   set.seed(randomSeed)
@@ -905,7 +899,7 @@ bake(preprocessing_recipe, new_data = dfSample) %&gt;%
   labs(y = &quot;Predicted Sale Price&quot;,
        title = &quot;New Property Premium&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png" alt="" width="672" /></p>
-<p>We can see there’s a small premium for a newly constructed property v/s an older property of the same build, quality and condition. This premium isn’t very much in a place like Ames, IA but we’d reckon it would be much higher in a larger metropolitan city.</p>
+<p>A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.</p>
 </div>
 
     </div>
