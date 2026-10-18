@@ -5,7 +5,7 @@
     <link>https://www.nitingupta.com/tags/ggplot2/</link>
       <atom:link href="https://www.nitingupta.com/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     <description>Ggplot2</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Tue, 27 Dec 2016 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Ggplot2</title>
@@ -13,15 +13,22 @@
     </image>
     
     <item>
-      <title>Ames Housing - Part 2 - Building Models</title>
-      <link>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</link>
-      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</guid>
+      <title>Ames Housing - Part 3 - Closing the deal - Building Models</title>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</link>
+      <pubDate>Tue, 27 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</guid>
       <description>
 
 
-&lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we explored the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;.&lt;/p&gt;
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt;, we built a data pipeline that cleans the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;, and in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Part 2&lt;/a&gt;, we explored the finalized dataset.&lt;/p&gt;
 &lt;p&gt;In this post, we build linear and non-linear models, and we find out how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.&lt;/p&gt;
+&lt;/div&gt;
 &lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
 &lt;p&gt;To measure how good a model is, we use the root mean squared error (RMSE) between the log of the predicted price and the log of the actual &lt;code&gt;SalePrice&lt;/code&gt;. RMSE is the typical size of a prediction error, so a lower RMSE is better. We use the log of the prices so that an error of 10% counts the same for an expensive house and for a cheap house.&lt;/p&gt;
@@ -43,8 +50,8 @@
 &lt;/div&gt;
 &lt;div id=&#34;removing-collinear-predictors&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Removing Collinear Predictors&lt;/h2&gt;
-&lt;p&gt;Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and &lt;code&gt;lm&lt;/code&gt; (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.&lt;/p&gt;
-&lt;p&gt;The association matrix in the previous post showed which features repeat each other. We drop these features, because other features already give their information:&lt;/p&gt;
+&lt;p&gt;Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt; repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and &lt;code&gt;lm&lt;/code&gt; (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.&lt;/p&gt;
+&lt;p&gt;The association matrix in Part 1 showed which features repeat each other. We drop these features, because other features already give their information:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; are the same as, or almost the same as, the &lt;em&gt;None&lt;/em&gt; category of &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;FireplaceQu&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;MSSubClass&lt;/code&gt; combines the type and the style of a building. &lt;code&gt;BldgType&lt;/code&gt; and &lt;code&gt;HouseStyle&lt;/code&gt; already give this information. Its &lt;em&gt;duplex&lt;/em&gt; category is identical to the &lt;em&gt;duplex&lt;/em&gt; category of &lt;code&gt;BldgType&lt;/code&gt;.&lt;/li&gt;
@@ -112,7 +119,7 @@ print(glue::glue(&amp;quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(mo
   geom_histogram(bins = 30, color = &amp;quot;white&amp;quot;, fill = &amp;quot;#F37735&amp;quot;) +
   labs(x = &amp;quot;log(SalePrice)&amp;quot;) +
   facet_grid(type ~ id)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Because we use stratified sampling, the prices have similar distributions in the training part and in the validation part of each fold.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -138,7 +145,7 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;/ul&gt;
 &lt;p&gt;A residual is the difference between the actual value and the predicted value, here of &lt;code&gt;log(SalePrice)&lt;/code&gt;. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of the linear model, fitted on the complete training set. The labels show the &lt;code&gt;Id&lt;/code&gt; of the most extreme properties in each plot:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_residuals(model_lm_check, vLabels = dfTrain_Proc$Id, plotTitle = &amp;quot;Residual plots of the linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/lm_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/lm_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# standardized residual, leverage and Cook&amp;#39;s distance of each property
 dfLmDiagnostics &amp;lt;- tibble(Id = dfTrain_Proc$Id,
                           std_resid = rstandard(model_lm_check),
@@ -147,7 +154,7 @@ dfLmDiagnostics &amp;lt;- tibble(Id = dfTrain_Proc$Id,
   arrange(desc(cooks))
 lm_diagnostic &amp;lt;- function(propertyId, column) dfLmDiagnostics[[column]][dfLmDiagnostics$Id == propertyId]&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids &lt;strong&gt;1299&lt;/strong&gt;, &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;633&lt;/strong&gt;. In the previous post, we saw that 1299 and 524 are very large properties that sold at low prices.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids &lt;strong&gt;1299&lt;/strong&gt;, &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;633&lt;/strong&gt;. In Part 2, we saw that 1299 and 524 are very large properties that sold at low prices.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Normal Q-Q:&lt;/strong&gt; The lower tail is much longer than the dashed line. Property 1299 has a standardized residual of -12.4, and property 524 has -9.1. For normally distributed errors, values beyond -3 are very rare.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Scale-Location:&lt;/strong&gt; The smooth line goes up at both ends, so the errors are larger for the cheapest and the most expensive properties.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Residuals vs Leverage:&lt;/strong&gt; Properties 1299 and 524 have both a large residual and a high leverage (0.22 and 0.16). So they have the largest Cook’s distances, 0.29 and 0.11. These are below the dashed contour at 0.5, but much larger than for most properties. They pull the straight-line fit, which is one reason why &lt;code&gt;glmnet&lt;/code&gt; and the tree-based models work better.&lt;/li&gt;
@@ -198,7 +205,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
   ggrepel::geom_label_repel(data = param_best_glmnet %&amp;gt;% map_df(round, digits = 4), 
                             aes(x = mixture, y = penalty, label = glue::glue(&amp;quot;penalty: {penalty}, mixture:{mixture}&amp;quot;)),
                             family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -249,7 +256,7 @@ Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
   geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &amp;quot;red&amp;quot;) +
   ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&amp;quot;mtry: {mtry}, min_n:{min_n}&amp;quot;)), family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -340,7 +347,7 @@ dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
   eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
   labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# properties among the 3 largest errors of more than one model
 dfWorst_train &amp;lt;- dfPlot %&amp;gt;%
   group_by(model) %&amp;gt;%
@@ -383,7 +390,7 @@ dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
   eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
   labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRMSE &amp;lt;- map(list(&amp;quot;glmnet&amp;quot;,&amp;quot;ranger&amp;quot;,&amp;quot;xgboost&amp;quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&amp;gt;% mutate(model = .x)) %&amp;gt;%
   bind_rows() %&amp;gt;%
   mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&amp;gt;%
@@ -425,7 +432,7 @@ p2 &amp;lt;- eda_plot_correlation_matrix(dfTrain %&amp;gt;% select(SalePrice, on
                             outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlations with SalePrice&amp;quot;)
 
 cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The plot on the right shows the correlations of the numerical features. All of them have a correlation of at least 0.5, or at most -0.5, with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;All of the 10 most important features make sense. To judge the price of a property, a buyer would look at the total area, the overall quality, the neighborhood, the number of bathrooms, the kitchen quality, the age of the property, the size and finish of the garage, central air conditioning, the overall condition, and so on.&lt;/li&gt;
@@ -463,12 +470,12 @@ bake(preprocessing_recipe, new_data = dfSample) %&amp;gt;%
   scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
   labs(y = &amp;quot;Predicted Sale Price&amp;quot;,
        title = &amp;quot;New Property Premium&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;appendix-tuning-code&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Appendix: Tuning Code&lt;/h2&gt;
-&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
 &lt;li&gt;If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.&lt;/li&gt;
@@ -791,7 +798,7 @@ vTuningResults &amp;lt;- c(&amp;quot;model_spec_lm&amp;quot;, &amp;quot;model_sp
                     &amp;quot;dfEncodingComparison&amp;quot;, &amp;quot;cv_folds&amp;quot;, &amp;quot;vFeaturesSkew&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;And this code decides whether to load the saved results or to run the tuning steps:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1
-ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-eda/Ames_Housing_Clean.Rda&amp;quot;
+ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-data-pipeline/Ames_Housing_Clean.Rda&amp;quot;
 
 # Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &amp;quot;tuning_steps&amp;quot;
 # chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so
@@ -818,23 +825,299 @@ rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
     </item>
     
     <item>
-      <title>Ames Housing - Part 1 - Exploratory Data Analysis</title>
-      <link>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</link>
-      <pubDate>Sun, 25 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</guid>
+      <title>Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</title>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part2-eda/</link>
+      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part2-eda/</guid>
       <description>
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/jquery/jquery-3.6.0.min.js&#34;&gt;&lt;/script&gt;
-&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/leaflet/leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/leaflet/leaflet.js&#34;&gt;&lt;/script&gt;
-&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/leafletfix/leafletfix.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/proj4/proj4.min.js&#34;&gt;&lt;/script&gt;
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/Proj4Leaflet/proj4leaflet.js&#34;&gt;&lt;/script&gt;
-&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/rstudio_leaflet/rstudio_leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/leaflet-binding/leaflet.js&#34;&gt;&lt;/script&gt;
 
 
-&lt;p&gt;In this case study, we use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to predict the sale prices of houses. In this first post, we clean the data and explore it. In the next post, we build models that predict the prices. A model is a formula that a computer learns from examples.&lt;/p&gt;
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Ames Housing - Part 3 - Closing the deal - Building Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt;, we built a data pipeline that cleans the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; and creates new features. In this post, we explore the finalized dataset. An exploratory data analysis (EDA) is the first study of a dataset before we build models. We look at the features one at a time, then two and three at a time, to find which features affect the sale price. In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Part 3&lt;/a&gt;, we use what we learn to build models.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at each feature by itself.&lt;/p&gt;
+&lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical Features&lt;/h3&gt;
+&lt;p&gt;First, let’s plot all the features that measure an area in square feet:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/univariate_continuous1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;All the area features have outliers, which are values that are very different from most other values.&lt;/li&gt;
+&lt;li&gt;Many features are very skewed: most values are small and a few values are much larger. Before we build models, we must transform these features (for example, with a log) to make them less skewed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now let’s look at the other numerical features:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)], &amp;quot;SalePrice&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/univariate_continuous2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most properties were sold less than 20 years after they were built or remodeled.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let’s plot &lt;code&gt;SalePrice&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, &amp;quot;SalePrice&amp;quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The distribution has long tails on both sides: a few properties are much cheaper or much more expensive than most.&lt;/li&gt;
+&lt;li&gt;11 properties cost less than USD 50,000, and 17 properties cost more than USD 500,000.&lt;/li&gt;
+&lt;li&gt;Outliers have a strong effect on linear models.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Categorical Features&lt;/h2&gt;
+&lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Ordinal Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat1, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In many features, 1 or 2 categories are much more common than the others. This makes these features hard to use for predictions, because the data has only a few examples of the other categories.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Nominal Features.&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat2, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In many features, 1 or 2 categories are much more common than the others.&lt;/li&gt;
+&lt;li&gt;Most properties are sold in the summer months, and the fewest in the winter months.&lt;/li&gt;
+&lt;li&gt;The data shows the effect of the housing market crisis: the fewest properties were sold in 2010.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bivariate-analysis-two-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis: Two Features at a Time&lt;/h2&gt;
+&lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
+&lt;p&gt;Let’s look at how &lt;code&gt;SalePrice&lt;/code&gt; changes with each of the other numerical features. A scatter plot shows one dot for each property, and the line shows the best straight line through the dots (a regression line):&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Let’s look more closely at &lt;code&gt;TotalSF&lt;/code&gt;. The labels show the properties with the largest Cook’s distance. Cook’s distance measures how much one point pulls the regression line towards itself:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar,
+                 nLabel = 3, feature_id = &amp;quot;Id&amp;quot;, labelBy = &amp;quot;cooks&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/influential_points-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Cook&amp;#39;s distance of each property in a linear fit of SalePrice on TotalSF
+dfInfluence &amp;lt;- dfClean %&amp;gt;% select(Id, TotalSF, SalePrice) %&amp;gt;% drop_na()
+dfInfluence &amp;lt;- dfInfluence %&amp;gt;%
+  mutate(cooks = cooks.distance(lm(SalePrice ~ TotalSF, data = dfInfluence))) %&amp;gt;%
+  arrange(desc(cooks))
+
+vOutliers_TotalSF &amp;lt;- dfInfluence$Id[1:3]&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The scatter plot of &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;SalePrice&lt;/code&gt; clearly shows a few very large properties that sold at unusually low prices. These points have high leverage: they are far from the other points, so they pull the regression line strongly. Without them, the line would be steeper.&lt;/li&gt;
+&lt;li&gt;The same properties also affect &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The Ids of these properties are 1299,2550,524. Their Cook’s distances are 5.69, 2.46, 0.54. These values are much higher than the usual limit of 4/n = 0.0014, where n is the number of properties. The next property has a Cook’s distance of only 0.12. Of these three properties, 524 and 1299 are in the training set.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;transforming-skewed-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Transforming Skewed Features&lt;/h3&gt;
+&lt;p&gt;Many numerical features are right skewed. Can we change them with a simple formula (a transform), so that their relationship with &lt;code&gt;log(SalePrice)&lt;/code&gt; becomes closer to a straight line? Let’s compare common transforms of three features: &lt;code&gt;TotalSF&lt;/code&gt;, the strongest area feature; &lt;code&gt;LotArea&lt;/code&gt;, which is very skewed; and &lt;code&gt;GarageArea&lt;/code&gt;, which is almost not skewed. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in &lt;code&gt;log(SalePrice)&lt;/code&gt; the line explains:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lTransformPlots &amp;lt;- map(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;), ~ eda_plot_transforms(dfClean, .x, &amp;quot;SalePrice&amp;quot;))
+cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/plot_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# R-squared of each transform, in the order of the panels
+vR2 &amp;lt;- map(lTransformPlots, ~ .x$data %&amp;gt;%
+             distinct(transform, r_squared) %&amp;gt;%
+             pull(r_squared) %&amp;gt;%
+             set_names(c(&amp;quot;identity&amp;quot;, &amp;quot;log&amp;quot;, &amp;quot;sqrt&amp;quot;, &amp;quot;cuberoot&amp;quot;))) %&amp;gt;%
+  set_names(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;))
+r2 &amp;lt;- function(feature, transform) round(vR2[[feature]][transform], 3)
+
+# skewness of each feature
+vSkew &amp;lt;- map_dbl(c(TotalSF = &amp;quot;TotalSF&amp;quot;, LotArea = &amp;quot;LotArea&amp;quot;, GarageArea = &amp;quot;GarageArea&amp;quot;), ~ timeDate::skewness(dfClean[[.x]], na.rm = T))&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;A log transform almost doubles the R-squared of &lt;code&gt;LotArea&lt;/code&gt; (skewness 12.8), from 0.066 to 0.138. Without the transform, a few very large lots control the line. The log makes these large values smaller.&lt;/li&gt;
+&lt;li&gt;All the transforms improve &lt;code&gt;TotalSF&lt;/code&gt; (skewness 1.5) a little. With a log, the R-squared goes from 0.61 to 0.647.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; (skewness 0.2) is almost not skewed, and the transforms make the fit worse. With a log, the R-squared goes down from 0.426 to 0.389. Also, the log cannot use the properties without a garage, because the log of 0 does not exist.&lt;/li&gt;
+&lt;li&gt;So, before we build linear models, we should transform only the very skewed features, not all of them.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
+&lt;p&gt;We keep the features whose correlation with &lt;code&gt;SalePrice&lt;/code&gt; is at least 0.1 or at most -0.1. The Pearson correlation measures how close a relationship is to a straight line, so outliers and skewed features affect it strongly. The Spearman correlation uses the ranks of the values (1st, 2nd, 3rd, …) instead of the values. So it measures whether one feature always goes up (or always goes down) when the other goes up, even along a curve. If we compare the two, we can see which relationships are strong but not straight lines:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
+
+dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
+  correlate() %&amp;gt;% 
+  focus(SalePrice) %&amp;gt;% 
+  dplyr::rename(feature = term,
+                corr = SalePrice) %&amp;gt;%
+  arrange(desc(abs(corr))) %&amp;gt;% 
+  dplyr::filter(abs(corr) &amp;gt; 0.1) %&amp;gt;% 
+  mutate(corr = round(corr, 2)) %&amp;gt;% 
+  mutate(feature = fct_reorder(feature, corr)) %&amp;gt;% 
+  dplyr::filter(!(feature %in% vFeatures_to_exclude))
+
+vFeaturesCor &amp;lt;- dfCor %&amp;gt;% pull(feature) %&amp;gt;% as.character()
+
+p1 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;pearson&amp;quot;, minAbsCor = 0.1)
+p2 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;spearman&amp;quot;, minAbsCor = 0.1)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# compare Pearson and Spearman correlations
+dfCorMethods &amp;lt;- tibble(feature = setdiff(vFeaturesNum, &amp;quot;SalePrice&amp;quot;)) %&amp;gt;%
+  mutate(pearson = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;)),
+         spearman = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;, method = &amp;quot;spearman&amp;quot;)))
+cor_of &amp;lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMethods$feature == feature_name], 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The 5 most correlated features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. A buyer would naturally look at these features to judge a property and its price.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;PropertyAge&lt;/code&gt; has a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. This means that newer properties sell for higher prices than older properties.&lt;/li&gt;
+&lt;li&gt;For most features, the Pearson and Spearman correlations are similar. But &lt;code&gt;LotArea&lt;/code&gt; is different: its correlation goes up from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from a straight line. The log transform above partly corrects this.&lt;/li&gt;
+&lt;li&gt;For &lt;code&gt;BsmtFinSF1&lt;/code&gt;, the correlation goes down from 0.43 to 0.33. About 32% of the properties have no finished basement, so they all have the same rank. Also, the largest finished basements have a large effect on the Pearson correlation. So the straight-line relationship with &lt;code&gt;SalePrice&lt;/code&gt; seems stronger than the rank relationship.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In almost all of these features, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the order of the categories.&lt;/li&gt;
+&lt;li&gt;The overall quality and the exterior quality show some of the strongest trends.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
+&lt;p&gt;Now let’s look at &lt;code&gt;SalePrice&lt;/code&gt; for the nominal features. The categories of a nominal feature have no natural order. But if we sort the categories by their median &lt;code&gt;SalePrice&lt;/code&gt;, we can find trends. To show the trends better, the &lt;code&gt;SalePrice&lt;/code&gt; axis does not show the outliers. A box plot shows the middle half of the prices as a box, with a line at the median:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: buyers prefer built-in and attached garages to detached garages and other types.&lt;/li&gt;
+&lt;li&gt;The categories of &lt;code&gt;MSSubClass&lt;/code&gt; show that houses built in 1946 or later have higher prices than older houses.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;multivariate-analysis-three-or-more-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Multivariate Analysis: Three or More Features at a Time&lt;/h2&gt;
+&lt;p&gt;In this section, we look at how some related features change &lt;code&gt;SalePrice&lt;/code&gt; together.&lt;/p&gt;
+&lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have some of the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how these relationships change with &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt;:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, yLabelsScale = scales::dollar)
+p2 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;GarageArea&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageType&amp;quot;, yLabelsScale = scales::dollar)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For the same total area, properties in some neighborhoods sell for more than in others.&lt;/li&gt;
+&lt;li&gt;The properties without a garage form a separate group.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, properties with built-in or attached garages usually sell for more.&lt;/li&gt;
+&lt;li&gt;So &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some of the differences in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical-Numerical-Numerical&lt;/h3&gt;
+&lt;p&gt;The dots in the scatter plots overlap a lot. So let’s check these results in another way, and compare categories among properties of similar size. We split &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; into four groups (bins) with the same number of properties. Then we plot &lt;code&gt;SalePrice&lt;/code&gt; for each category in each group. We also check whether central air conditioning (&lt;code&gt;CentralAir&lt;/code&gt;) changes the price of properties of the same size:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageArea&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p3 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;CentralAir&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_cat_num_bins-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# median SalePrice by category within each bin
+get_bin_medians &amp;lt;- function(p) {
+  p$data %&amp;gt;%
+    group_by(bin = as.integer(bin), category = as.character(x)) %&amp;gt;%
+    summarise(median = median(y), .groups = &amp;quot;drop&amp;quot;)
+}
+lBinMedians &amp;lt;- map(list(neighborhood = p1, garage = p2, air = p3), get_bin_medians)
+bin_median &amp;lt;- function(plotName, binNum, categoryName) {
+  dfMedians &amp;lt;- lBinMedians[[plotName]]
+  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp;amp; dfMedians$category == categoryName], accuracy = 1)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-10&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The neighborhood is very important, even for properties of the same size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; goes from &lt;code&gt;$161,000&lt;/code&gt; in Type5 neighborhoods to &lt;code&gt;$327,000&lt;/code&gt; in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest group, so the neighborhood and the size are also related.&lt;/li&gt;
+&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages go with higher prices than detached garages. For the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$299,018&lt;/code&gt; for built-in garages, &lt;code&gt;$253,000&lt;/code&gt; for attached garages and &lt;code&gt;$140,000&lt;/code&gt; for detached garages. Some garage types have very few properties, so their box plots are less reliable.&lt;/li&gt;
+&lt;li&gt;Properties with central air conditioning sell for more, at every size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$262,140&lt;/code&gt; with central air and &lt;code&gt;$136,000&lt;/code&gt; without it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
+&lt;p&gt;Does a combination of two categorical features tell us more about &lt;code&gt;SalePrice&lt;/code&gt;? A heatmap answers this question. It is a grid of tiles, one tile for each combination of two categories:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;OverallQual&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# number of combinations, and those with fewer than 10 properties
+vCells &amp;lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
+vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Each tile shows the median &lt;code&gt;SalePrice&lt;/code&gt; (by its color) and the number of properties. A tile is grey if it has fewer than 10 properties, because a median of so few properties is not reliable.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Some neighborhoods have more properties with a high &lt;code&gt;OverallQual&lt;/code&gt;, so their prices are higher. But in Type4 neighborhoods, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the quality of the property.&lt;/li&gt;
+&lt;li&gt;It is less clear whether &lt;code&gt;GarageType&lt;/code&gt; has a large effect by itself. Buyers seem to prefer built-in and attached garages, but &lt;code&gt;NeighborhoodType&lt;/code&gt; explains most of the differences.&lt;/li&gt;
+&lt;li&gt;In both one-story and multi-story houses built after 1946, properties in low-density residential zones and floating village zones usually have higher prices.&lt;/li&gt;
+&lt;li&gt;Many combinations are rare: 11 of the 34 combinations of &lt;code&gt;OverallQual&lt;/code&gt; and &lt;code&gt;NeighborhoodType&lt;/code&gt;, and 20 of the 46 combinations of &lt;code&gt;MSSubClass&lt;/code&gt; and &lt;code&gt;MSZoning&lt;/code&gt;, have fewer than 10 properties. So we can compare only the common combinations reliably. Also, a model would find it hard to learn how these features work together.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</title>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/</link>
+      <pubDate>Sun, 25 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/</guid>
+      <description>
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/jquery/jquery-3.6.0.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/leaflet/leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/leaflet/leaflet.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/leafletfix/leafletfix.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/proj4/proj4.min.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/Proj4Leaflet/proj4leaflet.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/rstudio_leaflet/rstudio_leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/leaflet-binding/leaflet.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Ames Housing - Part 3 - Closing the deal - Building Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In this case study, we use the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt; to predict the sale prices of houses. The case study has three posts:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;In this post, we build a data pipeline: a series of steps that fixes errors in the data, fills in missing values, creates new features and drops features that we do not need. At the end, we save the finalized dataset.&lt;/li&gt;
+&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Part 2&lt;/a&gt;, we explore the finalized dataset to find which features affect the sale price.&lt;/li&gt;
+&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Part 3&lt;/a&gt;, we build models that predict the prices. A model is a formula that a computer learns from examples.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
 &lt;div id=&#34;neighborhoods-of-ames&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Neighborhoods of Ames&lt;/h2&gt;
 &lt;p&gt;Location is very important for the price of a house. The version of the dataset that we use (from Kaggle) does not have the location of each property. But the full dataset by Dean De Cock, which is in the R package &lt;code&gt;modeldata&lt;/code&gt;, has the latitude and longitude of 2930 properties. We use it to show where the neighborhoods are.&lt;/p&gt;
@@ -945,7 +1228,7 @@ dfDescription &amp;lt;- map2_dfr(vStarts, vEnds, function(iStart, iEnd) {
   vCodes &amp;lt;- str_split_fixed(vCategories, &amp;quot;	&amp;quot;, 2)
   tibble(Feature = vParts[1],
          Description = trimws(vParts[2]),
-         Categories = paste0(&amp;quot;&amp;lt;b&amp;gt;&amp;quot;, trimws(vCodes[, 1]), &amp;quot;&amp;lt;/b&amp;gt;: &amp;quot;, trimws(vCodes[, 2]), collapse = &amp;quot;&amp;lt;br&amp;gt;&amp;quot;))
+         Categories = if (length(vCategories) &amp;gt; 0) paste0(&amp;quot;&amp;lt;b&amp;gt;&amp;quot;, trimws(vCodes[, 1]), &amp;quot;&amp;lt;/b&amp;gt;: &amp;quot;, trimws(vCodes[, 2]), collapse = &amp;quot;&amp;lt;br&amp;gt;&amp;quot;) else &amp;quot;&amp;quot;)
 })
 
 cat(&amp;#39;&amp;lt;details class=&amp;quot;code-fold&amp;quot;&amp;gt;&amp;lt;summary&amp;gt;Show the data description&amp;lt;/summary&amp;gt;
@@ -1002,7 +1285,6 @@ LotFrontage
 Linear feet of street connected to property
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1013,7 +1295,6 @@ LotArea
 Lot size in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1178,7 +1459,6 @@ YearBuilt
 Original construction date
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1189,7 +1469,6 @@ YearRemodAdd
 Remodel date (same as construction date if no remodeling or additions)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1255,7 +1534,6 @@ MasVnrArea
 Masonry veneer area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1343,7 +1621,6 @@ BsmtFinSF1
 Type 1 finished square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1365,7 +1642,6 @@ BsmtFinSF2
 Type 2 finished square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1376,7 +1652,6 @@ BsmtUnfSF
 Unfinished square feet of basement area
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1387,7 +1662,6 @@ TotalBsmtSF
 Total square feet of basement area
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1442,7 +1716,6 @@ Electrical system
 First Floor square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1453,7 +1726,6 @@ First Floor square feet
 Second floor square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1464,7 +1736,6 @@ LowQualFinSF
 Low quality finished square feet (all floors)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1475,7 +1746,6 @@ GrLivArea
 Above grade (ground) living area square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1486,7 +1756,6 @@ BsmtFullBath
 Basement full bathrooms
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1497,7 +1766,6 @@ BsmtHalfBath
 Basement half bathrooms
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1508,7 +1776,6 @@ FullBath
 Full bathrooms above grade
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1519,7 +1786,6 @@ HalfBath
 Half baths above grade
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1530,7 +1796,6 @@ Bedroom
 Bedrooms above grade (does NOT include basement bedrooms)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1541,7 +1806,6 @@ KitchenAbvGr
 Kitchens above grade
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1563,7 +1827,6 @@ TotRmsAbvGrd
 Total rooms above grade (does not include bathrooms)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1585,7 +1848,6 @@ Fireplaces
 Number of fireplaces
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1618,7 +1880,6 @@ GarageYrBlt
 Year garage was built
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1640,7 +1901,6 @@ GarageCars
 Size of garage in car capacity
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1651,7 +1911,6 @@ GarageArea
 Size of garage in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1695,7 +1954,6 @@ WoodDeckSF
 Wood deck area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1706,7 +1964,6 @@ OpenPorchSF
 Open porch area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1717,7 +1974,6 @@ EnclosedPorch
 Enclosed porch area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1728,7 +1984,6 @@ Enclosed porch area in square feet
 Three season porch area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1739,7 +1994,6 @@ ScreenPorch
 Screen porch area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1750,7 +2004,6 @@ PoolArea
 Pool area in square feet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1794,7 +2047,6 @@ MiscVal
 $Value of miscellaneous feature
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1805,7 +2057,6 @@ MoSold
 Month Sold (MM)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1816,7 +2067,6 @@ YrSold
 Year Sold (YYYY)
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
-&lt;b&gt;&lt;/b&gt;:
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1849,7 +2099,7 @@ Condition of sale
 &lt;/details&gt;
 &lt;p&gt;Now, let’s put the training set and the testing set together in one dataset, and count the missing values in each feature:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_missing_counts(dfClean)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/missing_values-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
@@ -2021,7 +2271,7 @@ p1 &amp;lt;- eda_plot_histograms(dfBsmt, vFeaturesNum, nCols = 2, plotTitle = &a
 p2 &amp;lt;- eda_plot_correlation_matrix(dfBsmt[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_num_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_num_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most properties have a basement.&lt;/li&gt;
 &lt;li&gt;The column plots show that one category is much more common than the others in &lt;code&gt;BsmtFinType2&lt;/code&gt; and in &lt;code&gt;BsmtCond&lt;/code&gt;.&lt;/li&gt;
@@ -2029,7 +2279,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesChr &amp;lt;- dfBsmt %&amp;gt;% select(-SalePrice) %&amp;gt;% select_if(is.character) %&amp;gt;% colnames()
 
 cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(dfBsmt, .x)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_chr_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_chr_bsmt-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfBsmt, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2050,7 +2300,7 @@ p1 &amp;lt;- eda_plot_histograms(dfBath, vFeaturesNum, plotTitle = &amp;quot;Bat
 p2 &amp;lt;- eda_plot_correlation_matrix(dfBath[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_bath-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_bath-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfBath, vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2096,7 +2346,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfFireplace[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_fireplace-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_fireplace-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfFireplace, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2185,7 +2435,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfGarage[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_garage-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_garage-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfGarage, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2279,7 +2529,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfMasVnr[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_masvnr-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_masvnr-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfMasVnr, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2346,7 +2596,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfPool[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_pool-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_pool-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfPool, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2375,7 +2625,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfPorch[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_porch-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_porch-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(dfPorch, vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2393,7 +2643,7 @@ p1 &amp;lt;- eda_plot_histograms(dfClean, vFeaturesNum, plotTitle = &amp;quot;Bu
 p2 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_area-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_area-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(vFeaturesNum)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2427,7 +2677,7 @@ p2 &amp;lt;- cowplot::plot_grid(plotlist = map(vFeaturesChr, ~ eda_plot_column(d
 p3 &amp;lt;- eda_plot_correlation_matrix(dfClean[c(&amp;quot;SalePrice&amp;quot;,vFeaturesNum)], outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlation with SalePrice&amp;quot;)
 
 grid.arrange(arrangeGrob(p1, p2, nrow = 2), p3, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_construction_years-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_construction_years-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cleanup
 rm(vFeaturesNum, vFeaturesChr)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -2452,7 +2702,7 @@ p1 &amp;lt;- eda_plot_box(dfClean, &amp;quot;Neighborhood&amp;quot;, &amp;quot;S
 p2 &amp;lt;- eda_plot_box(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::label_dollar(accuracy = 1))
 
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_neighborhood-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_neighborhood-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;other-missing-features&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Other Missing Features&lt;/h4&gt;
@@ -2604,11 +2854,11 @@ vFeaturesAssoc &amp;lt;- dfAssocPairs %&amp;gt;% filter(abs(association) &amp;gt
 vPorchAssoc &amp;lt;- map_dbl(c(&amp;quot;OpenPorchSF&amp;quot;,&amp;quot;EnclosedPorch&amp;quot;,&amp;quot;3SsnPorch&amp;quot;,&amp;quot;ScreenPorch&amp;quot;), ~ assoc_of(.x, &amp;quot;PorchSF&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Here are the 36 features that have an association of 0.85 or more with at least one other feature. Related features are next to each other:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_association_matrix(dfClean[vFeaturesAssoc], plotTitle = &amp;quot;Features with an association of 0.85 or more with another feature&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Most of the features that we drop have a strong association with another feature: &lt;code&gt;GarageCars&lt;/code&gt; with &lt;code&gt;GarageArea&lt;/code&gt; (0.89), &lt;code&gt;GrLivArea&lt;/code&gt; with &lt;code&gt;TotalSF&lt;/code&gt; (0.87), &lt;code&gt;BsmtFullBath&lt;/code&gt; with &lt;code&gt;BsmtBath&lt;/code&gt; (0.97), &lt;code&gt;PoolArea&lt;/code&gt; with &lt;code&gt;HasPool&lt;/code&gt; (0.94), &lt;code&gt;YearBuilt&lt;/code&gt; with &lt;code&gt;Vintage&lt;/code&gt; (0.9), &lt;code&gt;GarageYrBlt&lt;/code&gt; with &lt;code&gt;YearBuilt&lt;/code&gt; (0.86), &lt;code&gt;YearRemodAdd&lt;/code&gt; with &lt;code&gt;PropertyAge&lt;/code&gt; (-1), and &lt;code&gt;Neighborhood&lt;/code&gt; with &lt;code&gt;NeighborhoodType&lt;/code&gt; (1).&lt;/li&gt;
 &lt;li&gt;The four porch features have only a medium association with &lt;code&gt;PorchSF&lt;/code&gt; (between 0.19 and 0.61). So they do not repeat its information. We drop them because &lt;code&gt;PorchSF&lt;/code&gt;, their total area, replaces them.&lt;/li&gt;
-&lt;li&gt;The matrix also finds features that repeat information, which we have not dropped yet. &lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; give the same information as the &lt;em&gt;None&lt;/em&gt; category of the garage, fireplace and masonry features (Cramer’s V of about 1). Also, &lt;code&gt;MSSubClass&lt;/code&gt; has a strong association with &lt;code&gt;BldgType&lt;/code&gt; (0.89) and with &lt;code&gt;HouseStyle&lt;/code&gt; (0.83). Models that use decision trees are not affected by such repeated information. But in linear models, features that repeat each other (collinear features) make the results unreliable. So we will remove them before we build the models in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/&#34;&gt;the next post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;The matrix also finds features that repeat information, which we have not dropped yet. &lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; give the same information as the &lt;em&gt;None&lt;/em&gt; category of the garage, fireplace and masonry features (Cramer’s V of about 1). Also, &lt;code&gt;MSSubClass&lt;/code&gt; has a strong association with &lt;code&gt;BldgType&lt;/code&gt; (0.89) and with &lt;code&gt;HouseStyle&lt;/code&gt; (0.83). Models that use decision trees are not affected by such repeated information. But in linear models, features that repeat each other (collinear features) make the results unreliable. So we will remove them before we build the models in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/&#34;&gt;Part 3&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;skewed-categorical-features&#34; class=&#34;section level4&#34;&gt;
@@ -2617,7 +2867,7 @@ vPorchAssoc &amp;lt;- map_dbl(c(&amp;quot;OpenPorchSF&amp;quot;,&amp;quot;Enclos
 &lt;p&gt;For each categorical feature, let’s look at the share of its most common category. Let’s also count its rare categories, which have fewer than 10 properties:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p_dominance &amp;lt;- eda_plot_category_dominance(dfClean, threshold = 0.95, minCount = 10)
 p_dominance&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_category_dominance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_category_dominance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDominance &amp;lt;- p_dominance$data
 dfRare &amp;lt;- dfDominance %&amp;gt;% filter(share &amp;lt; 0.95, n_rare &amp;gt; 0) %&amp;gt;% arrange(desc(n_rare), desc(share))&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
@@ -2634,7 +2884,7 @@ dfRare &amp;lt;- dfDominance %&amp;gt;% filter(share &amp;lt; 0.95, n_rare &amp;
   pull(feature)
 
 cowplot::plot_grid(plotlist = map(vFeatures_skewed, ~ eda_plot_column(dfClean, .x)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_skewed_features-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/index_files/figure-html/plot_skewed_features-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Features to exclude for modelling
 vFeatures_to_exclude &amp;lt;- c(vFeatures_to_exclude, vFeatures_skewed) %&amp;gt;% unique()
 
@@ -2668,257 +2918,15 @@ print(&amp;quot;Dimensions of the finalized dataset&amp;quot;)&lt;/code&gt;&lt;/
 &lt;pre&gt;&lt;code&gt;Excluding Id, there are 72 features in the finalized dataset.&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(glue::glue(&amp;quot;There are {length(vFeaturesNum)} numerical, {length(vFeaturesCat1)} ordinal and {length(vFeaturesCat2)} nominal features.&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;There are 26 numerical, 26 ordinal and 20 nominal features.&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
-&lt;p&gt;In this section, we look at each feature by itself.&lt;/p&gt;
-&lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Numerical Features&lt;/h3&gt;
-&lt;p&gt;First, let’s plot all the features that measure an area in square feet:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)])&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;All the area features have outliers, which are values that are very different from most other values.&lt;/li&gt;
-&lt;li&gt;Many features are very skewed: most values are small and a few values are much larger. Before we build models, we must transform these features (for example, with a log) to make them less skewed.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Now let’s look at the other numerical features:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &amp;quot;SF|Area&amp;quot;)], &amp;quot;SalePrice&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/univariate_continuous2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;Most properties were sold less than 20 years after they were built or remodeled.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Let’s plot &lt;code&gt;SalePrice&lt;/code&gt; on a log scale. On a log scale, each step on the axis multiplies the value by the same amount:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_histograms(dfClean, &amp;quot;SalePrice&amp;quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/SalePrice_distribution-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;The distribution has long tails on both sides: a few properties are much cheaper or much more expensive than most.&lt;/li&gt;
-&lt;li&gt;11 properties cost less than USD 50,000, and 17 properties cost more than USD 500,000.&lt;/li&gt;
-&lt;li&gt;Outliers have a strong effect on linear models.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;categorical-features&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Categorical Features&lt;/h2&gt;
-&lt;div id=&#34;ordinal-features&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Ordinal Features&lt;/h3&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat1, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;In many features, 1 or 2 categories are much more common than the others. This makes these features hard to use for predictions, because the data has only a few examples of the other categories.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;nominal-features.&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Nominal Features.&lt;/h3&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist = map(vFeaturesCat2, ~ eda_plot_column(dfClean, .x)), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Univariate_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;In many features, 1 or 2 categories are much more common than the others.&lt;/li&gt;
-&lt;li&gt;Most properties are sold in the summer months, and the fewest in the winter months.&lt;/li&gt;
-&lt;li&gt;The data shows the effect of the housing market crisis: the fewest properties were sold in 2010.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;bivariate-analysis-two-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Bivariate Analysis: Two Features at a Time&lt;/h2&gt;
-&lt;div id=&#34;numerical-numerical&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Numerical-Numerical&lt;/h3&gt;
-&lt;p&gt;Let’s look at how &lt;code&gt;SalePrice&lt;/code&gt; changes with each of the other numerical features. A scatter plot shows one dot for each property, and the line shows the best straight line through the dots (a regression line):&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, vFeaturesNum, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/bivariate_scatterplots-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Let’s look more closely at &lt;code&gt;TotalSF&lt;/code&gt;. The labels show the properties with the largest Cook’s distance. Cook’s distance measures how much one point pulls the regression line towards itself:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, yLabelsScale = scales::dollar,
-                 nLabel = 3, feature_id = &amp;quot;Id&amp;quot;, labelBy = &amp;quot;cooks&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/influential_points-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Cook&amp;#39;s distance of each property in a linear fit of SalePrice on TotalSF
-dfInfluence &amp;lt;- dfClean %&amp;gt;% select(Id, TotalSF, SalePrice) %&amp;gt;% drop_na()
-dfInfluence &amp;lt;- dfInfluence %&amp;gt;%
-  mutate(cooks = cooks.distance(lm(SalePrice ~ TotalSF, data = dfInfluence))) %&amp;gt;%
-  arrange(desc(cooks))
-
-vOutliers_TotalSF &amp;lt;- dfInfluence$Id[1:3]&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;The scatter plot of &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;SalePrice&lt;/code&gt; clearly shows a few very large properties that sold at unusually low prices. These points have high leverage: they are far from the other points, so they pull the regression line strongly. Without them, the line would be steeper.&lt;/li&gt;
-&lt;li&gt;The same properties also affect &lt;code&gt;TotalBsmtSF&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;The Ids of these properties are 1299,2550,524. Their Cook’s distances are 5.69, 2.46, 0.54. These values are much higher than the usual limit of 4/n = 0.0014, where n is the number of properties. The next property has a Cook’s distance of only 0.12. Of these three properties, 524 and 1299 are in the training set.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;transforming-skewed-features&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Transforming Skewed Features&lt;/h3&gt;
-&lt;p&gt;Many numerical features are right skewed. Can we change them with a simple formula (a transform), so that their relationship with &lt;code&gt;log(SalePrice)&lt;/code&gt; becomes closer to a straight line? Let’s compare common transforms of three features: &lt;code&gt;TotalSF&lt;/code&gt;, the strongest area feature; &lt;code&gt;LotArea&lt;/code&gt;, which is very skewed; and &lt;code&gt;GarageArea&lt;/code&gt;, which is almost not skewed. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in &lt;code&gt;log(SalePrice)&lt;/code&gt; the line explains:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lTransformPlots &amp;lt;- map(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;), ~ eda_plot_transforms(dfClean, .x, &amp;quot;SalePrice&amp;quot;))
-cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_transforms-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# R-squared of each transform, in the order of the panels
-vR2 &amp;lt;- map(lTransformPlots, ~ .x$data %&amp;gt;%
-             distinct(transform, r_squared) %&amp;gt;%
-             pull(r_squared) %&amp;gt;%
-             set_names(c(&amp;quot;identity&amp;quot;, &amp;quot;log&amp;quot;, &amp;quot;sqrt&amp;quot;, &amp;quot;cuberoot&amp;quot;))) %&amp;gt;%
-  set_names(c(&amp;quot;TotalSF&amp;quot;, &amp;quot;LotArea&amp;quot;, &amp;quot;GarageArea&amp;quot;))
-r2 &amp;lt;- function(feature, transform) round(vR2[[feature]][transform], 3)
-
-# skewness of each feature
-vSkew &amp;lt;- map_dbl(c(TotalSF = &amp;quot;TotalSF&amp;quot;, LotArea = &amp;quot;LotArea&amp;quot;, GarageArea = &amp;quot;GarageArea&amp;quot;), ~ timeDate::skewness(dfClean[[.x]], na.rm = T))&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;A log transform almost doubles the R-squared of &lt;code&gt;LotArea&lt;/code&gt; (skewness 12.8), from 0.066 to 0.138. Without the transform, a few very large lots control the line. The log makes these large values smaller.&lt;/li&gt;
-&lt;li&gt;All the transforms improve &lt;code&gt;TotalSF&lt;/code&gt; (skewness 1.5) a little. With a log, the R-squared goes from 0.61 to 0.647.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;GarageArea&lt;/code&gt; (skewness 0.2) is almost not skewed, and the transforms make the fit worse. With a log, the R-squared goes down from 0.426 to 0.389. Also, the log cannot use the properties without a garage, because the log of 0 does not exist.&lt;/li&gt;
-&lt;li&gt;So, before we build linear models, we should transform only the very skewed features, not all of them.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;correlations-with-saleprice&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Correlations with SalePrice&lt;/h3&gt;
-&lt;p&gt;We keep the features whose correlation with &lt;code&gt;SalePrice&lt;/code&gt; is at least 0.1 or at most -0.1. The Pearson correlation measures how close a relationship is to a straight line, so outliers and skewed features affect it strongly. The Spearman correlation uses the ranks of the values (1st, 2nd, 3rd, …) instead of the values. So it measures whether one feature always goes up (or always goes down) when the other goes up, even along a curve. If we compare the two, we can see which relationships are strong but not straight lines:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(corrr)
-
-dfCor &amp;lt;- dfClean[vFeaturesNum] %&amp;gt;% 
-  correlate() %&amp;gt;% 
-  focus(SalePrice) %&amp;gt;% 
-  dplyr::rename(feature = term,
-                corr = SalePrice) %&amp;gt;%
-  arrange(desc(abs(corr))) %&amp;gt;% 
-  dplyr::filter(abs(corr) &amp;gt; 0.1) %&amp;gt;% 
-  mutate(corr = round(corr, 2)) %&amp;gt;% 
-  mutate(feature = fct_reorder(feature, corr)) %&amp;gt;% 
-  dplyr::filter(!(feature %in% vFeatures_to_exclude))
-
-vFeaturesCor &amp;lt;- dfCor %&amp;gt;% pull(feature) %&amp;gt;% as.character()
-
-p1 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;pearson&amp;quot;, minAbsCor = 0.1)
-p2 &amp;lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &amp;quot;SalePrice&amp;quot;, method = &amp;quot;spearman&amp;quot;, minAbsCor = 0.1)
-cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/plot_correlated-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# compare Pearson and Spearman correlations
-dfCorMethods &amp;lt;- tibble(feature = setdiff(vFeaturesNum, &amp;quot;SalePrice&amp;quot;)) %&amp;gt;%
-  mutate(pearson = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;)),
-         spearman = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &amp;quot;pairwise.complete.obs&amp;quot;, method = &amp;quot;spearman&amp;quot;)))
-cor_of &amp;lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMethods$feature == feature_name], 2)&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;The 5 most correlated features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. A buyer would naturally look at these features to judge a property and its price.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;PropertyAge&lt;/code&gt; has a strong negative correlation with &lt;code&gt;SalePrice&lt;/code&gt;. This means that newer properties sell for higher prices than older properties.&lt;/li&gt;
-&lt;li&gt;For most features, the Pearson and Spearman correlations are similar. But &lt;code&gt;LotArea&lt;/code&gt; is different: its correlation goes up from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from a straight line. The log transform above partly corrects this.&lt;/li&gt;
-&lt;li&gt;For &lt;code&gt;BsmtFinSF1&lt;/code&gt;, the correlation goes down from 0.43 to 0.33. About 32% of the properties have no finished basement, so they all have the same rank. Also, the largest finished basements have a large effect on the Pearson correlation. So the straight-line relationship with &lt;code&gt;SalePrice&lt;/code&gt; seems stronger than the rank relationship.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;numerical-categorical-ordinal&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Numerical-Categorical (Ordinal)&lt;/h3&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-9&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;In almost all of these features, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the order of the categories.&lt;/li&gt;
-&lt;li&gt;The overall quality and the exterior quality show some of the strongest trends.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;numerical-categorical-nominal&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Numerical-Categorical (Nominal)&lt;/h3&gt;
-&lt;p&gt;Now let’s look at &lt;code&gt;SalePrice&lt;/code&gt; for the nominal features. The categories of a nominal feature have no natural order. But if we sort the categories by their median &lt;code&gt;SalePrice&lt;/code&gt;, we can find trends. To show the trends better, the &lt;code&gt;SalePrice&lt;/code&gt; axis does not show the outliers. A box plot shows the middle half of the prices as a box, with a line at the median:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&amp;quot;SalePrice&amp;quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;whats-notable-10&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;GarageType&lt;/code&gt;: buyers prefer built-in and attached garages to detached garages and other types.&lt;/li&gt;
-&lt;li&gt;The categories of &lt;code&gt;MSSubClass&lt;/code&gt; show that houses built in 1946 or later have higher prices than older houses.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;multivariate-analysis-three-or-more-features-at-a-time&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Multivariate Analysis: Three or More Features at a Time&lt;/h2&gt;
-&lt;p&gt;In this section, we look at how some related features change &lt;code&gt;SalePrice&lt;/code&gt; together.&lt;/p&gt;
-&lt;div id=&#34;numerical-numerical-categorical&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Numerical-Numerical-Categorical&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; have some of the strongest correlations with &lt;code&gt;SalePrice&lt;/code&gt;. Let’s see how these relationships change with &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt;:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;TotalSF&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, yLabelsScale = scales::dollar)
-p2 &amp;lt;- eda_plot_scatter_cat(dfClean, &amp;quot;GarageArea&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageType&amp;quot;, yLabelsScale = scales::dollar)
-cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_num_num_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;For the same total area, properties in some neighborhoods sell for more than in others.&lt;/li&gt;
-&lt;li&gt;The properties without a garage form a separate group.&lt;/li&gt;
-&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, properties with built-in or attached garages usually sell for more.&lt;/li&gt;
-&lt;li&gt;So &lt;code&gt;NeighborhoodType&lt;/code&gt; and &lt;code&gt;GarageType&lt;/code&gt; explain some of the differences in &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;div id=&#34;categorical-numerical-numerical&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Categorical-Numerical-Numerical&lt;/h3&gt;
-&lt;p&gt;The dots in the scatter plots overlap a lot. So let’s check these results in another way, and compare categories among properties of similar size. We split &lt;code&gt;TotalSF&lt;/code&gt; and &lt;code&gt;GarageArea&lt;/code&gt; into four groups (bins) with the same number of properties. Then we plot &lt;code&gt;SalePrice&lt;/code&gt; for each category in each group. We also check whether central air conditioning (&lt;code&gt;CentralAir&lt;/code&gt;) changes the price of properties of the same size:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
-p2 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;GarageArea&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
-p3 &amp;lt;- eda_plot_box_by_bins(dfClean, &amp;quot;CentralAir&amp;quot;, &amp;quot;SalePrice&amp;quot;, &amp;quot;TotalSF&amp;quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
-cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_num_bins-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# median SalePrice by category within each bin
-get_bin_medians &amp;lt;- function(p) {
-  p$data %&amp;gt;%
-    group_by(bin = as.integer(bin), category = as.character(x)) %&amp;gt;%
-    summarise(median = median(y), .groups = &amp;quot;drop&amp;quot;)
-}
-lBinMedians &amp;lt;- map(list(neighborhood = p1, garage = p2, air = p3), get_bin_medians)
-bin_median &amp;lt;- function(plotName, binNum, categoryName) {
-  dfMedians &amp;lt;- lBinMedians[[plotName]]
-  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp;amp; dfMedians$category == categoryName], accuracy = 1)
-}&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;whats-notable-11&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;What’s notable?&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;The neighborhood is very important, even for properties of the same size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; goes from &lt;code&gt;$161,000&lt;/code&gt; in Type5 neighborhoods to &lt;code&gt;$327,000&lt;/code&gt; in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest group, so the neighborhood and the size are also related.&lt;/li&gt;
-&lt;li&gt;For the same &lt;code&gt;GarageArea&lt;/code&gt;, built-in and attached garages go with higher prices than detached garages. For the largest garages, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$299,018&lt;/code&gt; for built-in garages, &lt;code&gt;$253,000&lt;/code&gt; for attached garages and &lt;code&gt;$140,000&lt;/code&gt; for detached garages. Some garage types have very few properties, so their box plots are less reliable.&lt;/li&gt;
-&lt;li&gt;Properties with central air conditioning sell for more, at every size. For the largest properties, the median &lt;code&gt;SalePrice&lt;/code&gt; is &lt;code&gt;$262,140&lt;/code&gt; with central air and &lt;code&gt;$136,000&lt;/code&gt; without it.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id=&#34;categorical-categorical-numerical&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Categorical-Categorical-Numerical&lt;/h3&gt;
-&lt;p&gt;Does a combination of two categorical features tell us more about &lt;code&gt;SalePrice&lt;/code&gt;? A heatmap answers this question. It is a grid of tiles, one tile for each combination of two categories:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;OverallQual&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
-p2 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;GarageType&amp;quot;, &amp;quot;NeighborhoodType&amp;quot;, &amp;quot;SalePrice&amp;quot;)
-p3 &amp;lt;- eda_plot_heatmap(dfClean, &amp;quot;MSSubClass&amp;quot;, &amp;quot;MSZoning&amp;quot;, &amp;quot;SalePrice&amp;quot;)
-cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/index_files/figure-html/multivariate_cat_cat_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# number of combinations, and those with fewer than 10 properties
-vCells &amp;lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
-vSparse &amp;lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &amp;lt; 10))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Each tile shows the median &lt;code&gt;SalePrice&lt;/code&gt; (by its color) and the number of properties. A tile is grey if it has fewer than 10 properties, because a median of so few properties is not reliable.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Some neighborhoods have more properties with a high &lt;code&gt;OverallQual&lt;/code&gt;, so their prices are higher. But in Type4 neighborhoods, &lt;code&gt;SalePrice&lt;/code&gt; clearly changes with the quality of the property.&lt;/li&gt;
-&lt;li&gt;It is less clear whether &lt;code&gt;GarageType&lt;/code&gt; has a large effect by itself. Buyers seem to prefer built-in and attached garages, but &lt;code&gt;NeighborhoodType&lt;/code&gt; explains most of the differences.&lt;/li&gt;
-&lt;li&gt;In both one-story and multi-story houses built after 1946, properties in low-density residential zones and floating village zones usually have higher prices.&lt;/li&gt;
-&lt;li&gt;Many combinations are rare: 11 of the 34 combinations of &lt;code&gt;OverallQual&lt;/code&gt; and &lt;code&gt;NeighborhoodType&lt;/code&gt;, and 20 of the 46 combinations of &lt;code&gt;MSSubClass&lt;/code&gt; and &lt;code&gt;MSZoning&lt;/code&gt;, have fewer than 10 properties. So we can compare only the common combinations reliably. Also, a model would find it hard to learn how these features work together.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# split the data back to training and testing sets
-# dfTrain &amp;lt;- dfClean %&amp;gt;% dplyr::slice(1:nrows_train)
-# dfTest &amp;lt;- dfClean %&amp;gt;% dplyr::slice(-(1:nrows_train))
-
-save(vFeaturesCat, vFeaturesNum, vFeaturesCor, dfClean, vTestIDs, 
+&lt;p&gt;The finalized dataset has 2919 properties and 73 columns: the &lt;code&gt;Id&lt;/code&gt; and 72 features, including &lt;code&gt;SalePrice&lt;/code&gt;. We save it, so that the next posts can use it:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# cache = FALSE: always save the current data. Part 3 checks the contents of this file (not its date), so saving
+# the same data again does not make Part 3 tune its models again.
+save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, vFeaturesCat1, vFeaturesCat2, vFeatures_to_exclude,
      file = &amp;quot;Ames_Housing_Clean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;The data is now clean and ready. In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Part 2&lt;/a&gt;, we explore this dataset, one feature at a time, then two and three features at a time, to find which features affect the sale price.&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>

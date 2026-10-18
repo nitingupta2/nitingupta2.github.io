@@ -119,40 +119,49 @@
     <loc>https://www.nitingupta.com/post/a-brief-history-of-cricket/</loc>
     <lastmod>2017-02-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <loc>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</loc>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/casestudies/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/categories/case-studies/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/ggplot2/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/glmnet/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/linear/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/non-linear/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/ranger/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/regression/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/xgboost/</loc>
+    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/ames-housing-part2-eda/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/casestudies/ames-housing-part1-eda/</loc>
+    <loc>https://www.nitingupta.com/tags/eda/</loc>
+    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/</loc>
     <lastmod>2016-12-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/eda/</loc>
+    <loc>https://www.nitingupta.com/tags/data-cleaning/</loc>
+    <lastmod>2016-12-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/feature-engineering/</loc>
     <lastmod>2016-12-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/casestudies/diamonds-part3-non-linear-models/</loc>

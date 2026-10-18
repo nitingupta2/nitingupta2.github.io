@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="
+Other posts in this series:
+
+Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline
+Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis
+
+In Part 1, we built a data pipeline that cleans the Ames Housing dataset, and in Part 2, we explored the finalized dataset.
+In this post, we build linear and non-linear models, and we find out how well they predict the SalePrice of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">
+  <meta property="og:title" content="Ames Housing - Part 3 - Closing the deal - Building Models | Nitin Gupta">
+  <meta property="og:description" content="
+Other posts in this series:
+
+Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline
+Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis
+
+In Part 1, we built a data pipeline that cleans the Ames Housing dataset, and in Part 2, we explored the finalized dataset.
+In this post, we build linear and non-linear models, and we find out how well they predict the SalePrice of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2016-12-27T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2016-12-27T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Ames Housing - Part 3 - Closing the deal - Building Models | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Ames Housing - Part 3 - Closing the deal - Building Models</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 27, 2016
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/">Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</a></li>
+</ul>
+<p>In <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Part 1</a>, we built a data pipeline that cleans the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a>, and in <a href="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/">Part 2</a>, we explored the finalized dataset.</p>
+<p>In this post, we build linear and non-linear models, and we find out how well they predict the <code>SalePrice</code> of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.</p>
+</div>
+<div id="evaluation-criteria" class="section level2">
+<h2>Evaluation Criteria</h2>
+<p>To measure how good a model is, we use the root mean squared error (RMSE) between the log of the predicted price and the log of the actual <code>SalePrice</code>. RMSE is the typical size of a prediction error, so a lower RMSE is better. We use the log of the prices so that an error of 10% counts the same for an expensive house and for a cheap house.</p>
+</div>
+<div id="steps-for-building-models" class="section level2">
+<h2>Steps for Building Models</h2>
+<p>Each model has settings that it cannot learn from the data. We must choose them before training. These settings are called hyperparameters. To choose the best hyperparameters, we use K-fold cross validation, as described in the steps below:</p>
+<ul>
+<li>Remove features that repeat the information of other features, and change ordinal features into scores.</li>
+<li>Split the training data into K parts (folds). Each time, the model learns from all the folds except one (the training part), and we check its predictions on the remaining fold (the validation part). We split the data in a way that keeps a similar mix of prices in each fold (stratified sampling).</li>
+<li>Choose the linear and non-linear models to use.</li>
+<li>For each model, make a set (a grid) of hyperparameter combinations that covers the possible values evenly (a space-filling grid).</li>
+<li>For each combination, train the model on the training part and make predictions on the validation part. Repeat this for all the folds.</li>
+<li>Calculate the RMSE, and choose the combination with the lowest RMSE.</li>
+<li>Train each model again, with its best combination, on the complete training set.</li>
+<li>Calculate the RMSE of each final model on the testing set, which has properties that the models have not seen.</li>
+<li>Choose the model with the lowest RMSE.</li>
+</ul>
+</div>
+<div id="removing-collinear-predictors" class="section level2">
+<h2>Removing Collinear Predictors</h2>
+<p>Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Part 1</a> repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and <code>lm</code> (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.</p>
+<p>The association matrix in Part 1 showed which features repeat each other. We drop these features, because other features already give their information:</p>
+<ul>
+<li><code>HasGarage</code>, <code>HasFireplace</code> and <code>HasMasVnr</code> are the same as, or almost the same as, the <em>None</em> category of <code>GarageType</code>, <code>FireplaceQu</code> and <code>MasVnrType</code>.</li>
+<li><code>MSSubClass</code> combines the type and the style of a building. <code>BldgType</code> and <code>HouseStyle</code> already give this information. Its <em>duplex</em> category is identical to the <em>duplex</em> category of <code>BldgType</code>.</li>
+<li><code>TotalBath</code> is exactly <code>FullBath + 0.5 * HalfBath + BsmtBath</code>. We drop <code>HalfBath</code>, not <code>TotalBath</code>. So we keep the total, which is one of the most important features for the decision tree models. And we lose no information, because we can calculate <code>HalfBath</code> from the other three features.</li>
+</ul>
+<div id="encoding-ordinal-features" class="section level3">
+<h3>Encoding Ordinal Features</h3>
+<p>The categories of features such as <code>OverallQual</code> or <code>KitchenQual</code> have a natural order. These are ordinal features. By default, <code>step_dummy()</code> changes an ordinal feature into several features called polynomial contrasts. It makes one new feature for each category except one, and these features describe straight, curved and more complex trends across the grades. But some grades are very rare. For example, only one property has an <code>OverallCond</code> of 1. So a rare grade can be missing from a fold. Then some of these new features become collinear in that fold.</p>
+<p>Instead, we change each ordinal feature into one whole number (a score) that follows the order of its categories: 1, 2, 3 and so on. This assumes that the steps between the grades are equal. First, we drop the categories that no property has, such as a <em>Poor</em> exterior quality, so that the scores have no gaps. Here are the results of a linear model with each method, on the same folds:</p>
+<pre class="r"><code>dfEncodingComparison %&gt;% 
+  mutate(lm_cv_rmse = round(lm_cv_rmse, 4)) %&gt;% 
+  knitr::kable(col.names = c(&quot;Encoding of ordinal features&quot;, &quot;Predictors&quot;, &quot;Folds with a rank-deficient fit&quot;, &quot;lm cross validated RMSE&quot;))</code></pre>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="11%" />
+<col width="33%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Encoding of ordinal features</th>
+<th align="right">Predictors</th>
+<th align="right">Folds with a rank-deficient fit</th>
+<th align="right">lm cross validated RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">polynomial contrasts</td>
+<td align="right">214</td>
+<td align="right">4</td>
+<td align="right">0.1470</td>
+</tr>
+<tr class="even">
+<td align="left">ordinal scores</td>
+<td align="right">151</td>
+<td align="right">0</td>
+<td align="right">0.1336</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>encoding_value &lt;- function(encodingName, column) dfEncodingComparison[[column]][dfEncodingComparison$encoding == encodingName]</code></pre>
+<ul>
+<li>With polynomial contrasts, <code>lm</code> cannot calculate all the coefficients in 4 of the 5 folds. With scores, this problem happens in 0 folds.</li>
+<li>With scores, the number of features goes down from 214 to 151, and the cross validated RMSE of <code>lm</code> goes down from 0.147 to 0.134. The simpler method works better on new data, because the model does not have to learn a separate effect for each rare grade.</li>
+</ul>
+<p>Finally, <code>step_lincomb()</code> checks whether any features are still exact combinations of other features. This could happen because properties without a basement or a garage have the <em>None</em> category in every basement or garage feature. With scores, it finds no such features.</p>
+<p>After these steps, there are 151 features, and a linear model can calculate a coefficient for each of them:</p>
+<pre class="r"><code>model_lm_check &lt;- lm(target ~ ., data = dfTrain_Proc %&gt;% select(-Id))
+print(glue::glue(&quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(model_lm_check))} coefficients could not be estimated&quot;))</code></pre>
+<pre><code>0 of 152 coefficients could not be estimated</code></pre>
+</div>
+</div>
+<div id="partitioning-training-data" class="section level2">
+<h2>Partitioning Training Data</h2>
+<p>We split the training data into 5 folds. In each fold, the model learns from 80% of the data, and we compare its predictions with the actual prices on the other 20%.</p>
+<p>Let’s look at the spread (distribution) of the target, which is the value that we want to predict, in all the folds:</p>
+<pre class="r"><code>cv_folds %&gt;% 
+  mutate(target = map(splits, function(Z) bind_rows(training(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;training&quot;), 
+                                                    testing(Z) %&gt;% select(target) %&gt;% mutate(type = &quot;validation&quot;)))) %&gt;% 
+  select(-splits) %&gt;% 
+  unnest(cols = c(target)) %&gt;% 
+  ggplot(aes(x = target)) +
+  geom_histogram(bins = 30, color = &quot;white&quot;, fill = &quot;#F37735&quot;) +
+  labs(x = &quot;log(SalePrice)&quot;) +
+  facet_grid(type ~ id)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_target_partitioning-1.png" alt="" width="672" /></p>
+<p>Because we use stratified sampling, the prices have similar distributions in the training part and in the validation part of each fold.</p>
+</div>
+<div id="linear-models" class="section level2">
+<h2>Linear Models</h2>
+<div id="ordinary-least-squares-regression" class="section level3">
+<h3>Ordinary Least Squares Regression</h3>
+<p>First, we use cross validation to test a simple linear model on the training data. This model, called ordinary least squares, finds the straight-line formula with the smallest squared errors. Its result is our starting point (benchmark). If more complex models are not much better than this result, they are not worth the extra effort.</p>
+<pre class="r"><code>model_spec_lm</code></pre>
+<pre><code>Linear Regression Model Specification (regression)
+
+Computational engine: lm </code></pre>
+<pre class="r"><code>cv_results_lm</code></pre>
+<pre><code># A tibble: 1 × 1
+  mean_rmse
+      &lt;dbl&gt;
+1     0.134</code></pre>
+<pre class="r"><code>rmse_val &lt;- cv_results_lm %&gt;% pull(mean_rmse)</code></pre>
+<div id="whats-notable" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>A linear model with all the features gives an RMSE of <strong>0.1336</strong>.</li>
+<li>This is the simplest and fastest model, and it has no hyperparameters to choose.</li>
+</ul>
+<p>A residual is the difference between the actual value and the predicted value, here of <code>log(SalePrice)</code>. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of the linear model, fitted on the complete training set. The labels show the <code>Id</code> of the most extreme properties in each plot:</p>
+<pre class="r"><code>eda_plot_residuals(model_lm_check, vLabels = dfTrain_Proc$Id, plotTitle = &quot;Residual plots of the linear model&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/lm_residuals-1.png" alt="" width="960" /></p>
+<pre class="r"><code># standardized residual, leverage and Cook&#39;s distance of each property
+dfLmDiagnostics &lt;- tibble(Id = dfTrain_Proc$Id,
+                          std_resid = rstandard(model_lm_check),
+                          leverage = hatvalues(model_lm_check),
+                          cooks = cooks.distance(model_lm_check)) %&gt;%
+  arrange(desc(cooks))
+lm_diagnostic &lt;- function(propertyId, column) dfLmDiagnostics[[column]][dfLmDiagnostics$Id == propertyId]</code></pre>
+<ul>
+<li><strong>Residuals vs Fitted:</strong> Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids <strong>1299</strong>, <strong>524</strong> and <strong>633</strong>. In Part 2, we saw that 1299 and 524 are very large properties that sold at low prices.</li>
+<li><strong>Normal Q-Q:</strong> The lower tail is much longer than the dashed line. Property 1299 has a standardized residual of -12.4, and property 524 has -9.1. For normally distributed errors, values beyond -3 are very rare.</li>
+<li><strong>Scale-Location:</strong> The smooth line goes up at both ends, so the errors are larger for the cheapest and the most expensive properties.</li>
+<li><strong>Residuals vs Leverage:</strong> Properties 1299 and 524 have both a large residual and a high leverage (0.22 and 0.16). So they have the largest Cook’s distances, 0.29 and 0.11. These are below the dashed contour at 0.5, but much larger than for most properties. They pull the straight-line fit, which is one reason why <code>glmnet</code> and the tree-based models work better.</li>
+</ul>
+</div>
+</div>
+<div id="regularized-linear-model" class="section level3">
+<h3>Regularized Linear Model</h3>
+<p>Next, we use <code>glmnet</code>, a linear model with regularization. Regularization adds a penalty for large coefficients. This makes the model keep only the effects that the data clearly supports. <code>glmnet</code> combines two types of regularization: LASSO (L1), which can reduce the coefficient of a feature to exactly 0, and Ridge (L2), which makes all the coefficients smaller. We search for the values of these hyperparameters that give the lowest RMSE:</p>
+<ul>
+<li><code>penalty</code>: the total amount of regularization in the model.</li>
+<li><code>mixture</code>: the share of LASSO (L1) regularization in the model.</li>
+</ul>
+<pre class="r"><code>model_spec_glmnet</code></pre>
+<pre><code>Linear Regression Model Specification (regression)
+
+Main Arguments:
+  penalty = tune()
+  mixture = tune()
+
+Computational engine: glmnet </code></pre>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
+<pre class="r"><code>cv_results_glmnet %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 3
+    penalty mixture mean_rmse
+      &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;
+ 1 1.46e- 2  0.297      0.129
+ 2 1.22e- 3  0.490      0.130
+ 3 1.09e- 2  0.0439     0.131
+ 4 3.47e- 4  0.992      0.131
+ 5 1.22e- 2  0.657      0.131
+ 6 8.18e- 4  0.0856     0.132
+ 7 7.37e- 7  0.0221     0.132
+ 8 1.15e- 4  0.798      0.132
+ 9 3.37e-10  0.0573     0.133
+10 1.57e- 5  0.0760     0.133</code></pre>
+<div id="whats-notable-1" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>After we choose the hyperparameters with cross validation, the best <code>glmnet</code> model has an RMSE of 0.129, with penalty = 0.0146 and mixture = 0.2974.</li>
+<li>This is better than the ordinary least squares model, which had an RMSE of 0.1336. The regularization makes the coefficients of the less useful features smaller. This helps when there are so many features.</li>
+<li>Cross validation of <code>glmnet</code> is fast. It takes about 13 seconds.</li>
+<li>But outliers can strongly affect its results.</li>
+</ul>
+<p>Here is a plot of the <code>glmnet</code> hyperparameter grid, with the best combination:</p>
+<pre class="r"><code>eda_plot_scatter(param_grid_glmnet, &quot;mixture&quot;, &quot;penalty&quot;, alpha = 1, add_lm = F, yLog = T, yLabelsScale = scales::scientific) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &quot;red&quot;) +
+  ggrepel::geom_label_repel(data = param_best_glmnet %&gt;% map_df(round, digits = 4), 
+                            aes(x = mixture, y = penalty, label = glue::glue(&quot;penalty: {penalty}, mixture:{mixture}&quot;)),
+                            family = &quot;Roboto Condensed&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_glmnet-1.png" alt="" width="672" /></p>
+</div>
+</div>
+</div>
+<div id="non-linear-models" class="section level2">
+<h2>Non-linear Models</h2>
+<p>Next, we train two types of models that use decision trees. A decision tree predicts a value by asking a series of yes/no questions about the features, such as “Is <code>TotalSF</code> more than 2000?”. These models are not very sensitive to outliers and skewed data.</p>
+<div id="ranger-random-forest" class="section level3">
+<h3><em>ranger</em> (Random Forest)</h3>
+<p>A random forest builds many decision trees, each from a random sample of the data, and takes the average of their predictions. We use <code>ranger</code>, a version of random forests that gives the same results as the <code>randomForest</code> package but runs about 3 times faster. Each forest has 500 trees. (On a dataset of this size, more trees do not improve the error.) We search for the best values of these hyperparameters:</p>
+<ul>
+<li><code>mtry</code>: the number of features that the tree chooses from at random at each question (split).</li>
+<li><code>min_n</code>: the minimum number of properties that a group (node) must have before the tree can split it again.</li>
+</ul>
+<pre class="r"><code>model_spec_rf</code></pre>
+<pre><code>Random Forest Model Specification (regression)
+
+Main Arguments:
+  mtry = tune()
+  trees = 500
+  min_n = tune()
+
+Engine-Specific Arguments:
+  num.threads = 1
+
+Computational engine: ranger </code></pre>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
+<pre class="r"><code>cv_results_rf %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 3
+   min_n  mtry mean_rmse
+   &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;
+ 1     2    51     0.132
+ 2    12    67     0.134
+ 3     5    81     0.134
+ 4    15    34     0.134
+ 5     9    22     0.135
+ 6    22    42     0.136
+ 7    18    82     0.136
+ 8     8   121     0.137
+ 9    19   108     0.138
+10    33    46     0.138</code></pre>
+<div id="whats-notable-2" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>After cross validation, the best RMSE is 0.132, with mtry = 51 and min_n = 2.</li>
+<li>This is not better than <code>glmnet</code>. Also, cross validation of <code>ranger</code> takes much longer: about 279 seconds, against 13 seconds for <code>glmnet</code>.</li>
+</ul>
+<p>Here is a plot of the <code>ranger</code> hyperparameter grid, with the best combination:</p>
+<pre class="r"><code>eda_plot_scatter(param_grid_rf, &quot;min_n&quot;, &quot;mtry&quot;, alpha = 1, add_lm = F) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;) +
+  ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&quot;mtry: {mtry}, min_n:{min_n}&quot;)), family = &quot;Roboto Condensed&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_randomForest-1.png" alt="" width="672" /></p>
+</div>
+</div>
+<div id="xgboost" class="section level3">
+<h3><em>xgboost</em></h3>
+<p><code>xgboost</code> (gradient boosting) builds decision trees one after the other. Each new tree corrects some of the errors of the trees before it. Each model has 1000 trees, and we search for the best values of these hyperparameters:</p>
+<ul>
+<li><code>min_n</code>: the minimum number of properties that a group (node) must have before the tree can split it again.</li>
+<li><code>tree_depth</code>: the maximum number of questions (splits) from the top of a tree to its bottom.</li>
+<li><code>learn_rate</code>: how much each new tree can change the predictions. A smaller value makes the model learn more slowly and carefully.</li>
+</ul>
+<pre class="r"><code>model_spec_xgboost</code></pre>
+<pre><code>Boosted Tree Model Specification (regression)
+
+Main Arguments:
+  trees = 1000
+  min_n = tune()
+  tree_depth = tune()
+  learn_rate = tune()
+
+Engine-Specific Arguments:
+  objective = reg:squarederror
+  nthread = 1
+
+Computational engine: xgboost </code></pre>
+<p>Here are the 10 best RMSE values and their hyperparameter combinations:</p>
+<pre class="r"><code>cv_results_xgboost %&gt;% head(10)</code></pre>
+<pre><code># A tibble: 10 × 4
+   min_n tree_depth learn_rate mean_rmse
+   &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+ 1    33          2    0.0289      0.125
+ 2     3          2    0.0171      0.127
+ 3    23          4    0.0254      0.128
+ 4    24          1    0.190       0.129
+ 5    11          5    0.0549      0.129
+ 6    32          9    0.00605     0.130
+ 7    19         11    0.00482     0.130
+ 8    16         14    0.0121      0.131
+ 9    38          9    0.0270      0.131
+10    23          9    0.0405      0.131</code></pre>
+<div id="whats-notable-3" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>After cross validation, the best RMSE is 0.125, with min_n = 33, tree_depth = 2 and learn_rate = 0.0289.</li>
+<li>This is the best cross validated RMSE of all the models. It is a little better than <code>glmnet</code> (0.129) and <code>ranger</code> (0.132).</li>
+<li>Cross validation of <code>xgboost</code> takes longer than <code>glmnet</code>, but it is faster than <code>ranger</code> (about 177 seconds).</li>
+</ul>
+<!-- Here a 3D plot of the `xgboost` hyperparameter grid: -->
+<!-- <center> -->
+<!-- ```{r plot_xgboost} -->
+<!-- library(plotly) -->
+<!-- plot_ly(param_grid_xgboost, x = ~min_n, y = ~tree_depth, z = ~learn_rate) %>% -->
+<!--   add_markers() %>% -->
+<!--   layout(font = list(family = "Roboto Condensed"), -->
+<!--          title = list(text = "Scatterplot of min_n, tree_depth and learn_rate", font = list(size = 22)), -->
+<!--          scene = list(xaxis = list(title = 'min_n'), -->
+<!--                       yaxis = list(title = 'tree_depth'), -->
+<!--                       zaxis = list(title = 'learn_rate'))) -->
+<!-- ``` -->
+<!-- </center> -->
+</div>
+</div>
+</div>
+<div id="finalizing-models" class="section level2">
+<h2>Finalizing Models</h2>
+<p>For each model, we now know the hyperparameters with the lowest RMSE. We use them to train each model again on the complete training set. Then we use the trained models to predict log(SalePrice) for the training set, and we compare the predictions with the actual values.</p>
+<pre class="r"><code># Get predicted estimates
+get_predicted &lt;- function(model_final, dfNew) {
+
+  # Predict on testing set
+  vEstimates &lt;- model_final %&gt;%
+    predict(new_data = dfNew) %&gt;%
+    pull(.pred)
+  
+  return(vEstimates)
+}
+
+dfResults_train &lt;- dfTrain %&gt;% 
+  mutate(actual = log(SalePrice)) %&gt;% 
+  select(Id, actual) %&gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTrain_Proc),
+         ranger = get_predicted(model_final = model_final_rf, dfTrain_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTrain_Proc))</code></pre>
+<pre class="r"><code>dfPlot &lt;- dfResults_train %&gt;% 
+  gather(model, predicted, -actual, -Id) %&gt;% 
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
+
+dfPlot %&gt;%
+  rename(`log(SalePrice)` = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Actual v/s predicted log(SalePrice) on training set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_train-1.png" alt="" width="960" /></p>
+<pre class="r"><code># properties among the 3 largest errors of more than one model
+dfWorst_train &lt;- dfPlot %&gt;%
+  group_by(model) %&gt;%
+  slice_max(abs(predicted - actual), n = 3) %&gt;%
+  ungroup() %&gt;%
+  count(Id, name = &quot;n_models&quot;) %&gt;%
+  filter(n_models &gt; 1) %&gt;%
+  arrange(desc(n_models))
+
+# sentence about the properties that are among the largest errors of the most models
+worst_train_sentence &lt;- if (nrow(dfWorst_train) == 0) {
+  &quot;No property is among them for more than one model.&quot;
+} else {
+  vIds &lt;- dfWorst_train$Id[dfWorst_train$n_models == max(dfWorst_train$n_models)]
+  glue::glue(&quot;{if (length(vIds) == 1) &#39;The property with Id&#39; else &#39;The properties with Ids&#39;} {paste0(&#39;__&#39;, vIds, &#39;__&#39;, collapse = &#39; and &#39;)} {if (length(vIds) == 1) &#39;is&#39; else &#39;are each&#39;} among them for {max(dfWorst_train$n_models)} of the 3 models, so we should check {if (length(vIds) == 1) &#39;its&#39; else &#39;their&#39;} data for errors.&quot;)
+}</code></pre>
+<div id="whats-notable-4" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li><code>ranger</code> and <code>xgboost</code> fit the training data closely: their predictions are near the 45-degree line, where the predicted value is equal to the actual value. <code>ranger</code> fits the training data most closely, with a training RMSE of 0.050, against 0.096 for <code>xgboost</code>.</li>
+<li>The <code>glmnet</code> model has two outliers, Ids <strong>524</strong> and <strong>1299</strong>. Their predicted prices are much higher than their actual prices. Also, for the cheaper properties, the predicted values are very spread out.</li>
+<li>The plots label the three largest errors of each model. The properties with Ids <strong>31</strong> and <strong>1299</strong> are each among them for 2 of the 3 models, so we should check their data for errors.</li>
+<li>But a good fit on the training data does not prove that a model is good. We can only measure its true performance on data that it has not seen: the testing set.</li>
+</ul>
+</div>
+</div>
+<div id="performance-on-test-data" class="section level2">
+<h2>Performance on Test Data</h2>
+<pre class="r"><code>dfResults_test &lt;- dfTest %&gt;% 
+  mutate(actual = log(SalePrice)) %&gt;% 
+  select(Id, actual) %&gt;% 
+  mutate(glmnet = get_predicted(model_final = model_final_glmnet, dfTest_Proc),
+         ranger = get_predicted(model_final = model_final_rf, dfTest_Proc),
+         xgboost = get_predicted(model_final = model_final_xgboost, dfTest_Proc))</code></pre>
+<pre class="r"><code>dfPlot &lt;- dfResults_test %&gt;% 
+  gather(model, predicted, -actual, -Id) %&gt;% 
+  mutate(model = ordered(model, levels = c(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;)))
+
+dfPlot %&gt;%
+  rename(`log(SalePrice)` = actual) %&gt;%
+  eda_plot_actual_vs_predicted(&quot;log(SalePrice)&quot;, &quot;predicted&quot;, feature_model = &quot;model&quot;, feature_id = &quot;Id&quot;, nLabel = 3) +
+  labs(title = &quot;Actual v/s predicted log(SalePrice) on testing set&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_test-1.png" alt="" width="960" /></p>
+<pre class="r"><code>dfRMSE &lt;- map(list(&quot;glmnet&quot;,&quot;ranger&quot;,&quot;xgboost&quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&gt;% mutate(model = .x)) %&gt;%
+  bind_rows() %&gt;%
+  mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&gt;%
+  select(-.estimator, -.metric) %&gt;%
+  rename(test_rmse = .estimate) %&gt;%
+  select(model, everything())
+
+dfRMSE</code></pre>
+<pre><code># A tibble: 3 × 3
+  model   test_rmse cv_rmse
+  &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;
+1 glmnet      0.130   0.129
+2 ranger      0.138   0.132
+3 xgboost     0.132   0.125</code></pre>
+<div id="whats-notable-5" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>For all the models, the RMSE on the testing set is similar to the cross validated RMSE. This shows that cross validation correctly estimated how well the models work on new data, and that the hyperparameters are good.</li>
+<li>The properties with Ids <strong>1537</strong> and <strong>2217</strong> are outliers: no model predicts a price close to their actual prices.</li>
+<li><code>glmnet</code> has the lowest RMSE on the testing set, 0.130. <code>xgboost</code> is close, with 0.132.</li>
+<li>But outliers affect <code>glmnet</code>, as we saw with Ids <strong>524</strong> and <strong>1299</strong> in the training set. <code>xgboost</code> had the best cross validated RMSE, and the difference on the testing set is small. Also, <code>xgboost</code> is less affected by outliers, and it can learn curved relationships. So we choose <code>xgboost</code> as our final model, because it works well on new data.</li>
+</ul>
+<pre class="r"><code>model_final &lt;- model_final_xgboost</code></pre>
+</div>
+</div>
+<div id="feature-importance" class="section level2">
+<h2>Feature Importance</h2>
+<p>It is harder to understand how <code>xgboost</code> makes its predictions than how a linear model makes them. But a variable importance plot can show which features are the most important for the model.</p>
+<p>Here are the 10 most important features of our final <code>xgboost</code> model:</p>
+<pre class="r"><code>library(vip)
+
+p1 &lt;- vip(extract_fit_parsnip(model_final), aesthetics = list(fill = &quot;#00AED8&quot;)) +
+  labs(title = &quot;xgboost model Feature Importance in Training&quot;) +
+  theme_quant()
+
+vFeaturesImp &lt;- vip::vi(extract_fit_parsnip(model_final)) %&gt;% top_n(10, Importance) %&gt;% pull(Variable)
+
+p2 &lt;- eda_plot_correlation_matrix(dfTrain %&gt;% select(SalePrice, one_of(vFeaturesImp)), 
+                            outlineVar = &quot;SalePrice&quot;, plotTitle = &quot;Correlations with SalePrice&quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/feature_importance-1.png" alt="" width="1152" /></p>
+<ul>
+<li>The plot on the right shows the correlations of the numerical features. All of them have a correlation of at least 0.5, or at most -0.5, with <code>SalePrice</code>.</li>
+<li>All of the 10 most important features make sense. To judge the price of a property, a buyer would look at the total area, the overall quality, the neighborhood, the number of bathrooms, the kitchen quality, the age of the property, the size and finish of the garage, central air conditioning, the overall condition, and so on.</li>
+<li>So our final model works well on new data, and it chooses very reasonable features.</li>
+</ul>
+</div>
+<div id="new-property-premium" class="section level2">
+<h2>New Property Premium</h2>
+<p>Of the 10 most important features in our final model, most do not change during the life of a property, such as the area, the neighborhood and the number of bathrooms. The quality and the condition of a property can change, but people judge them in different ways. The only feature that clearly changes over time is <code>PropertyAge</code>.</p>
+<p>So, how does the predicted <code>SalePrice</code> change with the age of a property? We compare the same property when it is new, when it is more than 30 years old, and at all the ages in between.</p>
+<p>We choose two properties at random, change their <code>PropertyAge</code>, and look at the effect on the predicted <code>SalePrice</code>.</p>
+<pre class="r"><code>getSampleProperty &lt;- function(randomSeed) {
+  
+  set.seed(randomSeed)
+  dfSample &lt;- dfTest %&gt;% 
+    filter(PropertyAge &gt;= 30) %&gt;% 
+    sample_n(1)
+  
+  dfSample &lt;- tibble(PropertyAge = 1:dfSample$PropertyAge[1]) %&gt;% expand_grid(dfSample %&gt;% select(-PropertyAge))
+}
+
+dfSample &lt;- getSampleProperty(1000) %&gt;% bind_rows(getSampleProperty(2000))
+
+# preprocess the sample data with the recipe prepared on the training set and generate predicted values from the final model
+bake(preprocessing_recipe, new_data = dfSample) %&gt;% 
+  get_predicted(model_final, .) %&gt;% 
+  as_tibble() %&gt;% 
+  bind_cols(dfSample) %&gt;% 
+  mutate(predicted = exp(value)) %&gt;% 
+  group_by(Id) %&gt;% 
+  ggplot(aes(x = PropertyAge, y = predicted)) +
+  geom_point(color = &quot;#00AED8&quot;) +
+  geom_line() +
+  facet_wrap(~Id, scales = &quot;free&quot;) +
+  scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
+  labs(y = &quot;Predicted Sale Price&quot;,
+       title = &quot;New Property Premium&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/property_appreciation-1.png" alt="" width="672" /></p>
+<p>A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.</p>
+</div>
+<div id="appendix-tuning-code" class="section level2">
+<h2>Appendix: Tuning Code</h2>
+<p>This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file <code>Ames_Tuning.Rda</code>, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Part 1</a> and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:</p>
+<ul>
+<li>If the fingerprint is the same, the page loads the saved results in a few seconds.</li>
+<li>If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.</li>
+</ul>
+<p>Changes to the comments or the spacing of the code do not count as changes. To tune the models again without any change, delete <code>Ames_Tuning.Rda</code>.</p>
+<p>These are the tuning steps:</p>
+<pre class="r"><code># Why the tuning code is built the way it is (speed):
+# The dataset is small (1,460 rows x ~150 predictors after encoding), so run time is driven by the
+# number of model fits (5 models x 25 grid points x 5 folds) and by how expensive each fit is, not by data size.
+# The earlier version took ~35 minutes; this version takes ~11 minutes with 6 workers, tuning the same models and
+# hyperparameters (with randomForest replaced by the equivalent ranger engine). The changes:
+#   1. tune_grid() parallelises over every fold x grid-point combination (&quot;everything&quot;), instead of a manual
+#      for-loop over grid points that only ran the 5 folds in parallel and left the remaining cores idle.
+#   2. Random forest uses only the `ranger` engine with 500 trees. The `randomForest` package was tuned in addition
+#      to ranger and gave the same cross-validated RMSE (0.135 vs 0.134). On one fold with mtry = 84, min_n = 2:
+#        randomForest, 1,000 trees: 46.9s, RMSE 0.1305
+#        ranger,       1,000 trees: 15.1s, RMSE 0.1303
+#        ranger,         500 trees:  7.2s, RMSE 0.1293
+#      Random forest error levels off well before 500 trees on data of this size, so 1,000 trees only doubled the cost.
+#   3. xgboost searches a sensible learning-rate range, instead of spending much of the grid on learning rates as
+#      small as 1e-10 that cannot converge in 1,000 rounds (see get_model_param_grid). Early stopping was tried and
+#      rejected; see the note in get_model_spec.
+#   4. The number of parallel workers is capped by available RAM as well as CPU cores (see &quot;Parallel backend&quot;).
+#
+# Unrelated to speed: the earlier version used Id as a predictor. It is now excluded (see get_workflow).
+# It also had 21 predictors that were exact linear combinations of others, which lm reported as a rank-deficient
+# fit. They are now removed (see &quot;Collinear predictors&quot; and get_preprocessing_recipe), leaving a full-rank design.
+# Ordered factors are encoded as integer scores instead of polynomial contrasts (see get_preprocessing_recipe).
+
+# load the clean dataset from Part 1 (ames_data_file is set in the &quot;tuning_cache&quot; chunk)
+load(ames_data_file)
+
+# Collinear predictors
+########################################################################################################################################################
+# With the earlier set of features, 21 of the ~250 predictors were exact linear combinations of others (the design
+# matrix had rank 229 of 250), so lm could not estimate them and warned of a rank-deficient fit. Tree models are not
+# affected by duplicated information, but linear models are: the coefficients of collinear predictors are unstable.
+# These features are dropped because other features already carry their information (see the association matrix
+# in Part 1):
+#   HasGarage, HasFireplace, HasMasVnr: the same as the &quot;None&quot; category of GarageType, FireplaceQu and MasVnrType.
+#   MSSubClass: combines the building type and style, already in BldgType and HouseStyle (bias-corrected Cramer&#39;s V
+#               of 0.89 and 0.83). Its &quot;duplex&quot; category is identical to BldgType&#39;s.
+#   HalfBath:   TotalBath = FullBath + 0.5 * HalfBath + BsmtBath exactly. Dropping HalfBath rather than TotalBath
+#               keeps the total, one of the most important features for the tree models, and loses no information
+#               because HalfBath can be recovered from the other three.
+vFeaturesCollinear &lt;- c(&quot;HasGarage&quot;, &quot;HasFireplace&quot;, &quot;HasMasVnr&quot;, &quot;MSSubClass&quot;, &quot;HalfBath&quot;)
+
+# Categories that no property has (e.g. a Poor exterior quality) are dropped too, so that the scores of ordered factors
+# are consecutive (see get_preprocessing_recipe).
+dfClean &lt;- dfClean %&gt;%
+    select(-all_of(vFeaturesCollinear)) %&gt;%
+    mutate(across(where(is.factor), droplevels))
+
+# Determine skewed features
+vFeaturesSkew &lt;- dfClean %&gt;%
+    select_if(is.numeric) %&gt;%
+    select_if(function(Z) abs(timeDate::skewness(Z, na.rm = T)) &gt; 0.75) %&gt;%
+    colnames() %&gt;%
+    setdiff(c(&quot;Id&quot;,&quot;PropertyAge&quot;))
+
+# Remove Outliers and split clean data
+########################################################################################################################################################
+# dfClean &lt;- dfClean %&gt;% dplyr::filter(!(Id %in% c(524, 1299))) # glmnet cv_rmse improves to 0.117 but test_rmse is 0.135
+dfTrain &lt;- dfClean %&gt;% filter(!(Id %in% vTestIDs))
+dfTest &lt;- dfClean %&gt;% filter(Id %in% vTestIDs)
+
+# Preprocessing Recipe
+########################################################################################################################################################
+# Ordered factors (quality and condition grades, etc.) are encoded as integer scores, one predictor per feature, in
+# the order of their categories. The alternative, step_dummy&#39;s polynomial contrasts, creates one predictor per category
+# but one. Grades that only a handful of properties have can then be missing from a cross validation fold, which makes
+# the highest-order contrasts collinear: with that encoding lm reported a rank-deficient fit in 4 of the 5 folds. Scores
+# assume the grades are equally spaced, which is a reasonable approximation for these grades, and they cut the
+# number of predictors from ~214 to ~151. dfEncodingComparison below compares the two encodings.
+#
+# step_lincomb removes any remaining exact linear combinations among the predictors. These can arise because properties
+# without a basement or garage share the &quot;None&quot; category of every basement or garage feature. An intercept column is
+# added for the check, because such combinations can include a constant, and removed afterwards.
+get_preprocessing_recipe &lt;- function(df, ordinalScores = TRUE) {
+
+    preprocessing_recipe &lt;- recipe(SalePrice ~ ., data = df) %&gt;%
+        update_role(Id, new_role = &quot;ID&quot;) %&gt;%
+        step_mutate_at(one_of(vFeaturesSkew), -all_outcomes(), fn = ~ log(. + 1L))
+    if(ordinalScores) {
+        preprocessing_recipe &lt;- preprocessing_recipe %&gt;%
+            step_ordinalscore(all_ordered_predictors())
+    }
+    preprocessing_recipe &lt;- preprocessing_recipe %&gt;%
+        step_dummy(all_nominal()) %&gt;%
+        step_intercept() %&gt;%
+        step_lincomb(all_numeric_predictors()) %&gt;%
+        step_rm(any_of(&quot;intercept&quot;)) %&gt;%
+        step_log(all_outcomes()) %&gt;%
+        prep()
+    return(preprocessing_recipe)
+}
+
+# The recipe is prepared on the training set only, and the same recipe is applied to the testing set (and to any new
+# data), so that both have exactly the same predictors.
+preprocessing_recipe &lt;- get_preprocessing_recipe(dfTrain)
+
+# Preprocessed data for training models
+dfTrain_Proc &lt;- preprocessing_recipe %&gt;%
+    bake(new_data = NULL) %&gt;%
+    rename(target = SalePrice) %&gt;%
+    select(target, everything())
+
+dfTest_Proc &lt;- preprocessing_recipe %&gt;%
+    bake(new_data = dfTest) %&gt;%
+    rename(target = SalePrice) %&gt;%
+    select(target, everything())
+
+
+# Create cv folds
+########################################################################################################################################################
+get_cv_folds &lt;- function(df, numFolds, strataVar, randomSeed, shuffleData) {
+    # shuffle the rows
+    if(shuffleData) {
+        set.seed(randomSeed)
+        df &lt;- df[sample(nrow(df)), ]
+    }
+
+    # split dataset into folds where each fold has the same distribution of target
+    lFolds &lt;- df %&gt;% vfold_cv(v = numFolds, strata = all_of(strataVar))
+    return(lFolds)
+}
+
+
+# Parsnip Model Specification
+########################################################################################################################################################
+get_model_spec &lt;- function(modelType) {
+
+    model_spec &lt;- switch(modelType,
+                         lm = linear_reg(mode = &quot;regression&quot;) %&gt;%
+                             set_engine(&quot;lm&quot;),
+
+                         glmnet = linear_reg(mode = &quot;regression&quot;, penalty = tune(), mixture = tune()) %&gt;%
+                             set_engine(&quot;glmnet&quot;),
+
+                         # No early stopping. It was tried (stop after 50 rounds without improvement on a 10% validation split)
+                         # and roughly halved xgboost tuning time, but the final model was unstable: refitting the same best
+                         # parameters with different random validation splits stopped anywhere from 195 to 687 rounds, with test
+                         # RMSE between 0.133 and 0.151, versus 0.131 for a fixed 1,000 trees. With only ~146 validation rows the
+                         # stopping point is too noisy. The narrower learn_rate range already removes the wasted fits.
+                         # nthread = 1 because parallelism comes from running many fits at once (one per worker).
+                         xgboost = boost_tree(mode=&quot;regression&quot;, trees=1000, min_n=tune(), tree_depth=tune(), learn_rate=tune()) %&gt;%
+                             set_engine(&quot;xgboost&quot;, objective = &quot;reg:squarederror&quot;, nthread = 1),
+
+                         kernlab = svm_rbf(mode=&quot;regression&quot;, cost=tune(), rbf_sigma=tune(), margin=tune()) %&gt;%
+                             set_engine(&quot;kernlab&quot;),
+
+                         # ranger replaces the randomForest engine: same algorithm, ~3x faster implementation, and 500 trees
+                         # instead of 1,000 with no loss of accuracy (see the timings at the top of this code).
+                         # num.threads = 1 for the same reason as xgboost&#39;s nthread above.
+                         ranger = rand_forest(mode = &quot;regression&quot;, trees = 500, mtry = tune(), min_n = tune()) %&gt;%
+                             set_engine(&quot;ranger&quot;, num.threads = 1))
+
+    return(model_spec)
+}
+
+
+# Parameter Grid Search
+########################################################################################################################################################
+get_model_param_grid &lt;- function(df, modelType, numParams, randomSeed) {
+
+    # mtry is finalized on the predictors only, so its upper bound is the number of predictors (excludes target and Id)
+    dfPredictors &lt;- df %&gt;% select(-target, -Id)
+
+    set.seed(randomSeed)
+    param_spec &lt;- switch(modelType,
+                         glmnet = parameters(penalty(), mixture()),
+                         kernlab = parameters(cost(), rbf_sigma(), svm_margin()),
+                         # learn_rate is on a log10 scale. The dials default (1e-10 to 1e-1) spends most of the grid on rates
+                         # so small that 1,000 trees barely move from the starting prediction: those fits take the full time
+                         # and are never competitive. 10^-2.5 to 10^-0.5 (~0.003 to ~0.3) covers the useful range; the best
+                         # rate found with the default range was ~0.07, comfortably inside it.
+                         xgboost = parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))),
+                         ranger = parameters(min_n(), finalize(mtry(), dfPredictors)))
+
+    dfParamGrid &lt;- grid_space_filling(param_spec, size = numParams, type = &quot;max_entropy&quot;)
+    return(dfParamGrid)
+}
+
+
+# Workflow for a model
+########################################################################################################################################################
+# The data is already preprocessed, so the workflow only names the outcome and predictors.
+# Id is excluded from the predictors: it is a row identifier, and with training Ids 1-1460 and test Ids 1461-2919,
+# tree models would otherwise split on it and treat every test property as lying beyond the training range.
+get_workflow &lt;- function(model_spec) {
+    workflow() %&gt;%
+        add_variables(outcomes = target, predictors = -Id) %&gt;%
+        add_model(model_spec)
+}
+
+
+# Cross Validation Results
+########################################################################################################################################################
+# tune_grid() fits every grid point on every fold. With parallel_over = &quot;everything&quot;, each (fold, grid point)
+# combination is a separate task, so all workers stay busy until the end of the run.
+# The mean RMSE across folds is the same metric as before (mean of the per-fold RMSE).
+cross_validate_model &lt;- function(cv_folds, model_spec, param_grid) {
+
+    tune_results &lt;- get_workflow(model_spec) %&gt;%
+        tune_grid(resamples = cv_folds,
+                  grid = param_grid,
+                  metrics = metric_set(rmse),
+                  control = control_grid(parallel_over = &quot;everything&quot;))
+
+    dfResults &lt;- tune_results %&gt;%
+        collect_metrics() %&gt;%
+        select(all_of(names(param_grid)), mean_rmse = mean) %&gt;%
+        arrange(mean_rmse)
+    return(dfResults)
+}
+
+
+# Fitted model with parameters
+########################################################################################################################################################
+# Returns a fitted workflow; predict() on it selects the predictor columns from new data, so Id can stay in the data.
+# The seed makes the final ranger and xgboost fits reproducible between runs.
+get_fitted_model &lt;- function(df, model_spec, dfParams, randomSeed = 2300) {
+
+    model_wf &lt;- get_workflow(model_spec)
+    if(!is.null(dfParams)) model_wf &lt;- model_wf %&gt;% finalize_workflow(dfParams)
+    set.seed(randomSeed)
+    fit(model_wf, data = df)
+}
+
+
+# Parallel backend
+########################################################################################################################################################
+# Each worker is a separate R session with tidymodels and the model packages loaded. In a full run with 5 workers,
+# no R process exceeded 0.6 GB and all R processes together (main session + workers) peaked at 3.2 GB. Budgeting
+# 0.75 GB per worker leaves headroom. Workers are capped at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM
+# available when the run starts, so the run cannot push the machine into swapping even if other applications are open.
+gb_per_worker &lt;- 0.75
+gb_available &lt;- ps::ps_system_memory()$avail / 1024^3
+num_workers &lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
+message(sprintf(&quot;Using %d parallel workers (%.1f GB RAM available)&quot;, num_workers, gb_available))
+plan(multisession, workers = num_workers)
+
+# Create cross validation folds
+cv_folds &lt;- get_cv_folds(dfTrain_Proc, numFolds = 5, strataVar = &quot;target&quot;, randomSeed = 2300, shuffleData = T)
+
+# Compare the encodings of ordered factors with a linear model on the same folds (reported in the post)
+compare_encoding &lt;- function(ordinalScores) {
+
+    df &lt;- get_preprocessing_recipe(dfTrain, ordinalScores) %&gt;%
+        bake(new_data = NULL) %&gt;%
+        rename(target = SalePrice) %&gt;%
+        select(target, everything())
+    folds &lt;- get_cv_folds(df, numFolds = 5, strataVar = &quot;target&quot;, randomSeed = 2300, shuffleData = T)
+    vAliased &lt;- map_int(folds$splits, ~ sum(is.na(coef(lm(target ~ ., data = analysis(.x) %&gt;% select(-Id))))))
+
+    tibble(encoding = if(ordinalScores) &quot;ordinal scores&quot; else &quot;polynomial contrasts&quot;,
+           predictors = ncol(df) - 2,
+           folds_rank_deficient = sum(vAliased &gt; 0),
+           lm_cv_rmse = suppressWarnings(get_workflow(get_model_spec(&quot;lm&quot;)) %&gt;%
+                                             fit_resamples(resamples = folds, metrics = metric_set(rmse)) %&gt;%
+                                             collect_metrics() %&gt;%
+                                             pull(mean)))
+}
+dfEncodingComparison &lt;- bind_rows(compare_encoding(ordinalScores = FALSE), compare_encoding(ordinalScores = TRUE))
+
+# Time each model so the post can report relative run times
+dfTimings &lt;- tibble(model = character(), seconds = numeric())
+time_model &lt;- function(model, expr) {
+    t0 &lt;- Sys.time()
+    result &lt;- force(expr)
+    dfTimings &lt;&lt;- dfTimings %&gt;% add_row(model = model, seconds = as.numeric(difftime(Sys.time(), t0, units = &quot;secs&quot;)))
+    result
+}
+
+# lm model (no hyperparameters, so fit_resamples instead of tune_grid)
+model_spec_lm &lt;- get_model_spec(modelType = &quot;lm&quot;)
+cv_results_lm &lt;- time_model(&quot;lm&quot;,
+    get_workflow(model_spec_lm) %&gt;%
+        fit_resamples(resamples = cv_folds, metrics = metric_set(rmse)) %&gt;%
+        collect_metrics() %&gt;%
+        select(mean_rmse = mean))
+
+# glmnet model
+model_spec_glmnet &lt;- get_model_spec(modelType = &quot;glmnet&quot;)
+param_grid_glmnet &lt;- get_model_param_grid(dfTrain_Proc, modelType = &quot;glmnet&quot;, numParams = 25, randomSeed = 2300)
+cv_results_glmnet &lt;- time_model(&quot;glmnet&quot;, cross_validate_model(cv_folds, model_spec_glmnet, param_grid_glmnet))
+param_best_glmnet &lt;- cv_results_glmnet %&gt;% slice(1) %&gt;% select(-mean_rmse)
+model_final_glmnet &lt;- get_fitted_model(dfTrain_Proc, model_spec_glmnet, param_best_glmnet)
+
+# kernlab model
+model_spec_kernlab &lt;- get_model_spec(modelType = &quot;kernlab&quot;)
+param_grid_kernlab &lt;- get_model_param_grid(dfTrain_Proc, modelType = &quot;kernlab&quot;, numParams = 25, randomSeed = 2300)
+cv_results_kernlab &lt;- time_model(&quot;kernlab&quot;, cross_validate_model(cv_folds, model_spec_kernlab, param_grid_kernlab))
+param_best_kernlab &lt;- cv_results_kernlab %&gt;% slice(1) %&gt;% select(-mean_rmse)
+model_final_kernlab &lt;- get_fitted_model(dfTrain_Proc, model_spec_kernlab, param_best_kernlab)
+
+# random forest model (ranger engine; objects keep the _rf names used in index.Rmd)
+model_spec_rf &lt;- get_model_spec(modelType = &quot;ranger&quot;)
+param_grid_rf &lt;- get_model_param_grid(dfTrain_Proc, modelType = &quot;ranger&quot;, numParams = 25, randomSeed = 2300)
+cv_results_rf &lt;- time_model(&quot;ranger&quot;, cross_validate_model(cv_folds, model_spec_rf, param_grid_rf))
+param_best_rf &lt;- cv_results_rf %&gt;% slice(1) %&gt;% select(-mean_rmse)
+model_final_rf &lt;- get_fitted_model(dfTrain_Proc, model_spec_rf, param_best_rf)
+
+# xgboost model
+model_spec_xgboost &lt;- get_model_spec(modelType = &quot;xgboost&quot;)
+param_grid_xgboost &lt;- get_model_param_grid(dfTrain_Proc, modelType = &quot;xgboost&quot;, numParams = 25, randomSeed = 2300)
+cv_results_xgboost &lt;- time_model(&quot;xgboost&quot;, cross_validate_model(cv_folds, model_spec_xgboost, param_grid_xgboost))
+param_best_xgboost &lt;- cv_results_xgboost %&gt;% slice(1) %&gt;% select(-mean_rmse)
+model_final_xgboost &lt;- get_fitted_model(dfTrain_Proc, model_spec_xgboost, param_best_xgboost)
+
+plan(sequential)
+
+# the results that the post uses, which are saved to Ames_Tuning.Rda
+vTuningResults &lt;- c(&quot;model_spec_lm&quot;, &quot;model_spec_glmnet&quot;, &quot;model_spec_rf&quot;, &quot;model_spec_xgboost&quot;, &quot;model_spec_kernlab&quot;,
+                    &quot;model_final_glmnet&quot;, &quot;model_final_rf&quot;, &quot;model_final_xgboost&quot;, &quot;model_final_kernlab&quot;, &quot;cv_results_lm&quot;,
+                    &quot;cv_results_glmnet&quot;, &quot;cv_results_rf&quot;, &quot;cv_results_xgboost&quot;, &quot;cv_results_kernlab&quot;, &quot;param_grid_glmnet&quot;,
+                    &quot;param_grid_rf&quot;, &quot;param_grid_xgboost&quot;, &quot;param_grid_kernlab&quot;, &quot;param_best_glmnet&quot;, &quot;param_best_rf&quot;,
+                    &quot;param_best_xgboost&quot;, &quot;param_best_kernlab&quot;, &quot;dfTrain&quot;, &quot;dfTest&quot;, &quot;dfTrain_Proc&quot;,
+                    &quot;dfTest_Proc&quot;, &quot;dfTimings&quot;, &quot;get_preprocessing_recipe&quot;, &quot;preprocessing_recipe&quot;, &quot;vFeaturesCollinear&quot;,
+                    &quot;dfEncodingComparison&quot;, &quot;cv_folds&quot;, &quot;vFeaturesSkew&quot;)</code></pre>
+<p>And this code decides whether to load the saved results or to run the tuning steps:</p>
+<pre class="r"><code># The clean dataset from Part 1
+ames_data_file &lt;- &quot;../ames-housing-part1-data-pipeline/Ames_Housing_Clean.Rda&quot;
+
+# Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &quot;tuning_steps&quot;
+# chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so
+# editing them does not start a new tuning run.
+envData &lt;- new.env()
+load(ames_data_file, envir = envData)
+tuning_steps &lt;- knitr::knit_code$get(&quot;tuning_steps&quot;)
+tuning_hash &lt;- rlang::hash(list(data = list(envData$dfClean, envData$vTestIDs),
+                                code = deparse(parse(text = tuning_steps, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, tune the models again and save
+# the new results together with the fingerprint of their inputs.
+envSaved &lt;- new.env()
+if (file.exists(&quot;Ames_Tuning.Rda&quot;)) load(&quot;Ames_Tuning.Rda&quot;, envir = envSaved)
+if (identical(envSaved$tuning_hash, tuning_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  eval(parse(text = tuning_steps))
+  save(list = c(vTuningResults, &quot;tuning_hash&quot;), file = &quot;Ames_Tuning.Rda&quot;)
+}
+rm(envData, envSaved)</code></pre>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/models/">models</a>
+  
+  <a class="badge badge-light" href="/tags/regression/">regression</a>
+  
+  <a class="badge badge-light" href="/tags/linear/">linear</a>
+  
+  <a class="badge badge-light" href="/tags/non-linear/">non linear</a>
+  
+  <a class="badge badge-light" href="/tags/glmnet/">glmnet</a>
+  
+  <a class="badge badge-light" href="/tags/ranger/">ranger</a>
+  
+  <a class="badge badge-light" href="/tags/xgboost/">xgboost</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part2-eda/">Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part1-data-pipeline/">Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</a></li>
+      
+      <li><a href="/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
+
+    
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
+
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    © Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

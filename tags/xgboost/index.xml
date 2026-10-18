@@ -5,7 +5,7 @@
     <link>https://www.nitingupta.com/tags/xgboost/</link>
       <atom:link href="https://www.nitingupta.com/tags/xgboost/index.xml" rel="self" type="application/rss+xml" />
     <description>Xgboost</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Tue, 27 Dec 2016 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Xgboost</title>
@@ -13,15 +13,22 @@
     </image>
     
     <item>
-      <title>Ames Housing - Part 2 - Building Models</title>
-      <link>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</link>
-      <pubDate>Mon, 26 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>https://www.nitingupta.com/casestudies/ames-housing-part2-models/</guid>
+      <title>Ames Housing - Part 3 - Closing the deal - Building Models</title>
+      <link>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</link>
+      <pubDate>Tue, 27 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</guid>
       <description>
 
 
-&lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; in this series, we explored the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;.&lt;/p&gt;
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt;, we built a data pipeline that cleans the &lt;a href=&#34;http://www.amstat.org/publications/jse/v19n3/decock.pdf&#34;&gt;Ames Housing dataset&lt;/a&gt;, and in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-eda/&#34;&gt;Part 2&lt;/a&gt;, we explored the finalized dataset.&lt;/p&gt;
 &lt;p&gt;In this post, we build linear and non-linear models, and we find out how well they predict the &lt;code&gt;SalePrice&lt;/code&gt; of properties. A model is a formula that a computer learns from examples. A linear model adds up the features, each multiplied by a number (a coefficient) that it learns from the data. A non-linear model can also learn curved relationships.&lt;/p&gt;
+&lt;/div&gt;
 &lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
 &lt;p&gt;To measure how good a model is, we use the root mean squared error (RMSE) between the log of the predicted price and the log of the actual &lt;code&gt;SalePrice&lt;/code&gt;. RMSE is the typical size of a prediction error, so a lower RMSE is better. We use the log of the prices so that an error of 10% counts the same for an expensive house and for a cheap house.&lt;/p&gt;
@@ -43,8 +50,8 @@
 &lt;/div&gt;
 &lt;div id=&#34;removing-collinear-predictors&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Removing Collinear Predictors&lt;/h2&gt;
-&lt;p&gt;Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and &lt;code&gt;lm&lt;/code&gt; (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.&lt;/p&gt;
-&lt;p&gt;The association matrix in the previous post showed which features repeat each other. We drop these features, because other features already give their information:&lt;/p&gt;
+&lt;p&gt;Many features in this dataset describe the same thing in different ways. Also, some of the features that we created in &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt; repeat others. A model cannot use categories directly, so each category becomes a separate feature with the values 0 and 1 (a dummy variable). After this change, some features are exact combinations of other features (we call them collinear). A linear model cannot separate the effects of collinear features. So its coefficients become unreliable, or it cannot calculate them at all, and &lt;code&gt;lm&lt;/code&gt; (the basic linear model in R) gives a warning about a “rank-deficient fit”. Models that use decision trees are not affected by repeated information. But if we remove it, the linear models work correctly and all the models are simpler.&lt;/p&gt;
+&lt;p&gt;The association matrix in Part 1 showed which features repeat each other. We drop these features, because other features already give their information:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;HasGarage&lt;/code&gt;, &lt;code&gt;HasFireplace&lt;/code&gt; and &lt;code&gt;HasMasVnr&lt;/code&gt; are the same as, or almost the same as, the &lt;em&gt;None&lt;/em&gt; category of &lt;code&gt;GarageType&lt;/code&gt;, &lt;code&gt;FireplaceQu&lt;/code&gt; and &lt;code&gt;MasVnrType&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;MSSubClass&lt;/code&gt; combines the type and the style of a building. &lt;code&gt;BldgType&lt;/code&gt; and &lt;code&gt;HouseStyle&lt;/code&gt; already give this information. Its &lt;em&gt;duplex&lt;/em&gt; category is identical to the &lt;em&gt;duplex&lt;/em&gt; category of &lt;code&gt;BldgType&lt;/code&gt;.&lt;/li&gt;
@@ -112,7 +119,7 @@ print(glue::glue(&amp;quot;{sum(is.na(coef(model_lm_check)))} of {length(coef(mo
   geom_histogram(bins = 30, color = &amp;quot;white&amp;quot;, fill = &amp;quot;#F37735&amp;quot;) +
   labs(x = &amp;quot;log(SalePrice)&amp;quot;) +
   facet_grid(type ~ id)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_target_partitioning-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Because we use stratified sampling, the prices have similar distributions in the training part and in the validation part of each fold.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
@@ -138,7 +145,7 @@ Computational engine: lm &lt;/code&gt;&lt;/pre&gt;
 &lt;/ul&gt;
 &lt;p&gt;A residual is the difference between the actual value and the predicted value, here of &lt;code&gt;log(SalePrice)&lt;/code&gt;. Residual plots show if the errors of a model have a pattern. If the model is good, the residuals look like random noise around 0. Here are the four standard residual plots of the linear model, fitted on the complete training set. The labels show the &lt;code&gt;Id&lt;/code&gt; of the most extreme properties in each plot:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_residuals(model_lm_check, vLabels = dfTrain_Proc$Id, plotTitle = &amp;quot;Residual plots of the linear model&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/lm_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/lm_residuals-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# standardized residual, leverage and Cook&amp;#39;s distance of each property
 dfLmDiagnostics &amp;lt;- tibble(Id = dfTrain_Proc$Id,
                           std_resid = rstandard(model_lm_check),
@@ -147,7 +154,7 @@ dfLmDiagnostics &amp;lt;- tibble(Id = dfTrain_Proc$Id,
   arrange(desc(cooks))
 lm_diagnostic &amp;lt;- function(propertyId, column) dfLmDiagnostics[[column]][dfLmDiagnostics$Id == propertyId]&lt;/code&gt;&lt;/pre&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids &lt;strong&gt;1299&lt;/strong&gt;, &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;633&lt;/strong&gt;. In the previous post, we saw that 1299 and 524 are very large properties that sold at low prices.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Residuals vs Fitted:&lt;/strong&gt; Most residuals are close to 0. But three properties have very large negative residuals: the model predicts much higher prices than their actual prices. These are Ids &lt;strong&gt;1299&lt;/strong&gt;, &lt;strong&gt;524&lt;/strong&gt; and &lt;strong&gt;633&lt;/strong&gt;. In Part 2, we saw that 1299 and 524 are very large properties that sold at low prices.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Normal Q-Q:&lt;/strong&gt; The lower tail is much longer than the dashed line. Property 1299 has a standardized residual of -12.4, and property 524 has -9.1. For normally distributed errors, values beyond -3 are very rare.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Scale-Location:&lt;/strong&gt; The smooth line goes up at both ends, so the errors are larger for the cheapest and the most expensive properties.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Residuals vs Leverage:&lt;/strong&gt; Properties 1299 and 524 have both a large residual and a high leverage (0.22 and 0.16). So they have the largest Cook’s distances, 0.29 and 0.11. These are below the dashed contour at 0.5, but much larger than for most properties. They pull the straight-line fit, which is one reason why &lt;code&gt;glmnet&lt;/code&gt; and the tree-based models work better.&lt;/li&gt;
@@ -198,7 +205,7 @@ Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
   ggrepel::geom_label_repel(data = param_best_glmnet %&amp;gt;% map_df(round, digits = 4), 
                             aes(x = mixture, y = penalty, label = glue::glue(&amp;quot;penalty: {penalty}, mixture:{mixture}&amp;quot;)),
                             family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -249,7 +256,7 @@ Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_scatter(param_grid_rf, &amp;quot;min_n&amp;quot;, &amp;quot;mtry&amp;quot;, alpha = 1, add_lm = F) +
   geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &amp;quot;red&amp;quot;) +
   ggrepel::geom_label_repel(data = param_best_rf, aes(x = min_n, y = mtry, label = glue::glue(&amp;quot;mtry: {mtry}, min_n:{min_n}&amp;quot;)), family = &amp;quot;Roboto Condensed&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_randomForest-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
@@ -340,7 +347,7 @@ dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
   eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
   labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on training set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_train-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# properties among the 3 largest errors of more than one model
 dfWorst_train &amp;lt;- dfPlot %&amp;gt;%
   group_by(model) %&amp;gt;%
@@ -383,7 +390,7 @@ dfPlot %&amp;gt;%
   rename(`log(SalePrice)` = actual) %&amp;gt;%
   eda_plot_actual_vs_predicted(&amp;quot;log(SalePrice)&amp;quot;, &amp;quot;predicted&amp;quot;, feature_model = &amp;quot;model&amp;quot;, feature_id = &amp;quot;Id&amp;quot;, nLabel = 3) +
   labs(title = &amp;quot;Actual v/s predicted log(SalePrice) on testing set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/plot_test-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfRMSE &amp;lt;- map(list(&amp;quot;glmnet&amp;quot;,&amp;quot;ranger&amp;quot;,&amp;quot;xgboost&amp;quot;), ~ rmse(dfResults_test, actual, !!sym(.x)) %&amp;gt;% mutate(model = .x)) %&amp;gt;%
   bind_rows() %&amp;gt;%
   mutate(cv_rmse = c(cv_results_glmnet$mean_rmse[1], cv_results_rf$mean_rmse[1], cv_results_xgboost$mean_rmse[1])) %&amp;gt;%
@@ -425,7 +432,7 @@ p2 &amp;lt;- eda_plot_correlation_matrix(dfTrain %&amp;gt;% select(SalePrice, on
                             outlineVar = &amp;quot;SalePrice&amp;quot;, plotTitle = &amp;quot;Correlations with SalePrice&amp;quot;)
 
 cowplot::plot_grid(plotlist = list(p1, p2), nrow = 1)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;1152&#34; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;The plot on the right shows the correlations of the numerical features. All of them have a correlation of at least 0.5, or at most -0.5, with &lt;code&gt;SalePrice&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;All of the 10 most important features make sense. To judge the price of a property, a buyer would look at the total area, the overall quality, the neighborhood, the number of bathrooms, the kitchen quality, the age of the property, the size and finish of the garage, central air conditioning, the overall condition, and so on.&lt;/li&gt;
@@ -463,12 +470,12 @@ bake(preprocessing_recipe, new_data = dfSample) %&amp;gt;%
   scale_y_continuous(labels = scales::label_dollar(accuracy = 1)) +
   labs(y = &amp;quot;Predicted Sale Price&amp;quot;,
        title = &amp;quot;New Property Premium&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part2-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/ames-housing-part3-models/index_files/figure-html/property_appreciation-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A new property sells for a little more than an older property of the same type, quality and condition. This premium is small in a place like Ames, Iowa. We expect it to be much higher in a large city.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;appendix-tuning-code&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Appendix: Tuning Code&lt;/h2&gt;
-&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from the &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-eda/&#34;&gt;previous post&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Ames_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from &lt;a href=&#34;https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/&#34;&gt;Part 1&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
 &lt;li&gt;If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.&lt;/li&gt;
@@ -791,7 +798,7 @@ vTuningResults &amp;lt;- c(&amp;quot;model_spec_lm&amp;quot;, &amp;quot;model_sp
                     &amp;quot;dfEncodingComparison&amp;quot;, &amp;quot;cv_folds&amp;quot;, &amp;quot;vFeaturesSkew&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;And this code decides whether to load the saved results or to run the tuning steps:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1
-ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-eda/Ames_Housing_Clean.Rda&amp;quot;
+ames_data_file &amp;lt;- &amp;quot;../ames-housing-part1-data-pipeline/Ames_Housing_Clean.Rda&amp;quot;
 
 # Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &amp;quot;tuning_steps&amp;quot;
 # chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so

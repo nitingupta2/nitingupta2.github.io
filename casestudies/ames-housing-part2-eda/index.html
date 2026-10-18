@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="
+Other posts in this series:
+
+Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline
+Ames Housing - Part 3 - Closing the deal - Building Models
+
+In Part 1, we built a data pipeline that cleans the Ames Housing dataset and creates new features. In this post, we explore the finalized dataset. An exploratory data analysis (EDA) is the first study of a dataset before we build models. We look at the features one at a time, then two and three at a time, to find which features affect the sale price. In Part 3, we use what we learn to build models.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/">
+  <meta property="og:title" content="Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis | Nitin Gupta">
+  <meta property="og:description" content="
+Other posts in this series:
+
+Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline
+Ames Housing - Part 3 - Closing the deal - Building Models
+
+In Part 1, we built a data pipeline that cleans the Ames Housing dataset and creates new features. In this post, we explore the finalized dataset. An exploratory data analysis (EDA) is the first study of a dataset before we build models. We look at the features one at a time, then two and three at a time, to find which features affect the sale price. In Part 3, we use what we learn to build models."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2016-12-26T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2016-12-26T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Dec 26, 2016
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">Ames Housing - Part 3 - Closing the deal - Building Models</a></li>
+</ul>
+<p>In <a href="https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/">Part 1</a>, we built a data pipeline that cleans the <a href="http://www.amstat.org/publications/jse/v19n3/decock.pdf">Ames Housing dataset</a> and creates new features. In this post, we explore the finalized dataset. An exploratory data analysis (EDA) is the first study of a dataset before we build models. We look at the features one at a time, then two and three at a time, to find which features affect the sale price. In <a href="https://www.nitingupta.com/casestudies/ames-housing-part3-models/">Part 3</a>, we use what we learn to build models.</p>
+</div>
+<div id="univariate-analysis-one-feature-at-a-time" class="section level2">
+<h2>Univariate Analysis: One Feature at a Time</h2>
+<p>In this section, we look at each feature by itself.</p>
+<div id="numerical-features" class="section level3">
+<h3>Numerical Features</h3>
+<p>First, let’s plot all the features that measure an area in square feet:</p>
+<pre class="r"><code>eda_plot_histograms(dfClean, vFeaturesNum[str_detect(vFeaturesNum, &quot;SF|Area&quot;)])</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/univariate_continuous1-1.png" alt="" width="960" /></p>
+<div id="whats-notable" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>All the area features have outliers, which are values that are very different from most other values.</li>
+<li>Many features are very skewed: most values are small and a few values are much larger. Before we build models, we must transform these features (for example, with a log) to make them less skewed.</li>
+</ul>
+<p>Now let’s look at the other numerical features:</p>
+<pre class="r"><code>eda_plot_histograms(dfClean, setdiff(vFeaturesNum[!str_detect(vFeaturesNum, &quot;SF|Area&quot;)], &quot;SalePrice&quot;))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/univariate_continuous2-1.png" alt="" width="960" /></p>
+</div>
+<div id="whats-notable-1" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Most properties were sold less than 20 years after they were built or remodeled.</li>
+</ul>
+<p>Let’s plot <code>SalePrice</code> on a log scale. On a log scale, each step on the axis multiplies the value by the same amount:</p>
+<pre class="r"><code>eda_plot_histograms(dfClean, &quot;SalePrice&quot;, nBins = 50, xLog = T, xLabelsScale = scales::label_dollar(accuracy = 1))</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/SalePrice_distribution-1.png" alt="" width="672" /></p>
+</div>
+<div id="whats-notable-2" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The distribution has long tails on both sides: a few properties are much cheaper or much more expensive than most.</li>
+<li>11 properties cost less than USD 50,000, and 17 properties cost more than USD 500,000.</li>
+<li>Outliers have a strong effect on linear models.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="categorical-features" class="section level2">
+<h2>Categorical Features</h2>
+<div id="ordinal-features" class="section level3">
+<h3>Ordinal Features</h3>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat1, ~ eda_plot_column(dfClean, .x)), ncol = 4)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Univariate_Cat1-1.png" alt="" width="960" /></p>
+<div id="whats-notable-3" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>In many features, 1 or 2 categories are much more common than the others. This makes these features hard to use for predictions, because the data has only a few examples of the other categories.</li>
+</ul>
+</div>
+</div>
+<div id="nominal-features." class="section level3">
+<h3>Nominal Features.</h3>
+<pre class="r"><code>cowplot::plot_grid(plotlist = map(vFeaturesCat2, ~ eda_plot_column(dfClean, .x)), ncol = 4)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Univariate_Cat2-1.png" alt="" width="960" /></p>
+<div id="whats-notable-4" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>In many features, 1 or 2 categories are much more common than the others.</li>
+<li>Most properties are sold in the summer months, and the fewest in the winter months.</li>
+<li>The data shows the effect of the housing market crisis: the fewest properties were sold in 2010.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="bivariate-analysis-two-features-at-a-time" class="section level2">
+<h2>Bivariate Analysis: Two Features at a Time</h2>
+<div id="numerical-numerical" class="section level3">
+<h3>Numerical-Numerical</h3>
+<p>Let’s look at how <code>SalePrice</code> changes with each of the other numerical features. A scatter plot shows one dot for each property, and the line shows the best straight line through the dots (a regression line):</p>
+<pre class="r"><code>eda_plot_scatter(dfClean, vFeaturesNum, &quot;SalePrice&quot;, yLabelsScale = scales::dollar)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/bivariate_scatterplots-1.png" alt="" width="960" /></p>
+<p>Let’s look more closely at <code>TotalSF</code>. The labels show the properties with the largest Cook’s distance. Cook’s distance measures how much one point pulls the regression line towards itself:</p>
+<pre class="r"><code>eda_plot_scatter(dfClean, &quot;TotalSF&quot;, &quot;SalePrice&quot;, yLabelsScale = scales::dollar,
+                 nLabel = 3, feature_id = &quot;Id&quot;, labelBy = &quot;cooks&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/influential_points-1.png" alt="" width="960" /></p>
+<pre class="r"><code># Cook&#39;s distance of each property in a linear fit of SalePrice on TotalSF
+dfInfluence &lt;- dfClean %&gt;% select(Id, TotalSF, SalePrice) %&gt;% drop_na()
+dfInfluence &lt;- dfInfluence %&gt;%
+  mutate(cooks = cooks.distance(lm(SalePrice ~ TotalSF, data = dfInfluence))) %&gt;%
+  arrange(desc(cooks))
+
+vOutliers_TotalSF &lt;- dfInfluence$Id[1:3]</code></pre>
+<div id="whats-notable-5" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The scatter plot of <code>TotalSF</code> and <code>SalePrice</code> clearly shows a few very large properties that sold at unusually low prices. These points have high leverage: they are far from the other points, so they pull the regression line strongly. Without them, the line would be steeper.</li>
+<li>The same properties also affect <code>TotalBsmtSF</code>.</li>
+<li>The Ids of these properties are 1299,2550,524. Their Cook’s distances are 5.69, 2.46, 0.54. These values are much higher than the usual limit of 4/n = 0.0014, where n is the number of properties. The next property has a Cook’s distance of only 0.12. Of these three properties, 524 and 1299 are in the training set.</li>
+</ul>
+</div>
+</div>
+<div id="transforming-skewed-features" class="section level3">
+<h3>Transforming Skewed Features</h3>
+<p>Many numerical features are right skewed. Can we change them with a simple formula (a transform), so that their relationship with <code>log(SalePrice)</code> becomes closer to a straight line? Let’s compare common transforms of three features: <code>TotalSF</code>, the strongest area feature; <code>LotArea</code>, which is very skewed; and <code>GarageArea</code>, which is almost not skewed. Each panel shows the R-squared of a straight line through the points. R-squared is a number from 0 to 1. It tells how much of the variation in <code>log(SalePrice)</code> the line explains:</p>
+<pre class="r"><code>lTransformPlots &lt;- map(c(&quot;TotalSF&quot;, &quot;LotArea&quot;, &quot;GarageArea&quot;), ~ eda_plot_transforms(dfClean, .x, &quot;SalePrice&quot;))
+cowplot::plot_grid(plotlist = lTransformPlots, ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/plot_transforms-1.png" alt="" width="960" /></p>
+<pre class="r"><code># R-squared of each transform, in the order of the panels
+vR2 &lt;- map(lTransformPlots, ~ .x$data %&gt;%
+             distinct(transform, r_squared) %&gt;%
+             pull(r_squared) %&gt;%
+             set_names(c(&quot;identity&quot;, &quot;log&quot;, &quot;sqrt&quot;, &quot;cuberoot&quot;))) %&gt;%
+  set_names(c(&quot;TotalSF&quot;, &quot;LotArea&quot;, &quot;GarageArea&quot;))
+r2 &lt;- function(feature, transform) round(vR2[[feature]][transform], 3)
+
+# skewness of each feature
+vSkew &lt;- map_dbl(c(TotalSF = &quot;TotalSF&quot;, LotArea = &quot;LotArea&quot;, GarageArea = &quot;GarageArea&quot;), ~ timeDate::skewness(dfClean[[.x]], na.rm = T))</code></pre>
+<div id="whats-notable-6" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>A log transform almost doubles the R-squared of <code>LotArea</code> (skewness 12.8), from 0.066 to 0.138. Without the transform, a few very large lots control the line. The log makes these large values smaller.</li>
+<li>All the transforms improve <code>TotalSF</code> (skewness 1.5) a little. With a log, the R-squared goes from 0.61 to 0.647.</li>
+<li><code>GarageArea</code> (skewness 0.2) is almost not skewed, and the transforms make the fit worse. With a log, the R-squared goes down from 0.426 to 0.389. Also, the log cannot use the properties without a garage, because the log of 0 does not exist.</li>
+<li>So, before we build linear models, we should transform only the very skewed features, not all of them.</li>
+</ul>
+</div>
+</div>
+<div id="correlations-with-saleprice" class="section level3">
+<h3>Correlations with SalePrice</h3>
+<p>We keep the features whose correlation with <code>SalePrice</code> is at least 0.1 or at most -0.1. The Pearson correlation measures how close a relationship is to a straight line, so outliers and skewed features affect it strongly. The Spearman correlation uses the ranks of the values (1st, 2nd, 3rd, …) instead of the values. So it measures whether one feature always goes up (or always goes down) when the other goes up, even along a curve. If we compare the two, we can see which relationships are strong but not straight lines:</p>
+<pre class="r"><code>library(corrr)
+
+dfCor &lt;- dfClean[vFeaturesNum] %&gt;% 
+  correlate() %&gt;% 
+  focus(SalePrice) %&gt;% 
+  dplyr::rename(feature = term,
+                corr = SalePrice) %&gt;%
+  arrange(desc(abs(corr))) %&gt;% 
+  dplyr::filter(abs(corr) &gt; 0.1) %&gt;% 
+  mutate(corr = round(corr, 2)) %&gt;% 
+  mutate(feature = fct_reorder(feature, corr)) %&gt;% 
+  dplyr::filter(!(feature %in% vFeatures_to_exclude))
+
+vFeaturesCor &lt;- dfCor %&gt;% pull(feature) %&gt;% as.character()
+
+p1 &lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &quot;SalePrice&quot;, method = &quot;pearson&quot;, minAbsCor = 0.1)
+p2 &lt;- eda_plot_target_correlations(dfClean[vFeaturesNum], &quot;SalePrice&quot;, method = &quot;spearman&quot;, minAbsCor = 0.1)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/plot_correlated-1.png" alt="" width="960" /></p>
+<pre class="r"><code># compare Pearson and Spearman correlations
+dfCorMethods &lt;- tibble(feature = setdiff(vFeaturesNum, &quot;SalePrice&quot;)) %&gt;%
+  mutate(pearson = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &quot;pairwise.complete.obs&quot;)),
+         spearman = map_dbl(feature, ~ cor(dfClean[[.x]], dfClean$SalePrice, use = &quot;pairwise.complete.obs&quot;, method = &quot;spearman&quot;)))
+cor_of &lt;- function(feature_name, method) round(dfCorMethods[[method]][dfCorMethods$feature == feature_name], 2)</code></pre>
+<div id="whats-notable-7" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The 5 most correlated features are TotalSF, GarageArea, TotalBath, TotalBsmtSF, 1stFlrSF. A buyer would naturally look at these features to judge a property and its price.</li>
+<li><code>PropertyAge</code> has a strong negative correlation with <code>SalePrice</code>. This means that newer properties sell for higher prices than older properties.</li>
+<li>For most features, the Pearson and Spearman correlations are similar. But <code>LotArea</code> is different: its correlation goes up from 0.27 to 0.43. Larger lots do sell for more, but the relationship is far from a straight line. The log transform above partly corrects this.</li>
+<li>For <code>BsmtFinSF1</code>, the correlation goes down from 0.43 to 0.33. About 32% of the properties have no finished basement, so they all have the same rank. Also, the largest finished basements have a large effect on the Pearson correlation. So the straight-line relationship with <code>SalePrice</code> seems stronger than the rank relationship.</li>
+</ul>
+</div>
+</div>
+<div id="numerical-categorical-ordinal" class="section level3">
+<h3>Numerical-Categorical (Ordinal)</h3>
+<pre class="r"><code>cowplot::plot_grid(plotlist=map2(vFeaturesCat1,&quot;SalePrice&quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Bivariate_Num_Cat1-1.png" alt="" width="960" /></p>
+<div id="whats-notable-8" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>In almost all of these features, <code>SalePrice</code> clearly changes with the order of the categories.</li>
+<li>The overall quality and the exterior quality show some of the strongest trends.</li>
+</ul>
+</div>
+</div>
+<div id="numerical-categorical-nominal" class="section level3">
+<h3>Numerical-Categorical (Nominal)</h3>
+<p>Now let’s look at <code>SalePrice</code> for the nominal features. The categories of a nominal feature have no natural order. But if we sort the categories by their median <code>SalePrice</code>, we can find trends. To show the trends better, the <code>SalePrice</code> axis does not show the outliers. A box plot shows the middle half of the prices as a box, with a line at the median:</p>
+<pre class="r"><code>cowplot::plot_grid(plotlist=map2(vFeaturesCat2,&quot;SalePrice&quot;, ~ eda_plot_box(dfClean, .x, .y, yLimits = c(35000,410000))), ncol = 4)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/Bivariate_Num_Cat2-1.png" alt="" width="960" /></p>
+<div id="whats-notable-9" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li><code>GarageType</code>: buyers prefer built-in and attached garages to detached garages and other types.</li>
+<li>The categories of <code>MSSubClass</code> show that houses built in 1946 or later have higher prices than older houses.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="multivariate-analysis-three-or-more-features-at-a-time" class="section level2">
+<h2>Multivariate Analysis: Three or More Features at a Time</h2>
+<p>In this section, we look at how some related features change <code>SalePrice</code> together.</p>
+<div id="numerical-numerical-categorical" class="section level3">
+<h3>Numerical-Numerical-Categorical</h3>
+<p><code>TotalSF</code> and <code>GarageArea</code> have some of the strongest correlations with <code>SalePrice</code>. Let’s see how these relationships change with <code>NeighborhoodType</code> and <code>GarageType</code>:</p>
+<pre class="r"><code>p1 &lt;- eda_plot_scatter_cat(dfClean, &quot;TotalSF&quot;, &quot;SalePrice&quot;, &quot;NeighborhoodType&quot;, yLabelsScale = scales::dollar)
+p2 &lt;- eda_plot_scatter_cat(dfClean, &quot;GarageArea&quot;, &quot;SalePrice&quot;, &quot;GarageType&quot;, yLabelsScale = scales::dollar)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_num_num_cat-1.png" alt="" width="960" /></p>
+<ul>
+<li>For the same total area, properties in some neighborhoods sell for more than in others.</li>
+<li>The properties without a garage form a separate group.</li>
+<li>For the same <code>GarageArea</code>, properties with built-in or attached garages usually sell for more.</li>
+<li>So <code>NeighborhoodType</code> and <code>GarageType</code> explain some of the differences in <code>SalePrice</code>.</li>
+</ul>
+</div>
+<div id="categorical-numerical-numerical" class="section level3">
+<h3>Categorical-Numerical-Numerical</h3>
+<p>The dots in the scatter plots overlap a lot. So let’s check these results in another way, and compare categories among properties of similar size. We split <code>TotalSF</code> and <code>GarageArea</code> into four groups (bins) with the same number of properties. Then we plot <code>SalePrice</code> for each category in each group. We also check whether central air conditioning (<code>CentralAir</code>) changes the price of properties of the same size:</p>
+<pre class="r"><code>p1 &lt;- eda_plot_box_by_bins(dfClean, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p2 &lt;- eda_plot_box_by_bins(dfClean, &quot;GarageType&quot;, &quot;SalePrice&quot;, &quot;GarageArea&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+p3 &lt;- eda_plot_box_by_bins(dfClean, &quot;CentralAir&quot;, &quot;SalePrice&quot;, &quot;TotalSF&quot;, yLog = T, yLabelsScale = scales::label_dollar(accuracy = 1))
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_cat_num_bins-1.png" alt="" width="960" /></p>
+<pre class="r"><code># median SalePrice by category within each bin
+get_bin_medians &lt;- function(p) {
+  p$data %&gt;%
+    group_by(bin = as.integer(bin), category = as.character(x)) %&gt;%
+    summarise(median = median(y), .groups = &quot;drop&quot;)
+}
+lBinMedians &lt;- map(list(neighborhood = p1, garage = p2, air = p3), get_bin_medians)
+bin_median &lt;- function(plotName, binNum, categoryName) {
+  dfMedians &lt;- lBinMedians[[plotName]]
+  scales::dollar(dfMedians$median[dfMedians$bin == binNum &amp; dfMedians$category == categoryName], accuracy = 1)
+}</code></pre>
+<div id="whats-notable-10" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The neighborhood is very important, even for properties of the same size. For the largest properties, the median <code>SalePrice</code> goes from <code>$161,000</code> in Type5 neighborhoods to <code>$327,000</code> in Type1 neighborhoods. Type1 neighborhoods have few or no properties in the smallest group, so the neighborhood and the size are also related.</li>
+<li>For the same <code>GarageArea</code>, built-in and attached garages go with higher prices than detached garages. For the largest garages, the median <code>SalePrice</code> is <code>$299,018</code> for built-in garages, <code>$253,000</code> for attached garages and <code>$140,000</code> for detached garages. Some garage types have very few properties, so their box plots are less reliable.</li>
+<li>Properties with central air conditioning sell for more, at every size. For the largest properties, the median <code>SalePrice</code> is <code>$262,140</code> with central air and <code>$136,000</code> without it.</li>
+</ul>
+</div>
+</div>
+<div id="categorical-categorical-numerical" class="section level3">
+<h3>Categorical-Categorical-Numerical</h3>
+<p>Does a combination of two categorical features tell us more about <code>SalePrice</code>? A heatmap answers this question. It is a grid of tiles, one tile for each combination of two categories:</p>
+<pre class="r"><code>p1 &lt;- eda_plot_heatmap(dfClean, &quot;OverallQual&quot;, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;)
+p2 &lt;- eda_plot_heatmap(dfClean, &quot;GarageType&quot;, &quot;NeighborhoodType&quot;, &quot;SalePrice&quot;)
+p3 &lt;- eda_plot_heatmap(dfClean, &quot;MSSubClass&quot;, &quot;MSZoning&quot;, &quot;SalePrice&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3), ncol = 1)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/ames-housing-part2-eda/index_files/figure-html/multivariate_cat_cat_num-1.png" alt="" width="960" /></p>
+<pre class="r"><code># number of combinations, and those with fewer than 10 properties
+vCells &lt;- map_int(list(p1, p2, p3), ~ nrow(.x$data))
+vSparse &lt;- map_int(list(p1, p2, p3), ~ sum(.x$data$n &lt; 10))</code></pre>
+<p>Each tile shows the median <code>SalePrice</code> (by its color) and the number of properties. A tile is grey if it has fewer than 10 properties, because a median of so few properties is not reliable.</p>
+<ul>
+<li>Some neighborhoods have more properties with a high <code>OverallQual</code>, so their prices are higher. But in Type4 neighborhoods, <code>SalePrice</code> clearly changes with the quality of the property.</li>
+<li>It is less clear whether <code>GarageType</code> has a large effect by itself. Buyers seem to prefer built-in and attached garages, but <code>NeighborhoodType</code> explains most of the differences.</li>
+<li>In both one-story and multi-story houses built after 1946, properties in low-density residential zones and floating village zones usually have higher prices.</li>
+<li>Many combinations are rare: 11 of the 34 combinations of <code>OverallQual</code> and <code>NeighborhoodType</code>, and 20 of the 46 combinations of <code>MSSubClass</code> and <code>MSZoning</code>, have fewer than 10 properties. So we can compare only the common combinations reliably. Also, a model would find it hard to learn how these features work together.</li>
+</ul>
+</div>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/eda/">eda</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part1-data-pipeline/">Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</a></li>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
+
+    
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
+
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    © Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
