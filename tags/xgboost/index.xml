@@ -215,91 +215,199 @@ dfOverall %&amp;gt;%
   mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
          across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&amp;gt;%
   select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&amp;gt;%
-  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC&amp;quot;, &amp;quot;Average ROC AUC&amp;lt;br&amp;gt;within a month&amp;quot;, &amp;quot;PR AUC&amp;quot;, &amp;quot;Log loss&amp;quot;,
-                             &amp;quot;Average predicted probability&amp;quot;, &amp;quot;Actual subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+  # in the HTML table, each cell&amp;#39;s text is on a line of its own, and Hugo would turn a line that starts with &amp;quot;+&amp;quot; into a
+  # bulleted list, so the text is wrapped in a &amp;lt;span&amp;gt;
+  mutate(feature_set = paste0(&amp;quot;&amp;lt;span&amp;gt;&amp;quot;, feature_set, &amp;quot;&amp;lt;/span&amp;gt;&amp;quot;)) %&amp;gt;%
+  # an HTML table, so that the browser sizes the columns to their contents, and the headers break where they should;
+  # text columns are aligned left, and number columns right, with their headers
+  knitr::kable(format = &amp;quot;html&amp;quot;, escape = FALSE, align = c(&amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;),
+               col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC&amp;lt;br&amp;gt;AUC&amp;quot;, &amp;quot;Average ROC AUC&amp;lt;br&amp;gt;within a month&amp;quot;, &amp;quot;PR&amp;lt;br&amp;gt;AUC&amp;quot;, &amp;quot;Log&amp;lt;br&amp;gt;loss&amp;quot;,
+                             &amp;quot;Average predicted&amp;lt;br&amp;gt;probability&amp;quot;, &amp;quot;Actual&amp;lt;br&amp;gt;subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;table&gt;
-&lt;colgroup&gt;
-&lt;col width=&#34;5%&#34; /&gt;
-&lt;col width=&#34;14%&#34; /&gt;
-&lt;col width=&#34;5%&#34; /&gt;
-&lt;col width=&#34;24%&#34; /&gt;
-&lt;col width=&#34;4%&#34; /&gt;
-&lt;col width=&#34;6%&#34; /&gt;
-&lt;col width=&#34;21%&#34; /&gt;
-&lt;col width=&#34;17%&#34; /&gt;
-&lt;/colgroup&gt;
 &lt;thead&gt;
-&lt;tr class=&#34;header&#34;&gt;
-&lt;th align=&#34;left&#34;&gt;Model&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Features&lt;/th&gt;
-&lt;th align=&#34;right&#34;&gt;ROC AUC&lt;/th&gt;
-&lt;th align=&#34;right&#34;&gt;Average ROC AUC&lt;br&gt;within a month&lt;/th&gt;
-&lt;th align=&#34;right&#34;&gt;PR AUC&lt;/th&gt;
-&lt;th align=&#34;right&#34;&gt;Log loss&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Average predicted probability&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Actual subscription rate&lt;/th&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Model
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Features
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+ROC&lt;br&gt;AUC
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average ROC AUC&lt;br&gt;within a month
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+PR&lt;br&gt;AUC
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Log&lt;br&gt;loss
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average predicted&lt;br&gt;probability
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Actual&lt;br&gt;subscription rate
+&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
-&lt;tr class=&#34;odd&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;glmnet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;client and campaign&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.655&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.678&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.621&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.762&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;27.4%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.621
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.762
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+27.4%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
-&lt;tr class=&#34;even&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;glmnet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;+ economic levels&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.596&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.683&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.519&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;1.337&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;50.7%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.596
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.683
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.519
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.337
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+50.7%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
-&lt;tr class=&#34;odd&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;glmnet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;+ economic trends&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.588&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.678&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.521&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.902&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;45.9%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.588
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.521
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.902
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+45.9%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
-&lt;tr class=&#34;even&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;client and campaign&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.650&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.677&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.615&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.764&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;27.7%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.677
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.615
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.764
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+27.7%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
-&lt;tr class=&#34;odd&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;+ economic levels&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.638&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.669&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.598&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.721&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;31.7%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.638
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.669
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.598
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.721
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+31.7%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
-&lt;tr class=&#34;even&#34;&gt;
-&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;+ economic trends&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.573&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.650&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.519&lt;/td&gt;
-&lt;td align=&#34;right&#34;&gt;0.716&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;47.1%&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;44.5%&lt;/td&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.573
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.519
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.716
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+47.1%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;

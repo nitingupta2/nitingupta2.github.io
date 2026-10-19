@@ -98,7 +98,7 @@ In Part 1, we found that the subscription rate changed a lot between 2008 and 20
     
     
     
-    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
+    <link rel="stylesheet" href="/css/academic.46f9f899be56d93ae96eae42f5466d92.css">
   
 
   
@@ -674,91 +674,199 @@ dfOverall %&gt;%
   mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
          across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&gt;%
   select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&gt;%
-  knitr::kable(col.names = c(&quot;Model&quot;, &quot;Features&quot;, &quot;ROC AUC&quot;, &quot;Average ROC AUC&lt;br&gt;within a month&quot;, &quot;PR AUC&quot;, &quot;Log loss&quot;,
-                             &quot;Average predicted probability&quot;, &quot;Actual subscription rate&quot;))</code></pre>
+  # in the HTML table, each cell&#39;s text is on a line of its own, and Hugo would turn a line that starts with &quot;+&quot; into a
+  # bulleted list, so the text is wrapped in a &lt;span&gt;
+  mutate(feature_set = paste0(&quot;&lt;span&gt;&quot;, feature_set, &quot;&lt;/span&gt;&quot;)) %&gt;%
+  # an HTML table, so that the browser sizes the columns to their contents, and the headers break where they should;
+  # text columns are aligned left, and number columns right, with their headers
+  knitr::kable(format = &quot;html&quot;, escape = FALSE, align = c(&quot;l&quot;, &quot;l&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;, &quot;r&quot;),
+               col.names = c(&quot;Model&quot;, &quot;Features&quot;, &quot;ROC&lt;br&gt;AUC&quot;, &quot;Average ROC AUC&lt;br&gt;within a month&quot;, &quot;PR&lt;br&gt;AUC&quot;, &quot;Log&lt;br&gt;loss&quot;,
+                             &quot;Average predicted&lt;br&gt;probability&quot;, &quot;Actual&lt;br&gt;subscription rate&quot;))</code></pre>
 <table>
-<colgroup>
-<col width="5%" />
-<col width="14%" />
-<col width="5%" />
-<col width="24%" />
-<col width="4%" />
-<col width="6%" />
-<col width="21%" />
-<col width="17%" />
-</colgroup>
 <thead>
-<tr class="header">
-<th align="left">Model</th>
-<th align="left">Features</th>
-<th align="right">ROC AUC</th>
-<th align="right">Average ROC AUC<br>within a month</th>
-<th align="right">PR AUC</th>
-<th align="right">Log loss</th>
-<th align="left">Average predicted probability</th>
-<th align="left">Actual subscription rate</th>
+<tr>
+<th style="text-align:left;">
+Model
+</th>
+<th style="text-align:left;">
+Features
+</th>
+<th style="text-align:right;">
+ROC<br>AUC
+</th>
+<th style="text-align:right;">
+Average ROC AUC<br>within a month
+</th>
+<th style="text-align:right;">
+PR<br>AUC
+</th>
+<th style="text-align:right;">
+Log<br>loss
+</th>
+<th style="text-align:right;">
+Average predicted<br>probability
+</th>
+<th style="text-align:right;">
+Actual<br>subscription rate
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">glmnet</td>
-<td align="left">client and campaign</td>
-<td align="right">0.655</td>
-<td align="right">0.678</td>
-<td align="right">0.621</td>
-<td align="right">0.762</td>
-<td align="left">27.4%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+glmnet
+</td>
+<td style="text-align:left;">
+<span>client and campaign</span>
+</td>
+<td style="text-align:right;">
+0.655
+</td>
+<td style="text-align:right;">
+0.678
+</td>
+<td style="text-align:right;">
+0.621
+</td>
+<td style="text-align:right;">
+0.762
+</td>
+<td style="text-align:right;">
+27.4%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
-<tr class="even">
-<td align="left">glmnet</td>
-<td align="left">+ economic levels</td>
-<td align="right">0.596</td>
-<td align="right">0.683</td>
-<td align="right">0.519</td>
-<td align="right">1.337</td>
-<td align="left">50.7%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+glmnet
+</td>
+<td style="text-align:left;">
+<span>+ economic levels</span>
+</td>
+<td style="text-align:right;">
+0.596
+</td>
+<td style="text-align:right;">
+0.683
+</td>
+<td style="text-align:right;">
+0.519
+</td>
+<td style="text-align:right;">
+1.337
+</td>
+<td style="text-align:right;">
+50.7%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
-<tr class="odd">
-<td align="left">glmnet</td>
-<td align="left">+ economic trends</td>
-<td align="right">0.588</td>
-<td align="right">0.678</td>
-<td align="right">0.521</td>
-<td align="right">0.902</td>
-<td align="left">45.9%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+glmnet
+</td>
+<td style="text-align:left;">
+<span>+ economic trends</span>
+</td>
+<td style="text-align:right;">
+0.588
+</td>
+<td style="text-align:right;">
+0.678
+</td>
+<td style="text-align:right;">
+0.521
+</td>
+<td style="text-align:right;">
+0.902
+</td>
+<td style="text-align:right;">
+45.9%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
-<tr class="even">
-<td align="left">xgboost</td>
-<td align="left">client and campaign</td>
-<td align="right">0.650</td>
-<td align="right">0.677</td>
-<td align="right">0.615</td>
-<td align="right">0.764</td>
-<td align="left">27.7%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+xgboost
+</td>
+<td style="text-align:left;">
+<span>client and campaign</span>
+</td>
+<td style="text-align:right;">
+0.650
+</td>
+<td style="text-align:right;">
+0.677
+</td>
+<td style="text-align:right;">
+0.615
+</td>
+<td style="text-align:right;">
+0.764
+</td>
+<td style="text-align:right;">
+27.7%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
-<tr class="odd">
-<td align="left">xgboost</td>
-<td align="left">+ economic levels</td>
-<td align="right">0.638</td>
-<td align="right">0.669</td>
-<td align="right">0.598</td>
-<td align="right">0.721</td>
-<td align="left">31.7%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+xgboost
+</td>
+<td style="text-align:left;">
+<span>+ economic levels</span>
+</td>
+<td style="text-align:right;">
+0.638
+</td>
+<td style="text-align:right;">
+0.669
+</td>
+<td style="text-align:right;">
+0.598
+</td>
+<td style="text-align:right;">
+0.721
+</td>
+<td style="text-align:right;">
+31.7%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
-<tr class="even">
-<td align="left">xgboost</td>
-<td align="left">+ economic trends</td>
-<td align="right">0.573</td>
-<td align="right">0.650</td>
-<td align="right">0.519</td>
-<td align="right">0.716</td>
-<td align="left">47.1%</td>
-<td align="left">44.5%</td>
+<tr>
+<td style="text-align:left;">
+xgboost
+</td>
+<td style="text-align:left;">
+<span>+ economic trends</span>
+</td>
+<td style="text-align:right;">
+0.573
+</td>
+<td style="text-align:right;">
+0.650
+</td>
+<td style="text-align:right;">
+0.519
+</td>
+<td style="text-align:right;">
+0.716
+</td>
+<td style="text-align:right;">
+47.1%
+</td>
+<td style="text-align:right;">
+44.5%
+</td>
 </tr>
 </tbody>
 </table>
