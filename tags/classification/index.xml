@@ -177,14 +177,15 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &amp;quot;v&amp;qu
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- ggplot(dfMonthly, aes(x = year_month, y = euribor_mean)) +
   geom_line(color = &amp;quot;#00AED8&amp;quot;) + geom_point(color = &amp;quot;#00AED8&amp;quot;) +
   scale_x_date(date_breaks = &amp;quot;3 months&amp;quot;, date_labels = &amp;quot;%b %Y&amp;quot;) +
-  labs(x = NULL, y = &amp;quot;3 month Euribor (%)&amp;quot;, title = &amp;quot;Average 3 month Euribor in each month&amp;quot;)
+  labs(x = NULL, y = &amp;quot;3 month Euribor (%)&amp;quot;, title = &amp;quot;Average 3 month Euribor in each month&amp;quot;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 p2 &amp;lt;- ggplot(dfMonthly %&amp;gt;% filter(!is.na(prev_month_rate)), aes(x = rate, y = prev_month_rate)) +
   geom_abline(lty = 2) +
   geom_point(aes(size = calls), color = &amp;quot;#F37735&amp;quot;, alpha = 0.7, show.legend = FALSE) +
   scale_x_continuous(labels = scales::label_percent()) +
   scale_y_continuous(labels = scales::label_percent()) +
   labs(x = &amp;quot;Subscription rate in the month&amp;quot;, y = &amp;quot;Rate in the previous month with calls&amp;quot;,
-       title = &amp;quot;Subscription rate: each month and the month before&amp;quot;)
+       title = &amp;quot;Subscription rate vs the previous month&amp;quot;)
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/trend_features-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
@@ -214,25 +215,25 @@ dfOverall %&amp;gt;%
   mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
          across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&amp;gt;%
   select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&amp;gt;%
-  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC&amp;quot;, &amp;quot;Average ROC AUC within a month&amp;quot;, &amp;quot;PR AUC&amp;quot;, &amp;quot;Log loss&amp;quot;,
+  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC&amp;quot;, &amp;quot;Average ROC AUC&amp;lt;br&amp;gt;within a month&amp;quot;, &amp;quot;PR AUC&amp;quot;, &amp;quot;Log loss&amp;quot;,
                              &amp;quot;Average predicted probability&amp;quot;, &amp;quot;Actual subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;table style=&#34;width:100%;&#34;&gt;
+&lt;table&gt;
 &lt;colgroup&gt;
 &lt;col width=&#34;5%&#34; /&gt;
 &lt;col width=&#34;14%&#34; /&gt;
 &lt;col width=&#34;5%&#34; /&gt;
-&lt;col width=&#34;22%&#34; /&gt;
-&lt;col width=&#34;5%&#34; /&gt;
+&lt;col width=&#34;24%&#34; /&gt;
+&lt;col width=&#34;4%&#34; /&gt;
 &lt;col width=&#34;6%&#34; /&gt;
 &lt;col width=&#34;21%&#34; /&gt;
-&lt;col width=&#34;18%&#34; /&gt;
+&lt;col width=&#34;17%&#34; /&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr class=&#34;header&#34;&gt;
 &lt;th align=&#34;left&#34;&gt;Model&lt;/th&gt;
 &lt;th align=&#34;left&#34;&gt;Features&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;ROC AUC&lt;/th&gt;
-&lt;th align=&#34;right&#34;&gt;Average ROC AUC within a month&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Average ROC AUC&lt;br&gt;within a month&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;PR AUC&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;Log loss&lt;/th&gt;
 &lt;th align=&#34;left&#34;&gt;Average predicted probability&lt;/th&gt;

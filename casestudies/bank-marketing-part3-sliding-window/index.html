@@ -636,14 +636,15 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</co
 <pre class="r"><code>p1 &lt;- ggplot(dfMonthly, aes(x = year_month, y = euribor_mean)) +
   geom_line(color = &quot;#00AED8&quot;) + geom_point(color = &quot;#00AED8&quot;) +
   scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
-  labs(x = NULL, y = &quot;3 month Euribor (%)&quot;, title = &quot;Average 3 month Euribor in each month&quot;)
+  labs(x = NULL, y = &quot;3 month Euribor (%)&quot;, title = &quot;Average 3 month Euribor in each month&quot;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 p2 &lt;- ggplot(dfMonthly %&gt;% filter(!is.na(prev_month_rate)), aes(x = rate, y = prev_month_rate)) +
   geom_abline(lty = 2) +
   geom_point(aes(size = calls), color = &quot;#F37735&quot;, alpha = 0.7, show.legend = FALSE) +
   scale_x_continuous(labels = scales::label_percent()) +
   scale_y_continuous(labels = scales::label_percent()) +
   labs(x = &quot;Subscription rate in the month&quot;, y = &quot;Rate in the previous month with calls&quot;,
-       title = &quot;Subscription rate: each month and the month before&quot;)
+       title = &quot;Subscription rate vs the previous month&quot;)
 cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/trend_features-1.png" alt="" width="960" /></p>
 </div>
@@ -673,25 +674,25 @@ dfOverall %&gt;%
   mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
          across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&gt;%
   select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&gt;%
-  knitr::kable(col.names = c(&quot;Model&quot;, &quot;Features&quot;, &quot;ROC AUC&quot;, &quot;Average ROC AUC within a month&quot;, &quot;PR AUC&quot;, &quot;Log loss&quot;,
+  knitr::kable(col.names = c(&quot;Model&quot;, &quot;Features&quot;, &quot;ROC AUC&quot;, &quot;Average ROC AUC&lt;br&gt;within a month&quot;, &quot;PR AUC&quot;, &quot;Log loss&quot;,
                              &quot;Average predicted probability&quot;, &quot;Actual subscription rate&quot;))</code></pre>
-<table style="width:100%;">
+<table>
 <colgroup>
 <col width="5%" />
 <col width="14%" />
 <col width="5%" />
-<col width="22%" />
-<col width="5%" />
+<col width="24%" />
+<col width="4%" />
 <col width="6%" />
 <col width="21%" />
-<col width="18%" />
+<col width="17%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">Model</th>
 <th align="left">Features</th>
 <th align="right">ROC AUC</th>
-<th align="right">Average ROC AUC within a month</th>
+<th align="right">Average ROC AUC<br>within a month</th>
 <th align="right">PR AUC</th>
 <th align="right">Log loss</th>
 <th align="left">Average predicted probability</th>
