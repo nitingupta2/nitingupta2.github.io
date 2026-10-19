@@ -32,7 +32,7 @@
 Other posts in this series:
 
 Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
-Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
+Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models
 
 A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.">
 
@@ -136,7 +136,7 @@ A Portuguese bank ran a series of telemarketing campaigns between May 2008 and N
 Other posts in this series:
 
 Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
-Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
+Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models
 
 A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
@@ -483,14 +483,14 @@ A Portuguese bank ran a series of telemarketing campaigns between May 2008 and N
 <h4>Other posts in this series:</h4>
 <ul>
 <li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</a></li>
-<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models</a></li>
 </ul>
 <p>A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">Bank Marketing dataset</a> (<a href="http://dx.doi.org/10.1016/j.dss.2014.03.001">Moro, Cortez and Rita, 2014</a>) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.</p>
 <p>In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, <em>yes</em> or <em>no</em>? This kind of problem is called classification. The case study has three posts:</p>
 <ol style="list-style-type: decimal">
 <li>In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.</li>
 <li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.</li>
-<li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we train the models on a sliding window of recent months and predict the next month, as a bank would do in practice.</li>
+<li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we train the models on past months only, either a sliding window of the last 12 months or all the months so far, and predict the next 3 months, as a bank would do in practice.</li>
 </ol>
 </div>
 <div id="data-description" class="section level2">
@@ -947,7 +947,7 @@ calls_oct_dec_2008 &lt;- sum(dfMonthCheck$calls[dfMonthCheck$year_month %in% as.
 <ul>
 <li>67% of the calls were made in 2008, when fewer than 1 in 15 calls succeeded, except in October and December, which had only 77 calls between them.</li>
 <li>From the middle of 2009, the bank made far fewer calls, and more of them succeeded: in 2010, about half of the calls ended with a <em>yes</em>. Part of this change may come from the economy, and part from the bank calling different clients. The data cannot separate the two.</li>
-<li>So the behavior of clients changed over time. A model that learns from the past should give more weight to the recent past. In Part 3, we train the models on a sliding window of recent months, and predict the next month.</li>
+<li>So the behavior of clients changed over time. So a model that learns from the past may need to give more weight to the recent past. In Part 3, we compare training on a sliding window of the last 12 months with training on all the months so far.</li>
 </ul>
 </div>
 </div>
@@ -1052,7 +1052,7 @@ save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, dfCallDates, file = &quot;Ba
 <li>Age and job matter, but less.</li>
 <li><code>duration</code> must not be used, even though it looks like the best predictor.</li>
 </ul>
-<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we use this dataset to build models that predict which clients will subscribe. In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we use the dates of the calls to train the models on recent months only.</p>
+<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we use this dataset to build models that predict which clients will subscribe. In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we use the dates of the calls to train the models on past months only, and test them on the months that follow.</p>
 </div>
 
     </div>

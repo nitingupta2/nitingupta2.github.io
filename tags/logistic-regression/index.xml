@@ -24,7 +24,7 @@
 &lt;h4&gt;Other posts in this series:&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt;, we explored the &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt;: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.&lt;/p&gt;
 &lt;p&gt;In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.&lt;/p&gt;

@@ -13,7 +13,7 @@
     </image>
     
     <item>
-      <title>Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models</title>
+      <title>Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models</title>
       <link>https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/</link>
       <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/</guid>
@@ -28,7 +28,11 @@
 &lt;/ul&gt;
 &lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt;, we found that the subscription rate changed a lot between 2008 and 2010, as interest rates fell and the bank changed its campaigns. In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we built models on a random sample of the calls and tested them on the other calls from the same period. They did well. But when we trained them on the earlier calls and tested them on the later calls, they did much worse.&lt;/p&gt;
 &lt;p&gt;The calls in this dataset are independent of each other: one client’s answer does not change another client’s answer. But they are not independent of &lt;em&gt;time&lt;/em&gt;. What makes a client say yes, and how often, depends on the economy and on the campaign at the time. A model learned from the past only works for the near future.&lt;/p&gt;
-&lt;p&gt;So in this post, we do what a bank would do in practice. We take the calls of the last 12 months, choose the hyperparameters and train the models on them, and use the models to predict the calls of the next 3 months. Then we move forward by 3 months, and repeat. This is called a sliding window (or walk-forward) evaluation.&lt;/p&gt;
+&lt;p&gt;So in this post, we do what a bank would do in practice. We take the calls of the past months, choose the hyperparameters and train the models on them, and use the models to predict the calls of the next 3 months, which the models have never seen. Then we move forward by 3 months, and repeat. This is called a walk-forward evaluation. We compare two ways of choosing the past months:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;strong&gt;sliding window&lt;/strong&gt; of the last 12 months, which forgets the older months.&lt;/li&gt;
+&lt;li&gt;An &lt;strong&gt;expanding window&lt;/strong&gt; of all the months so far, which keeps everything.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;the-timeline-of-the-calls&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;The Timeline of the Calls&lt;/h2&gt;
@@ -47,109 +51,143 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &amp;quot;v&amp;qu
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/timeline-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Most of the calls were made in 2008, when few clients said yes. From the middle of 2009, the bank made far fewer calls, and about half of them succeeded. So a model trained on the past learns from a very different situation from the one that it has to predict.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;how-the-sliding-windows-work&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;How the Sliding Windows Work&lt;/h2&gt;
+&lt;div id=&#34;how-the-windows-work&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;How the Windows Work&lt;/h2&gt;
 &lt;p&gt;Each cycle has two parts:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;A &lt;strong&gt;training window&lt;/strong&gt; of the 12 calendar months before the testing period. We choose the hyperparameters with cross validation on these calls only, and train the final model on all of them.&lt;/li&gt;
+&lt;li&gt;A &lt;strong&gt;training window&lt;/strong&gt; of past months. We choose the hyperparameters with cross validation on these calls only, and train the final model on all of them.&lt;/li&gt;
 &lt;li&gt;A &lt;strong&gt;testing period&lt;/strong&gt; of the next 3 months. The model predicts these calls, which it has never seen.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Then the window moves forward by 3 months. The first testing period starts in June 2009, the first month with 12 full months of calls before it, and the last one ends in November 2010, the last month of the data. Some months have no calls, so a window can have fewer than 12 months of calls.&lt;/p&gt;
+&lt;p&gt;Then we move forward by 3 months. The first testing period starts in June 2009, the first month with 12 full months of calls before it, and the last one ends in November 2010, the last month of the data. The two kinds of windows use the same testing periods:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;strong&gt;sliding window&lt;/strong&gt; is the 12 calendar months before the testing period. Some months have no calls, so a window can have fewer than 12 months of calls.&lt;/li&gt;
+&lt;li&gt;The &lt;strong&gt;expanding window&lt;/strong&gt; starts with the same 12 months, and keeps all the months since then. So in the first cycle, the two windows are the same, and the first cycle is run only once.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCycles %&amp;gt;%
+  mutate(training = paste(format(train_first, &amp;quot;%b %Y&amp;quot;), &amp;quot;-&amp;quot;, format(train_last, &amp;quot;%b %Y&amp;quot;)),
+         training_calls = scales::label_comma()(train_calls),
+         training_rate = scales::label_percent(accuracy = 0.1)(train_rate)) %&amp;gt;%
+  select(window, cycle, test_first, test_last, test_calls, test_rate, training, training_calls, training_rate) %&amp;gt;%
+  pivot_wider(names_from = window, values_from = c(training, training_calls, training_rate)) %&amp;gt;%
   transmute(Cycle = cycle,
-            `Training months` = paste(format(train_first, &amp;quot;%b %Y&amp;quot;), &amp;quot;-&amp;quot;, format(train_last, &amp;quot;%b %Y&amp;quot;)),
-            `Training calls` = scales::label_comma()(train_calls),
-            `Training rate` = scales::label_percent(accuracy = 0.1)(train_rate),
             `Testing months` = if_else(test_first == test_last, format(test_first, &amp;quot;%b %Y&amp;quot;),
                                        paste(format(test_first, &amp;quot;%b %Y&amp;quot;), &amp;quot;-&amp;quot;, format(test_last, &amp;quot;%b %Y&amp;quot;))),
             `Testing calls` = scales::label_comma()(test_calls),
-            `Testing rate` = scales::label_percent(accuracy = 0.1)(test_rate)) %&amp;gt;%
-  knitr::kable()&lt;/code&gt;&lt;/pre&gt;
-&lt;table&gt;
+            `Testing rate` = scales::label_percent(accuracy = 0.1)(test_rate),
+            `Sliding window` = training_sliding, `Calls` = training_calls_sliding, `Rate` = training_rate_sliding,
+            `Expanding window` = training_expanding, `Calls ` = training_calls_expanding, `Rate ` = training_rate_expanding) %&amp;gt;%
+  knitr::kable(align = c(&amp;quot;r&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table style=&#34;width:100%;&#34;&gt;
 &lt;colgroup&gt;
 &lt;col width=&#34;5%&#34; /&gt;
-&lt;col width=&#34;19%&#34; /&gt;
-&lt;col width=&#34;14%&#34; /&gt;
-&lt;col width=&#34;13%&#34; /&gt;
-&lt;col width=&#34;19%&#34; /&gt;
-&lt;col width=&#34;13%&#34; /&gt;
-&lt;col width=&#34;12%&#34; /&gt;
+&lt;col width=&#34;16%&#34; /&gt;
+&lt;col width=&#34;11%&#34; /&gt;
+&lt;col width=&#34;10%&#34; /&gt;
+&lt;col width=&#34;16%&#34; /&gt;
+&lt;col width=&#34;5%&#34; /&gt;
+&lt;col width=&#34;5%&#34; /&gt;
+&lt;col width=&#34;16%&#34; /&gt;
+&lt;col width=&#34;5%&#34; /&gt;
+&lt;col width=&#34;5%&#34; /&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr class=&#34;header&#34;&gt;
 &lt;th align=&#34;right&#34;&gt;Cycle&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Training months&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Training calls&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Training rate&lt;/th&gt;
 &lt;th align=&#34;left&#34;&gt;Testing months&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Testing calls&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Testing rate&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Testing calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Testing rate&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Sliding window&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Rate&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Expanding window&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Rate&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr class=&#34;odd&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Jun 2008 - May 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;28,452&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;7.7%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Jun 2009 - Aug 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;1,662&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;35.7%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1,662&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;35.7%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - May 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;28,452&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;7.7%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - May 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;28,452&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;7.7%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Oct 2008 - Aug 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;13,886&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;13.8%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Sep 2009 - Nov 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;1,070&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;42.4%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1,070&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;42.4%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Oct 2008 - Aug 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;13,886&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;13.8%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - Aug 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;30,114&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;9.2%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;odd&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Dec 2008 - Nov 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;11,274&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;19.0%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Dec 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;172&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;51.2%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;172&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;51.2%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Dec 2008 - Nov 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11,274&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;19.0%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - Nov 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;31,184&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10.4%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Mar 2009 - Dec 2009&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;11,436&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;19.5%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Mar 2010 - May 2010&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;650&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;56.8%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;650&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;56.8%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Mar 2009 - Dec 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11,436&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;19.5%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - Dec 2009&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;31,356&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10.6%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;odd&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;5&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Jun 2009 - May 2010&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;3,554&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;42.3%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Jun 2010 - Aug 2010&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;773&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;52.1%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;773&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;52.1%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2009 - May 2010&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3,554&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;42.3%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - May 2010&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;32,006&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11.5%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
 &lt;td align=&#34;right&#34;&gt;6&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Sep 2009 - Aug 2010&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;2,665&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;49.3%&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Sep 2010 - Nov 2010&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;635&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;47.4%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;635&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;47.4%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sep 2009 - Aug 2010&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2,665&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;49.3%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Jun 2008 - Aug 2010&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;32,779&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12.5%&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCycles %&amp;gt;%
-  select(cycle, train_first, train_last, test_first, test_last) %&amp;gt;%
-  pivot_longer(-cycle, names_to = c(&amp;quot;part&amp;quot;, &amp;quot;.value&amp;quot;), names_sep = &amp;quot;_&amp;quot;) %&amp;gt;%
+  select(window, cycle, train_first, train_last, test_first, test_last) %&amp;gt;%
+  pivot_longer(-c(window, cycle), names_to = c(&amp;quot;part&amp;quot;, &amp;quot;.value&amp;quot;), names_sep = &amp;quot;_&amp;quot;) %&amp;gt;%
   mutate(part = if_else(part == &amp;quot;train&amp;quot;, &amp;quot;training window&amp;quot;, &amp;quot;testing period&amp;quot;),
-         last = last %m+% months(1)) %&amp;gt;%
+         last = last %m+% months(1),
+         window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;), labels = c(&amp;quot;Sliding windows&amp;quot;, &amp;quot;Expanding windows&amp;quot;))) %&amp;gt;%
   ggplot(aes(y = factor(cycle), xmin = first, xmax = last, color = part)) +
-  geom_linerange(linewidth = 6) +
+  geom_linerange(linewidth = 5) +
+  facet_wrap(~ window, ncol = 1) +
   scale_y_discrete(limits = rev) +
   scale_x_date(date_breaks = &amp;quot;3 months&amp;quot;, date_labels = &amp;quot;%b %Y&amp;quot;) +
   scale_color_manual(values = c(&amp;quot;training window&amp;quot; = &amp;quot;#00AED8&amp;quot;, &amp;quot;testing period&amp;quot; = &amp;quot;#F37735&amp;quot;), name = NULL) +
@@ -158,8 +196,8 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &amp;quot;v&amp;qu
 &lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;The training windows shrink from 28,452 calls in the first cycle to 2,665 in the last, because the bank made fewer calls each year.&lt;/li&gt;
-&lt;li&gt;In the first cycles, the models learn from a very different situation from the one that they predict: in cycle 1, 7.7% of the training calls succeeded, but 35.7% of the testing calls did. By the last cycles, the training windows have similar rates to the testing periods.&lt;/li&gt;
+&lt;li&gt;The sliding windows shrink from 28,452 calls in the first cycle to 2,665 in the last, because the bank made fewer calls each year. The expanding windows grow, but only to 32,779, because the later months have few calls.&lt;/li&gt;
+&lt;li&gt;The subscription rate in the sliding windows rises from 7.7% to 49.3%, close to the rates of the testing periods. In the expanding windows, it only reaches 12.5%, because most of their calls are always from 2008, when few clients said yes.&lt;/li&gt;
 &lt;li&gt;Cycle 3 tests only December 2009, because there were no calls in January and February 2010.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In each cycle, the code checks that every training call was made before every testing call, and that no call is in both. Everything that the model learns, including the hyperparameters and the preparation of the features (such as the dummy variables and which features are skewed), comes from the training window only.&lt;/p&gt;
@@ -193,39 +231,43 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;h2&gt;Results&lt;/h2&gt;
 &lt;div id=&#34;all-the-testing-periods-together&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;All the Testing Periods Together&lt;/h3&gt;
-&lt;p&gt;We put the predictions of all the testing periods together, 4,962 calls in total, and measure each model and feature set. We also measure the ROC AUC within each month and take the average. This shows how well a model ranks the clients &lt;em&gt;within&lt;/em&gt; a month, which is what a bank needs to decide whom to call that month.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfOverall &amp;lt;- dfSlidingPred %&amp;gt;%
-  group_by(model, feature_set) %&amp;gt;%
+&lt;p&gt;We put the predictions of all the testing periods together, 4,962 calls in total, and measure each window, model and feature set. We also measure the ROC AUC within each month and take the average. This shows how well a model ranks the clients &lt;em&gt;within&lt;/em&gt; a month, which is what a bank needs to decide whom to call that month.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfOverall &amp;lt;- dfWindowPred %&amp;gt;%
+  group_by(window, model, feature_set) %&amp;gt;%
   summarise(roc_auc = roc_auc_vec(y, .pred_yes),
             pr_auc = pr_auc_vec(y, .pred_yes),
             mn_log_loss = mn_log_loss_vec(y, .pred_yes),
             mean_predicted = mean(.pred_yes),
             actual_rate = mean(y == &amp;quot;yes&amp;quot;),
             .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
-  left_join(dfSlidingPred %&amp;gt;%
-              group_by(model, feature_set, year_month) %&amp;gt;%
+  left_join(dfWindowPred %&amp;gt;%
+              group_by(window, model, feature_set, year_month) %&amp;gt;%
               summarise(month_roc_auc = roc_auc_vec(y, .pred_yes), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
-              group_by(model, feature_set) %&amp;gt;%
+              group_by(window, model, feature_set) %&amp;gt;%
               summarise(monthly_roc_auc = mean(month_roc_auc), .groups = &amp;quot;drop&amp;quot;),
-            by = c(&amp;quot;model&amp;quot;, &amp;quot;feature_set&amp;quot;)) %&amp;gt;%
-  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets))) %&amp;gt;%
-  arrange(model, feature_set)
+            by = c(&amp;quot;window&amp;quot;, &amp;quot;model&amp;quot;, &amp;quot;feature_set&amp;quot;)) %&amp;gt;%
+  mutate(window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;)),
+         feature_set = factor(feature_set, levels = names(lFeatureSets))) %&amp;gt;%
+  arrange(window, model, feature_set)
 
 dfOverall %&amp;gt;%
   mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
          across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&amp;gt;%
-  select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&amp;gt;%
+  select(window, model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&amp;gt;%
   # in the HTML table, each cell&amp;#39;s text is on a line of its own, and Hugo would turn a line that starts with &amp;quot;+&amp;quot; into a
   # bulleted list, so the text is wrapped in a &amp;lt;span&amp;gt;
   mutate(feature_set = paste0(&amp;quot;&amp;lt;span&amp;gt;&amp;quot;, feature_set, &amp;quot;&amp;lt;/span&amp;gt;&amp;quot;)) %&amp;gt;%
   # an HTML table, so that the browser sizes the columns to their contents, and the headers break where they should;
   # text columns are aligned left, and number columns right, with their headers
-  knitr::kable(format = &amp;quot;html&amp;quot;, escape = FALSE, align = c(&amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;),
-               col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC&amp;lt;br&amp;gt;AUC&amp;quot;, &amp;quot;Average ROC AUC&amp;lt;br&amp;gt;within a month&amp;quot;, &amp;quot;PR&amp;lt;br&amp;gt;AUC&amp;quot;, &amp;quot;Log&amp;lt;br&amp;gt;loss&amp;quot;,
-                             &amp;quot;Average predicted&amp;lt;br&amp;gt;probability&amp;quot;, &amp;quot;Actual&amp;lt;br&amp;gt;subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+  knitr::kable(format = &amp;quot;html&amp;quot;, escape = FALSE, align = c(&amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;),
+               col.names = c(&amp;quot;Window&amp;quot;, &amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC&amp;lt;br&amp;gt;AUC&amp;quot;, &amp;quot;Average ROC AUC&amp;lt;br&amp;gt;within a month&amp;quot;, &amp;quot;PR&amp;lt;br&amp;gt;AUC&amp;quot;,
+                             &amp;quot;Log&amp;lt;br&amp;gt;loss&amp;quot;, &amp;quot;Average predicted&amp;lt;br&amp;gt;probability&amp;quot;, &amp;quot;Actual&amp;lt;br&amp;gt;subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Window
+&lt;/th&gt;
 &lt;th style=&#34;text-align:left;&#34;&gt;
 Model
 &lt;/th&gt;
@@ -255,6 +297,9 @@ Actual&lt;br&gt;subscription rate
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
 glmnet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
@@ -280,6 +325,9 @@ glmnet
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
 glmnet
 &lt;/td&gt;
@@ -307,6 +355,9 @@ glmnet
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
 glmnet
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
@@ -332,6 +383,9 @@ glmnet
 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
 xgboost
 &lt;/td&gt;
@@ -359,6 +413,9 @@ xgboost
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
 xgboost
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
@@ -385,6 +442,9 @@ xgboost
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
 xgboost
 &lt;/td&gt;
 &lt;td style=&#34;text-align:left;&#34;&gt;
@@ -409,68 +469,256 @@ xgboost
 44.5%
 &lt;/td&gt;
 &lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.612
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.834
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+22.3%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.592
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.684
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.521
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.170
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+53.9%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.628
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.660
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.592
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.763
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+46.9%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.653
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.652
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.613
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.810
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+24.2%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.613
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.571
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.751
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+30.3%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.582
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.645
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.520
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.711
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+49.8%
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+44.5%
+&lt;/td&gt;
+&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;overall &amp;lt;- function(model, feature_set, metric) dfOverall[[metric]][dfOverall$model == model &amp;amp; dfOverall$feature_set == feature_set]
-# the best model and feature set, by ROC AUC over all the testing periods together
-best_row &amp;lt;- dfOverall %&amp;gt;% slice_max(roc_auc, n = 1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;overall &amp;lt;- function(window, model, feature_set, metric) {
+  dfOverall[[metric]][dfOverall$window == window &amp;amp; dfOverall$model == model &amp;amp; dfOverall$feature_set == feature_set]
+}
+# the best window, model and feature set, by ROC AUC over all the testing periods together
+best_row &amp;lt;- dfOverall %&amp;gt;% slice_max(roc_auc, n = 1)
+
+# expanding minus sliding, for each model and feature set
+dfWindowComparison &amp;lt;- dfOverall %&amp;gt;%
+  select(window, model, feature_set, roc_auc, monthly_roc_auc) %&amp;gt;%
+  pivot_wider(names_from = window, values_from = c(roc_auc, monthly_roc_auc)) %&amp;gt;%
+  mutate(roc_diff = roc_auc_expanding - roc_auc_sliding,
+         monthly_diff = monthly_roc_auc_expanding - monthly_roc_auc_sliding)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;On calls that they have not seen, from the next 3 months, the models do much worse than in Part 2. The best ROC AUC is 0.655, for glmnet with the client and campaign features, compared with about 0.80 on the random testing set of Part 2.&lt;/li&gt;
-&lt;li&gt;Within a month, all the models and feature sets rank the clients about equally well, with an average ROC AUC of 0.650 to 0.683. The differences in the overall ROC AUC come mostly from how well the models predict the level of each month: a model that gives every client in a good month a higher probability ranks them higher overall.&lt;/li&gt;
-&lt;li&gt;The economic features do not help. With their levels, &lt;code&gt;glmnet&lt;/code&gt; has an overall ROC AUC of only 0.596 and the worst log loss, 1.337. The trend features do not help either.&lt;/li&gt;
-&lt;li&gt;Without the economic features, the models expect far fewer subscribers than there are: an average predicted probability of about 27%, compared with the actual rate of 44%. They learned from windows with lower subscription rates.&lt;/li&gt;
+&lt;li&gt;On calls that they have not seen, from the next 3 months, all the models do much worse than in Part 2: their ROC AUC is between 0.573 and 0.659, compared with about 0.80 on the random testing set of Part 2. The best is glmnet with the client and campaign features and the expanding window, with 0.659, just ahead of the same model with the sliding window (0.655).&lt;/li&gt;
+&lt;li&gt;Within a month, the sliding windows rank the clients better: the average ROC AUC within a month is higher with the sliding window for 5 of the 6 combinations of model and features.&lt;/li&gt;
+&lt;li&gt;The economic features do not help, with either kind of window. With their levels, &lt;code&gt;glmnet&lt;/code&gt; has the worst log loss, because it predicts far too many subscribers in some months.&lt;/li&gt;
+&lt;li&gt;Without the economic features, the models expect far fewer subscribers than there are, and more so with the expanding window: an average predicted probability of 22% with the expanding window and 27% with the sliding window for &lt;code&gt;glmnet&lt;/code&gt;, compared with the actual rate of 44%.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;cycle-by-cycle&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Cycle by Cycle&lt;/h3&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCycleResults &amp;lt;- dfSlidingPred %&amp;gt;%
-  group_by(cycle, model, feature_set) %&amp;gt;%
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCycleResults &amp;lt;- dfWindowPred %&amp;gt;%
+  group_by(window, cycle, model, feature_set) %&amp;gt;%
   summarise(roc_auc = roc_auc_vec(y, .pred_yes), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
-  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets)))
+  mutate(window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;)),
+         feature_set = factor(feature_set, levels = names(lFeatureSets)))
 
-ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
+ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = window)) +
   geom_hline(yintercept = 0.5, lty = 2) +
   geom_line() + geom_point(size = 2) +
-  facet_wrap(~ model) +
-  scale_x_continuous(breaks = dfCycles$cycle) +
-  scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;Features&amp;quot;) +
+  facet_grid(model ~ feature_set) +
+  scale_x_continuous(breaks = unique(dfCycles$cycle)) +
+  scale_color_manual(values = c(&amp;quot;sliding&amp;quot; = &amp;quot;#00AED8&amp;quot;, &amp;quot;expanding&amp;quot; = &amp;quot;#F37735&amp;quot;), name = &amp;quot;Window&amp;quot;) +
   labs(x = &amp;quot;Cycle&amp;quot;, y = &amp;quot;ROC AUC on the testing period&amp;quot;, title = &amp;quot;ROC AUC in each testing period&amp;quot;,
        subtitle = &amp;quot;The dashed line is a random ranking&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/cycle_results-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;In every cycle, the models and feature sets have similar ROC AUCs. The period matters much more than the model or the features.&lt;/li&gt;
-&lt;li&gt;The ROC AUC rises from about 0.57 in cycle 1 to about 0.76 in the last cycle. In the first cycle, the training window is mostly calls from 2008, when few clients said yes. In the last cycles, the training window is from the same situation as the testing period, so what the models learned still applies.&lt;/li&gt;
+&lt;li&gt;In cycle 1, the two windows are the same, and so are the results.&lt;/li&gt;
+&lt;li&gt;In cycles 2 to 4, the two windows give similar results, and the expanding window is sometimes a little better: it has more calls, and the situation has not yet changed much.&lt;/li&gt;
+&lt;li&gt;In the last two cycles, the sliding window is better for almost every model and feature set: an average ROC AUC of 0.744 with the sliding window, compared with 0.698 with the expanding window. By then, the clients behave very differently from 2008. The sliding window has forgotten 2008, but most of the calls in the expanding window are still from 2008.&lt;/li&gt;
+&lt;li&gt;With both kinds of windows, the period matters much more than the model or the features.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;predicted-and-actual-subscription-rates&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Predicted and Actual Subscription Rates&lt;/h3&gt;
 &lt;p&gt;A bank also needs to know how many subscribers to expect, for example to plan its staff. Here is the average predicted probability in each testing month, compared with the actual subscription rate:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfSlidingPred %&amp;gt;%
-  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets))) %&amp;gt;%
-  group_by(model, feature_set, year_month) %&amp;gt;%
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfWindowPred %&amp;gt;%
+  mutate(window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;), labels = c(&amp;quot;Sliding window&amp;quot;, &amp;quot;Expanding window&amp;quot;)),
+         feature_set = factor(feature_set, levels = names(lFeatureSets))) %&amp;gt;%
+  group_by(window, model, feature_set, year_month) %&amp;gt;%
   summarise(predicted = mean(.pred_yes), actual = mean(y == &amp;quot;yes&amp;quot;), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
   ggplot(aes(x = year_month)) +
   geom_line(aes(y = actual), color = &amp;quot;black&amp;quot;, linewidth = 1) +
   geom_line(aes(y = predicted, color = feature_set)) +
   geom_point(aes(y = predicted, color = feature_set), size = 1.5) +
-  facet_wrap(~ model) +
+  facet_grid(window ~ model) +
   scale_y_continuous(labels = scales::label_percent()) +
   scale_x_date(date_breaks = &amp;quot;3 months&amp;quot;, date_labels = &amp;quot;%b %Y&amp;quot;) +
   scale_color_quant(palette = &amp;quot;metro&amp;quot;, name = &amp;quot;Features&amp;quot;) +
-  labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = &amp;quot;Predicted (colors) and actual (black) subscription rate in each testing month&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+  labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = &amp;quot;Predicted (colors) and actual (black) subscription rate in each testing month&amp;quot;) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/calibration-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Without the economic features, the models predict too few subscribers in the first cycles, and catch up as the training windows include more months with high rates.&lt;/li&gt;
-&lt;li&gt;With the levels of the economic features, &lt;code&gt;glmnet&lt;/code&gt; swings widely: in September to November 2009, it predicts that almost every client will say yes. In those months, interest rates were lower than in any month of its training window, so it extended a straight-line trend that no longer applied (as in Part 2).&lt;/li&gt;
-&lt;li&gt;With the trend features, the average prediction is closer to the actual rate over the whole period, but it jumps from one cycle to the next, because the change of the economy and last month’s rate are only a rough guide to the next 3 months.&lt;/li&gt;
+&lt;li&gt;Without the economic features, the models with expanding windows predict too few subscribers in almost every cycle, because their training windows are dominated by the low subscription rates of 2008. The sliding windows catch up with the actual rate in the last cycles.&lt;/li&gt;
+&lt;li&gt;With the levels of the economic features, &lt;code&gt;glmnet&lt;/code&gt; swings widely with both kinds of windows: in September to November 2009, it predicts that almost every client will say yes. In those months, interest rates were lower than in any month of its training window, so it extended a straight-line trend that no longer applied (as in Part 2).&lt;/li&gt;
+&lt;li&gt;With the trend features, the predictions are closer to the actual rate on average, but they jump from one cycle to the next.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -480,19 +728,23 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCycleParams %&amp;gt;%
   filter(model == &amp;quot;xgboost&amp;quot;, feature_set == best_row$feature_set) %&amp;gt;%
   unnest(params) %&amp;gt;%
-  transmute(Cycle = cycle, min_n, tree_depth, learn_rate = signif(learn_rate, 3),
+  mutate(window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;))) %&amp;gt;%
+  arrange(window, cycle) %&amp;gt;%
+  transmute(Window = window, Cycle = cycle, min_n, tree_depth, learn_rate = signif(learn_rate, 3),
             `Cross validated ROC AUC in the training window` = round(cv_roc_auc, 3)) %&amp;gt;%
   knitr::kable()&lt;/code&gt;&lt;/pre&gt;
 &lt;table&gt;
 &lt;colgroup&gt;
-&lt;col width=&#34;7%&#34; /&gt;
-&lt;col width=&#34;7%&#34; /&gt;
-&lt;col width=&#34;13%&#34; /&gt;
-&lt;col width=&#34;13%&#34; /&gt;
-&lt;col width=&#34;58%&#34; /&gt;
+&lt;col width=&#34;10%&#34; /&gt;
+&lt;col width=&#34;6%&#34; /&gt;
+&lt;col width=&#34;6%&#34; /&gt;
+&lt;col width=&#34;12%&#34; /&gt;
+&lt;col width=&#34;12%&#34; /&gt;
+&lt;col width=&#34;51%&#34; /&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Window&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;Cycle&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;min_n&lt;/th&gt;
 &lt;th align=&#34;right&#34;&gt;tree_depth&lt;/th&gt;
@@ -502,6 +754,7 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;23&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
@@ -509,6 +762,7 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;td align=&#34;right&#34;&gt;0.619&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;40&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
@@ -516,6 +770,7 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;td align=&#34;right&#34;&gt;0.692&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
@@ -523,6 +778,7 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;td align=&#34;right&#34;&gt;0.755&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
@@ -530,6 +786,7 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;td align=&#34;right&#34;&gt;0.759&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;5&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;23&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
@@ -537,22 +794,235 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;td align=&#34;right&#34;&gt;0.634&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;sliding&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;6&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;23&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;15&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;0.0089&lt;/td&gt;
 &lt;td align=&#34;right&#34;&gt;0.693&lt;/td&gt;
 &lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;23&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0032&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.619&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0035&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.680&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0035&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.706&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0035&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.723&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;5&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0035&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.747&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;expanding&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;6&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;39&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;12&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.0035&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.757&lt;/td&gt;
+&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;What’s notable?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;The best hyperparameters change from cycle to cycle, from very shallow trees (a depth of 1 or 2) to deep trees (a depth of 12 or more). This is why we must choose them again in each cycle, on the training window only, rather than reuse the hyperparameters of Part 2, which were chosen on calls from the whole period.&lt;/li&gt;
-&lt;li&gt;The cross validated ROC AUC within a training window does not tell us how well the model will do on the next 3 months: sometimes it is higher, and sometimes lower. Cross validation within a window measures how well a model fits that period, not the next one.&lt;/li&gt;
+&lt;li&gt;With the expanding windows, &lt;code&gt;xgboost&lt;/code&gt; settles on almost the same hyperparameters from cycle 2 on, because each window adds only a few calls to the many calls of 2008. With the sliding windows, the best hyperparameters change more, from very shallow trees to deep trees, because each window is a different period.&lt;/li&gt;
+&lt;li&gt;The cross validated ROC AUC within the expanding windows rises steadily, but the ROC AUC on the next 3 months does not follow it. Cross validation within a window measures how well a model fits that window, not how well it predicts the next months.&lt;/li&gt;
+&lt;li&gt;Either way, the hyperparameters must be chosen again in each cycle, on the training window only, rather than reused from Part 2, where they were chosen on calls from the whole period.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;sliding-or-expanding&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Sliding or Expanding?&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfWindowComparison %&amp;gt;%
+  mutate(across(where(is.numeric), ~ round(.x, 3)),
+         feature_set = paste0(&amp;quot;&amp;lt;span&amp;gt;&amp;quot;, feature_set, &amp;quot;&amp;lt;/span&amp;gt;&amp;quot;)) %&amp;gt;%
+  select(model, feature_set, roc_auc_sliding, roc_auc_expanding, monthly_roc_auc_sliding, monthly_roc_auc_expanding) %&amp;gt;%
+  knitr::kable(format = &amp;quot;html&amp;quot;, escape = FALSE, align = c(&amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;),
+               col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC&amp;lt;br&amp;gt;sliding&amp;quot;, &amp;quot;ROC AUC&amp;lt;br&amp;gt;expanding&amp;quot;,
+                             &amp;quot;Average ROC AUC within&amp;lt;br&amp;gt;a month, sliding&amp;quot;, &amp;quot;Average ROC AUC within&amp;lt;br&amp;gt;a month, expanding&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Model
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Features
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+ROC AUC&lt;br&gt;sliding
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+ROC AUC&lt;br&gt;expanding
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average ROC AUC within&lt;br&gt;a month, sliding
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average ROC AUC within&lt;br&gt;a month, expanding
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.596
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.592
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.683
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.684
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.588
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.628
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.660
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.653
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.677
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.652
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.638
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.613
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.669
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.573
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.582
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.645
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;Over all the testing periods together, the expanding window ranks the clients slightly better for 4 of the 6 combinations, but the differences are small: 0.040 at most.&lt;/li&gt;
+&lt;li&gt;Within a month, which is what matters to decide whom to call, the sliding window is better for 5 of the 6 combinations.&lt;/li&gt;
+&lt;li&gt;The sliding window adapts faster when the behavior of the clients changes, as in the last two cycles, and its predictions of the number of subscribers are generally closer to the actual numbers.&lt;/li&gt;
+&lt;li&gt;The sliding window is also cheaper: tuning and training took about 21 minutes for all the cycles, compared with about 40 minutes for the expanding windows, which have more calls.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So in this dataset, forgetting the old past helps. An expanding window would be the better choice when the past stays relevant, or when there is too little recent data. A middle way, which we have not tried here, is to keep all the past calls but give the recent calls more weight.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;comparison-with-part-2&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Comparison with Part 2&lt;/h2&gt;
@@ -560,15 +1030,15 @@ ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
 &lt;ul&gt;
 &lt;li&gt;On a random testing set from the same period (Part 2), the best models had a ROC AUC of about 0.80.&lt;/li&gt;
 &lt;li&gt;When we trained on the first 75% of the calls and tested on the last 25% (Part 2), the ROC AUC was between 0.28 and 0.71, depending on the model and the features. But the hyperparameters had been chosen on calls from the whole period.&lt;/li&gt;
-&lt;li&gt;With sliding windows, where every choice is made on past calls only, the ROC AUC over all the testing periods is between 0.573 and 0.655.&lt;/li&gt;
+&lt;li&gt;With sliding and expanding windows, where every choice is made on past calls only, the ROC AUC over all the testing periods is between 0.573 and 0.659.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The testing periods are not exactly the same (the later calls of Part 2 start in May 2009, and the testing periods here start in June 2009), so the numbers cannot be compared exactly. But the message is clear: the random testing set of Part 2 gave a much too good picture of how the models would predict future calls.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;how-a-bank-could-use-the-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;How a Bank Could Use the Models&lt;/h2&gt;
-&lt;p&gt;Even with modest ROC AUCs, the models are useful within a month. If the bank calls the 20% of each month’s clients with the highest probabilities, using the glmnet model with the client and campaign features:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTopCalls &amp;lt;- dfSlidingPred %&amp;gt;%
-  filter(model == best_row$model, feature_set == best_row$feature_set) %&amp;gt;%
+&lt;p&gt;Even with modest ROC AUCs, the models are useful within a month. If the bank calls the 20% of each month’s clients with the highest probabilities, using the glmnet model with the client and campaign features and the expanding window:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTopCalls &amp;lt;- dfWindowPred %&amp;gt;%
+  filter(window == best_row$window, model == best_row$model, feature_set == best_row$feature_set) %&amp;gt;%
   group_by(year_month) %&amp;gt;%
   arrange(desc(.pred_yes), .by_group = TRUE) %&amp;gt;%
   mutate(called = row_number() &amp;lt;= ceiling(0.2 * n())) %&amp;gt;%
@@ -587,25 +1057,29 @@ all_rate &amp;lt;- mean(dfTopCalls$y == &amp;quot;yes&amp;quot;)&lt;/code&gt;&lt
 &lt;h2&gt;Conclusions&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;When the data covers a period of time, the way we test a model matters as much as the model itself. A random testing set lets the model learn from the same period that it is tested on, and it gives a much too good picture.&lt;/li&gt;
-&lt;li&gt;In a sliding window, every step that learns from data, including the choice of the hyperparameters, the preparation of the features and the features that describe the recent past, must use the training window only. Then the testing period is truly unseen.&lt;/li&gt;
-&lt;li&gt;On truly unseen calls, the models rank the clients within a month moderately well (an average ROC AUC of about 0.67), and calling the top 20% of each month gives about 1.5 times the success rate of calling at random.&lt;/li&gt;
+&lt;li&gt;In a walk-forward evaluation, every step that learns from data, including the choice of the hyperparameters, the preparation of the features and the features that describe the recent past, must use the training window only. Then the testing period is truly unseen.&lt;/li&gt;
+&lt;li&gt;On truly unseen calls, the models rank the clients within a month moderately well, and calling the top 20% of each month gives about 1.5 times the success rate of calling at random.&lt;/li&gt;
 &lt;li&gt;The economic features, which looked so useful in Part 2, do not help a model that predicts the future: the economy of the next months is outside what the model has seen.&lt;/li&gt;
-&lt;li&gt;The models do better when the recent past is like the near future. In practice, a bank should train its models again often, and watch how well they predict each new month.&lt;/li&gt;
+&lt;li&gt;When the behavior of the clients changes over time, a sliding window of recent months adapts faster than an expanding window of all the past months, ranks the clients within a month better, and costs less to train. In practice, a bank should train its models again often, on recent calls, and watch how well they predict each new month.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-&lt;div id=&#34;appendix-sliding-window-code&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Appendix: Sliding Window Code&lt;/h2&gt;
-&lt;p&gt;This code runs the sliding windows. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Bank_Sliding.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs: the clean data from &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt; and the code itself. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;div id=&#34;appendix-window-code&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Appendix: Window Code&lt;/h2&gt;
+&lt;p&gt;This code runs the sliding and expanding windows. It takes more than an hour, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Bank_Windows.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs: the clean data from &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt; and the code itself. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
-&lt;li&gt;If the data or any part of the code has changed, the page runs the sliding windows again and saves the new results.&lt;/li&gt;
+&lt;li&gt;If the data or any part of the code has changed, the page runs the windows again and saves the new results.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To run the sliding windows again without any change, delete &lt;code&gt;Bank_Sliding.Rda&lt;/code&gt;.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# How the sliding window code is built:
-#   1. Each cycle has a training window of 12 calendar months and a testing period of the next 3 months. Then the
-#      window moves forward by 3 months. Hyperparameters are tuned within each training window only, so no information
-#      from the testing period or later is used (no lookahead). The Part 2 hyperparameters are not reused, because they
-#      were tuned on calls from the whole period.
+&lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To run the windows again without any change, delete &lt;code&gt;Bank_Windows.Rda&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# How the window code is built:
+#   1. Each cycle has a training window and a testing period of the next 3 months, and the next cycle starts 3 months
+#      later. Two kinds of training windows are compared on the same testing periods:
+#        sliding:   the 12 calendar months before the testing period.
+#        expanding: all the months from the first usable month (June 2008) to the month before the testing period.
+#                   It starts with the same 12 months as the sliding window, and grows by 3 months in each cycle.
+#      Hyperparameters are tuned within each training window only, so no information from the testing period or later
+#      is used (no lookahead). The Part 2 hyperparameters are not reused, because they were tuned on calls from the
+#      whole period.
 #   2. Within a training window, the hyperparameters are tuned by racing with 5-fold cross validation, as in Part 2.
 #      The folds are random within the window: they do not need to respect time, because all of them come before the
 #      testing period.
@@ -617,8 +1091,10 @@ all_rate &amp;lt;- mean(dfTopCalls$y == &amp;quot;yes&amp;quot;)&lt;/code&gt;&lt
 #      unregularized model is unstable. ranger is not used, because it was the slowest to tune in Part 2, and it did
 #      not do better than xgboost.
 #   5. The cycles run one after another; within a cycle, the tuning runs in parallel (see &amp;quot;Parallel backend&amp;quot;).
+#   6. A cycle whose training window and testing period are the same as those of an earlier cycle is not run again:
+#      its results are reused. This is the case for the first cycle, where both windows are the same 12 months.
 
-# load the clean dataset and the dates of the calls from Part 1 (bank_data_file is set in the &amp;quot;sliding_cache&amp;quot; chunk)
+# load the clean dataset and the dates of the calls from Part 1 (bank_data_file is set in the &amp;quot;window_cache&amp;quot; chunk)
 load(bank_data_file)
 
 dfCalls &amp;lt;- dfClean %&amp;gt;%
@@ -663,15 +1139,16 @@ lFeatureSets &amp;lt;- list(&amp;quot;client and campaign&amp;quot; = c(vFeature
 # Cycles
 ########################################################################################################################################################
 # The first testing period starts 12 calendar months after the first usable month (June 2008), so that every training
-# window has 12 full months. Each cycle tests the next 3 months, and the next cycle starts 3 months later, until the
-# last month of the data.
+# window has at least 12 full months. Each cycle tests the next 3 months, and the next cycle starts 3 months later,
+# until the last month of the data. Both kinds of windows use the same testing periods.
 first_month &amp;lt;- min(dfCalls$year_month)
 last_month &amp;lt;- max(dfCalls$year_month)
-dfCycles &amp;lt;- tibble(test_start = seq(first_month %m+% months(12), last_month, by = &amp;quot;3 months&amp;quot;)) %&amp;gt;%
-    mutate(train_start = test_start %m-% months(12),
-           train_end = test_start %m-% months(1),
-           test_end = test_start %m+% months(2),
-           cycle = row_number(),
+dfTestPeriods &amp;lt;- tibble(test_start = seq(first_month %m+% months(12), last_month, by = &amp;quot;3 months&amp;quot;)) %&amp;gt;%
+    mutate(cycle = row_number(), test_end = test_start %m+% months(2))
+dfCycles &amp;lt;- bind_rows(sliding = dfTestPeriods %&amp;gt;% mutate(train_start = test_start %m-% months(12)),
+                      expanding = dfTestPeriods %&amp;gt;% mutate(train_start = first_month),
+                      .id = &amp;quot;window&amp;quot;) %&amp;gt;%
+    mutate(train_end = test_start %m-% months(1),
            train_first = as.Date(NA), train_last = as.Date(NA), test_first = as.Date(NA), test_last = as.Date(NA),
            train_calls = NA_integer_, train_rate = NA_real_, test_calls = NA_integer_, test_rate = NA_real_)
 
@@ -770,10 +1247,13 @@ plan(multisession, workers = num_workers)
 # Run the cycles
 ########################################################################################################################################################
 lResults &amp;lt;- list()
-dfTimings &amp;lt;- tibble(cycle = integer(), model = character(), feature_set = character(), seconds = numeric())
+lDone &amp;lt;- list()     # results of each training window and testing period that has been run, to reuse them
+dfTimings &amp;lt;- tibble(window = character(), cycle = integer(), model = character(), feature_set = character(),
+                    seconds = numeric(), reused = logical())
 for (i in seq_len(nrow(dfCycles))) {
 
     cycle &amp;lt;- dfCycles[i, ]
+    cycle_key &amp;lt;- paste(cycle$train_start, cycle$train_end, cycle$test_start, cycle$test_end)
     dfTrain &amp;lt;- dfCalls %&amp;gt;% filter(year_month &amp;gt;= cycle$train_start, year_month &amp;lt;= cycle$train_end)
     dfTest &amp;lt;- dfCalls %&amp;gt;% filter(year_month &amp;gt;= cycle$test_start, year_month &amp;lt;= cycle$test_end)
 
@@ -794,13 +1274,19 @@ for (i in seq_len(nrow(dfCycles))) {
 
     for (feature_set in names(lFeatureSets)) {
         for (modelType in c(&amp;quot;glmnet&amp;quot;, &amp;quot;xgboost&amp;quot;)) {
+            task_key &amp;lt;- paste(cycle_key, feature_set, modelType)
+            reused &amp;lt;- !is.null(lDone[[task_key]])
             t0 &amp;lt;- Sys.time()
-            result &amp;lt;- tune_fit_predict(dfTrain_Proc, dfTest_Proc, modelType, lFeatureSets[[feature_set]])
-            dfTimings &amp;lt;- dfTimings %&amp;gt;% add_row(cycle = cycle$cycle, model = modelType, feature_set = feature_set,
+            if (!reused) {
+                lDone[[task_key]] &amp;lt;- tune_fit_predict(dfTrain_Proc, dfTest_Proc, modelType, lFeatureSets[[feature_set]])
+            }
+            result &amp;lt;- lDone[[task_key]]
+            dfTimings &amp;lt;- dfTimings %&amp;gt;% add_row(window = cycle$window, cycle = cycle$cycle, model = modelType,
+                                               feature_set = feature_set, reused = reused,
                                                seconds = as.numeric(difftime(Sys.time(), t0, units = &amp;quot;secs&amp;quot;)))
-            lResults[[length(lResults) + 1]] &amp;lt;- list(cycle = cycle$cycle, model = modelType, feature_set = feature_set,
-                                                     params = result$params, cv_roc_auc = result$cv_roc_auc,
-                                                     predictions = result$predictions)
+            lResults[[length(lResults) + 1]] &amp;lt;- list(window = cycle$window, cycle = cycle$cycle, model = modelType,
+                                                     feature_set = feature_set, params = result$params,
+                                                     cv_roc_auc = result$cv_roc_auc, predictions = result$predictions)
         }
     }
     dfCycles$train_first[i] &amp;lt;- min(dfTrain$year_month)
@@ -815,37 +1301,39 @@ for (i in seq_len(nrow(dfCycles))) {
 
 plan(sequential)
 
-# predictions for every call of every testing period, by model and feature set
-dfSlidingPred &amp;lt;- map_dfr(lResults, ~ .x$predictions %&amp;gt;% mutate(cycle = .x$cycle, model = .x$model, feature_set = .x$feature_set))
+# predictions for every call of every testing period, by window, model and feature set
+dfWindowPred &amp;lt;- map_dfr(lResults, ~ .x$predictions %&amp;gt;% mutate(window = .x$window, cycle = .x$cycle, model = .x$model,
+                                                              feature_set = .x$feature_set))
 
 # the hyperparameters chosen in each cycle, with their cross validated ROC AUC within the training window
-dfCycleParams &amp;lt;- map_dfr(lResults, ~ tibble(cycle = .x$cycle, model = .x$model, feature_set = .x$feature_set,
-                                            cv_roc_auc = .x$cv_roc_auc, params = list(.x$params)))
+dfCycleParams &amp;lt;- map_dfr(lResults, ~ tibble(window = .x$window, cycle = .x$cycle, model = .x$model,
+                                            feature_set = .x$feature_set, cv_roc_auc = .x$cv_roc_auc,
+                                            params = list(.x$params)))
 
-# the results that the post uses, which are saved to Bank_Sliding.Rda
-vSlidingResults &amp;lt;- c(&amp;quot;dfSlidingPred&amp;quot;, &amp;quot;dfCycleParams&amp;quot;, &amp;quot;dfCycles&amp;quot;, &amp;quot;dfMonthly&amp;quot;, &amp;quot;dfTimings&amp;quot;, &amp;quot;num_workers&amp;quot;,
-                     &amp;quot;vFeaturesEconomic&amp;quot;, &amp;quot;vFeaturesTrend&amp;quot;, &amp;quot;lFeatureSets&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And this code decides whether to load the saved results or to run the sliding windows:&lt;/p&gt;
+# the results that the post uses, which are saved to Bank_Windows.Rda
+vWindowResults &amp;lt;- c(&amp;quot;dfWindowPred&amp;quot;, &amp;quot;dfCycleParams&amp;quot;, &amp;quot;dfCycles&amp;quot;, &amp;quot;dfMonthly&amp;quot;, &amp;quot;dfTimings&amp;quot;, &amp;quot;num_workers&amp;quot;,
+                    &amp;quot;vFeaturesEconomic&amp;quot;, &amp;quot;vFeaturesTrend&amp;quot;, &amp;quot;lFeatureSets&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And this code decides whether to load the saved results or to run the windows:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset and the dates of the calls from Part 1
 bank_data_file &amp;lt;- &amp;quot;../bank-marketing-part1-eda/Bank_Marketing_Clean.Rda&amp;quot;
 
-# Fingerprint (hash) of the inputs: the data that the code uses, and the code of the &amp;quot;sliding_steps&amp;quot; chunk.
+# Fingerprint (hash) of the inputs: the data that the code uses, and the code of the &amp;quot;window_steps&amp;quot; chunk.
 # Comments and spacing are removed from the code first, so editing them does not start a new run.
 envData &amp;lt;- new.env()
 load(bank_data_file, envir = envData)
-sliding_steps &amp;lt;- knitr::knit_code$get(&amp;quot;sliding_steps&amp;quot;)
-sliding_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$dfCallDates),
-                                 code = deparse(parse(text = sliding_steps, keep.source = FALSE))))
+window_steps &amp;lt;- knitr::knit_code$get(&amp;quot;window_steps&amp;quot;)
+window_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$dfCallDates),
+                                code = deparse(parse(text = window_steps, keep.source = FALSE))))
 
-# If the saved results were made from the same inputs, load them. Otherwise, run the sliding windows again and save
-# the new results together with the fingerprint of their inputs.
+# If the saved results were made from the same inputs, load them. Otherwise, run the windows again and save the new
+# results together with the fingerprint of their inputs.
 envSaved &amp;lt;- new.env()
-if (file.exists(&amp;quot;Bank_Sliding.Rda&amp;quot;)) load(&amp;quot;Bank_Sliding.Rda&amp;quot;, envir = envSaved)
-if (identical(envSaved$sliding_hash, sliding_hash)) {
+if (file.exists(&amp;quot;Bank_Windows.Rda&amp;quot;)) load(&amp;quot;Bank_Windows.Rda&amp;quot;, envir = envSaved)
+if (identical(envSaved$window_hash, window_hash)) {
   list2env(as.list(envSaved), envir = environment())
 } else {
-  eval(parse(text = sliding_steps))
-  save(list = c(vSlidingResults, &amp;quot;sliding_hash&amp;quot;), file = &amp;quot;Bank_Sliding.Rda&amp;quot;)
+  eval(parse(text = window_steps))
+  save(list = c(vWindowResults, &amp;quot;window_hash&amp;quot;), file = &amp;quot;Bank_Windows.Rda&amp;quot;)
 }
 rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
@@ -864,7 +1352,7 @@ rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
 &lt;h4&gt;Other posts in this series:&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt;, we explored the &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt;: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.&lt;/p&gt;
 &lt;p&gt;In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.&lt;/p&gt;

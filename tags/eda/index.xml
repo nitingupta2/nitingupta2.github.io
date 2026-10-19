@@ -24,14 +24,14 @@
 &lt;h4&gt;Other posts in this series:&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Bank Marketing - Part 2 - Who will say yes? - Building Classification Models&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding and Expanding Window Models&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt; (&lt;a href=&#34;http://dx.doi.org/10.1016/j.dss.2014.03.001&#34;&gt;Moro, Cortez and Rita, 2014&lt;/a&gt;) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.&lt;/p&gt;
 &lt;p&gt;In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;? This kind of problem is called classification. The case study has three posts:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.&lt;/li&gt;
 &lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.&lt;/li&gt;
-&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;, we train the models on a sliding window of recent months and predict the next month, as a bank would do in practice.&lt;/li&gt;
+&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;, we train the models on past months only, either a sliding window of the last 12 months or all the months so far, and predict the next 3 months, as a bank would do in practice.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 &lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
@@ -488,7 +488,7 @@ calls_oct_dec_2008 &amp;lt;- sum(dfMonthCheck$calls[dfMonthCheck$year_month %in%
 &lt;ul&gt;
 &lt;li&gt;67% of the calls were made in 2008, when fewer than 1 in 15 calls succeeded, except in October and December, which had only 77 calls between them.&lt;/li&gt;
 &lt;li&gt;From the middle of 2009, the bank made far fewer calls, and more of them succeeded: in 2010, about half of the calls ended with a &lt;em&gt;yes&lt;/em&gt;. Part of this change may come from the economy, and part from the bank calling different clients. The data cannot separate the two.&lt;/li&gt;
-&lt;li&gt;So the behavior of clients changed over time. A model that learns from the past should give more weight to the recent past. In Part 3, we train the models on a sliding window of recent months, and predict the next month.&lt;/li&gt;
+&lt;li&gt;So the behavior of clients changed over time. So a model that learns from the past may need to give more weight to the recent past. In Part 3, we compare training on a sliding window of the last 12 months with training on all the months so far.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -593,7 +593,7 @@ save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, dfCallDates, file = &amp;quo
 &lt;li&gt;Age and job matter, but less.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;duration&lt;/code&gt; must not be used, even though it looks like the best predictor.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we use this dataset to build models that predict which clients will subscribe. In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;, we use the dates of the calls to train the models on recent months only.&lt;/p&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we use this dataset to build models that predict which clients will subscribe. In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;, we use the dates of the calls to train the models on past months only, and test them on the months that follow.&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
