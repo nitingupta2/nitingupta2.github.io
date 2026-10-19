@@ -1024,6 +1024,434 @@ xgboost
 &lt;/ul&gt;
 &lt;p&gt;So in this dataset, forgetting the old past helps. An expanding window would be the better choice when the past stays relevant, or when there is too little recent data. A middle way, which we have not tried here, is to keep all the past calls but give the recent calls more weight.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div id=&#34;with-perfect-foresight&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;With Perfect Foresight&lt;/h2&gt;
+&lt;p&gt;In Part 2, we chose the hyperparameters by cross validation on a random sample of the calls of the whole period, including the calls that we predict here. So those hyperparameters were chosen with knowledge of the future (perfect foresight), which a bank never has. How much better would the models do with them?&lt;/p&gt;
+&lt;p&gt;Here, we train the models in every cycle with the hyperparameters of Part 2, without tuning, on the same training windows, and test them on the same testing periods. For &lt;code&gt;glmnet&lt;/code&gt;, they are a penalty of 1e-10 and a mixture of 1. For &lt;code&gt;xgboost&lt;/code&gt;, they are min_n = 23, tree_depth = 4 and learn_rate = 0.0254.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summarise_predictions &amp;lt;- function(dfPred) {
+  dfPred %&amp;gt;%
+    group_by(window, model, feature_set) %&amp;gt;%
+    summarise(roc_auc = roc_auc_vec(y, .pred_yes), log_loss = mn_log_loss_vec(y, .pred_yes), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
+    left_join(dfPred %&amp;gt;%
+                group_by(window, model, feature_set, year_month) %&amp;gt;%
+                summarise(month_roc_auc = roc_auc_vec(y, .pred_yes), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
+                group_by(window, model, feature_set) %&amp;gt;%
+                summarise(monthly_roc_auc = mean(month_roc_auc), .groups = &amp;quot;drop&amp;quot;),
+              by = c(&amp;quot;window&amp;quot;, &amp;quot;model&amp;quot;, &amp;quot;feature_set&amp;quot;))
+}
+
+dfForesightComparison &amp;lt;- bind_rows(tuned = summarise_predictions(dfWindowPred),
+                                   foresight = summarise_predictions(dfForesightPred), .id = &amp;quot;hyperparameters&amp;quot;) %&amp;gt;%
+  pivot_wider(names_from = hyperparameters, values_from = c(roc_auc, monthly_roc_auc, log_loss)) %&amp;gt;%
+  mutate(window = factor(window, levels = c(&amp;quot;sliding&amp;quot;, &amp;quot;expanding&amp;quot;)),
+         feature_set = factor(feature_set, levels = names(lFeatureSets)),
+         roc_gain = roc_auc_foresight - roc_auc_tuned,
+         monthly_gain = monthly_roc_auc_foresight - monthly_roc_auc_tuned) %&amp;gt;%
+  arrange(window, model, feature_set)
+
+dfForesightComparison %&amp;gt;%
+  mutate(across(where(is.numeric), ~ round(.x, 3)),
+         feature_set = paste0(&amp;quot;&amp;lt;span&amp;gt;&amp;quot;, feature_set, &amp;quot;&amp;lt;/span&amp;gt;&amp;quot;)) %&amp;gt;%
+  select(window, model, feature_set, roc_auc_tuned, roc_auc_foresight, monthly_roc_auc_tuned, monthly_roc_auc_foresight,
+         log_loss_tuned, log_loss_foresight) %&amp;gt;%
+  knitr::kable(format = &amp;quot;html&amp;quot;, escape = FALSE, align = c(&amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;l&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;, &amp;quot;r&amp;quot;),
+               col.names = c(&amp;quot;Window&amp;quot;, &amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC&amp;lt;br&amp;gt;tuned&amp;quot;, &amp;quot;ROC AUC&amp;lt;br&amp;gt;foresight&amp;quot;,
+                             &amp;quot;Average ROC AUC within&amp;lt;br&amp;gt;a month, tuned&amp;quot;, &amp;quot;Average ROC AUC within&amp;lt;br&amp;gt;a month, foresight&amp;quot;,
+                             &amp;quot;Log loss&amp;lt;br&amp;gt;tuned&amp;quot;, &amp;quot;Log loss&amp;lt;br&amp;gt;foresight&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Window
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Model
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+Features
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+ROC AUC&lt;br&gt;tuned
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+ROC AUC&lt;br&gt;foresight
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average ROC AUC within&lt;br&gt;a month, tuned
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Average ROC AUC within&lt;br&gt;a month, foresight
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Log loss&lt;br&gt;tuned
+&lt;/th&gt;
+&lt;th style=&#34;text-align:right;&#34;&gt;
+Log loss&lt;br&gt;foresight
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.657
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.676
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.762
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.760
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.596
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.591
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.683
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.683
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.337
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.396
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.588
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.588
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.678
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.676
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.902
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.930
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.653
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.677
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.662
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.764
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.758
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.638
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.645
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.669
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.656
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.721
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.724
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+sliding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.573
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.563
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.650
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.629
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.716
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.754
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.659
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.660
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.834
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.832
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.592
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.590
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.684
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.685
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.170
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+1.169
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+glmnet
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.628
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.626
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.660
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.660
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.763
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.766
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;client and campaign&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.653
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.651
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.652
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.653
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.810
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.811
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic levels&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.613
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.631
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.655
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.662
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.751
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.729
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+expanding
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+xgboost
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+&lt;span&gt;+ economic trends&lt;/span&gt;
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.582
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.586
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.645
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.635
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.711
+&lt;/td&gt;
+&lt;td style=&#34;text-align:right;&#34;&gt;
+0.764
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;In this table, &lt;em&gt;tuned&lt;/em&gt; means the hyperparameters chosen in each cycle on the training window only, and &lt;em&gt;foresight&lt;/em&gt; the hyperparameters of Part 2.&lt;/p&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The hyperparameters chosen with perfect foresight do not make the models better. Over all the testing periods together, they give a higher ROC AUC for only 5 of the 12 combinations of window, model and features, and the average difference is +0.001 (from -0.010 to +0.018).&lt;/li&gt;
+&lt;li&gt;Within a month, they are better for 5 of the 12 combinations, and slightly worse on average (-0.004).&lt;/li&gt;
+&lt;li&gt;So the large difference between Part 2 (a ROC AUC of about 0.80) and this post (about 0.65) does not come from the hyperparameters. It comes from the data: in Part 2, the models learned from calls of the same months as the calls that they predicted. Knowing the future hyperparameters is worth almost nothing; knowing the future clients is worth a lot.&lt;/li&gt;
+&lt;li&gt;The models are not very sensitive to the exact hyperparameters here. Choosing them again in each cycle mainly protects us from a lookahead: it costs much more time (about 61 minutes for all the cycles, compared with 3 minutes to train the models with fixed hyperparameters), but it is the only choice that a bank could make in practice.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
 &lt;div id=&#34;comparison-with-part-2&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Comparison with Part 2&lt;/h2&gt;
 &lt;p&gt;The three ways of testing the models give very different answers:&lt;/p&gt;
@@ -1032,7 +1460,7 @@ xgboost
 &lt;li&gt;When we trained on the first 75% of the calls and tested on the last 25% (Part 2), the ROC AUC was between 0.28 and 0.71, depending on the model and the features. But the hyperparameters had been chosen on calls from the whole period.&lt;/li&gt;
 &lt;li&gt;With sliding and expanding windows, where every choice is made on past calls only, the ROC AUC over all the testing periods is between 0.573 and 0.659.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;The testing periods are not exactly the same (the later calls of Part 2 start in May 2009, and the testing periods here start in June 2009), so the numbers cannot be compared exactly. But the message is clear: the random testing set of Part 2 gave a much too good picture of how the models would predict future calls.&lt;/p&gt;
+&lt;p&gt;The testing periods are not exactly the same (the later calls of Part 2 start in May 2009, and the testing periods here start in June 2009), so the numbers cannot be compared exactly. But the message is clear: the random testing set of Part 2 gave a much too good picture of how the models would predict future calls. And as we saw above, the hyperparameters of Part 2, chosen with perfect foresight, explain almost none of the difference.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;how-a-bank-could-use-the-models&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;How a Bank Could Use the Models&lt;/h2&gt;
@@ -1060,6 +1488,7 @@ all_rate &amp;lt;- mean(dfTopCalls$y == &amp;quot;yes&amp;quot;)&lt;/code&gt;&lt
 &lt;li&gt;In a walk-forward evaluation, every step that learns from data, including the choice of the hyperparameters, the preparation of the features and the features that describe the recent past, must use the training window only. Then the testing period is truly unseen.&lt;/li&gt;
 &lt;li&gt;On truly unseen calls, the models rank the clients within a month moderately well, and calling the top 20% of each month gives about 1.5 times the success rate of calling at random.&lt;/li&gt;
 &lt;li&gt;The economic features, which looked so useful in Part 2, do not help a model that predicts the future: the economy of the next months is outside what the model has seen.&lt;/li&gt;
+&lt;li&gt;Even the hyperparameters of Part 2, chosen with perfect foresight, do not make the models better. The models of Part 2 looked good because they learned from the same months that they were tested on, not because of their hyperparameters.&lt;/li&gt;
 &lt;li&gt;When the behavior of the clients changes over time, a sliding window of recent months adapts faster than an expanding window of all the past months, ranks the clients within a month better, and costs less to train. In practice, a bank should train its models again often, on recent calls, and watch how well they predict each new month.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
@@ -1071,6 +1500,7 @@ all_rate &amp;lt;- mean(dfTopCalls$y == &amp;quot;yes&amp;quot;)&lt;/code&gt;&lt
 &lt;li&gt;If the data or any part of the code has changed, the page runs the windows again and saves the new results.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To run the windows again without any change, delete &lt;code&gt;Bank_Windows.Rda&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These steps prepare the data, the features, the cycles and the models:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# How the window code is built:
 #   1. Each cycle has a training window and a testing period of the next 3 months, and the next cycle starts 3 months
 #      later. Two kinds of training windows are compared on the same testing periods:
@@ -1241,10 +1671,9 @@ gb_per_worker &amp;lt;- 0.75
 gb_available &amp;lt;- ps::ps_system_memory()$avail / 1024^3
 num_workers &amp;lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
 message(sprintf(&amp;quot;Using %d parallel workers (%.1f GB RAM available)&amp;quot;, num_workers, gb_available))
-plan(multisession, workers = num_workers)
-
-
-# Run the cycles
+plan(multisession, workers = num_workers)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;These steps run the cycles of both kinds of windows:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Run the cycles
 ########################################################################################################################################################
 lResults &amp;lt;- list()
 lDone &amp;lt;- list()     # results of each training window and testing period that has been run, to reuse them
@@ -1317,11 +1746,11 @@ vWindowResults &amp;lt;- c(&amp;quot;dfWindowPred&amp;quot;, &amp;quot;dfCyclePa
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset and the dates of the calls from Part 1
 bank_data_file &amp;lt;- &amp;quot;../bank-marketing-part1-eda/Bank_Marketing_Clean.Rda&amp;quot;
 
-# Fingerprint (hash) of the inputs: the data that the code uses, and the code of the &amp;quot;window_steps&amp;quot; chunk.
-# Comments and spacing are removed from the code first, so editing them does not start a new run.
+# Fingerprint (hash) of the inputs: the data that the code uses, and the code of the &amp;quot;window_setup&amp;quot; and &amp;quot;window_runs&amp;quot;
+# chunks. Comments and spacing are removed from the code first, so editing them does not start a new run.
 envData &amp;lt;- new.env()
 load(bank_data_file, envir = envData)
-window_steps &amp;lt;- knitr::knit_code$get(&amp;quot;window_steps&amp;quot;)
+window_steps &amp;lt;- c(knitr::knit_code$get(&amp;quot;window_setup&amp;quot;), knitr::knit_code$get(&amp;quot;window_runs&amp;quot;))
 window_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$dfCallDates),
                                 code = deparse(parse(text = window_steps, keep.source = FALSE))))
 
@@ -1336,6 +1765,119 @@ if (identical(envSaved$window_hash, window_hash)) {
   save(list = c(vWindowResults, &amp;quot;window_hash&amp;quot;), file = &amp;quot;Bank_Windows.Rda&amp;quot;)
 }
 rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;perfect-foresight-code&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Perfect Foresight Code&lt;/h3&gt;
+&lt;p&gt;This code trains the models with the hyperparameters chosen in &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, in every cycle of both kinds of windows. It uses the data, the features, the cycles and the functions of the steps above. Its results are saved in &lt;code&gt;Bank_Foresight.Rda&lt;/code&gt;, with their own fingerprint, which also includes the hyperparameters of Part 2.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Perfect foresight: the hyperparameters chosen in Part 2
+########################################################################################################################################################
+# Part 2 chose the hyperparameters by cross validation on a random sample of the calls of the whole period, including
+# the testing periods here, so they were chosen with knowledge of the future (perfect foresight). Here, each model is
+# trained in every cycle with those hyperparameters, without tuning, on the same training windows as above, and tested
+# on the same testing periods. Part 2 tuned the models with all the features (like the &amp;quot;+ economic levels&amp;quot; set); the
+# same hyperparameters are used with every feature set.
+envPart2 &amp;lt;- new.env()
+load(part2_tuning_file, envir = envPart2)
+lParamsForesight &amp;lt;- list(glmnet = envPart2$param_best_glmnet, xgboost = envPart2$param_best_xgboost)
+rm(envPart2)
+
+# Train a model with the given hyperparameters on the training window, and predict the testing period
+fit_predict_fixed &amp;lt;- function(dfTrain_Proc, dfTest_Proc, modelType, vExclude, params, randomSeed = 2300) {
+
+    set.seed(randomSeed)
+    model_final &amp;lt;- get_workflow(get_model_spec(modelType), vExclude) %&amp;gt;%
+        finalize_workflow(params) %&amp;gt;%
+        fit(data = dfTrain_Proc)
+    dfTest_Proc %&amp;gt;%
+        select(Id, year_month, y) %&amp;gt;%
+        mutate(.pred_yes = predict(model_final, dfTest_Proc, type = &amp;quot;prob&amp;quot;)$.pred_yes)
+}
+
+# The same steps as in &amp;quot;Run the cycles&amp;quot;, with the fixed hyperparameters instead of tuning. The 6 models of a cycle
+# (2 models x 3 feature sets) are trained in parallel. As above, a cycle with the same training window and testing
+# period as an earlier cycle (the first cycle) reuses its results.
+lForesight &amp;lt;- list()
+lDoneForesight &amp;lt;- list()
+dfForesightTimings &amp;lt;- tibble(window = character(), cycle = integer(), seconds = numeric(), reused = logical())
+for (i in seq_len(nrow(dfCycles))) {
+
+    cycle &amp;lt;- dfCycles[i, ]
+    cycle_key &amp;lt;- paste(cycle$train_start, cycle$train_end, cycle$test_start, cycle$test_end)
+    reused &amp;lt;- !is.null(lDoneForesight[[cycle_key]])
+    t0 &amp;lt;- Sys.time()
+
+    if (!reused) {
+        dfTrain &amp;lt;- dfCalls %&amp;gt;% filter(year_month &amp;gt;= cycle$train_start, year_month &amp;lt;= cycle$train_end)
+        dfTest &amp;lt;- dfCalls %&amp;gt;% filter(year_month &amp;gt;= cycle$test_start, year_month &amp;lt;= cycle$test_end)
+
+        # The testing period must be unseen: every training call comes before every testing call, and no call is in both
+        stopifnot(max(dfTrain$year_month) &amp;lt; min(dfTest$year_month),
+                  length(intersect(dfTrain$Id, dfTest$Id)) == 0)
+
+        # Trend features of the testing calls, relative to the last month of the training window (see &amp;quot;Trend features&amp;quot;)
+        reference_month &amp;lt;- dfMonthly %&amp;gt;% filter(year_month == max(dfTrain$year_month))
+        dfTest &amp;lt;- dfTest %&amp;gt;%
+            mutate(euribor_change = euribor3m - reference_month$euribor_mean,
+                   employed_change = nr.employed - reference_month$employed_mean,
+                   prev_month_rate = reference_month$rate)
+
+        preprocessing_recipe &amp;lt;- get_preprocessing_recipe(dfTrain)
+        dfTrain_Proc &amp;lt;- bake(preprocessing_recipe, new_data = NULL)
+        dfTest_Proc &amp;lt;- bake(preprocessing_recipe, new_data = dfTest)
+
+        dfTasks &amp;lt;- expand_grid(feature_set = names(lFeatureSets), model = c(&amp;quot;glmnet&amp;quot;, &amp;quot;xgboost&amp;quot;))
+        lPred &amp;lt;- furrr::future_map2(dfTasks$feature_set, dfTasks$model, function(feature_set, modelType) {
+            fit_predict_fixed(dfTrain_Proc, dfTest_Proc, modelType, lFeatureSets[[feature_set]],
+                              lParamsForesight[[modelType]]) %&amp;gt;%
+                mutate(feature_set = feature_set, model = modelType)
+        }, .options = furrr::furrr_options(seed = TRUE, packages = c(&amp;quot;tidymodels&amp;quot;, &amp;quot;glmnet&amp;quot;, &amp;quot;xgboost&amp;quot;)))
+        lDoneForesight[[cycle_key]] &amp;lt;- bind_rows(lPred)
+    }
+
+    dfForesightTimings &amp;lt;- dfForesightTimings %&amp;gt;%
+        add_row(window = cycle$window, cycle = cycle$cycle, reused = reused,
+                seconds = as.numeric(difftime(Sys.time(), t0, units = &amp;quot;secs&amp;quot;)))
+    lForesight[[i]] &amp;lt;- lDoneForesight[[cycle_key]] %&amp;gt;% mutate(window = cycle$window, cycle = cycle$cycle)
+}
+
+plan(sequential)
+
+# predictions for every call of every testing period, by window, model and feature set
+dfForesightPred &amp;lt;- bind_rows(lForesight)
+
+# the results that the post uses, which are saved to Bank_Foresight.Rda
+vForesightResults &amp;lt;- c(&amp;quot;dfForesightPred&amp;quot;, &amp;quot;dfForesightTimings&amp;quot;, &amp;quot;lParamsForesight&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And this code decides whether to load the saved results or to train the models again:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1 and the tuning results of Part 2
+bank_data_file &amp;lt;- &amp;quot;../bank-marketing-part1-eda/Bank_Marketing_Clean.Rda&amp;quot;
+part2_tuning_file &amp;lt;- &amp;quot;../bank-marketing-part2-models/Bank_Tuning.Rda&amp;quot;
+
+# Fingerprint (hash) of the inputs: the data, the hyperparameters of Part 2, and the code of the &amp;quot;window_setup&amp;quot; and
+# &amp;quot;foresight_steps&amp;quot; chunks. Comments and spacing are removed from the code first.
+envData &amp;lt;- new.env()
+load(bank_data_file, envir = envData)
+load(part2_tuning_file, envir = envData)
+foresight_code &amp;lt;- c(knitr::knit_code$get(&amp;quot;window_setup&amp;quot;), knitr::knit_code$get(&amp;quot;foresight_steps&amp;quot;))
+foresight_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$dfCallDates),
+                                   params = list(envData$param_best_glmnet, envData$param_best_xgboost),
+                                   code = deparse(parse(text = foresight_code, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, train the models again in a separate
+# environment (so that the setup steps do not replace the results of the windows that this page has loaded), and save
+# the new results together with the fingerprint of their inputs.
+envSaved &amp;lt;- new.env()
+if (file.exists(&amp;quot;Bank_Foresight.Rda&amp;quot;)) load(&amp;quot;Bank_Foresight.Rda&amp;quot;, envir = envSaved)
+if (identical(envSaved$foresight_hash, foresight_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  envRun &amp;lt;- new.env()
+  eval(parse(text = foresight_code), envir = envRun)
+  envRun$foresight_hash &amp;lt;- foresight_hash
+  save(list = c(envRun$vForesightResults, &amp;quot;foresight_hash&amp;quot;), envir = envRun, file = &amp;quot;Bank_Foresight.Rda&amp;quot;)
+  list2env(mget(envRun$vForesightResults, envir = envRun), envir = environment())
+  rm(envRun)
+}
+rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 </description>
     </item>
