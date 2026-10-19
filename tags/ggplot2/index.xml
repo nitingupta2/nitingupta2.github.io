@@ -5,12 +5,1519 @@
     <link>https://www.nitingupta.com/tags/ggplot2/</link>
       <atom:link href="https://www.nitingupta.com/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     <description>Ggplot2</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Tue, 27 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sun, 18 Oct 2026 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Ggplot2</title>
       <link>https://www.nitingupta.com/tags/ggplot2/</link>
     </image>
+    
+    <item>
+      <title>Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</title>
+      <link>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</link>
+      <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</guid>
+      <description>
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt;, we explored the &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt;: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.&lt;/p&gt;
+&lt;p&gt;In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;evaluation-criteria&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Evaluation Criteria&lt;/h2&gt;
+&lt;p&gt;In Part 1, we saw that only 11.3% of the clients subscribed. So we cannot judge a model by its accuracy, the share of correct &lt;em&gt;yes&lt;/em&gt;/&lt;em&gt;no&lt;/em&gt; answers: a model that always says &lt;em&gt;no&lt;/em&gt; would be 88.7% accurate and would never find a subscriber. Instead, we judge a model by how well it ranks the clients, using its predicted probabilities:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;ROC AUC&lt;/strong&gt; (area under the ROC curve) is the probability that the model gives a random subscriber a higher probability than a random client who did not subscribe. 0.5 means that the model ranks clients no better than chance, and 1 means that it ranks every subscriber above every other client. This is our main measure, because a bank needs to know whom to call first.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PR AUC&lt;/strong&gt; (area under the precision-recall curve) focuses on the subscribers. Precision is the share of subscribers among the clients that the model picks, and recall is the share of all the subscribers that it finds. A model that picks clients at random has a PR AUC equal to the subscription rate, 0.113. PR AUC shows differences between models that ROC AUC can hide when one class is rare.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Log loss&lt;/strong&gt; measures how good the probabilities themselves are. Lower is better.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;steps-for-building-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Steps for Building Models&lt;/h2&gt;
+&lt;p&gt;Each model has settings that it cannot learn from the data. We must choose them before training. These settings are called hyperparameters. To choose the best hyperparameters, we use K-fold cross validation, as in the Ames Housing case study:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Change the categorical features into numbers that a model can use.&lt;/li&gt;
+&lt;li&gt;Split the training data into K parts (folds). Each time, the model learns from all the folds except one (the training part), and we check its predictions on the remaining fold (the validation part). Each fold has the same subscription rate (stratified sampling).&lt;/li&gt;
+&lt;li&gt;For each model, make a set (a grid) of hyperparameter combinations that covers the possible values evenly (a space-filling grid).&lt;/li&gt;
+&lt;li&gt;For each combination, train the model on the training part and make predictions on the validation part. Repeat this for all the folds.&lt;/li&gt;
+&lt;li&gt;Choose the combination with the highest ROC AUC.&lt;/li&gt;
+&lt;li&gt;Train each model again, with its best combination, on the complete training set.&lt;/li&gt;
+&lt;li&gt;Measure each final model on the testing set, which has clients that the models have not seen.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;preparing-the-features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Preparing the Features&lt;/h2&gt;
+&lt;p&gt;A model cannot use categories directly. So each category of a categorical feature becomes a separate feature with the values 0 and 1 (a dummy variable), except one category of each feature, which is the baseline. For example, &lt;code&gt;contact&lt;/code&gt; becomes one feature, &lt;code&gt;contact_telephone&lt;/code&gt;, which is 1 for a landline and 0 for a cell phone.&lt;/p&gt;
+&lt;p&gt;We also take the log of the skewed numerical features (&lt;code&gt;age&lt;/code&gt; and &lt;code&gt;campaign&lt;/code&gt; and &lt;code&gt;previous&lt;/code&gt;), so that a few clients with very large values do not dominate the linear models. Models that use decision trees are not affected by this change.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;unknown&lt;/em&gt; categories of &lt;code&gt;housing&lt;/code&gt; and &lt;code&gt;loan&lt;/code&gt; are the same clients, so their dummy variables are identical. When a feature is an exact combination of other features, a linear model cannot separate their effects. &lt;code&gt;step_lincomb()&lt;/code&gt; removes these 1 features: loan_unknown.&lt;/p&gt;
+&lt;p&gt;After these steps, there are 50 features.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;partitioning-training-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Partitioning Training Data&lt;/h2&gt;
+&lt;p&gt;We split the 30,881 training calls into 5 folds. In each fold, the model learns from 80% of the calls, and we check its predictions on the other 20%. Because we used stratified sampling, the subscription rate is almost the same in every part:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_folds %&amp;gt;%
+  mutate(training = map_dbl(splits, ~ mean(analysis(.x)$y == &amp;quot;yes&amp;quot;)),
+         validation = map_dbl(splits, ~ mean(assessment(.x)$y == &amp;quot;yes&amp;quot;))) %&amp;gt;%
+  select(id, training, validation) %&amp;gt;%
+  mutate(across(c(training, validation), ~ scales::label_percent(accuracy = 0.01)(.x))) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Fold&amp;quot;, &amp;quot;Subscription rate (training part)&amp;quot;, &amp;quot;Subscription rate (validation part)&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;7%&#34; /&gt;
+&lt;col width=&#34;44%&#34; /&gt;
+&lt;col width=&#34;47%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Fold&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Subscription rate (training part)&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Subscription rate (validation part)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Fold1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Fold2&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Fold3&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.26%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Fold4&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.26%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;Fold5&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.27%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;11.26%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div id=&#34;linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Linear Models&lt;/h2&gt;
+&lt;div id=&#34;logistic-regression&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Logistic Regression&lt;/h3&gt;
+&lt;p&gt;Logistic regression is the basic linear model for classification. It adds up the features, each multiplied by a coefficient, and changes the total into a probability between 0 and 1. It has no hyperparameters, so we use it as a benchmark: more complex models are only worth it if they do better.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_glm&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;Logistic Regression Model Specification (classification)
+
+Computational engine: glm &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_glm&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 1 × 3
+  mn_log_loss pr_auc roc_auc
+        &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
+1       0.278  0.446   0.789&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Logistic regression has a cross validated ROC AUC of 0.789 and a PR AUC of 0.446. Its PR AUC is about 4 times the 0.113 of a random ranking.&lt;/li&gt;
+&lt;li&gt;It takes about 11 seconds to cross validate.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;regularized-logistic-regression&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Regularized Logistic Regression&lt;/h3&gt;
+&lt;p&gt;We use &lt;code&gt;glmnet&lt;/code&gt;, which adds a penalty for large coefficients to logistic regression (regularization). This helps when features repeat each other’s information, such as the economic features. We do a grid search of these hyperparameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;penalty&lt;/code&gt;: The total amount of regularization in the model.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mixture&lt;/code&gt;: The proportion of L1 regularization (LASSO), which can set coefficients to exactly 0, versus L2 regularization (Ridge), which only shrinks them.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_glmnet&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;Logistic Regression Model Specification (classification)
+
+Main Arguments:
+  penalty = tune()
+  mixture = tune()
+
+Computational engine: glmnet &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 hyperparameter combinations, in order of ROC AUC:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_glmnet %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 5
+    penalty mixture mn_log_loss pr_auc roc_auc
+      &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
+ 1 2.07e- 9   0.950       0.278  0.445   0.790
+ 2 3.47e- 4   0.992       0.279  0.445   0.790
+ 3 5.26e- 7   0.976       0.279  0.445   0.790
+ 4 3.70e- 8   0.441       0.278  0.445   0.790
+ 5 5.82e-10   0.536       0.278  0.446   0.790
+ 6 4.72e- 9   0.797       0.278  0.445   0.790
+ 7 2.31e- 6   0.716       0.278  0.445   0.790
+ 8 1.23e-10   0.333       0.278  0.446   0.790
+ 9 2.01e- 5   0.274       0.278  0.446   0.790
+10 6.54e- 9   0.141       0.278  0.446   0.790&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The best &lt;code&gt;glmnet&lt;/code&gt; model has a ROC AUC of 0.790, with penalty = 2.07e-09 and mixture = 0.95. This penalty is so small that the model is practically the same as logistic regression, and so is its ROC AUC. With 30,881 calls and only 50 features, a linear model does not learn noise (overfit), so regularization has little to fix.&lt;/li&gt;
+&lt;li&gt;The combinations with the largest penalties set all the coefficients to 0. Then the model gives every client the same probability, and its ROC AUC is 0.500, no better than chance.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;glmnet&lt;/code&gt; cross validation takes about 185 seconds.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(cv_results_glmnet, aes(x = mixture, y = penalty, color = roc_auc)) +
+  geom_point(size = 3) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &amp;quot;red&amp;quot;, size = 4, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
+  scale_y_log10(labels = scales::label_scientific()) +
+  scale_color_gradient(low = &amp;quot;grey85&amp;quot;, high = &amp;quot;#00AED8&amp;quot;, name = &amp;quot;ROC AUC&amp;quot;) +
+  labs(title = &amp;quot;glmnet hyperparameter grid&amp;quot;, subtitle = &amp;quot;The best combination is circled in red&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/plot_glmnet-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;non-linear-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Non-linear Models&lt;/h2&gt;
+&lt;p&gt;Next, we train two models that are built from decision trees. A decision tree splits the clients into groups with a series of yes/no questions, such as “Was the previous campaign a success?”. Tree models can learn curved relationships and interactions between features without our help.&lt;/p&gt;
+&lt;div id=&#34;ranger-random-forest&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;em&gt;ranger&lt;/em&gt; (Random Forest)&lt;/h3&gt;
+&lt;p&gt;A random forest averages the predictions of many trees. Each tree learns from a random sample of the clients, and each split considers a random subset of the features. We use 500 trees and do a grid search of these hyperparameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mtry&lt;/code&gt;: The number of features to randomly sample at each split.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of clients in a group required to split it further.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_rf&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;Random Forest Model Specification (classification)
+
+Main Arguments:
+  mtry = tune()
+  trees = 500
+  min_n = tune()
+
+Engine-Specific Arguments:
+  num.threads = 1
+
+Computational engine: ranger &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 hyperparameter combinations:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_rf %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 5
+   min_n  mtry mn_log_loss pr_auc roc_auc
+   &amp;lt;int&amp;gt; &amp;lt;int&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
+ 1    39     4       0.274  0.463   0.796
+ 2    28     3       0.274  0.461   0.795
+ 3     9     4       0.274  0.462   0.795
+ 4    22     2       0.278  0.454   0.794
+ 5    33     7       0.275  0.463   0.794
+ 6     4     2       0.277  0.455   0.794
+ 7    39     9       0.276  0.463   0.794
+ 8    33     2       0.278  0.453   0.794
+ 9    22     6       0.275  0.462   0.794
+10    15     5       0.275  0.461   0.793&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The best &lt;code&gt;ranger&lt;/code&gt; model has a ROC AUC of 0.796, with mtry = 4 and min_n = 39. It ranks clients better than the linear models.&lt;/li&gt;
+&lt;li&gt;Small values of &lt;code&gt;mtry&lt;/code&gt; work best: the top 5 combinations sample only 2 to 7 features at each split. With few features to choose from, the trees are more different from each other, and their average is more reliable.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ranger&lt;/code&gt; cross validation takes about 1028 seconds.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(cv_results_rf, aes(x = min_n, y = mtry, color = roc_auc)) +
+  geom_point(size = 3) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &amp;quot;red&amp;quot;, size = 4, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
+  scale_color_gradient(low = &amp;quot;grey85&amp;quot;, high = &amp;quot;#00AED8&amp;quot;, name = &amp;quot;ROC AUC&amp;quot;) +
+  labs(title = &amp;quot;ranger hyperparameter grid&amp;quot;, subtitle = &amp;quot;The best combination is circled in red&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/plot_ranger-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;xgboost&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;&lt;em&gt;xgboost&lt;/em&gt;&lt;/h3&gt;
+&lt;p&gt;Boosted trees add trees one at a time, and each new tree corrects the errors of the trees before it. We use 1,000 trees and do a grid search of these hyperparameters:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;min_n&lt;/code&gt;: The minimum number of clients in a group required to split it further.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tree_depth&lt;/code&gt;: The maximum number of questions in a row in each tree.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;learn_rate&lt;/code&gt;: How much each new tree changes the predictions.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;model_spec_xgboost&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;Boosted Tree Model Specification (classification)
+
+Main Arguments:
+  trees = 1000
+  min_n = tune()
+  tree_depth = tune()
+  learn_rate = tune()
+
+Engine-Specific Arguments:
+  nthread = 1
+
+Computational engine: xgboost &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s take a look at the top 10 hyperparameter combinations:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cv_results_xgboost %&amp;gt;% head(10)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;# A tibble: 10 × 6
+   min_n tree_depth learn_rate mn_log_loss pr_auc roc_auc
+   &amp;lt;int&amp;gt;      &amp;lt;int&amp;gt;      &amp;lt;dbl&amp;gt;       &amp;lt;dbl&amp;gt;  &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;
+ 1    23          4    0.0254        0.274  0.460   0.800
+ 2    32          9    0.00605       0.273  0.461   0.799
+ 3     3          4    0.00418       0.274  0.462   0.799
+ 4    20          4    0.00401       0.275  0.457   0.798
+ 5    33          2    0.0289        0.275  0.457   0.797
+ 6     3          2    0.0171        0.275  0.457   0.797
+ 7    19         11    0.00482       0.274  0.461   0.797
+ 8    24          1    0.190         0.275  0.454   0.797
+ 9    29         15    0.00387       0.274  0.459   0.797
+10     4          1    0.0872        0.277  0.451   0.795&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The best &lt;code&gt;xgboost&lt;/code&gt; model has a ROC AUC of 0.800, with min_n = 23, tree_depth = 4 and learn_rate = 0.0254.&lt;/li&gt;
+&lt;li&gt;7 of the top 10 combinations have shallow trees, with a depth of 4 or less. Small trees, added slowly, are enough for this data.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;xgboost&lt;/code&gt; cross validation takes about 370 seconds.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;comparing-the-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Comparing the Models&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfCVSummary &amp;lt;- bind_rows(glm = cv_results_glm,
+                         glmnet = cv_results_glmnet %&amp;gt;% slice(1),
+                         ranger = cv_results_rf %&amp;gt;% slice(1),
+                         xgboost = cv_results_xgboost %&amp;gt;% slice(1), .id = &amp;quot;model&amp;quot;) %&amp;gt;%
+  select(model, roc_auc, pr_auc, mn_log_loss) %&amp;gt;%
+  left_join(dfTimings %&amp;gt;% mutate(seconds = round(seconds)), by = &amp;quot;model&amp;quot;)
+
+dfCVSummary %&amp;gt;%
+  mutate(across(c(roc_auc, pr_auc, mn_log_loss), ~ round(.x, 4))) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;ROC AUC&amp;quot;, &amp;quot;PR AUC&amp;quot;, &amp;quot;Log loss&amp;quot;, &amp;quot;Seconds to cross validate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Model&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;ROC AUC&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PR AUC&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Log loss&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Seconds to cross validate&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glm&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7894&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4462&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2783&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glmnet&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7899&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4451&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2785&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;185&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;ranger&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7956&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4631&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2739&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1028&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7997&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4595&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2738&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;370&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;xgboost has the best ROC AUC, 0.800, and ranger has the best PR AUC, 0.463. The two tree models rank clients better than the two linear models, but only a little: the difference in ROC AUC is about 0.010.&lt;/li&gt;
+&lt;li&gt;So simple logistic regression gets most of the way. Most of the information is in a few strong features, which a linear model can use as well as a tree model.&lt;/li&gt;
+&lt;li&gt;The tree models take much longer to tune. &lt;code&gt;ranger&lt;/code&gt; takes about 17 minutes, compared with 11 seconds for logistic regression.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;performance-on-test-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Performance on Test Data&lt;/h2&gt;
+&lt;p&gt;Now we use the final models to predict the probabilities of the 10,295 clients in the testing set, which the models have not seen.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_test_probs &amp;lt;- function(model_final, label) {
+  dfTest_Proc %&amp;gt;%
+    select(Id, y) %&amp;gt;%
+    mutate(model = label, .pred_yes = predict(model_final, dfTest_Proc, type = &amp;quot;prob&amp;quot;)$.pred_yes)
+}
+
+dfTestPred &amp;lt;- bind_rows(get_test_probs(model_final_glm, &amp;quot;glm&amp;quot;),
+                        get_test_probs(model_final_glmnet, &amp;quot;glmnet&amp;quot;),
+                        get_test_probs(model_final_rf, &amp;quot;ranger&amp;quot;),
+                        get_test_probs(model_final_xgboost, &amp;quot;xgboost&amp;quot;))
+
+dfTestMetrics &amp;lt;- dfTestPred %&amp;gt;%
+  group_by(model) %&amp;gt;%
+  summarise(roc_auc = roc_auc_vec(y, .pred_yes),
+            pr_auc = pr_auc_vec(y, .pred_yes),
+            mn_log_loss = mn_log_loss_vec(y, .pred_yes))
+
+dfTestMetrics %&amp;gt;%
+  left_join(dfCVSummary %&amp;gt;% select(model, cv_roc_auc = roc_auc), by = &amp;quot;model&amp;quot;) %&amp;gt;%
+  mutate(across(where(is.numeric), ~ round(.x, 4))) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Test ROC AUC&amp;quot;, &amp;quot;Test PR AUC&amp;quot;, &amp;quot;Test log loss&amp;quot;, &amp;quot;Cross validated ROC AUC&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;11%&#34; /&gt;
+&lt;col width=&#34;18%&#34; /&gt;
+&lt;col width=&#34;16%&#34; /&gt;
+&lt;col width=&#34;19%&#34; /&gt;
+&lt;col width=&#34;33%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Model&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Test ROC AUC&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Test PR AUC&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Test log loss&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Cross validated ROC AUC&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glm&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7957&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4655&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2746&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7894&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glmnet&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7955&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4644&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2751&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7899&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;ranger&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.8034&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4785&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2692&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7956&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.8027&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.4793&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2691&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.7997&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dfTestPred %&amp;gt;%
+  group_by(model) %&amp;gt;%
+  roc_curve(y, .pred_yes) %&amp;gt;%
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = model)) +
+  geom_path(linewidth = 0.8) +
+  geom_abline(lty = 2) +
+  coord_equal() +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;) +
+  labs(x = &amp;quot;False positive rate (1 - specificity)&amp;quot;, y = &amp;quot;True positive rate (sensitivity)&amp;quot;, title = &amp;quot;ROC curves&amp;quot;)
+
+p2 &amp;lt;- dfTestPred %&amp;gt;%
+  group_by(model) %&amp;gt;%
+  pr_curve(y, .pred_yes) %&amp;gt;%
+  ggplot(aes(x = recall, y = precision, color = model)) +
+  geom_path(linewidth = 0.8) +
+  geom_hline(yintercept = mean(dfTest$y == &amp;quot;yes&amp;quot;), lty = 2) +
+  coord_equal() +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;) +
+  labs(x = &amp;quot;Recall&amp;quot;, y = &amp;quot;Precision&amp;quot;, title = &amp;quot;Precision-recall curves&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/test_curves-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;On the testing set, each model does about as well as in cross validation, so the hyperparameters were not tuned to the training data by chance.&lt;/li&gt;
+&lt;li&gt;The tree models are again slightly better: &lt;code&gt;ranger&lt;/code&gt; and &lt;code&gt;xgboost&lt;/code&gt; have a test ROC AUC of 0.803 and 0.803, and logistic regression has 0.796.&lt;/li&gt;
+&lt;li&gt;A PR AUC of about 0.48 is about 4 times the 0.113 of a random ranking.&lt;/li&gt;
+&lt;li&gt;The ROC curves rise steeply at first: the clients with the highest probabilities are very likely to subscribe. After that, the models struggle to separate the remaining subscribers from the other clients.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;how-a-bank-could-use-the-model&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;How a Bank Could Use the Model&lt;/h2&gt;
+&lt;p&gt;A bank cannot call every client. With a model, it can sort the clients by their predicted probability and call them from the top of the list. The gain curve shows the share of all the subscribers that the bank would reach, for each share of the clients that it calls:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTestPred %&amp;gt;%
+  group_by(model) %&amp;gt;%
+  gain_curve(y, .pred_yes) %&amp;gt;%
+  ggplot(aes(x = .percent_tested / 100, y = .percent_found / 100, color = model)) +
+  geom_path(linewidth = 0.8) +
+  geom_abline(lty = 2) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_color_quant(palette = &amp;quot;metro&amp;quot;) +
+  labs(x = &amp;quot;Share of clients called (highest probability first)&amp;quot;, y = &amp;quot;Share of subscribers reached&amp;quot;,
+       title = &amp;quot;Gain curves on the testing set&amp;quot;, subtitle = &amp;quot;The dashed line is calling clients in random order&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/gain_curve-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;For the best model by cross validated ROC AUC, xgboost, here is what different call plans would achieve on the testing set:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfBest &amp;lt;- dfTestPred %&amp;gt;% filter(model == best_model) %&amp;gt;% arrange(desc(.pred_yes))
+overall_rate &amp;lt;- mean(dfBest$y == &amp;quot;yes&amp;quot;)
+
+dfCallPlans &amp;lt;- map_dfr(c(0.1, 0.2, 0.3, 0.5), function(share) {
+  nCalled &amp;lt;- ceiling(share * nrow(dfBest))
+  tibble(share_called = share,
+         clients_called = nCalled,
+         subscribers_reached = sum(dfBest$y[1:nCalled] == &amp;quot;yes&amp;quot;) / sum(dfBest$y == &amp;quot;yes&amp;quot;),
+         rate_among_called = mean(dfBest$y[1:nCalled] == &amp;quot;yes&amp;quot;),
+         lift = rate_among_called / overall_rate)
+})
+
+dfCallPlans %&amp;gt;%
+  mutate(across(c(share_called, subscribers_reached, rate_among_called), ~ scales::label_percent(accuracy = 1)(.x)),
+         lift = round(lift, 1)) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Share of clients called&amp;quot;, &amp;quot;Clients called&amp;quot;, &amp;quot;Share of subscribers reached&amp;quot;,
+                             &amp;quot;Subscription rate among clients called&amp;quot;, &amp;quot;Lift&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;21%&#34; /&gt;
+&lt;col width=&#34;13%&#34; /&gt;
+&lt;col width=&#34;25%&#34; /&gt;
+&lt;col width=&#34;34%&#34; /&gt;
+&lt;col width=&#34;4%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Share of clients called&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Clients called&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Share of subscribers reached&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Subscription rate among clients called&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Lift&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;10%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1030&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;47%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;52%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4.7&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;20%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2059&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;66%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;37%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3.3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;30%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3089&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;73%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;27%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;50%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;5148&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;82%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18%&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.6&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The lift is the subscription rate among the clients called, divided by the overall rate of 11.3%.&lt;/p&gt;
+&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;By calling the 10% of the clients with the highest probabilities, the bank would reach 47% of all the subscribers. 52% of these calls would end with a &lt;em&gt;yes&lt;/em&gt;, 4.7 times the rate of calling at random.&lt;/li&gt;
+&lt;li&gt;Calling the top 20% reaches 66% of the subscribers. After that, each extra call finds fewer new subscribers: calling half of the clients reaches 82%.&lt;/li&gt;
+&lt;li&gt;The best plan depends on the cost of a call and on the value of a new deposit. The model gives the bank the list in the best order. The bank decides where to stop.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;what-drives-the-predictions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;What Drives the Predictions?&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;xgboost&lt;/code&gt; model is not as easy to read as a linear model, but it can tell us how much each feature improved its trees (the feature importance). The &lt;code&gt;glmnet&lt;/code&gt; model is easier to read: for a categorical feature, the odds ratio of a category says how many times the odds of subscribing are multiplied for a client in that category, compared with the baseline category.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- vip::vip(extract_fit_parsnip(model_final_xgboost), num_features = 15, aesthetics = list(fill = &amp;quot;#00AED8&amp;quot;)) +
+  labs(title = &amp;quot;xgboost feature importance&amp;quot;) +
+  theme_quant()
+
+# odds ratios of the categories (dummy variables) in the glmnet model. glmnet models the probability of the second
+# level of y, which is &amp;quot;no&amp;quot;, so the sign of each coefficient is reversed to give the odds of a &amp;quot;yes&amp;quot;.
+dfOddsRatios &amp;lt;- tidy(extract_fit_parsnip(model_final_glmnet)) %&amp;gt;%
+  filter(str_detect(term, &amp;quot;_&amp;quot;), !term %in% vFeaturesEconomic, estimate != 0) %&amp;gt;%
+  mutate(odds_ratio = exp(-estimate)) %&amp;gt;%
+  slice_max(abs(estimate), n = 15) %&amp;gt;%
+  mutate(term = fct_reorder(term, odds_ratio))
+
+p2 &amp;lt;- ggplot(dfOddsRatios, aes(x = odds_ratio, y = term)) +
+  geom_col(fill = &amp;quot;#F37735&amp;quot;) +
+  geom_vline(xintercept = 1, lty = 2) +
+  scale_x_log10() +
+  labs(x = &amp;quot;Odds ratio (log scale)&amp;quot;, y = NULL, title = &amp;quot;glmnet: largest effects of categories&amp;quot;)
+
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/feature_importance-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In &lt;code&gt;xgboost&lt;/code&gt;, &lt;code&gt;nr.employed&lt;/code&gt; is by far the most important feature, and the other economic features follow. As we saw in Part 1, they tell the model &lt;em&gt;when&lt;/em&gt; the call was made, and the subscription rate changed a lot over time.&lt;/li&gt;
+&lt;li&gt;Among the client features, the most important are the history with the bank (&lt;code&gt;recent_contact&lt;/code&gt;, &lt;code&gt;poutcome&lt;/code&gt;, &lt;code&gt;previous&lt;/code&gt;), &lt;code&gt;age&lt;/code&gt;, the number of calls in this campaign and the type of phone.&lt;/li&gt;
+&lt;li&gt;In &lt;code&gt;glmnet&lt;/code&gt;, a recent contact in a previous campaign multiplies the odds of a &lt;em&gt;yes&lt;/em&gt; by about 3.2, and a successful previous campaign by about 1.9 (compared with a failed one). A call to a landline about halves the odds.&lt;/li&gt;
+&lt;li&gt;Every month has lower odds than March, the baseline month, after taking the economy into account. March had the highest subscription rate in Part 1.&lt;/li&gt;
+&lt;li&gt;The large odds ratio of &lt;code&gt;education_illiterate&lt;/code&gt; is not reliable, because only 18 clients have this category.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;testing-on-later-calls&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Testing on Later Calls&lt;/h2&gt;
+&lt;p&gt;In Part 1, we saw that the economic features tell a model &lt;em&gt;when&lt;/em&gt; a call was made, and that the subscription rate changed a lot over time. The testing set above has calls from the same period as the training set. But a bank would use the model to plan &lt;em&gt;future&lt;/em&gt; calls.&lt;/p&gt;
+&lt;p&gt;So we train the best model (xgboost) again, with the same hyperparameters, on the first 75% of the calls in time order, and we test it on the last 25%. We do the same with logistic regression, the simplest model. We train each model twice: with all the features, and without the five economic features.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfEarlyLateRates %&amp;gt;%
+  mutate(rate = scales::label_percent(accuracy = 0.1)(rate)) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Period&amp;quot;, &amp;quot;Calls&amp;quot;, &amp;quot;Subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Period&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Calls&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Subscription rate&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;earlier calls (training)&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;30882&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;6.4%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;later calls (testing)&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10294&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25.8%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# the same earlier and later calls as in the tuning steps, where the best model was scored (dfLaterCalls)
+dfAll_Proc &amp;lt;- bind_rows(dfTrain_Proc, dfTest_Proc) %&amp;gt;% arrange(Id)
+idCutoff &amp;lt;- quantile(dfAll_Proc$Id, 0.75)
+dfEarly_Proc &amp;lt;- dfAll_Proc %&amp;gt;% filter(Id &amp;lt;= idCutoff)
+dfLate_Proc &amp;lt;- dfAll_Proc %&amp;gt;% filter(Id &amp;gt; idCutoff)
+
+# logistic regression takes seconds to train, so it is scored here rather than in the tuning steps
+score_glm_later_calls &amp;lt;- function(vExclude, features) {
+  model_early &amp;lt;- workflow() %&amp;gt;%
+    add_variables(outcomes = y, predictors = c(-Id, -any_of(vExclude))) %&amp;gt;%
+    add_model(model_spec_glm) %&amp;gt;%
+    fit(data = dfEarly_Proc)
+  dfPred &amp;lt;- dfLate_Proc %&amp;gt;% select(y) %&amp;gt;% bind_cols(predict(model_early, dfLate_Proc, type = &amp;quot;prob&amp;quot;))
+  tibble(features = features,
+         roc_auc = roc_auc_vec(dfPred$y, dfPred$.pred_yes),
+         pr_auc = pr_auc_vec(dfPred$y, dfPred$.pred_yes),
+         mean_predicted = mean(dfPred$.pred_yes),
+         actual_rate = mean(dfPred$y == &amp;quot;yes&amp;quot;))
+}
+
+dfLaterAll &amp;lt;- bind_rows(dfLaterCalls %&amp;gt;% mutate(model = best_model),
+                        bind_rows(score_glm_later_calls(character(), &amp;quot;all features&amp;quot;),
+                                  score_glm_later_calls(vFeaturesEconomic, &amp;quot;without economic features&amp;quot;)) %&amp;gt;%
+                          mutate(model = &amp;quot;glm&amp;quot;)) %&amp;gt;%
+  select(model, everything())
+
+dfLaterAll %&amp;gt;%
+  mutate(across(c(roc_auc, pr_auc), ~ round(.x, 3)),
+         across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&amp;gt;%
+  knitr::kable(col.names = c(&amp;quot;Model&amp;quot;, &amp;quot;Features&amp;quot;, &amp;quot;ROC AUC on later calls&amp;quot;, &amp;quot;PR AUC on later calls&amp;quot;,
+                             &amp;quot;Average predicted probability&amp;quot;, &amp;quot;Actual subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;5%&#34; /&gt;
+&lt;col width=&#34;19%&#34; /&gt;
+&lt;col width=&#34;17%&#34; /&gt;
+&lt;col width=&#34;16%&#34; /&gt;
+&lt;col width=&#34;22%&#34; /&gt;
+&lt;col width=&#34;18%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Model&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Features&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;ROC AUC on later calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;PR AUC on later calls&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Average predicted probability&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Actual subscription rate&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;all features&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.611&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.342&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;20.8%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25.8%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;xgboost&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;without economic features&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.503&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.308&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18.1%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25.8%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glm&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;all features&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.275&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.164&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;8.2%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25.8%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;glm&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;without economic features&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.707&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.469&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;18.1%&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;25.8%&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;later_value &amp;lt;- function(model, features, metric) dfLaterAll[[metric]][dfLaterAll$model == model &amp;amp; dfLaterAll$features == features]
+
+# share of calls to clients whose previous campaign was a success, in each period
+share_prev_success &amp;lt;- c(earlier = mean(dfEarly_Proc$poutcome_success == 1), later = mean(dfLate_Proc$poutcome_success == 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The later calls are very different: 26% of them ended with a &lt;em&gt;yes&lt;/em&gt;, compared with 6% of the earlier calls.&lt;/li&gt;
+&lt;li&gt;All the models do much worse on the later calls than on the random testing set. With all the features, xgboost has a ROC AUC of 0.611, compared with 0.803 on the random testing set. Without the economic features, its ROC AUC of 0.503 is no better than chance.&lt;/li&gt;
+&lt;li&gt;Logistic regression with all the features does even worse: its ROC AUC of 0.275 is below 0.5, so it ranks the clients in the wrong order. In the later calls, the economic features have values that the model never saw in training, such as interest rates below 1%. A linear model extends the straight-line trend that it learned, and here that trend points the wrong way.&lt;/li&gt;
+&lt;li&gt;Logistic regression &lt;em&gt;without&lt;/em&gt; the economic features does best, with a ROC AUC of 0.707. In the earlier calls, only 0.4% of the clients had a successful previous campaign, compared with 12% in the later calls. The tree models saw too few of these clients to learn much from them, but logistic regression still learned one coefficient for them, and it carries over to the later calls.&lt;/li&gt;
+&lt;li&gt;So the random testing set gives a much too good picture of how the models would do in a future campaign. A bank should train the models again often, on its most recent calls, and test them on the calls that came after.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusions&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Conclusions&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;On calls from the same period, all the models rank the clients well, with a ROC AUC of about 0.8 on the testing set. The tree models are slightly better than logistic regression, but they take much longer to tune.&lt;/li&gt;
+&lt;li&gt;A bank could reach about 66% of the subscribers by calling only the top 20% of the clients on the list.&lt;/li&gt;
+&lt;li&gt;The strongest signals are the economy at the time of the call and the client’s history with the bank. The economic features make the models look good on a random testing set, but they do not carry over to a later period with a different economy.&lt;/li&gt;
+&lt;li&gt;When the data covers a period of time, a random testing set is not enough. We must also test the models on later data, which is how they will be used.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;appendix-tuning-code&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Appendix: Tuning Code&lt;/h2&gt;
+&lt;p&gt;This is the code that tunes the models. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file &lt;code&gt;Bank_Tuning.Rda&lt;/code&gt;, together with a fingerprint (a hash) of the inputs of the tuning. The inputs are the clean data from &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt; and the tuning code itself, which also sets the hyperparameter grids. When we build the page again, it calculates the fingerprint again:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the fingerprint is the same, the page loads the saved results in a few seconds.&lt;/li&gt;
+&lt;li&gt;If the data, a hyperparameter or any other part of the tuning code has changed, the page tunes the models again and saves the new results.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Changes to the comments or the spacing of the code do not count as changes. To tune the models again without any change, delete &lt;code&gt;Bank_Tuning.Rda&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These are the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# How the tuning code is built:
+# It follows the tuning code of the Ames Housing case study (Part 3), adapted for classification:
+#   1. tune_grid() parallelises over every fold x grid-point combination (&amp;quot;everything&amp;quot;), so all workers stay busy.
+#   2. The number of parallel workers is capped by available RAM as well as CPU cores (see &amp;quot;Parallel backend&amp;quot;).
+#   3. Models are compared by ROC AUC (see &amp;quot;Metrics&amp;quot;). Accuracy is not used: with 11% of clients subscribing, a model
+#      that always predicts &amp;quot;no&amp;quot; is 89% accurate.
+#   4. The models are logistic regression (the baseline, no hyperparameters), glmnet (regularized logistic regression),
+#      ranger (random forest) and xgboost (boosted trees).
+#      An SVM (kernlab), which the Ames case study also tuned, is not used here. Training an SVM takes time that grows
+#      faster than the square of the number of rows, and each cross validation fit here has ~24,700 rows (17 times as
+#      many as Ames). It also does not give class probabilities without an extra, slower calibration step.
+#   5. After tuning, the best model is also trained on the earlier calls and tested on the later calls (see &amp;quot;Testing on
+#      later calls&amp;quot;), because the economic features tell the model when a call was made (see Part 1). The post adds
+#      logistic regression to this check outside the tuning steps, because it takes only seconds.
+#
+# A full run takes ~28 minutes with 4 workers: logistic regression 11s, glmnet 3 minutes, ranger 17 minutes and
+# xgboost 6 minutes, plus the final fits. All R processes together peaked at 3.4 GB.
+
+# load the clean dataset from Part 1 (bank_data_file is set in the &amp;quot;tuning_cache&amp;quot; chunk)
+load(bank_data_file)
+
+# Training and testing sets (the stratified split was made in Part 1)
+########################################################################################################################################################
+dfTrain &amp;lt;- dfClean %&amp;gt;% filter(!(Id %in% vTestIDs))
+dfTest &amp;lt;- dfClean %&amp;gt;% filter(Id %in% vTestIDs)
+
+# Right-skewed numerical features (a long tail of large values), which are log transformed for the linear models
+# (tree models are not affected by it). Only positive skewness counts: nr.employed is skewed to the left, and the log
+# of an employment count would not make its distribution more even.
+vFeaturesSkew &amp;lt;- dfClean %&amp;gt;%
+    select(all_of(vFeaturesNum)) %&amp;gt;%
+    select_if(function(Z) timeDate::skewness(Z, na.rm = T) &amp;gt; 0.75) %&amp;gt;%
+    colnames()
+
+# Preprocessing Recipe
+########################################################################################################################################################
+# Categorical features become dummy variables (one 0/1 predictor per category but one). The &amp;quot;unknown&amp;quot; categories of
+# housing and loan are the same 990 clients, so those two dummy variables are identical. step_lincomb removes exact
+# linear combinations like this one. An intercept column is added for the check, because such combinations can include
+# a constant, and removed afterwards. step_zv removes predictors with a single value.
+get_preprocessing_recipe &amp;lt;- function(df) {
+
+    recipe(y ~ ., data = df) %&amp;gt;%
+        update_role(Id, new_role = &amp;quot;ID&amp;quot;) %&amp;gt;%
+        step_mutate_at(all_of(vFeaturesSkew), fn = ~ log(. + 1)) %&amp;gt;%
+        step_dummy(all_nominal_predictors()) %&amp;gt;%
+        step_zv(all_predictors()) %&amp;gt;%
+        step_intercept() %&amp;gt;%
+        step_lincomb(all_numeric_predictors()) %&amp;gt;%
+        step_rm(any_of(&amp;quot;intercept&amp;quot;)) %&amp;gt;%
+        prep()
+}
+
+# The recipe is prepared on the training set only, and the same recipe is applied to the testing set (and to any new
+# data), so that both have exactly the same predictors.
+preprocessing_recipe &amp;lt;- get_preprocessing_recipe(dfTrain)
+dfTrain_Proc &amp;lt;- preprocessing_recipe %&amp;gt;% bake(new_data = NULL)
+dfTest_Proc &amp;lt;- preprocessing_recipe %&amp;gt;% bake(new_data = dfTest)
+
+
+# Metrics
+########################################################################################################################################################
+# ROC AUC: the probability that a random subscriber gets a higher predicted probability than a random non-subscriber.
+#          It measures how well the model ranks clients, which is what a bank needs to decide whom to call first.
+# PR AUC:  the average precision (share of subscribers among the clients called) over all recall levels. It focuses on
+#          the rare class, so it shows differences between models that ROC AUC can hide when classes are imbalanced.
+# Log loss: measures how good the probabilities themselves are (lower is better).
+# &amp;quot;yes&amp;quot; is the first level of y, so it is the event for all three metrics.
+class_metrics &amp;lt;- metric_set(roc_auc, pr_auc, mn_log_loss)
+
+
+# Parsnip Model Specification
+########################################################################################################################################################
+get_model_spec &amp;lt;- function(modelType) {
+
+    model_spec &amp;lt;- switch(modelType,
+                         glm = logistic_reg(mode = &amp;quot;classification&amp;quot;) %&amp;gt;%
+                             set_engine(&amp;quot;glm&amp;quot;),
+
+                         glmnet = logistic_reg(mode = &amp;quot;classification&amp;quot;, penalty = tune(), mixture = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;glmnet&amp;quot;),
+
+                         # 500 trees, as in the Ames case study: random forest performance levels off well before that.
+                         # num.threads = 1 because parallelism comes from running many fits at once (one per worker).
+                         ranger = rand_forest(mode = &amp;quot;classification&amp;quot;, trees = 500, mtry = tune(), min_n = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;ranger&amp;quot;, num.threads = 1),
+
+                         # No early stopping, for the reason found in the Ames case study: with a random validation split,
+                         # the stopping point, and so the final model, changed from one run to the next.
+                         xgboost = boost_tree(mode = &amp;quot;classification&amp;quot;, trees = 1000, min_n = tune(), tree_depth = tune(),
+                                              learn_rate = tune()) %&amp;gt;%
+                             set_engine(&amp;quot;xgboost&amp;quot;, nthread = 1))
+
+    return(model_spec)
+}
+
+
+# Parameter Grid Search
+########################################################################################################################################################
+get_model_param_grid &amp;lt;- function(df, modelType, numParams, randomSeed) {
+
+    set.seed(randomSeed)
+    param_spec &amp;lt;- switch(modelType,
+                         glmnet = parameters(penalty(), mixture()),
+                         # learn_rate is on a log10 scale; ~0.003 to ~0.3 covers the useful range for 1,000 trees (see the
+                         # Ames case study, where the dials default spent most of the grid on rates that never converged).
+                         xgboost = parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))),
+                         # mtry is limited to 1-20 of the ~50 predictors. In a test run, small values won (mtry 6 and 2 had
+                         # ROC AUC 0.794 and 0.793, mtry 35-37 had 0.781-0.788), and the time of a fit grows with mtry. On one
+                         # fold, with 500 trees and min_n = 10: mtry 6 took 14.4s (ROC AUC 0.788), mtry 20 took 30.7s (0.784)
+                         # and mtry 35 took 46.2s (0.780). The full range made ranger ~85% of the tuning time.
+                         ranger = parameters(min_n(), mtry(range = c(1, 20))))
+
+    dfParamGrid &amp;lt;- grid_space_filling(param_spec, size = numParams, type = &amp;quot;max_entropy&amp;quot;)
+    return(dfParamGrid)
+}
+
+
+# Workflow for a model
+########################################################################################################################################################
+# The data is already preprocessed, so the workflow only names the outcome and predictors.
+# Id is excluded from the predictors: it is the order of the calls, so a tree model could otherwise split on it and
+# learn the period of a call directly. vExclude removes more predictors (used in &amp;quot;Testing on later calls&amp;quot;).
+get_workflow &amp;lt;- function(model_spec, vExclude = character()) {
+    workflow() %&amp;gt;%
+        add_variables(outcomes = y, predictors = c(-Id, -any_of(vExclude))) %&amp;gt;%
+        add_model(model_spec)
+}
+
+
+# Cross Validation Results
+########################################################################################################################################################
+# tune_grid() fits every grid point on every fold. With parallel_over = &amp;quot;everything&amp;quot;, each (fold, grid point)
+# combination is a separate task, so all workers stay busy until the end of the run.
+# The results have one row per grid point, with the mean of each metric across the folds, best ROC AUC first.
+cross_validate_model &amp;lt;- function(cv_folds, model_spec, param_grid) {
+
+    tune_results &amp;lt;- get_workflow(model_spec) %&amp;gt;%
+        tune_grid(resamples = cv_folds,
+                  grid = param_grid,
+                  metrics = class_metrics,
+                  control = control_grid(parallel_over = &amp;quot;everything&amp;quot;))
+
+    dfResults &amp;lt;- tune_results %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(all_of(names(param_grid)), .metric, mean) %&amp;gt;%
+        pivot_wider(names_from = .metric, values_from = mean) %&amp;gt;%
+        arrange(desc(roc_auc))
+    return(dfResults)
+}
+
+
+# Fitted model with parameters
+########################################################################################################################################################
+# Returns a fitted workflow; predict() on it selects the predictor columns from new data, so Id can stay in the data.
+# The seed makes the final ranger and xgboost fits reproducible between runs.
+get_fitted_model &amp;lt;- function(df, model_spec, dfParams, randomSeed = 2300, vExclude = character()) {
+
+    model_wf &amp;lt;- get_workflow(model_spec, vExclude)
+    if(!is.null(dfParams)) model_wf &amp;lt;- model_wf %&amp;gt;% finalize_workflow(dfParams)
+    set.seed(randomSeed)
+    fit(model_wf, data = df)
+}
+
+
+# Parallel backend
+########################################################################################################################################################
+# Each worker is a separate R session with tidymodels and the model packages loaded. The training set here is 21 times
+# the size of the Ames training set, and one ranger probability forest of 500 trees takes ~150 MB. In a test run with
+# 2 workers, all R processes together peaked at 2.3 GB, and the largest one (the main session, which holds the data and
+# the final models) at 1.0 GB, so each worker used ~0.6 GB. Budgeting 1 GB per worker leaves headroom. Workers are
+# capped at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM available when the run
+# starts, so the run cannot push the machine into swapping.
+gb_per_worker &amp;lt;- 1
+gb_available &amp;lt;- ps::ps_system_memory()$avail / 1024^3
+num_workers &amp;lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
+message(sprintf(&amp;quot;Using %d parallel workers (%.1f GB RAM available)&amp;quot;, num_workers, gb_available))
+plan(multisession, workers = num_workers)
+
+# Create cross validation folds, stratified so that each fold has the same subscription rate
+set.seed(2300)
+cv_folds &amp;lt;- vfold_cv(dfTrain_Proc, v = 5, strata = y)
+
+# Time each model so the post can report relative run times
+dfTimings &amp;lt;- tibble(model = character(), seconds = numeric())
+time_model &amp;lt;- function(model, expr) {
+    t0 &amp;lt;- Sys.time()
+    result &amp;lt;- force(expr)
+    dfTimings &amp;lt;&amp;lt;- dfTimings %&amp;gt;% add_row(model = model, seconds = as.numeric(difftime(Sys.time(), t0, units = &amp;quot;secs&amp;quot;)))
+    result
+}
+
+# logistic regression (no hyperparameters, so fit_resamples instead of tune_grid)
+model_spec_glm &amp;lt;- get_model_spec(modelType = &amp;quot;glm&amp;quot;)
+cv_results_glm &amp;lt;- time_model(&amp;quot;glm&amp;quot;,
+    get_workflow(model_spec_glm) %&amp;gt;%
+        fit_resamples(resamples = cv_folds, metrics = class_metrics) %&amp;gt;%
+        collect_metrics() %&amp;gt;%
+        select(.metric, mean) %&amp;gt;%
+        pivot_wider(names_from = .metric, values_from = mean))
+model_final_glm &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_glm, NULL)
+
+# glmnet model
+model_spec_glmnet &amp;lt;- get_model_spec(modelType = &amp;quot;glmnet&amp;quot;)
+param_grid_glmnet &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;glmnet&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_glmnet &amp;lt;- time_model(&amp;quot;glmnet&amp;quot;, cross_validate_model(cv_folds, model_spec_glmnet, param_grid_glmnet))
+param_best_glmnet &amp;lt;- cv_results_glmnet %&amp;gt;% slice(1) %&amp;gt;% select(all_of(names(param_grid_glmnet)))
+model_final_glmnet &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_glmnet, param_best_glmnet)
+
+# random forest model (ranger engine)
+model_spec_rf &amp;lt;- get_model_spec(modelType = &amp;quot;ranger&amp;quot;)
+param_grid_rf &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;ranger&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_rf &amp;lt;- time_model(&amp;quot;ranger&amp;quot;, cross_validate_model(cv_folds, model_spec_rf, param_grid_rf))
+param_best_rf &amp;lt;- cv_results_rf %&amp;gt;% slice(1) %&amp;gt;% select(all_of(names(param_grid_rf)))
+model_final_rf &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_rf, param_best_rf)
+
+# xgboost model
+model_spec_xgboost &amp;lt;- get_model_spec(modelType = &amp;quot;xgboost&amp;quot;)
+param_grid_xgboost &amp;lt;- get_model_param_grid(dfTrain_Proc, modelType = &amp;quot;xgboost&amp;quot;, numParams = 25, randomSeed = 2300)
+cv_results_xgboost &amp;lt;- time_model(&amp;quot;xgboost&amp;quot;, cross_validate_model(cv_folds, model_spec_xgboost, param_grid_xgboost))
+param_best_xgboost &amp;lt;- cv_results_xgboost %&amp;gt;% slice(1) %&amp;gt;% select(all_of(names(param_grid_xgboost)))
+model_final_xgboost &amp;lt;- get_fitted_model(dfTrain_Proc, model_spec_xgboost, param_best_xgboost)
+
+plan(sequential)
+
+
+# Testing on later calls
+########################################################################################################################################################
+# The random split above tests the models on calls from the same period as the training calls. Here, the best model
+# by cross validated ROC AUC is trained on the first 75% of the calls (in time order, Id) and tested on the last 25%,
+# with the same hyperparameters, once with all the features and once without the five economic features.
+vFeaturesEconomic &amp;lt;- c(&amp;quot;emp.var.rate&amp;quot;, &amp;quot;cons.price.idx&amp;quot;, &amp;quot;cons.conf.idx&amp;quot;, &amp;quot;euribor3m&amp;quot;, &amp;quot;nr.employed&amp;quot;)
+dfAll_Proc &amp;lt;- bind_rows(dfTrain_Proc, dfTest_Proc) %&amp;gt;% arrange(Id)
+idCutoff &amp;lt;- quantile(dfAll_Proc$Id, 0.75)
+dfEarly_Proc &amp;lt;- dfAll_Proc %&amp;gt;% filter(Id &amp;lt;= idCutoff)
+dfLate_Proc &amp;lt;- dfAll_Proc %&amp;gt;% filter(Id &amp;gt; idCutoff)
+
+dfCVBest &amp;lt;- bind_rows(glmnet = cv_results_glmnet %&amp;gt;% slice(1), ranger = cv_results_rf %&amp;gt;% slice(1),
+                      xgboost = cv_results_xgboost %&amp;gt;% slice(1), .id = &amp;quot;model&amp;quot;)
+best_model &amp;lt;- dfCVBest$model[which.max(dfCVBest$roc_auc)]
+best_spec &amp;lt;- switch(best_model, glmnet = model_spec_glmnet, ranger = model_spec_rf, xgboost = model_spec_xgboost)
+best_params &amp;lt;- switch(best_model, glmnet = param_best_glmnet, ranger = param_best_rf, xgboost = param_best_xgboost)
+
+score_later_calls &amp;lt;- function(vExclude, features) {
+    model_early &amp;lt;- get_fitted_model(dfEarly_Proc, best_spec, best_params, vExclude = vExclude)
+    dfPred &amp;lt;- dfLate_Proc %&amp;gt;% select(y) %&amp;gt;% bind_cols(predict(model_early, dfLate_Proc, type = &amp;quot;prob&amp;quot;))
+    tibble(features = features,
+           roc_auc = roc_auc_vec(dfPred$y, dfPred$.pred_yes),
+           pr_auc = pr_auc_vec(dfPred$y, dfPred$.pred_yes),
+           mean_predicted = mean(dfPred$.pred_yes),
+           actual_rate = mean(dfPred$y == &amp;quot;yes&amp;quot;))
+}
+dfLaterCalls &amp;lt;- bind_rows(score_later_calls(character(), &amp;quot;all features&amp;quot;),
+                          score_later_calls(vFeaturesEconomic, &amp;quot;without economic features&amp;quot;))
+dfEarlyLateRates &amp;lt;- tibble(period = c(&amp;quot;earlier calls (training)&amp;quot;, &amp;quot;later calls (testing)&amp;quot;),
+                           calls = c(nrow(dfEarly_Proc), nrow(dfLate_Proc)),
+                           rate = c(mean(dfEarly_Proc$y == &amp;quot;yes&amp;quot;), mean(dfLate_Proc$y == &amp;quot;yes&amp;quot;)))
+
+
+# the results that the post uses, which are saved to Bank_Tuning.Rda
+vTuningResults &amp;lt;- c(&amp;quot;model_spec_glm&amp;quot;, &amp;quot;model_spec_glmnet&amp;quot;, &amp;quot;model_spec_rf&amp;quot;, &amp;quot;model_spec_xgboost&amp;quot;,
+                    &amp;quot;model_final_glm&amp;quot;, &amp;quot;model_final_glmnet&amp;quot;, &amp;quot;model_final_rf&amp;quot;, &amp;quot;model_final_xgboost&amp;quot;,
+                    &amp;quot;cv_results_glm&amp;quot;, &amp;quot;cv_results_glmnet&amp;quot;, &amp;quot;cv_results_rf&amp;quot;, &amp;quot;cv_results_xgboost&amp;quot;,
+                    &amp;quot;param_grid_glmnet&amp;quot;, &amp;quot;param_grid_rf&amp;quot;, &amp;quot;param_grid_xgboost&amp;quot;,
+                    &amp;quot;param_best_glmnet&amp;quot;, &amp;quot;param_best_rf&amp;quot;, &amp;quot;param_best_xgboost&amp;quot;,
+                    &amp;quot;dfTrain&amp;quot;, &amp;quot;dfTest&amp;quot;, &amp;quot;dfTrain_Proc&amp;quot;, &amp;quot;dfTest_Proc&amp;quot;, &amp;quot;preprocessing_recipe&amp;quot;, &amp;quot;vFeaturesSkew&amp;quot;,
+                    &amp;quot;cv_folds&amp;quot;, &amp;quot;dfTimings&amp;quot;, &amp;quot;num_workers&amp;quot;, &amp;quot;best_model&amp;quot;, &amp;quot;dfLaterCalls&amp;quot;, &amp;quot;dfEarlyLateRates&amp;quot;,
+                    &amp;quot;vFeaturesEconomic&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And this code decides whether to load the saved results or to run the tuning steps:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# The clean dataset from Part 1
+bank_data_file &amp;lt;- &amp;quot;../bank-marketing-part1-eda/Bank_Marketing_Clean.Rda&amp;quot;
+
+# Fingerprint (hash) of the inputs of the tuning: the data that it uses, and the code of the &amp;quot;tuning_steps&amp;quot;
+# chunk, which also sets the hyperparameter grids. Comments and spacing are removed from the code first, so
+# editing them does not start a new tuning run.
+envData &amp;lt;- new.env()
+load(bank_data_file, envir = envData)
+tuning_steps &amp;lt;- knitr::knit_code$get(&amp;quot;tuning_steps&amp;quot;)
+tuning_hash &amp;lt;- rlang::hash(list(data = list(envData$dfClean, envData$vTestIDs),
+                                code = deparse(parse(text = tuning_steps, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, tune the models again and save
+# the new results together with the fingerprint of their inputs.
+envSaved &amp;lt;- new.env()
+if (file.exists(&amp;quot;Bank_Tuning.Rda&amp;quot;)) load(&amp;quot;Bank_Tuning.Rda&amp;quot;, envir = envSaved)
+if (identical(envSaved$tuning_hash, tuning_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  eval(parse(text = tuning_steps))
+  save(list = c(vTuningResults, &amp;quot;tuning_hash&amp;quot;), file = &amp;quot;Bank_Tuning.Rda&amp;quot;)
+}
+rm(envData, envSaved)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</title>
+      <link>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</link>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</guid>
+      <description>
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Bank Marketing - Part 2 - Who will say yes? - Building Classification Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt; (&lt;a href=&#34;http://dx.doi.org/10.1016/j.dss.2014.03.001&#34;&gt;Moro, Cortez and Rita, 2014&lt;/a&gt;) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.&lt;/p&gt;
+&lt;p&gt;In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;? This kind of problem is called classification. The case study has two posts:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.&lt;/li&gt;
+&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Description&lt;/h2&gt;
+&lt;p&gt;Each row is one call, which was the last call to a client in a campaign. The rows are in the order of the calls, from May 2008 to November 2010. There are 20 features and the target, &lt;code&gt;y&lt;/code&gt;, which is the value that we want to predict:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDescription &amp;lt;- tribble(~ Feature, ~ Type, ~ Description,
+                         &amp;quot;age&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;age of the client&amp;quot;,
+                         &amp;quot;job&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;type of job&amp;quot;,
+                         &amp;quot;marital&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;marital status (*divorced* also means widowed)&amp;quot;,
+                         &amp;quot;education&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;highest level of education&amp;quot;,
+                         &amp;quot;default&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a loan in default?&amp;quot;,
+                         &amp;quot;housing&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a housing loan?&amp;quot;,
+                         &amp;quot;loan&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a personal loan?&amp;quot;,
+                         &amp;quot;contact&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;type of phone: cellular or telephone (landline)&amp;quot;,
+                         &amp;quot;month&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;month of the call&amp;quot;,
+                         &amp;quot;day_of_week&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;day of the week of the call&amp;quot;,
+                         &amp;quot;duration&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;length of the call, in seconds&amp;quot;,
+                         &amp;quot;campaign&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of calls to the client in this campaign, including this one&amp;quot;,
+                         &amp;quot;pdays&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;days since the client was last called in a previous campaign (999: not called)&amp;quot;,
+                         &amp;quot;previous&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of calls to the client before this campaign&amp;quot;,
+                         &amp;quot;poutcome&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;result of the previous campaign&amp;quot;,
+                         &amp;quot;emp.var.rate&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;employment variation rate (quarterly)&amp;quot;,
+                         &amp;quot;cons.price.idx&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;consumer price index (monthly)&amp;quot;,
+                         &amp;quot;cons.conf.idx&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;consumer confidence index (monthly)&amp;quot;,
+                         &amp;quot;euribor3m&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;3 month Euribor interest rate (daily)&amp;quot;,
+                         &amp;quot;nr.employed&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of employees in the economy, in thousands (quarterly)&amp;quot;,
+                         &amp;quot;y&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;**target**: did the client subscribe to a term deposit?&amp;quot;)
+
+knitr::kable(dfDescription)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;14%&#34; /&gt;
+&lt;col width=&#34;11%&#34; /&gt;
+&lt;col width=&#34;74%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Feature&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;age&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;age of the client&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;job&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;type of job&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;marital&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;marital status (&lt;em&gt;divorced&lt;/em&gt; also means widowed)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;education&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;highest level of education&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;default&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a loan in default?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;housing&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a housing loan?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;loan&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a personal loan?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;contact&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;type of phone: cellular or telephone (landline)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;month&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;month of the call&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;day_of_week&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;day of the week of the call&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;duration&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;length of the call, in seconds&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;campaign&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of calls to the client in this campaign, including this one&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;pdays&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;days since the client was last called in a previous campaign (999: not called)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;previous&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of calls to the client before this campaign&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;poutcome&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;result of the previous campaign&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;emp.var.rate&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;employment variation rate (quarterly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;cons.price.idx&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;consumer price index (monthly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;cons.conf.idx&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;consumer confidence index (monthly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;euribor3m&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3 month Euribor interest rate (daily)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;nr.employed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of employees in the economy, in thousands (quarterly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;y&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;target&lt;/strong&gt;: did the client subscribe to a term deposit?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The last five features describe the economy of Portugal at the time of the call. They are the same for all the clients who were called on the same day.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-quality&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Quality&lt;/h2&gt;
+&lt;p&gt;Before we explore the features, we check the data for problems.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# exact duplicate rows
+nDuplicates &amp;lt;- sum(duplicated(dfRaw))
+
+# number of &amp;quot;unknown&amp;quot; values in each categorical feature
+dfUnknown &amp;lt;- dfRaw %&amp;gt;%
+  select(where(is.character)) %&amp;gt;%
+  summarise(across(everything(), ~ sum(.x == &amp;quot;unknown&amp;quot;))) %&amp;gt;%
+  pivot_longer(everything(), names_to = &amp;quot;feature&amp;quot;, values_to = &amp;quot;unknown&amp;quot;) %&amp;gt;%
+  filter(unknown &amp;gt; 0) %&amp;gt;%
+  mutate(percent = round(100 * unknown / nrow(dfRaw), 1)) %&amp;gt;%
+  arrange(desc(unknown))
+
+knitr::kable(dfUnknown, col.names = c(&amp;quot;Feature&amp;quot;, &amp;quot;Unknown values&amp;quot;, &amp;quot;% of calls&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Feature&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Unknown values&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;% of calls&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;default&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;8597&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;20.9&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;education&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1731&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;housing&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;990&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;loan&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;990&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;job&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;330&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;marital&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;80&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# clients called in a previous campaign, by whether pdays is recorded
+dfPrevious &amp;lt;- dfRaw %&amp;gt;%
+  filter(previous &amp;gt; 0) %&amp;gt;%
+  count(pdays_recorded = pdays != 999, poutcome)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;There are no empty (missing) values. Instead, the categorical features use the category &lt;em&gt;unknown&lt;/em&gt;. &lt;code&gt;default&lt;/code&gt; is unknown for 20.9% of the clients. &lt;code&gt;housing&lt;/code&gt; and &lt;code&gt;loan&lt;/code&gt; are unknown for the same 990 clients.&lt;/li&gt;
+&lt;li&gt;12 rows are exact copies of other rows. The data has no client ID, so we cannot tell whether these are the same call recorded twice or different clients with the same details. They are too few to matter, and we remove them when we prepare the data.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;default&lt;/code&gt; has only 3 clients with &lt;em&gt;yes&lt;/em&gt;. So the feature really tells us whether the client’s answer was &lt;em&gt;no&lt;/em&gt; or &lt;em&gt;unknown&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;The description says that a &lt;code&gt;pdays&lt;/code&gt; of 999 means the client was not called before. But 5,625 clients were called in a previous campaign (&lt;code&gt;previous&lt;/code&gt; is more than 0), and only 1,515 of them have a &lt;code&gt;pdays&lt;/code&gt; value. Of those, 1373 had a successful previous campaign. So &lt;code&gt;pdays&lt;/code&gt; is mostly recorded for clients who said yes before.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-target-who-subscribed&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The Target: Who Subscribed?&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTarget &amp;lt;- dfRaw %&amp;gt;% count(y) %&amp;gt;% mutate(percent = 100 * n / sum(n))
+rate_yes &amp;lt;- mean(dfRaw$y == &amp;quot;yes&amp;quot;)
+
+ggplot(dfTarget, aes(x = y, y = n, fill = y)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = glue::glue(&amp;quot;{format(n, big.mark = &amp;#39;,&amp;#39;)} ({round(percent, 1)}%)&amp;quot;)), vjust = -0.5, family = &amp;quot;Roboto Condensed&amp;quot;) +
+  scale_fill_quant(palette = &amp;quot;main&amp;quot;) +
+  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.1))) +
+  labs(x = &amp;quot;Subscribed to a term deposit (y)&amp;quot;, y = &amp;quot;Number of calls&amp;quot;, title = &amp;quot;Most clients said no&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/target-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Only 11.3% of the calls ended with a subscription. The two classes are very unequal in size (imbalanced).&lt;/li&gt;
+&lt;li&gt;So a model that always predicts &lt;em&gt;no&lt;/em&gt; would be right 88.7% of the time, but it would be useless. In Part 2, we use measures that are not fooled by this.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the rest of this post, we compare the subscription rate, the percentage of calls that ended with a &lt;em&gt;yes&lt;/em&gt;, across the values of each feature. The dashed line in the plots is the overall rate of 11.3%. These functions make the plots:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# subscription rate and number of calls for each category of a feature
+plot_rate &amp;lt;- function(df, feature, sortByRate = TRUE, minCount = 30) {
+  dfRate &amp;lt;- df %&amp;gt;%
+    group_by(category = .data[[feature]]) %&amp;gt;%
+    summarise(calls = n(), rate = mean(y == &amp;quot;yes&amp;quot;), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
+    filter(calls &amp;gt;= minCount)
+  if (sortByRate) dfRate &amp;lt;- dfRate %&amp;gt;% mutate(category = fct_reorder(as.factor(category), rate))
+  ggplot(dfRate, aes(x = category, y = rate)) +
+    geom_col(fill = &amp;quot;#00AED8&amp;quot;) +
+    geom_hline(yintercept = mean(df$y == &amp;quot;yes&amp;quot;), lty = 2) +
+    geom_text(aes(label = scales::label_comma()(calls)), hjust = -0.1, size = 3, family = &amp;quot;Roboto Condensed&amp;quot;) +
+    scale_y_continuous(labels = scales::label_percent(), expand = expansion(mult = c(0, 0.25))) +
+    coord_flip() +
+    labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = feature)
+}
+
+# subscription rate for bins of a numerical feature
+plot_rate_bins &amp;lt;- function(df, feature, breaks, labels = NULL) {
+  df %&amp;gt;%
+    mutate(bin = cut(.data[[feature]], breaks = breaks, labels = labels, include.lowest = TRUE, dig.lab = 5)) %&amp;gt;%
+    plot_rate(&amp;quot;bin&amp;quot;, sortByRate = FALSE) +
+    labs(title = feature)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The numbers next to the bars are the numbers of calls. Categories with fewer than 30 calls are not shown, because their rates are not reliable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;a-feature-we-cannot-use-call-duration&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;A Feature We Cannot Use: Call Duration&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_rate_bins(dfRaw, &amp;quot;duration&amp;quot;, breaks = c(0, 60, 120, 180, 300, 600, 5000)) +
+  labs(x = &amp;quot;Length of the call (seconds)&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/duration-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;duration&lt;/code&gt; predicts the result very well: almost no client who talked for less than a minute subscribed, and about half of the clients who talked for more than 10 minutes did.&lt;/li&gt;
+&lt;li&gt;But we only know the length of a call after the call has ended, and by then we also know whether the client said yes. A bank cannot use it to decide whom to call. Using a feature that would not be known at the time of the prediction is called data leakage. It makes a model look much better than it will be in practice.&lt;/li&gt;
+&lt;li&gt;The authors of the dataset give the same warning. So we drop &lt;code&gt;duration&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
+&lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesNumRaw &amp;lt;- c(&amp;quot;age&amp;quot;, &amp;quot;campaign&amp;quot;, &amp;quot;previous&amp;quot;, &amp;quot;emp.var.rate&amp;quot;, &amp;quot;cons.price.idx&amp;quot;, &amp;quot;cons.conf.idx&amp;quot;, &amp;quot;euribor3m&amp;quot;, &amp;quot;nr.employed&amp;quot;)
+eda_plot_histograms(dfRaw, vFeaturesNumRaw, nCols = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most clients are between 30 and 50 years old.&lt;/li&gt;
+&lt;li&gt;Most clients were called once or twice in the campaign, but some were called up to 56 times. &lt;code&gt;campaign&lt;/code&gt; is very skewed.&lt;/li&gt;
+&lt;li&gt;Most clients (86%) were never called in a previous campaign.&lt;/li&gt;
+&lt;li&gt;The economic features have only a few distinct values, with gaps between them. For example, &lt;code&gt;nr.employed&lt;/code&gt; has only 11 values, because it changes once a quarter. So these features also tell us &lt;em&gt;when&lt;/em&gt; a call was made.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesCatRaw &amp;lt;- c(&amp;quot;job&amp;quot;, &amp;quot;marital&amp;quot;, &amp;quot;education&amp;quot;, &amp;quot;default&amp;quot;, &amp;quot;housing&amp;quot;, &amp;quot;loan&amp;quot;, &amp;quot;contact&amp;quot;, &amp;quot;month&amp;quot;, &amp;quot;day_of_week&amp;quot;, &amp;quot;poutcome&amp;quot;)
+cowplot::plot_grid(plotlist = map(vFeaturesCatRaw, ~ eda_plot_column(dfRaw, .x)), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most clients work in administration, blue-collar jobs or as technicians.&lt;/li&gt;
+&lt;li&gt;Most calls were made in May, and the fewest in December and March. There are no calls in January and February.&lt;/li&gt;
+&lt;li&gt;About two thirds of the calls were to cell phones.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bivariate-analysis-each-feature-and-the-subscription-rate&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis: Each Feature and the Subscription Rate&lt;/h2&gt;
+&lt;div id=&#34;client-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Client Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;age&amp;quot;, breaks = c(17, 25, 30, 40, 50, 60, 100))
+p2 &amp;lt;- plot_rate(dfRaw, &amp;quot;job&amp;quot;)
+p3 &amp;lt;- plot_rate(dfRaw, &amp;quot;marital&amp;quot;)
+p4 &amp;lt;- plot_rate(dfRaw, &amp;quot;education&amp;quot;)
+p5 &amp;lt;- plot_rate(dfRaw, &amp;quot;default&amp;quot;)
+p6 &amp;lt;- plot_rate(dfRaw, &amp;quot;housing&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_client-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The youngest and the oldest clients are the most likely to subscribe: students and retired people subscribe at more than twice the overall rate. Blue-collar workers subscribe the least.&lt;/li&gt;
+&lt;li&gt;Clients with a university degree subscribe more often than clients with a basic education.&lt;/li&gt;
+&lt;li&gt;Clients whose &lt;code&gt;default&lt;/code&gt; status is unknown subscribe much less often than clients who said they have no loan in default.&lt;/li&gt;
+&lt;li&gt;Having a housing loan (and, not shown, a personal loan) makes almost no difference.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;campaign-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Campaign Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfMonthOrder &amp;lt;- dfRaw %&amp;gt;% mutate(month = factor(month, levels = c(&amp;quot;mar&amp;quot;,&amp;quot;apr&amp;quot;,&amp;quot;may&amp;quot;,&amp;quot;jun&amp;quot;,&amp;quot;jul&amp;quot;,&amp;quot;aug&amp;quot;,&amp;quot;sep&amp;quot;,&amp;quot;oct&amp;quot;,&amp;quot;nov&amp;quot;,&amp;quot;dec&amp;quot;)),
+                                 day_of_week = factor(day_of_week, levels = c(&amp;quot;mon&amp;quot;,&amp;quot;tue&amp;quot;,&amp;quot;wed&amp;quot;,&amp;quot;thu&amp;quot;,&amp;quot;fri&amp;quot;)))
+p1 &amp;lt;- plot_rate(dfRaw, &amp;quot;contact&amp;quot;)
+p2 &amp;lt;- plot_rate(dfMonthOrder, &amp;quot;month&amp;quot;, sortByRate = FALSE)
+p3 &amp;lt;- plot_rate(dfMonthOrder, &amp;quot;day_of_week&amp;quot;, sortByRate = FALSE)
+p4 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;campaign&amp;quot;, breaks = c(1, 1.5, 2.5, 3.5, 5.5, 10.5, 60), labels = c(&amp;quot;1&amp;quot;, &amp;quot;2&amp;quot;, &amp;quot;3&amp;quot;, &amp;quot;4-5&amp;quot;, &amp;quot;6-10&amp;quot;, &amp;quot;11+&amp;quot;)) +
+  labs(title = &amp;quot;campaign (calls in this campaign)&amp;quot;)
+p5 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;previous&amp;quot;, breaks = c(0, 0.5, 1.5, 2.5, 10), labels = c(&amp;quot;0&amp;quot;, &amp;quot;1&amp;quot;, &amp;quot;2&amp;quot;, &amp;quot;3+&amp;quot;)) +
+  labs(title = &amp;quot;previous (calls before this campaign)&amp;quot;)
+p6 &amp;lt;- plot_rate(dfRaw, &amp;quot;poutcome&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_campaign-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Clients called on a cell phone subscribe almost three times as often as clients called on a landline.&lt;/li&gt;
+&lt;li&gt;The months with the fewest calls (March, September, October and December) have the highest rates, close to 50%. May, the busiest month, has the lowest rate. We look at this again in the next section.&lt;/li&gt;
+&lt;li&gt;The day of the week makes little difference.&lt;/li&gt;
+&lt;li&gt;Each extra call in the same campaign makes a &lt;em&gt;yes&lt;/em&gt; less likely. Only 3% of the clients who were called more than 10 times subscribed.&lt;/li&gt;
+&lt;li&gt;The more often a client was called in previous campaigns, the more likely a &lt;em&gt;yes&lt;/em&gt;: these clients already know the bank.&lt;/li&gt;
+&lt;li&gt;The result of the previous campaign is the strongest client-level signal: 65% of the clients who said yes before said yes again.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-economy-and-the-time-of-the-call&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;The Economy and the Time of the Call&lt;/h3&gt;
+&lt;p&gt;The rows are in the order of the calls. So we can follow the subscription rate over time. Here, we split the calls into blocks of 1,000 consecutive calls:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTime &amp;lt;- dfRaw %&amp;gt;%
+  mutate(call_order = row_number(), block = (call_order - 1) %/% 1000 + 1) %&amp;gt;%
+  group_by(block) %&amp;gt;%
+  summarise(first_call = min(call_order), rate = mean(y == &amp;quot;yes&amp;quot;), euribor3m = mean(euribor3m), nr.employed = mean(nr.employed))
+
+p1 &amp;lt;- ggplot(dfTime, aes(x = first_call, y = rate)) +
+  geom_line(color = &amp;quot;#00AED8&amp;quot;) + geom_point(color = &amp;quot;#00AED8&amp;quot;) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = &amp;quot;Subscription rate in each block of 1,000 calls&amp;quot;)
+p2 &amp;lt;- ggplot(dfTime, aes(x = first_call, y = euribor3m)) +
+  geom_line(color = &amp;quot;#F37735&amp;quot;) + geom_point(color = &amp;quot;#F37735&amp;quot;) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = &amp;quot;Call number (in order of time)&amp;quot;, y = &amp;quot;3 month Euribor (%)&amp;quot;, title = &amp;quot;Interest rate at the time of the calls&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &amp;quot;v&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/time_trend-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_correlation_matrix(dfRaw %&amp;gt;% select(emp.var.rate, cons.price.idx, cons.conf.idx, euribor3m, nr.employed),
+                            plotTitle = &amp;quot;Correlation of the economic features&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/economic_correlations-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In the first 23,000 or so calls, fewer than 1 in 10 calls ended with a &lt;em&gt;yes&lt;/em&gt;. After the interest rate fell in late 2008 and 2009, the rate rose, and in the last blocks about half of the calls were successful. Fewer calls were made in that period, which explains why the quiet months had the highest rates.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;euribor3m&lt;/code&gt;, &lt;code&gt;emp.var.rate&lt;/code&gt; and &lt;code&gt;nr.employed&lt;/code&gt; move together (their correlations are above 0.9). They describe the same economic cycle.&lt;/li&gt;
+&lt;li&gt;So the economic features are strong predictors, but much of their power comes from telling the model &lt;em&gt;when&lt;/em&gt; the call was made. A model can learn that calls in a certain period were successful. That is useful when we predict calls from the same period, but the economy of the next campaign will be different. In Part 2, we test the models on calls from the same period, and then on later calls.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;associations-between-features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Associations Between Features&lt;/h2&gt;
+&lt;p&gt;Correlation only works for numerical features. To compare all the features at once, including the categorical ones and the target, we use an association matrix. It uses Cramér’s V for pairs of categorical features: 0 means no association and 1 means that one feature completely determines the other.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfAssoc &amp;lt;- dfRaw %&amp;gt;%
+  select(-duration) %&amp;gt;%
+  mutate(across(where(is.character), as.factor))
+eda_plot_association_matrix(dfAssoc, outlineVar = &amp;quot;y&amp;quot;, plotTitle = &amp;quot;Association of features with each other and with y&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The target &lt;code&gt;y&lt;/code&gt; is most strongly associated with the economic features (about 0.3), with &lt;code&gt;poutcome&lt;/code&gt;, &lt;code&gt;pdays&lt;/code&gt; and &lt;code&gt;previous&lt;/code&gt; (the history of previous campaigns), and with &lt;code&gt;month&lt;/code&gt;. &lt;code&gt;job&lt;/code&gt; and &lt;code&gt;contact&lt;/code&gt; follow, with about 0.15.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pdays&lt;/code&gt;, &lt;code&gt;previous&lt;/code&gt; and &lt;code&gt;poutcome&lt;/code&gt; are strongly associated with each other, because they all describe the previous campaign.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;month&lt;/code&gt;, &lt;code&gt;contact&lt;/code&gt; and the economic features are strongly associated with each other, because they all depend on when the call was made.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;age&lt;/code&gt; is associated with &lt;code&gt;job&lt;/code&gt; and &lt;code&gt;marital&lt;/code&gt;: students are young, and retired people are old.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;housing&lt;/code&gt; and &lt;code&gt;loan&lt;/code&gt; are almost unrelated to &lt;code&gt;y&lt;/code&gt;. They are associated with each other only because their &lt;em&gt;unknown&lt;/em&gt; values are the same clients.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;preparing-the-data-for-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Preparing the Data for Models&lt;/h2&gt;
+&lt;p&gt;Based on what we have found, we make these changes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Remove the 12 duplicate rows.&lt;/li&gt;
+&lt;li&gt;Drop &lt;code&gt;duration&lt;/code&gt;, which is not known before a call (data leakage).&lt;/li&gt;
+&lt;li&gt;Replace &lt;code&gt;pdays&lt;/code&gt; with a yes/no feature, &lt;code&gt;recent_contact&lt;/code&gt;, that says whether &lt;code&gt;pdays&lt;/code&gt; was recorded. Its exact value adds little, because it is recorded almost only for clients with a successful previous campaign, and the value 999 would mislead a linear model.&lt;/li&gt;
+&lt;li&gt;Change the 3 &lt;em&gt;yes&lt;/em&gt; answers in &lt;code&gt;default&lt;/code&gt; to &lt;em&gt;unknown&lt;/em&gt;, so that the feature compares clients who said &lt;em&gt;no&lt;/em&gt; with all the others. Three examples are too few for a model to learn from.&lt;/li&gt;
+&lt;li&gt;Keep &lt;em&gt;unknown&lt;/em&gt; as a category in the other features, because it is informative: for example, clients whose education is unknown subscribe more often than average.&lt;/li&gt;
+&lt;li&gt;Put the months and the days of the week in calendar order.&lt;/li&gt;
+&lt;li&gt;Add an &lt;code&gt;Id&lt;/code&gt; that keeps the order of the calls, so that in Part 2 we can test the models on later calls. The models do not use it as a feature.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Then we set aside 25% of the calls as a testing set, which the models will not see while they learn. We use stratified sampling, so that the testing set has the same subscription rate as the training set.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfRaw %&amp;gt;%
+  mutate(Id = row_number()) %&amp;gt;%
+  filter(!duplicated(pick(-Id))) %&amp;gt;%
+  select(-duration) %&amp;gt;%
+  mutate(recent_contact = if_else(pdays != 999, &amp;quot;yes&amp;quot;, &amp;quot;no&amp;quot;),
+         default = if_else(default == &amp;quot;yes&amp;quot;, &amp;quot;unknown&amp;quot;, default),
+         month = factor(month, levels = c(&amp;quot;mar&amp;quot;,&amp;quot;apr&amp;quot;,&amp;quot;may&amp;quot;,&amp;quot;jun&amp;quot;,&amp;quot;jul&amp;quot;,&amp;quot;aug&amp;quot;,&amp;quot;sep&amp;quot;,&amp;quot;oct&amp;quot;,&amp;quot;nov&amp;quot;,&amp;quot;dec&amp;quot;)),
+         day_of_week = factor(day_of_week, levels = c(&amp;quot;mon&amp;quot;,&amp;quot;tue&amp;quot;,&amp;quot;wed&amp;quot;,&amp;quot;thu&amp;quot;,&amp;quot;fri&amp;quot;)),
+         y = factor(y, levels = c(&amp;quot;yes&amp;quot;, &amp;quot;no&amp;quot;))) %&amp;gt;%
+  select(-pdays) %&amp;gt;%
+  mutate(across(where(is.character), as.factor)) %&amp;gt;%
+  select(Id, y, everything())
+
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(-Id, -y) %&amp;gt;% select(where(is.numeric)) %&amp;gt;% colnames()
+vFeaturesCat &amp;lt;- dfClean %&amp;gt;% select(-Id, -y) %&amp;gt;% select(where(is.factor)) %&amp;gt;% colnames()
+
+# stratified split into training (75%) and testing (25%) sets
+set.seed(2300)
+data_split &amp;lt;- initial_split(dfClean, prop = 0.75, strata = y)
+vTestIDs &amp;lt;- testing(data_split)$Id
+
+dfSplit &amp;lt;- dfClean %&amp;gt;%
+  mutate(set = if_else(Id %in% vTestIDs, &amp;quot;testing&amp;quot;, &amp;quot;training&amp;quot;)) %&amp;gt;%
+  group_by(set) %&amp;gt;%
+  summarise(calls = n(), subscribed = sum(y == &amp;quot;yes&amp;quot;), rate = round(100 * mean(y == &amp;quot;yes&amp;quot;), 2))
+knitr::kable(dfSplit, col.names = c(&amp;quot;Set&amp;quot;, &amp;quot;Calls&amp;quot;, &amp;quot;Subscribed&amp;quot;, &amp;quot;Subscription rate (%)&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Set&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Subscribed&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Subscription rate (%)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;testing&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10295&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1160&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11.27&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;training&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;30881&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3479&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11.27&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, file = &amp;quot;Bank_Marketing_Clean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The finalized dataset has 41,176 calls and 19 features: 8 numerical and 11 categorical.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;We have learned that:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The history of a client with the bank (&lt;code&gt;poutcome&lt;/code&gt;, &lt;code&gt;previous&lt;/code&gt;) and the type of phone are strong signals.&lt;/li&gt;
+&lt;li&gt;The economy and the time of the call matter a lot, so we must be careful about how we test the models.&lt;/li&gt;
+&lt;li&gt;Age and job matter, but less.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;duration&lt;/code&gt; must not be used, even though it looks like the best predictor.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we use this dataset to build models that predict which clients will subscribe.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Ames Housing - Part 3 - Closing the deal - Building Models</title>
@@ -3663,7 +5170,7 @@ vCooks &amp;lt;- cooks.distance(fit_lm[[1]])&lt;/code&gt;&lt;/pre&gt;
   rename(price = actual) %&amp;gt;%
   eda_plot_predicted_vs_actual(&amp;quot;price&amp;quot;, &amp;quot;estimate&amp;quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
-  labs(title = bquote(log(price) == log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
+  labs(title = bquote(log(price) ~ log(carat) + clarity + color))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The points are close to the 45-degree line. But at the high end, the differences between the actual and predicted prices become larger.
 The predictions of the final model are also much less extreme. The most expensive diamond in the testing set costs &lt;code&gt;$18,804&lt;/code&gt;. The highest predicted price is &lt;code&gt;$28,130&lt;/code&gt;. But the cube root model predicts prices as high as &lt;code&gt;$59,082&lt;/code&gt; for the same testing set. Like all linear models, the final model can still predict prices above the highest prices in the data (this is called extrapolation).&lt;/p&gt;

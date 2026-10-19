@@ -5,12 +5,523 @@
     <link>https://www.nitingupta.com/tags/eda/</link>
       <atom:link href="https://www.nitingupta.com/tags/eda/index.xml" rel="self" type="application/rss+xml" />
     <description>Eda</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Mon, 26 Dec 2016 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sat, 17 Oct 2026 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Eda</title>
       <link>https://www.nitingupta.com/tags/eda/</link>
     </image>
+    
+    <item>
+      <title>Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</title>
+      <link>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</link>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</guid>
+      <description>
+
+
+&lt;div id=&#34;other-posts-in-this-series&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Other posts in this series:&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Bank Marketing - Part 2 - Who will say yes? - Building Classification Models&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt; (&lt;a href=&#34;http://dx.doi.org/10.1016/j.dss.2014.03.001&#34;&gt;Moro, Cortez and Rita, 2014&lt;/a&gt;) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.&lt;/p&gt;
+&lt;p&gt;In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;? This kind of problem is called classification. The case study has two posts:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.&lt;/li&gt;
+&lt;li&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-description&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Description&lt;/h2&gt;
+&lt;p&gt;Each row is one call, which was the last call to a client in a campaign. The rows are in the order of the calls, from May 2008 to November 2010. There are 20 features and the target, &lt;code&gt;y&lt;/code&gt;, which is the value that we want to predict:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfDescription &amp;lt;- tribble(~ Feature, ~ Type, ~ Description,
+                         &amp;quot;age&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;age of the client&amp;quot;,
+                         &amp;quot;job&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;type of job&amp;quot;,
+                         &amp;quot;marital&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;marital status (*divorced* also means widowed)&amp;quot;,
+                         &amp;quot;education&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;highest level of education&amp;quot;,
+                         &amp;quot;default&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a loan in default?&amp;quot;,
+                         &amp;quot;housing&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a housing loan?&amp;quot;,
+                         &amp;quot;loan&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;does the client have a personal loan?&amp;quot;,
+                         &amp;quot;contact&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;type of phone: cellular or telephone (landline)&amp;quot;,
+                         &amp;quot;month&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;month of the call&amp;quot;,
+                         &amp;quot;day_of_week&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;day of the week of the call&amp;quot;,
+                         &amp;quot;duration&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;length of the call, in seconds&amp;quot;,
+                         &amp;quot;campaign&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of calls to the client in this campaign, including this one&amp;quot;,
+                         &amp;quot;pdays&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;days since the client was last called in a previous campaign (999: not called)&amp;quot;,
+                         &amp;quot;previous&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of calls to the client before this campaign&amp;quot;,
+                         &amp;quot;poutcome&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;result of the previous campaign&amp;quot;,
+                         &amp;quot;emp.var.rate&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;employment variation rate (quarterly)&amp;quot;,
+                         &amp;quot;cons.price.idx&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;consumer price index (monthly)&amp;quot;,
+                         &amp;quot;cons.conf.idx&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;consumer confidence index (monthly)&amp;quot;,
+                         &amp;quot;euribor3m&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;3 month Euribor interest rate (daily)&amp;quot;,
+                         &amp;quot;nr.employed&amp;quot;, &amp;quot;numerical&amp;quot;, &amp;quot;number of employees in the economy, in thousands (quarterly)&amp;quot;,
+                         &amp;quot;y&amp;quot;, &amp;quot;categorical&amp;quot;, &amp;quot;**target**: did the client subscribe to a term deposit?&amp;quot;)
+
+knitr::kable(dfDescription)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;colgroup&gt;
+&lt;col width=&#34;14%&#34; /&gt;
+&lt;col width=&#34;11%&#34; /&gt;
+&lt;col width=&#34;74%&#34; /&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Feature&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;age&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;age of the client&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;job&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;type of job&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;marital&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;marital status (&lt;em&gt;divorced&lt;/em&gt; also means widowed)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;education&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;highest level of education&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;default&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a loan in default?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;housing&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a housing loan?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;loan&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;does the client have a personal loan?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;contact&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;type of phone: cellular or telephone (landline)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;month&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;month of the call&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;day_of_week&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;day of the week of the call&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;duration&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;length of the call, in seconds&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;campaign&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of calls to the client in this campaign, including this one&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;pdays&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;days since the client was last called in a previous campaign (999: not called)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;previous&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of calls to the client before this campaign&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;poutcome&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;result of the previous campaign&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;emp.var.rate&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;employment variation rate (quarterly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;cons.price.idx&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;consumer price index (monthly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;cons.conf.idx&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;consumer confidence index (monthly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;euribor3m&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3 month Euribor interest rate (daily)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;nr.employed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;numerical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number of employees in the economy, in thousands (quarterly)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;y&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;categorical&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;target&lt;/strong&gt;: did the client subscribe to a term deposit?&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The last five features describe the economy of Portugal at the time of the call. They are the same for all the clients who were called on the same day.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data-quality&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Data Quality&lt;/h2&gt;
+&lt;p&gt;Before we explore the features, we check the data for problems.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# exact duplicate rows
+nDuplicates &amp;lt;- sum(duplicated(dfRaw))
+
+# number of &amp;quot;unknown&amp;quot; values in each categorical feature
+dfUnknown &amp;lt;- dfRaw %&amp;gt;%
+  select(where(is.character)) %&amp;gt;%
+  summarise(across(everything(), ~ sum(.x == &amp;quot;unknown&amp;quot;))) %&amp;gt;%
+  pivot_longer(everything(), names_to = &amp;quot;feature&amp;quot;, values_to = &amp;quot;unknown&amp;quot;) %&amp;gt;%
+  filter(unknown &amp;gt; 0) %&amp;gt;%
+  mutate(percent = round(100 * unknown / nrow(dfRaw), 1)) %&amp;gt;%
+  arrange(desc(unknown))
+
+knitr::kable(dfUnknown, col.names = c(&amp;quot;Feature&amp;quot;, &amp;quot;Unknown values&amp;quot;, &amp;quot;% of calls&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Feature&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Unknown values&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;% of calls&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;default&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;8597&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;20.9&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;education&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1731&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;housing&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;990&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;loan&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;990&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;job&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;330&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;marital&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;80&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# clients called in a previous campaign, by whether pdays is recorded
+dfPrevious &amp;lt;- dfRaw %&amp;gt;%
+  filter(previous &amp;gt; 0) %&amp;gt;%
+  count(pdays_recorded = pdays != 999, poutcome)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;whats-notable&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;There are no empty (missing) values. Instead, the categorical features use the category &lt;em&gt;unknown&lt;/em&gt;. &lt;code&gt;default&lt;/code&gt; is unknown for 20.9% of the clients. &lt;code&gt;housing&lt;/code&gt; and &lt;code&gt;loan&lt;/code&gt; are unknown for the same 990 clients.&lt;/li&gt;
+&lt;li&gt;12 rows are exact copies of other rows. The data has no client ID, so we cannot tell whether these are the same call recorded twice or different clients with the same details. They are too few to matter, and we remove them when we prepare the data.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;default&lt;/code&gt; has only 3 clients with &lt;em&gt;yes&lt;/em&gt;. So the feature really tells us whether the client’s answer was &lt;em&gt;no&lt;/em&gt; or &lt;em&gt;unknown&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;The description says that a &lt;code&gt;pdays&lt;/code&gt; of 999 means the client was not called before. But 5,625 clients were called in a previous campaign (&lt;code&gt;previous&lt;/code&gt; is more than 0), and only 1,515 of them have a &lt;code&gt;pdays&lt;/code&gt; value. Of those, 1373 had a successful previous campaign. So &lt;code&gt;pdays&lt;/code&gt; is mostly recorded for clients who said yes before.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-target-who-subscribed&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;The Target: Who Subscribed?&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTarget &amp;lt;- dfRaw %&amp;gt;% count(y) %&amp;gt;% mutate(percent = 100 * n / sum(n))
+rate_yes &amp;lt;- mean(dfRaw$y == &amp;quot;yes&amp;quot;)
+
+ggplot(dfTarget, aes(x = y, y = n, fill = y)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = glue::glue(&amp;quot;{format(n, big.mark = &amp;#39;,&amp;#39;)} ({round(percent, 1)}%)&amp;quot;)), vjust = -0.5, family = &amp;quot;Roboto Condensed&amp;quot;) +
+  scale_fill_quant(palette = &amp;quot;main&amp;quot;) +
+  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.1))) +
+  labs(x = &amp;quot;Subscribed to a term deposit (y)&amp;quot;, y = &amp;quot;Number of calls&amp;quot;, title = &amp;quot;Most clients said no&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/target-1.png&#34; alt=&#34;&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Only 11.3% of the calls ended with a subscription. The two classes are very unequal in size (imbalanced).&lt;/li&gt;
+&lt;li&gt;So a model that always predicts &lt;em&gt;no&lt;/em&gt; would be right 88.7% of the time, but it would be useless. In Part 2, we use measures that are not fooled by this.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the rest of this post, we compare the subscription rate, the percentage of calls that ended with a &lt;em&gt;yes&lt;/em&gt;, across the values of each feature. The dashed line in the plots is the overall rate of 11.3%. These functions make the plots:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# subscription rate and number of calls for each category of a feature
+plot_rate &amp;lt;- function(df, feature, sortByRate = TRUE, minCount = 30) {
+  dfRate &amp;lt;- df %&amp;gt;%
+    group_by(category = .data[[feature]]) %&amp;gt;%
+    summarise(calls = n(), rate = mean(y == &amp;quot;yes&amp;quot;), .groups = &amp;quot;drop&amp;quot;) %&amp;gt;%
+    filter(calls &amp;gt;= minCount)
+  if (sortByRate) dfRate &amp;lt;- dfRate %&amp;gt;% mutate(category = fct_reorder(as.factor(category), rate))
+  ggplot(dfRate, aes(x = category, y = rate)) +
+    geom_col(fill = &amp;quot;#00AED8&amp;quot;) +
+    geom_hline(yintercept = mean(df$y == &amp;quot;yes&amp;quot;), lty = 2) +
+    geom_text(aes(label = scales::label_comma()(calls)), hjust = -0.1, size = 3, family = &amp;quot;Roboto Condensed&amp;quot;) +
+    scale_y_continuous(labels = scales::label_percent(), expand = expansion(mult = c(0, 0.25))) +
+    coord_flip() +
+    labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = feature)
+}
+
+# subscription rate for bins of a numerical feature
+plot_rate_bins &amp;lt;- function(df, feature, breaks, labels = NULL) {
+  df %&amp;gt;%
+    mutate(bin = cut(.data[[feature]], breaks = breaks, labels = labels, include.lowest = TRUE, dig.lab = 5)) %&amp;gt;%
+    plot_rate(&amp;quot;bin&amp;quot;, sortByRate = FALSE) +
+    labs(title = feature)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The numbers next to the bars are the numbers of calls. Categories with fewer than 30 calls are not shown, because their rates are not reliable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;a-feature-we-cannot-use-call-duration&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;A Feature We Cannot Use: Call Duration&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_rate_bins(dfRaw, &amp;quot;duration&amp;quot;, breaks = c(0, 60, 120, 180, 300, 600, 5000)) +
+  labs(x = &amp;quot;Length of the call (seconds)&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/duration-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;duration&lt;/code&gt; predicts the result very well: almost no client who talked for less than a minute subscribed, and about half of the clients who talked for more than 10 minutes did.&lt;/li&gt;
+&lt;li&gt;But we only know the length of a call after the call has ended, and by then we also know whether the client said yes. A bank cannot use it to decide whom to call. Using a feature that would not be known at the time of the prediction is called data leakage. It makes a model look much better than it will be in practice.&lt;/li&gt;
+&lt;li&gt;The authors of the dataset give the same warning. So we drop &lt;code&gt;duration&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;univariate-analysis-one-feature-at-a-time&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Univariate Analysis: One Feature at a Time&lt;/h2&gt;
+&lt;div id=&#34;numerical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Numerical Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesNumRaw &amp;lt;- c(&amp;quot;age&amp;quot;, &amp;quot;campaign&amp;quot;, &amp;quot;previous&amp;quot;, &amp;quot;emp.var.rate&amp;quot;, &amp;quot;cons.price.idx&amp;quot;, &amp;quot;cons.conf.idx&amp;quot;, &amp;quot;euribor3m&amp;quot;, &amp;quot;nr.employed&amp;quot;)
+eda_plot_histograms(dfRaw, vFeaturesNumRaw, nCols = 4)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_num-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most clients are between 30 and 50 years old.&lt;/li&gt;
+&lt;li&gt;Most clients were called once or twice in the campaign, but some were called up to 56 times. &lt;code&gt;campaign&lt;/code&gt; is very skewed.&lt;/li&gt;
+&lt;li&gt;Most clients (86%) were never called in a previous campaign.&lt;/li&gt;
+&lt;li&gt;The economic features have only a few distinct values, with gaps between them. For example, &lt;code&gt;nr.employed&lt;/code&gt; has only 11 values, because it changes once a quarter. So these features also tell us &lt;em&gt;when&lt;/em&gt; a call was made.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;categorical-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Categorical Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;vFeaturesCatRaw &amp;lt;- c(&amp;quot;job&amp;quot;, &amp;quot;marital&amp;quot;, &amp;quot;education&amp;quot;, &amp;quot;default&amp;quot;, &amp;quot;housing&amp;quot;, &amp;quot;loan&amp;quot;, &amp;quot;contact&amp;quot;, &amp;quot;month&amp;quot;, &amp;quot;day_of_week&amp;quot;, &amp;quot;poutcome&amp;quot;)
+cowplot::plot_grid(plotlist = map(vFeaturesCatRaw, ~ eda_plot_column(dfRaw, .x)), ncol = 3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_cat-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-4&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Most clients work in administration, blue-collar jobs or as technicians.&lt;/li&gt;
+&lt;li&gt;Most calls were made in May, and the fewest in December and March. There are no calls in January and February.&lt;/li&gt;
+&lt;li&gt;About two thirds of the calls were to cell phones.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bivariate-analysis-each-feature-and-the-subscription-rate&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Bivariate Analysis: Each Feature and the Subscription Rate&lt;/h2&gt;
+&lt;div id=&#34;client-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Client Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;age&amp;quot;, breaks = c(17, 25, 30, 40, 50, 60, 100))
+p2 &amp;lt;- plot_rate(dfRaw, &amp;quot;job&amp;quot;)
+p3 &amp;lt;- plot_rate(dfRaw, &amp;quot;marital&amp;quot;)
+p4 &amp;lt;- plot_rate(dfRaw, &amp;quot;education&amp;quot;)
+p5 &amp;lt;- plot_rate(dfRaw, &amp;quot;default&amp;quot;)
+p6 &amp;lt;- plot_rate(dfRaw, &amp;quot;housing&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_client-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-5&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The youngest and the oldest clients are the most likely to subscribe: students and retired people subscribe at more than twice the overall rate. Blue-collar workers subscribe the least.&lt;/li&gt;
+&lt;li&gt;Clients with a university degree subscribe more often than clients with a basic education.&lt;/li&gt;
+&lt;li&gt;Clients whose &lt;code&gt;default&lt;/code&gt; status is unknown subscribe much less often than clients who said they have no loan in default.&lt;/li&gt;
+&lt;li&gt;Having a housing loan (and, not shown, a personal loan) makes almost no difference.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;campaign-features&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Campaign Features&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfMonthOrder &amp;lt;- dfRaw %&amp;gt;% mutate(month = factor(month, levels = c(&amp;quot;mar&amp;quot;,&amp;quot;apr&amp;quot;,&amp;quot;may&amp;quot;,&amp;quot;jun&amp;quot;,&amp;quot;jul&amp;quot;,&amp;quot;aug&amp;quot;,&amp;quot;sep&amp;quot;,&amp;quot;oct&amp;quot;,&amp;quot;nov&amp;quot;,&amp;quot;dec&amp;quot;)),
+                                 day_of_week = factor(day_of_week, levels = c(&amp;quot;mon&amp;quot;,&amp;quot;tue&amp;quot;,&amp;quot;wed&amp;quot;,&amp;quot;thu&amp;quot;,&amp;quot;fri&amp;quot;)))
+p1 &amp;lt;- plot_rate(dfRaw, &amp;quot;contact&amp;quot;)
+p2 &amp;lt;- plot_rate(dfMonthOrder, &amp;quot;month&amp;quot;, sortByRate = FALSE)
+p3 &amp;lt;- plot_rate(dfMonthOrder, &amp;quot;day_of_week&amp;quot;, sortByRate = FALSE)
+p4 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;campaign&amp;quot;, breaks = c(1, 1.5, 2.5, 3.5, 5.5, 10.5, 60), labels = c(&amp;quot;1&amp;quot;, &amp;quot;2&amp;quot;, &amp;quot;3&amp;quot;, &amp;quot;4-5&amp;quot;, &amp;quot;6-10&amp;quot;, &amp;quot;11+&amp;quot;)) +
+  labs(title = &amp;quot;campaign (calls in this campaign)&amp;quot;)
+p5 &amp;lt;- plot_rate_bins(dfRaw, &amp;quot;previous&amp;quot;, breaks = c(0, 0.5, 1.5, 2.5, 10), labels = c(&amp;quot;0&amp;quot;, &amp;quot;1&amp;quot;, &amp;quot;2&amp;quot;, &amp;quot;3+&amp;quot;)) +
+  labs(title = &amp;quot;previous (calls before this campaign)&amp;quot;)
+p6 &amp;lt;- plot_rate(dfRaw, &amp;quot;poutcome&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_campaign-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-6&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Clients called on a cell phone subscribe almost three times as often as clients called on a landline.&lt;/li&gt;
+&lt;li&gt;The months with the fewest calls (March, September, October and December) have the highest rates, close to 50%. May, the busiest month, has the lowest rate. We look at this again in the next section.&lt;/li&gt;
+&lt;li&gt;The day of the week makes little difference.&lt;/li&gt;
+&lt;li&gt;Each extra call in the same campaign makes a &lt;em&gt;yes&lt;/em&gt; less likely. Only 3% of the clients who were called more than 10 times subscribed.&lt;/li&gt;
+&lt;li&gt;The more often a client was called in previous campaigns, the more likely a &lt;em&gt;yes&lt;/em&gt;: these clients already know the bank.&lt;/li&gt;
+&lt;li&gt;The result of the previous campaign is the strongest client-level signal: 65% of the clients who said yes before said yes again.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-economy-and-the-time-of-the-call&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;The Economy and the Time of the Call&lt;/h3&gt;
+&lt;p&gt;The rows are in the order of the calls. So we can follow the subscription rate over time. Here, we split the calls into blocks of 1,000 consecutive calls:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfTime &amp;lt;- dfRaw %&amp;gt;%
+  mutate(call_order = row_number(), block = (call_order - 1) %/% 1000 + 1) %&amp;gt;%
+  group_by(block) %&amp;gt;%
+  summarise(first_call = min(call_order), rate = mean(y == &amp;quot;yes&amp;quot;), euribor3m = mean(euribor3m), nr.employed = mean(nr.employed))
+
+p1 &amp;lt;- ggplot(dfTime, aes(x = first_call, y = rate)) +
+  geom_line(color = &amp;quot;#00AED8&amp;quot;) + geom_point(color = &amp;quot;#00AED8&amp;quot;) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = &amp;quot;Subscription rate&amp;quot;, title = &amp;quot;Subscription rate in each block of 1,000 calls&amp;quot;)
+p2 &amp;lt;- ggplot(dfTime, aes(x = first_call, y = euribor3m)) +
+  geom_line(color = &amp;quot;#F37735&amp;quot;) + geom_point(color = &amp;quot;#F37735&amp;quot;) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = &amp;quot;Call number (in order of time)&amp;quot;, y = &amp;quot;3 month Euribor (%)&amp;quot;, title = &amp;quot;Interest rate at the time of the calls&amp;quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &amp;quot;v&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/time_trend-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;eda_plot_correlation_matrix(dfRaw %&amp;gt;% select(emp.var.rate, cons.price.idx, cons.conf.idx, euribor3m, nr.employed),
+                            plotTitle = &amp;quot;Correlation of the economic features&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/economic_correlations-1.png&#34; alt=&#34;&#34; width=&#34;768&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-7&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;In the first 23,000 or so calls, fewer than 1 in 10 calls ended with a &lt;em&gt;yes&lt;/em&gt;. After the interest rate fell in late 2008 and 2009, the rate rose, and in the last blocks about half of the calls were successful. Fewer calls were made in that period, which explains why the quiet months had the highest rates.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;euribor3m&lt;/code&gt;, &lt;code&gt;emp.var.rate&lt;/code&gt; and &lt;code&gt;nr.employed&lt;/code&gt; move together (their correlations are above 0.9). They describe the same economic cycle.&lt;/li&gt;
+&lt;li&gt;So the economic features are strong predictors, but much of their power comes from telling the model &lt;em&gt;when&lt;/em&gt; the call was made. A model can learn that calls in a certain period were successful. That is useful when we predict calls from the same period, but the economy of the next campaign will be different. In Part 2, we test the models on calls from the same period, and then on later calls.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;associations-between-features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Associations Between Features&lt;/h2&gt;
+&lt;p&gt;Correlation only works for numerical features. To compare all the features at once, including the categorical ones and the target, we use an association matrix. It uses Cramér’s V for pairs of categorical features: 0 means no association and 1 means that one feature completely determines the other.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfAssoc &amp;lt;- dfRaw %&amp;gt;%
+  select(-duration) %&amp;gt;%
+  mutate(across(where(is.character), as.factor))
+eda_plot_association_matrix(dfAssoc, outlineVar = &amp;quot;y&amp;quot;, plotTitle = &amp;quot;Association of features with each other and with y&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/association_matrix-1.png&#34; alt=&#34;&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;whats-notable-8&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What’s notable?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;The target &lt;code&gt;y&lt;/code&gt; is most strongly associated with the economic features (about 0.3), with &lt;code&gt;poutcome&lt;/code&gt;, &lt;code&gt;pdays&lt;/code&gt; and &lt;code&gt;previous&lt;/code&gt; (the history of previous campaigns), and with &lt;code&gt;month&lt;/code&gt;. &lt;code&gt;job&lt;/code&gt; and &lt;code&gt;contact&lt;/code&gt; follow, with about 0.15.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pdays&lt;/code&gt;, &lt;code&gt;previous&lt;/code&gt; and &lt;code&gt;poutcome&lt;/code&gt; are strongly associated with each other, because they all describe the previous campaign.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;month&lt;/code&gt;, &lt;code&gt;contact&lt;/code&gt; and the economic features are strongly associated with each other, because they all depend on when the call was made.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;age&lt;/code&gt; is associated with &lt;code&gt;job&lt;/code&gt; and &lt;code&gt;marital&lt;/code&gt;: students are young, and retired people are old.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;housing&lt;/code&gt; and &lt;code&gt;loan&lt;/code&gt; are almost unrelated to &lt;code&gt;y&lt;/code&gt;. They are associated with each other only because their &lt;em&gt;unknown&lt;/em&gt; values are the same clients.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;preparing-the-data-for-models&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Preparing the Data for Models&lt;/h2&gt;
+&lt;p&gt;Based on what we have found, we make these changes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Remove the 12 duplicate rows.&lt;/li&gt;
+&lt;li&gt;Drop &lt;code&gt;duration&lt;/code&gt;, which is not known before a call (data leakage).&lt;/li&gt;
+&lt;li&gt;Replace &lt;code&gt;pdays&lt;/code&gt; with a yes/no feature, &lt;code&gt;recent_contact&lt;/code&gt;, that says whether &lt;code&gt;pdays&lt;/code&gt; was recorded. Its exact value adds little, because it is recorded almost only for clients with a successful previous campaign, and the value 999 would mislead a linear model.&lt;/li&gt;
+&lt;li&gt;Change the 3 &lt;em&gt;yes&lt;/em&gt; answers in &lt;code&gt;default&lt;/code&gt; to &lt;em&gt;unknown&lt;/em&gt;, so that the feature compares clients who said &lt;em&gt;no&lt;/em&gt; with all the others. Three examples are too few for a model to learn from.&lt;/li&gt;
+&lt;li&gt;Keep &lt;em&gt;unknown&lt;/em&gt; as a category in the other features, because it is informative: for example, clients whose education is unknown subscribe more often than average.&lt;/li&gt;
+&lt;li&gt;Put the months and the days of the week in calendar order.&lt;/li&gt;
+&lt;li&gt;Add an &lt;code&gt;Id&lt;/code&gt; that keeps the order of the calls, so that in Part 2 we can test the models on later calls. The models do not use it as a feature.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Then we set aside 25% of the calls as a testing set, which the models will not see while they learn. We use stratified sampling, so that the testing set has the same subscription rate as the training set.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfClean &amp;lt;- dfRaw %&amp;gt;%
+  mutate(Id = row_number()) %&amp;gt;%
+  filter(!duplicated(pick(-Id))) %&amp;gt;%
+  select(-duration) %&amp;gt;%
+  mutate(recent_contact = if_else(pdays != 999, &amp;quot;yes&amp;quot;, &amp;quot;no&amp;quot;),
+         default = if_else(default == &amp;quot;yes&amp;quot;, &amp;quot;unknown&amp;quot;, default),
+         month = factor(month, levels = c(&amp;quot;mar&amp;quot;,&amp;quot;apr&amp;quot;,&amp;quot;may&amp;quot;,&amp;quot;jun&amp;quot;,&amp;quot;jul&amp;quot;,&amp;quot;aug&amp;quot;,&amp;quot;sep&amp;quot;,&amp;quot;oct&amp;quot;,&amp;quot;nov&amp;quot;,&amp;quot;dec&amp;quot;)),
+         day_of_week = factor(day_of_week, levels = c(&amp;quot;mon&amp;quot;,&amp;quot;tue&amp;quot;,&amp;quot;wed&amp;quot;,&amp;quot;thu&amp;quot;,&amp;quot;fri&amp;quot;)),
+         y = factor(y, levels = c(&amp;quot;yes&amp;quot;, &amp;quot;no&amp;quot;))) %&amp;gt;%
+  select(-pdays) %&amp;gt;%
+  mutate(across(where(is.character), as.factor)) %&amp;gt;%
+  select(Id, y, everything())
+
+vFeaturesNum &amp;lt;- dfClean %&amp;gt;% select(-Id, -y) %&amp;gt;% select(where(is.numeric)) %&amp;gt;% colnames()
+vFeaturesCat &amp;lt;- dfClean %&amp;gt;% select(-Id, -y) %&amp;gt;% select(where(is.factor)) %&amp;gt;% colnames()
+
+# stratified split into training (75%) and testing (25%) sets
+set.seed(2300)
+data_split &amp;lt;- initial_split(dfClean, prop = 0.75, strata = y)
+vTestIDs &amp;lt;- testing(data_split)$Id
+
+dfSplit &amp;lt;- dfClean %&amp;gt;%
+  mutate(set = if_else(Id %in% vTestIDs, &amp;quot;testing&amp;quot;, &amp;quot;training&amp;quot;)) %&amp;gt;%
+  group_by(set) %&amp;gt;%
+  summarise(calls = n(), subscribed = sum(y == &amp;quot;yes&amp;quot;), rate = round(100 * mean(y == &amp;quot;yes&amp;quot;), 2))
+knitr::kable(dfSplit, col.names = c(&amp;quot;Set&amp;quot;, &amp;quot;Calls&amp;quot;, &amp;quot;Subscribed&amp;quot;, &amp;quot;Subscription rate (%)&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Set&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Calls&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Subscribed&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Subscription rate (%)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;testing&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10295&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1160&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11.27&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;training&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;30881&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3479&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11.27&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, file = &amp;quot;Bank_Marketing_Clean.Rda&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The finalized dataset has 41,176 calls and 19 features: 8 numerical and 11 categorical.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+&lt;p&gt;We have learned that:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The history of a client with the bank (&lt;code&gt;poutcome&lt;/code&gt;, &lt;code&gt;previous&lt;/code&gt;) and the type of phone are strong signals.&lt;/li&gt;
+&lt;li&gt;The economy and the time of the call matter a lot, so we must be careful about how we test the models.&lt;/li&gt;
+&lt;li&gt;Age and job matter, but less.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;duration&lt;/code&gt; must not be used, even though it looks like the best predictor.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part2-models/&#34;&gt;Part 2&lt;/a&gt;, we use this dataset to build models that predict which clients will subscribe.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</title>

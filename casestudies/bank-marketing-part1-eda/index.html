@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="
+Other posts in this series:
+
+Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+
+A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">
+  <meta property="og:title" content="Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis | Nitin Gupta">
+  <meta property="og:description" content="
+Other posts in this series:
+
+Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+
+A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2026-10-17T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2026-10-17T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Oct 17, 2026
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</a></li>
+</ul>
+<p>A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">Bank Marketing dataset</a> (<a href="http://dx.doi.org/10.1016/j.dss.2014.03.001">Moro, Cortez and Rita, 2014</a>) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.</p>
+<p>In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, <em>yes</em> or <em>no</em>? This kind of problem is called classification. The case study has two posts:</p>
+<ol style="list-style-type: decimal">
+<li>In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.</li>
+<li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.</li>
+</ol>
+</div>
+<div id="data-description" class="section level2">
+<h2>Data Description</h2>
+<p>Each row is one call, which was the last call to a client in a campaign. The rows are in the order of the calls, from May 2008 to November 2010. There are 20 features and the target, <code>y</code>, which is the value that we want to predict:</p>
+<pre class="r"><code>dfDescription &lt;- tribble(~ Feature, ~ Type, ~ Description,
+                         &quot;age&quot;, &quot;numerical&quot;, &quot;age of the client&quot;,
+                         &quot;job&quot;, &quot;categorical&quot;, &quot;type of job&quot;,
+                         &quot;marital&quot;, &quot;categorical&quot;, &quot;marital status (*divorced* also means widowed)&quot;,
+                         &quot;education&quot;, &quot;categorical&quot;, &quot;highest level of education&quot;,
+                         &quot;default&quot;, &quot;categorical&quot;, &quot;does the client have a loan in default?&quot;,
+                         &quot;housing&quot;, &quot;categorical&quot;, &quot;does the client have a housing loan?&quot;,
+                         &quot;loan&quot;, &quot;categorical&quot;, &quot;does the client have a personal loan?&quot;,
+                         &quot;contact&quot;, &quot;categorical&quot;, &quot;type of phone: cellular or telephone (landline)&quot;,
+                         &quot;month&quot;, &quot;categorical&quot;, &quot;month of the call&quot;,
+                         &quot;day_of_week&quot;, &quot;categorical&quot;, &quot;day of the week of the call&quot;,
+                         &quot;duration&quot;, &quot;numerical&quot;, &quot;length of the call, in seconds&quot;,
+                         &quot;campaign&quot;, &quot;numerical&quot;, &quot;number of calls to the client in this campaign, including this one&quot;,
+                         &quot;pdays&quot;, &quot;numerical&quot;, &quot;days since the client was last called in a previous campaign (999: not called)&quot;,
+                         &quot;previous&quot;, &quot;numerical&quot;, &quot;number of calls to the client before this campaign&quot;,
+                         &quot;poutcome&quot;, &quot;categorical&quot;, &quot;result of the previous campaign&quot;,
+                         &quot;emp.var.rate&quot;, &quot;numerical&quot;, &quot;employment variation rate (quarterly)&quot;,
+                         &quot;cons.price.idx&quot;, &quot;numerical&quot;, &quot;consumer price index (monthly)&quot;,
+                         &quot;cons.conf.idx&quot;, &quot;numerical&quot;, &quot;consumer confidence index (monthly)&quot;,
+                         &quot;euribor3m&quot;, &quot;numerical&quot;, &quot;3 month Euribor interest rate (daily)&quot;,
+                         &quot;nr.employed&quot;, &quot;numerical&quot;, &quot;number of employees in the economy, in thousands (quarterly)&quot;,
+                         &quot;y&quot;, &quot;categorical&quot;, &quot;**target**: did the client subscribe to a term deposit?&quot;)
+
+knitr::kable(dfDescription)</code></pre>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="11%" />
+<col width="74%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Feature</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">age</td>
+<td align="left">numerical</td>
+<td align="left">age of the client</td>
+</tr>
+<tr class="even">
+<td align="left">job</td>
+<td align="left">categorical</td>
+<td align="left">type of job</td>
+</tr>
+<tr class="odd">
+<td align="left">marital</td>
+<td align="left">categorical</td>
+<td align="left">marital status (<em>divorced</em> also means widowed)</td>
+</tr>
+<tr class="even">
+<td align="left">education</td>
+<td align="left">categorical</td>
+<td align="left">highest level of education</td>
+</tr>
+<tr class="odd">
+<td align="left">default</td>
+<td align="left">categorical</td>
+<td align="left">does the client have a loan in default?</td>
+</tr>
+<tr class="even">
+<td align="left">housing</td>
+<td align="left">categorical</td>
+<td align="left">does the client have a housing loan?</td>
+</tr>
+<tr class="odd">
+<td align="left">loan</td>
+<td align="left">categorical</td>
+<td align="left">does the client have a personal loan?</td>
+</tr>
+<tr class="even">
+<td align="left">contact</td>
+<td align="left">categorical</td>
+<td align="left">type of phone: cellular or telephone (landline)</td>
+</tr>
+<tr class="odd">
+<td align="left">month</td>
+<td align="left">categorical</td>
+<td align="left">month of the call</td>
+</tr>
+<tr class="even">
+<td align="left">day_of_week</td>
+<td align="left">categorical</td>
+<td align="left">day of the week of the call</td>
+</tr>
+<tr class="odd">
+<td align="left">duration</td>
+<td align="left">numerical</td>
+<td align="left">length of the call, in seconds</td>
+</tr>
+<tr class="even">
+<td align="left">campaign</td>
+<td align="left">numerical</td>
+<td align="left">number of calls to the client in this campaign, including this one</td>
+</tr>
+<tr class="odd">
+<td align="left">pdays</td>
+<td align="left">numerical</td>
+<td align="left">days since the client was last called in a previous campaign (999: not called)</td>
+</tr>
+<tr class="even">
+<td align="left">previous</td>
+<td align="left">numerical</td>
+<td align="left">number of calls to the client before this campaign</td>
+</tr>
+<tr class="odd">
+<td align="left">poutcome</td>
+<td align="left">categorical</td>
+<td align="left">result of the previous campaign</td>
+</tr>
+<tr class="even">
+<td align="left">emp.var.rate</td>
+<td align="left">numerical</td>
+<td align="left">employment variation rate (quarterly)</td>
+</tr>
+<tr class="odd">
+<td align="left">cons.price.idx</td>
+<td align="left">numerical</td>
+<td align="left">consumer price index (monthly)</td>
+</tr>
+<tr class="even">
+<td align="left">cons.conf.idx</td>
+<td align="left">numerical</td>
+<td align="left">consumer confidence index (monthly)</td>
+</tr>
+<tr class="odd">
+<td align="left">euribor3m</td>
+<td align="left">numerical</td>
+<td align="left">3 month Euribor interest rate (daily)</td>
+</tr>
+<tr class="even">
+<td align="left">nr.employed</td>
+<td align="left">numerical</td>
+<td align="left">number of employees in the economy, in thousands (quarterly)</td>
+</tr>
+<tr class="odd">
+<td align="left">y</td>
+<td align="left">categorical</td>
+<td align="left"><strong>target</strong>: did the client subscribe to a term deposit?</td>
+</tr>
+</tbody>
+</table>
+<p>The last five features describe the economy of Portugal at the time of the call. They are the same for all the clients who were called on the same day.</p>
+</div>
+<div id="data-quality" class="section level2">
+<h2>Data Quality</h2>
+<p>Before we explore the features, we check the data for problems.</p>
+<pre class="r"><code># exact duplicate rows
+nDuplicates &lt;- sum(duplicated(dfRaw))
+
+# number of &quot;unknown&quot; values in each categorical feature
+dfUnknown &lt;- dfRaw %&gt;%
+  select(where(is.character)) %&gt;%
+  summarise(across(everything(), ~ sum(.x == &quot;unknown&quot;))) %&gt;%
+  pivot_longer(everything(), names_to = &quot;feature&quot;, values_to = &quot;unknown&quot;) %&gt;%
+  filter(unknown &gt; 0) %&gt;%
+  mutate(percent = round(100 * unknown / nrow(dfRaw), 1)) %&gt;%
+  arrange(desc(unknown))
+
+knitr::kable(dfUnknown, col.names = c(&quot;Feature&quot;, &quot;Unknown values&quot;, &quot;% of calls&quot;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Feature</th>
+<th align="right">Unknown values</th>
+<th align="right">% of calls</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">default</td>
+<td align="right">8597</td>
+<td align="right">20.9</td>
+</tr>
+<tr class="even">
+<td align="left">education</td>
+<td align="right">1731</td>
+<td align="right">4.2</td>
+</tr>
+<tr class="odd">
+<td align="left">housing</td>
+<td align="right">990</td>
+<td align="right">2.4</td>
+</tr>
+<tr class="even">
+<td align="left">loan</td>
+<td align="right">990</td>
+<td align="right">2.4</td>
+</tr>
+<tr class="odd">
+<td align="left">job</td>
+<td align="right">330</td>
+<td align="right">0.8</td>
+</tr>
+<tr class="even">
+<td align="left">marital</td>
+<td align="right">80</td>
+<td align="right">0.2</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># clients called in a previous campaign, by whether pdays is recorded
+dfPrevious &lt;- dfRaw %&gt;%
+  filter(previous &gt; 0) %&gt;%
+  count(pdays_recorded = pdays != 999, poutcome)</code></pre>
+<div id="whats-notable" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>There are no empty (missing) values. Instead, the categorical features use the category <em>unknown</em>. <code>default</code> is unknown for 20.9% of the clients. <code>housing</code> and <code>loan</code> are unknown for the same 990 clients.</li>
+<li>12 rows are exact copies of other rows. The data has no client ID, so we cannot tell whether these are the same call recorded twice or different clients with the same details. They are too few to matter, and we remove them when we prepare the data.</li>
+<li><code>default</code> has only 3 clients with <em>yes</em>. So the feature really tells us whether the client’s answer was <em>no</em> or <em>unknown</em>.</li>
+<li>The description says that a <code>pdays</code> of 999 means the client was not called before. But 5,625 clients were called in a previous campaign (<code>previous</code> is more than 0), and only 1,515 of them have a <code>pdays</code> value. Of those, 1373 had a successful previous campaign. So <code>pdays</code> is mostly recorded for clients who said yes before.</li>
+</ul>
+</div>
+</div>
+<div id="the-target-who-subscribed" class="section level2">
+<h2>The Target: Who Subscribed?</h2>
+<pre class="r"><code>dfTarget &lt;- dfRaw %&gt;% count(y) %&gt;% mutate(percent = 100 * n / sum(n))
+rate_yes &lt;- mean(dfRaw$y == &quot;yes&quot;)
+
+ggplot(dfTarget, aes(x = y, y = n, fill = y)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = glue::glue(&quot;{format(n, big.mark = &#39;,&#39;)} ({round(percent, 1)}%)&quot;)), vjust = -0.5, family = &quot;Roboto Condensed&quot;) +
+  scale_fill_quant(palette = &quot;main&quot;) +
+  scale_y_continuous(labels = scales::label_comma(), expand = expansion(mult = c(0, 0.1))) +
+  labs(x = &quot;Subscribed to a term deposit (y)&quot;, y = &quot;Number of calls&quot;, title = &quot;Most clients said no&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/target-1.png" alt="" width="672" /></p>
+<div id="whats-notable-1" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Only 11.3% of the calls ended with a subscription. The two classes are very unequal in size (imbalanced).</li>
+<li>So a model that always predicts <em>no</em> would be right 88.7% of the time, but it would be useless. In Part 2, we use measures that are not fooled by this.</li>
+</ul>
+<p>In the rest of this post, we compare the subscription rate, the percentage of calls that ended with a <em>yes</em>, across the values of each feature. The dashed line in the plots is the overall rate of 11.3%. These functions make the plots:</p>
+<pre class="r"><code># subscription rate and number of calls for each category of a feature
+plot_rate &lt;- function(df, feature, sortByRate = TRUE, minCount = 30) {
+  dfRate &lt;- df %&gt;%
+    group_by(category = .data[[feature]]) %&gt;%
+    summarise(calls = n(), rate = mean(y == &quot;yes&quot;), .groups = &quot;drop&quot;) %&gt;%
+    filter(calls &gt;= minCount)
+  if (sortByRate) dfRate &lt;- dfRate %&gt;% mutate(category = fct_reorder(as.factor(category), rate))
+  ggplot(dfRate, aes(x = category, y = rate)) +
+    geom_col(fill = &quot;#00AED8&quot;) +
+    geom_hline(yintercept = mean(df$y == &quot;yes&quot;), lty = 2) +
+    geom_text(aes(label = scales::label_comma()(calls)), hjust = -0.1, size = 3, family = &quot;Roboto Condensed&quot;) +
+    scale_y_continuous(labels = scales::label_percent(), expand = expansion(mult = c(0, 0.25))) +
+    coord_flip() +
+    labs(x = NULL, y = &quot;Subscription rate&quot;, title = feature)
+}
+
+# subscription rate for bins of a numerical feature
+plot_rate_bins &lt;- function(df, feature, breaks, labels = NULL) {
+  df %&gt;%
+    mutate(bin = cut(.data[[feature]], breaks = breaks, labels = labels, include.lowest = TRUE, dig.lab = 5)) %&gt;%
+    plot_rate(&quot;bin&quot;, sortByRate = FALSE) +
+    labs(title = feature)
+}</code></pre>
+<p>The numbers next to the bars are the numbers of calls. Categories with fewer than 30 calls are not shown, because their rates are not reliable.</p>
+</div>
+</div>
+<div id="a-feature-we-cannot-use-call-duration" class="section level2">
+<h2>A Feature We Cannot Use: Call Duration</h2>
+<pre class="r"><code>plot_rate_bins(dfRaw, &quot;duration&quot;, breaks = c(0, 60, 120, 180, 300, 600, 5000)) +
+  labs(x = &quot;Length of the call (seconds)&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/duration-1.png" alt="" width="768" /></p>
+<div id="whats-notable-2" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li><code>duration</code> predicts the result very well: almost no client who talked for less than a minute subscribed, and about half of the clients who talked for more than 10 minutes did.</li>
+<li>But we only know the length of a call after the call has ended, and by then we also know whether the client said yes. A bank cannot use it to decide whom to call. Using a feature that would not be known at the time of the prediction is called data leakage. It makes a model look much better than it will be in practice.</li>
+<li>The authors of the dataset give the same warning. So we drop <code>duration</code>.</li>
+</ul>
+</div>
+</div>
+<div id="univariate-analysis-one-feature-at-a-time" class="section level2">
+<h2>Univariate Analysis: One Feature at a Time</h2>
+<div id="numerical-features" class="section level3">
+<h3>Numerical Features</h3>
+<pre class="r"><code>vFeaturesNumRaw &lt;- c(&quot;age&quot;, &quot;campaign&quot;, &quot;previous&quot;, &quot;emp.var.rate&quot;, &quot;cons.price.idx&quot;, &quot;cons.conf.idx&quot;, &quot;euribor3m&quot;, &quot;nr.employed&quot;)
+eda_plot_histograms(dfRaw, vFeaturesNumRaw, nCols = 4)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_num-1.png" alt="" width="960" /></p>
+<div id="whats-notable-3" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Most clients are between 30 and 50 years old.</li>
+<li>Most clients were called once or twice in the campaign, but some were called up to 56 times. <code>campaign</code> is very skewed.</li>
+<li>Most clients (86%) were never called in a previous campaign.</li>
+<li>The economic features have only a few distinct values, with gaps between them. For example, <code>nr.employed</code> has only 11 values, because it changes once a quarter. So these features also tell us <em>when</em> a call was made.</li>
+</ul>
+</div>
+</div>
+<div id="categorical-features" class="section level3">
+<h3>Categorical Features</h3>
+<pre class="r"><code>vFeaturesCatRaw &lt;- c(&quot;job&quot;, &quot;marital&quot;, &quot;education&quot;, &quot;default&quot;, &quot;housing&quot;, &quot;loan&quot;, &quot;contact&quot;, &quot;month&quot;, &quot;day_of_week&quot;, &quot;poutcome&quot;)
+cowplot::plot_grid(plotlist = map(vFeaturesCatRaw, ~ eda_plot_column(dfRaw, .x)), ncol = 3)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/univariate_cat-1.png" alt="" width="960" /></p>
+<div id="whats-notable-4" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Most clients work in administration, blue-collar jobs or as technicians.</li>
+<li>Most calls were made in May, and the fewest in December and March. There are no calls in January and February.</li>
+<li>About two thirds of the calls were to cell phones.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="bivariate-analysis-each-feature-and-the-subscription-rate" class="section level2">
+<h2>Bivariate Analysis: Each Feature and the Subscription Rate</h2>
+<div id="client-features" class="section level3">
+<h3>Client Features</h3>
+<pre class="r"><code>p1 &lt;- plot_rate_bins(dfRaw, &quot;age&quot;, breaks = c(17, 25, 30, 40, 50, 60, 100))
+p2 &lt;- plot_rate(dfRaw, &quot;job&quot;)
+p3 &lt;- plot_rate(dfRaw, &quot;marital&quot;)
+p4 &lt;- plot_rate(dfRaw, &quot;education&quot;)
+p5 &lt;- plot_rate(dfRaw, &quot;default&quot;)
+p6 &lt;- plot_rate(dfRaw, &quot;housing&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_client-1.png" alt="" width="960" /></p>
+<div id="whats-notable-5" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The youngest and the oldest clients are the most likely to subscribe: students and retired people subscribe at more than twice the overall rate. Blue-collar workers subscribe the least.</li>
+<li>Clients with a university degree subscribe more often than clients with a basic education.</li>
+<li>Clients whose <code>default</code> status is unknown subscribe much less often than clients who said they have no loan in default.</li>
+<li>Having a housing loan (and, not shown, a personal loan) makes almost no difference.</li>
+</ul>
+</div>
+</div>
+<div id="campaign-features" class="section level3">
+<h3>Campaign Features</h3>
+<pre class="r"><code>dfMonthOrder &lt;- dfRaw %&gt;% mutate(month = factor(month, levels = c(&quot;mar&quot;,&quot;apr&quot;,&quot;may&quot;,&quot;jun&quot;,&quot;jul&quot;,&quot;aug&quot;,&quot;sep&quot;,&quot;oct&quot;,&quot;nov&quot;,&quot;dec&quot;)),
+                                 day_of_week = factor(day_of_week, levels = c(&quot;mon&quot;,&quot;tue&quot;,&quot;wed&quot;,&quot;thu&quot;,&quot;fri&quot;)))
+p1 &lt;- plot_rate(dfRaw, &quot;contact&quot;)
+p2 &lt;- plot_rate(dfMonthOrder, &quot;month&quot;, sortByRate = FALSE)
+p3 &lt;- plot_rate(dfMonthOrder, &quot;day_of_week&quot;, sortByRate = FALSE)
+p4 &lt;- plot_rate_bins(dfRaw, &quot;campaign&quot;, breaks = c(1, 1.5, 2.5, 3.5, 5.5, 10.5, 60), labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4-5&quot;, &quot;6-10&quot;, &quot;11+&quot;)) +
+  labs(title = &quot;campaign (calls in this campaign)&quot;)
+p5 &lt;- plot_rate_bins(dfRaw, &quot;previous&quot;, breaks = c(0, 0.5, 1.5, 2.5, 10), labels = c(&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3+&quot;)) +
+  labs(title = &quot;previous (calls before this campaign)&quot;)
+p6 &lt;- plot_rate(dfRaw, &quot;poutcome&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2, p3, p4, p5, p6), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/bivariate_campaign-1.png" alt="" width="960" /></p>
+<div id="whats-notable-6" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Clients called on a cell phone subscribe almost three times as often as clients called on a landline.</li>
+<li>The months with the fewest calls (March, September, October and December) have the highest rates, close to 50%. May, the busiest month, has the lowest rate. We look at this again in the next section.</li>
+<li>The day of the week makes little difference.</li>
+<li>Each extra call in the same campaign makes a <em>yes</em> less likely. Only 3% of the clients who were called more than 10 times subscribed.</li>
+<li>The more often a client was called in previous campaigns, the more likely a <em>yes</em>: these clients already know the bank.</li>
+<li>The result of the previous campaign is the strongest client-level signal: 65% of the clients who said yes before said yes again.</li>
+</ul>
+</div>
+</div>
+<div id="the-economy-and-the-time-of-the-call" class="section level3">
+<h3>The Economy and the Time of the Call</h3>
+<p>The rows are in the order of the calls. So we can follow the subscription rate over time. Here, we split the calls into blocks of 1,000 consecutive calls:</p>
+<pre class="r"><code>dfTime &lt;- dfRaw %&gt;%
+  mutate(call_order = row_number(), block = (call_order - 1) %/% 1000 + 1) %&gt;%
+  group_by(block) %&gt;%
+  summarise(first_call = min(call_order), rate = mean(y == &quot;yes&quot;), euribor3m = mean(euribor3m), nr.employed = mean(nr.employed))
+
+p1 &lt;- ggplot(dfTime, aes(x = first_call, y = rate)) +
+  geom_line(color = &quot;#00AED8&quot;) + geom_point(color = &quot;#00AED8&quot;) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = &quot;Subscription rate&quot;, title = &quot;Subscription rate in each block of 1,000 calls&quot;)
+p2 &lt;- ggplot(dfTime, aes(x = first_call, y = euribor3m)) +
+  geom_line(color = &quot;#F37735&quot;) + geom_point(color = &quot;#F37735&quot;) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  labs(x = &quot;Call number (in order of time)&quot;, y = &quot;3 month Euribor (%)&quot;, title = &quot;Interest rate at the time of the calls&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/time_trend-1.png" alt="" width="960" /></p>
+<pre class="r"><code>eda_plot_correlation_matrix(dfRaw %&gt;% select(emp.var.rate, cons.price.idx, cons.conf.idx, euribor3m, nr.employed),
+                            plotTitle = &quot;Correlation of the economic features&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/economic_correlations-1.png" alt="" width="768" /></p>
+<div id="whats-notable-7" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>In the first 23,000 or so calls, fewer than 1 in 10 calls ended with a <em>yes</em>. After the interest rate fell in late 2008 and 2009, the rate rose, and in the last blocks about half of the calls were successful. Fewer calls were made in that period, which explains why the quiet months had the highest rates.</li>
+<li><code>euribor3m</code>, <code>emp.var.rate</code> and <code>nr.employed</code> move together (their correlations are above 0.9). They describe the same economic cycle.</li>
+<li>So the economic features are strong predictors, but much of their power comes from telling the model <em>when</em> the call was made. A model can learn that calls in a certain period were successful. That is useful when we predict calls from the same period, but the economy of the next campaign will be different. In Part 2, we test the models on calls from the same period, and then on later calls.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="associations-between-features" class="section level2">
+<h2>Associations Between Features</h2>
+<p>Correlation only works for numerical features. To compare all the features at once, including the categorical ones and the target, we use an association matrix. It uses Cramér’s V for pairs of categorical features: 0 means no association and 1 means that one feature completely determines the other.</p>
+<pre class="r"><code>dfAssoc &lt;- dfRaw %&gt;%
+  select(-duration) %&gt;%
+  mutate(across(where(is.character), as.factor))
+eda_plot_association_matrix(dfAssoc, outlineVar = &quot;y&quot;, plotTitle = &quot;Association of features with each other and with y&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/association_matrix-1.png" alt="" width="960" /></p>
+<div id="whats-notable-8" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The target <code>y</code> is most strongly associated with the economic features (about 0.3), with <code>poutcome</code>, <code>pdays</code> and <code>previous</code> (the history of previous campaigns), and with <code>month</code>. <code>job</code> and <code>contact</code> follow, with about 0.15.</li>
+<li><code>pdays</code>, <code>previous</code> and <code>poutcome</code> are strongly associated with each other, because they all describe the previous campaign.</li>
+<li><code>month</code>, <code>contact</code> and the economic features are strongly associated with each other, because they all depend on when the call was made.</li>
+<li><code>age</code> is associated with <code>job</code> and <code>marital</code>: students are young, and retired people are old.</li>
+<li><code>housing</code> and <code>loan</code> are almost unrelated to <code>y</code>. They are associated with each other only because their <em>unknown</em> values are the same clients.</li>
+</ul>
+</div>
+</div>
+<div id="preparing-the-data-for-models" class="section level2">
+<h2>Preparing the Data for Models</h2>
+<p>Based on what we have found, we make these changes:</p>
+<ul>
+<li>Remove the 12 duplicate rows.</li>
+<li>Drop <code>duration</code>, which is not known before a call (data leakage).</li>
+<li>Replace <code>pdays</code> with a yes/no feature, <code>recent_contact</code>, that says whether <code>pdays</code> was recorded. Its exact value adds little, because it is recorded almost only for clients with a successful previous campaign, and the value 999 would mislead a linear model.</li>
+<li>Change the 3 <em>yes</em> answers in <code>default</code> to <em>unknown</em>, so that the feature compares clients who said <em>no</em> with all the others. Three examples are too few for a model to learn from.</li>
+<li>Keep <em>unknown</em> as a category in the other features, because it is informative: for example, clients whose education is unknown subscribe more often than average.</li>
+<li>Put the months and the days of the week in calendar order.</li>
+<li>Add an <code>Id</code> that keeps the order of the calls, so that in Part 2 we can test the models on later calls. The models do not use it as a feature.</li>
+</ul>
+<p>Then we set aside 25% of the calls as a testing set, which the models will not see while they learn. We use stratified sampling, so that the testing set has the same subscription rate as the training set.</p>
+<pre class="r"><code>dfClean &lt;- dfRaw %&gt;%
+  mutate(Id = row_number()) %&gt;%
+  filter(!duplicated(pick(-Id))) %&gt;%
+  select(-duration) %&gt;%
+  mutate(recent_contact = if_else(pdays != 999, &quot;yes&quot;, &quot;no&quot;),
+         default = if_else(default == &quot;yes&quot;, &quot;unknown&quot;, default),
+         month = factor(month, levels = c(&quot;mar&quot;,&quot;apr&quot;,&quot;may&quot;,&quot;jun&quot;,&quot;jul&quot;,&quot;aug&quot;,&quot;sep&quot;,&quot;oct&quot;,&quot;nov&quot;,&quot;dec&quot;)),
+         day_of_week = factor(day_of_week, levels = c(&quot;mon&quot;,&quot;tue&quot;,&quot;wed&quot;,&quot;thu&quot;,&quot;fri&quot;)),
+         y = factor(y, levels = c(&quot;yes&quot;, &quot;no&quot;))) %&gt;%
+  select(-pdays) %&gt;%
+  mutate(across(where(is.character), as.factor)) %&gt;%
+  select(Id, y, everything())
+
+vFeaturesNum &lt;- dfClean %&gt;% select(-Id, -y) %&gt;% select(where(is.numeric)) %&gt;% colnames()
+vFeaturesCat &lt;- dfClean %&gt;% select(-Id, -y) %&gt;% select(where(is.factor)) %&gt;% colnames()
+
+# stratified split into training (75%) and testing (25%) sets
+set.seed(2300)
+data_split &lt;- initial_split(dfClean, prop = 0.75, strata = y)
+vTestIDs &lt;- testing(data_split)$Id
+
+dfSplit &lt;- dfClean %&gt;%
+  mutate(set = if_else(Id %in% vTestIDs, &quot;testing&quot;, &quot;training&quot;)) %&gt;%
+  group_by(set) %&gt;%
+  summarise(calls = n(), subscribed = sum(y == &quot;yes&quot;), rate = round(100 * mean(y == &quot;yes&quot;), 2))
+knitr::kable(dfSplit, col.names = c(&quot;Set&quot;, &quot;Calls&quot;, &quot;Subscribed&quot;, &quot;Subscription rate (%)&quot;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Set</th>
+<th align="right">Calls</th>
+<th align="right">Subscribed</th>
+<th align="right">Subscription rate (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">testing</td>
+<td align="right">10295</td>
+<td align="right">1160</td>
+<td align="right">11.27</td>
+</tr>
+<tr class="even">
+<td align="left">training</td>
+<td align="right">30881</td>
+<td align="right">3479</td>
+<td align="right">11.27</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, file = &quot;Bank_Marketing_Clean.Rda&quot;)</code></pre>
+<p>The finalized dataset has 41,176 calls and 19 features: 8 numerical and 11 categorical.</p>
+</div>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<p>We have learned that:</p>
+<ul>
+<li>The history of a client with the bank (<code>poutcome</code>, <code>previous</code>) and the type of phone are strong signals.</li>
+<li>The economy and the time of the call matter a lot, so we must be careful about how we test the models.</li>
+<li>Age and job matter, but less.</li>
+<li><code>duration</code> must not be used, even though it looks like the best predictor.</li>
+</ul>
+<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we use this dataset to build models that predict which clients will subscribe.</p>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/eda/">eda</a>
+  
+  <a class="badge badge-light" href="/tags/classification/">classification</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/ames-housing-part2-eda/">Ames Housing - Part 2 - Walkthrough - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/casestudies/diamonds-part1-eda/">Diamonds - Part 1 - In the rough - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part3-models/">Ames Housing - Part 3 - Closing the deal - Building Models</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part1-data-pipeline/">Ames Housing - Part 1 - Laying the foundation - Building a Data Pipeline</a></li>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
+
+    
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
+
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    © Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

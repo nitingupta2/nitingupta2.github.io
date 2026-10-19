@@ -778,7 +778,7 @@ vCooks &lt;- cooks.distance(fit_lm[[1]])</code></pre>
   rename(price = actual) %&gt;%
   eda_plot_predicted_vs_actual(&quot;price&quot;, &quot;estimate&quot;, nLabel = 0, xLog = T, yLog = T,
                                labelsScale = scales::label_dollar(accuracy = 1)) +
-  labs(title = bquote(log(price) == log(carat) + clarity + color))</code></pre>
+  labs(title = bquote(log(price) ~ log(carat) + clarity + color))</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/diamonds-part2-linear-models/index_files/figure-html/final_model_plot-1.png" alt="" width="672" /></p>
 <p>The points are close to the 45-degree line. But at the high end, the differences between the actual and predicted prices become larger.
 The predictions of the final model are also much less extreme. The most expensive diamond in the testing set costs <code>$18,804</code>. The highest predicted price is <code>$28,130</code>. But the cube root model predicts prices as high as <code>$59,082</code> for the same testing set. Like all linear models, the final model can still predict prices above the highest prices in the data (this is called extrapolation).</p>

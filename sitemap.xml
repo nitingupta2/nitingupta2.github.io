@@ -2,8 +2,53 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/case-studies/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/categories/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/classification/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/ggplot2/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/glmnet/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/logistic-regression/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/models/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://www.nitingupta.com/</loc>
-    <lastmod>2026-05-13T00:00:00-04:00</lastmod>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/ranger/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/rstats/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/xgboost/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/eda/</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/privacy/</loc>
     <lastmod>2026-05-13T00:00:00-04:00</lastmod>
@@ -20,13 +65,7 @@
     <loc>https://www.nitingupta.com/tags/shiny-apps/</loc>
     <lastmod>2019-06-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/</loc>
-    <lastmod>2019-06-27T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.nitingupta.com/tags/bayesian/</loc>
-    <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/categories/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/categories/datascience/</loc>
@@ -39,9 +78,6 @@
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/post/</loc>
-    <lastmod>2018-10-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/rstats/</loc>
     <lastmod>2018-10-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/swimming/</loc>
@@ -66,9 +102,6 @@
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/investing/investment-strategy-diversification/</loc>
-    <lastmod>2017-06-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/models/</loc>
     <lastmod>2017-06-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/momentum/</loc>
@@ -122,37 +155,16 @@
     <loc>https://www.nitingupta.com/casestudies/ames-housing-part3-models/</loc>
     <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/casestudies/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/categories/case-studies/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/ggplot2/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/glmnet/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.nitingupta.com/tags/linear/</loc>
     <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/non-linear/</loc>
     <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/ranger/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.nitingupta.com/tags/regression/</loc>
     <lastmod>2016-12-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/xgboost/</loc>
-    <lastmod>2016-12-27T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.nitingupta.com/casestudies/ames-housing-part2-eda/</loc>
-    <lastmod>2016-12-26T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/eda/</loc>
     <lastmod>2016-12-26T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/casestudies/ames-housing-part1-data-pipeline/</loc>
