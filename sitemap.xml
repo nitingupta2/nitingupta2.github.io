@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</loc>
+    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/casestudies/</loc>
@@ -23,16 +23,10 @@
     <loc>https://www.nitingupta.com/tags/glmnet/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/logistic-regression/</loc>
-    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://www.nitingupta.com/tags/models/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/</loc>
-    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://www.nitingupta.com/tags/ranger/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/tags/rstats/</loc>
@@ -41,14 +35,26 @@
     <loc>https://www.nitingupta.com/tags/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>https://www.nitingupta.com/tags/time-series/</loc>
+    <lastmod>2026-10-18T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://www.nitingupta.com/tags/xgboost/</loc>
     <lastmod>2026-10-18T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</loc>
+    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</loc>
     <lastmod>2026-10-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://www.nitingupta.com/tags/eda/</loc>
+    <loc>https://www.nitingupta.com/tags/logistic-regression/</loc>
     <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/ranger/</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/</loc>
+    <lastmod>2026-10-16T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://www.nitingupta.com/tags/eda/</loc>
+    <lastmod>2026-10-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://www.nitingupta.com/privacy/</loc>
     <lastmod>2026-05-13T00:00:00-04:00</lastmod>

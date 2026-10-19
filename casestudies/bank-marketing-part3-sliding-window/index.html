@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.5.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Nitin Gupta">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="
+Other posts in this series:
+
+Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis
+Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+
+In Part 1, we found that the subscription rate changed a lot between 2008 and 2010, as interest rates fell and the bank changed its campaigns. In Part 2, we built models on a random sample of the calls and tested them on the other calls from the same period. They did well. But when we trained them on the earlier calls and tested them on the later calls, they did much worse.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="hsl(339, 90%, 68%)">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light" disabled>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark">
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.79b133138a0bf07bda4e338891691c8f.css">
+
+  
+    
+    
+    
+    
+      
+    
+    
+    
+    <link rel="stylesheet" href="/css/academic.7fe128f72282ecde959e58ee214ca2ad.css">
+  
+
+  
+
+
+
+
+  
+
+
+  
+
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  
+  <link rel="icon" type="image/png" href="/img/icon-32.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">
+
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="og:site_name" content="Nitin Gupta">
+  <meta property="og:url" content="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">
+  <meta property="og:title" content="Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models | Nitin Gupta">
+  <meta property="og:description" content="
+Other posts in this series:
+
+Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis
+Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+
+In Part 1, we found that the subscription rate changed a lot between 2008 and 2010, as interest rates fell and the bank changed its campaigns. In Part 2, we built models on a random sample of the calls and tested them on the other calls from the same period. They did well. But when we trained them on the earlier calls and tested them on the later calls, they did much worse."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
+  <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2026-10-18T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2026-10-18T00:00:00&#43;00:00">
+  
+
+  
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models | Nitin Gupta</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" class="dark">
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0 compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Nitin Gupta</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#investing"><span>Investing</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Data Science</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#casestudies"><span>Case Studies</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Web Apps</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+        </li>
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Oct 18, 2026
+  </span>
+  
+
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/case-studies/">case studies</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="other-posts-in-this-series" class="section level4">
+<h4>Other posts in this series:</h4>
+<ul>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</a></li>
+</ul>
+<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">Part 1</a>, we found that the subscription rate changed a lot between 2008 and 2010, as interest rates fell and the bank changed its campaigns. In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we built models on a random sample of the calls and tested them on the other calls from the same period. They did well. But when we trained them on the earlier calls and tested them on the later calls, they did much worse.</p>
+<p>The calls in this dataset are independent of each other: one client’s answer does not change another client’s answer. But they are not independent of <em>time</em>. What makes a client say yes, and how often, depends on the economy and on the campaign at the time. A model learned from the past only works for the near future.</p>
+<p>So in this post, we do what a bank would do in practice. We take the calls of the last 12 months, choose the hyperparameters and train the models on them, and use the models to predict the calls of the next 3 months. Then we move forward by 3 months, and repeat. This is called a sliding window (or walk-forward) evaluation.</p>
+</div>
+<div id="the-timeline-of-the-calls" class="section level2">
+<h2>The Timeline of the Calls</h2>
+<p>In Part 1, we recovered the year of each call from the order of the calls. Here are the calls and the subscription rate in each month:</p>
+<pre class="r"><code>p1 &lt;- ggplot(dfMonthly, aes(x = year_month, y = calls)) +
+  geom_col(fill = &quot;#00AED8&quot;) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  labs(x = NULL, y = &quot;Calls&quot;, title = &quot;Number of calls in each month&quot;)
+p2 &lt;- ggplot(dfMonthly, aes(x = year_month, y = rate)) +
+  geom_line(color = &quot;#F37735&quot;) + geom_point(aes(size = calls), color = &quot;#F37735&quot;, show.legend = FALSE) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  labs(x = NULL, y = &quot;Subscription rate&quot;, title = &quot;Subscription rate in each month (point size: number of calls)&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/timeline-1.png" alt="" width="960" /></p>
+<p>Most of the calls were made in 2008, when few clients said yes. From the middle of 2009, the bank made far fewer calls, and about half of them succeeded. So a model trained on the past learns from a very different situation from the one that it has to predict.</p>
+</div>
+<div id="how-the-sliding-windows-work" class="section level2">
+<h2>How the Sliding Windows Work</h2>
+<p>Each cycle has two parts:</p>
+<ul>
+<li>A <strong>training window</strong> of the 12 calendar months before the testing period. We choose the hyperparameters with cross validation on these calls only, and train the final model on all of them.</li>
+<li>A <strong>testing period</strong> of the next 3 months. The model predicts these calls, which it has never seen.</li>
+</ul>
+<p>Then the window moves forward by 3 months. The first testing period starts in June 2009, the first month with 12 full months of calls before it, and the last one ends in November 2010, the last month of the data. Some months have no calls, so a window can have fewer than 12 months of calls.</p>
+<pre class="r"><code>dfCycles %&gt;%
+  transmute(Cycle = cycle,
+            `Training months` = paste(format(train_first, &quot;%b %Y&quot;), &quot;-&quot;, format(train_last, &quot;%b %Y&quot;)),
+            `Training calls` = scales::label_comma()(train_calls),
+            `Training rate` = scales::label_percent(accuracy = 0.1)(train_rate),
+            `Testing months` = if_else(test_first == test_last, format(test_first, &quot;%b %Y&quot;),
+                                       paste(format(test_first, &quot;%b %Y&quot;), &quot;-&quot;, format(test_last, &quot;%b %Y&quot;))),
+            `Testing calls` = scales::label_comma()(test_calls),
+            `Testing rate` = scales::label_percent(accuracy = 0.1)(test_rate)) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="5%" />
+<col width="19%" />
+<col width="14%" />
+<col width="13%" />
+<col width="19%" />
+<col width="13%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Cycle</th>
+<th align="left">Training months</th>
+<th align="left">Training calls</th>
+<th align="left">Training rate</th>
+<th align="left">Testing months</th>
+<th align="left">Testing calls</th>
+<th align="left">Testing rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="left">Jun 2008 - May 2009</td>
+<td align="left">28,452</td>
+<td align="left">7.7%</td>
+<td align="left">Jun 2009 - Aug 2009</td>
+<td align="left">1,662</td>
+<td align="left">35.7%</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="left">Oct 2008 - Aug 2009</td>
+<td align="left">13,886</td>
+<td align="left">13.8%</td>
+<td align="left">Sep 2009 - Nov 2009</td>
+<td align="left">1,070</td>
+<td align="left">42.4%</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="left">Dec 2008 - Nov 2009</td>
+<td align="left">11,274</td>
+<td align="left">19.0%</td>
+<td align="left">Dec 2009</td>
+<td align="left">172</td>
+<td align="left">51.2%</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="left">Mar 2009 - Dec 2009</td>
+<td align="left">11,436</td>
+<td align="left">19.5%</td>
+<td align="left">Mar 2010 - May 2010</td>
+<td align="left">650</td>
+<td align="left">56.8%</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">Jun 2009 - May 2010</td>
+<td align="left">3,554</td>
+<td align="left">42.3%</td>
+<td align="left">Jun 2010 - Aug 2010</td>
+<td align="left">773</td>
+<td align="left">52.1%</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="left">Sep 2009 - Aug 2010</td>
+<td align="left">2,665</td>
+<td align="left">49.3%</td>
+<td align="left">Sep 2010 - Nov 2010</td>
+<td align="left">635</td>
+<td align="left">47.4%</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>dfCycles %&gt;%
+  select(cycle, train_first, train_last, test_first, test_last) %&gt;%
+  pivot_longer(-cycle, names_to = c(&quot;part&quot;, &quot;.value&quot;), names_sep = &quot;_&quot;) %&gt;%
+  mutate(part = if_else(part == &quot;train&quot;, &quot;training window&quot;, &quot;testing period&quot;),
+         last = last %m+% months(1)) %&gt;%
+  ggplot(aes(y = factor(cycle), xmin = first, xmax = last, color = part)) +
+  geom_linerange(linewidth = 6) +
+  scale_y_discrete(limits = rev) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  scale_color_manual(values = c(&quot;training window&quot; = &quot;#00AED8&quot;, &quot;testing period&quot; = &quot;#F37735&quot;), name = NULL) +
+  labs(x = NULL, y = &quot;Cycle&quot;, title = &quot;Training windows and testing periods&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/windows_plot-1.png" alt="" width="960" /></p>
+<div id="whats-notable" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The training windows shrink from 28,452 calls in the first cycle to 2,665 in the last, because the bank made fewer calls each year.</li>
+<li>In the first cycles, the models learn from a very different situation from the one that they predict: in cycle 1, 7.7% of the training calls succeeded, but 35.7% of the testing calls did. By the last cycles, the training windows have similar rates to the testing periods.</li>
+<li>Cycle 3 tests only December 2009, because there were no calls in January and February 2010.</li>
+</ul>
+<p>In each cycle, the code checks that every training call was made before every testing call, and that no call is in both. Everything that the model learns, including the hyperparameters and the preparation of the features (such as the dummy variables and which features are skewed), comes from the training window only.</p>
+</div>
+</div>
+<div id="feature-sets" class="section level2">
+<h2>Feature Sets</h2>
+<p>We compare three sets of features:</p>
+<ul>
+<li><strong>client and campaign</strong>: the features of the client and of the call, such as <code>age</code>, <code>job</code>, <code>contact</code>, <code>month</code> and the history of previous campaigns. No economic features.</li>
+<li><strong>+ economic levels</strong>: the same features plus the five economic features, as in Part 2.</li>
+<li><strong>+ economic trends</strong>: the client and campaign features plus three features that describe how things changed, instead of their levels: <code>euribor_change</code>, the change of the Euribor rate; <code>employed_change</code>, the change of the number of employees; and <code>prev_month_rate</code>, the subscription rate in the last month that the model knows.</li>
+</ul>
+<p>For the calls in a testing period, the trend features compare with the last month of the training window, the last month that the bank knows when it trains the model. So the model does not use the results of other calls in the testing period.</p>
+<pre class="r"><code>p1 &lt;- ggplot(dfMonthly, aes(x = year_month, y = euribor_mean)) +
+  geom_line(color = &quot;#00AED8&quot;) + geom_point(color = &quot;#00AED8&quot;) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  labs(x = NULL, y = &quot;3 month Euribor (%)&quot;, title = &quot;Average 3 month Euribor in each month&quot;)
+p2 &lt;- ggplot(dfMonthly %&gt;% filter(!is.na(prev_month_rate)), aes(x = rate, y = prev_month_rate)) +
+  geom_abline(lty = 2) +
+  geom_point(aes(size = calls), color = &quot;#F37735&quot;, alpha = 0.7, show.legend = FALSE) +
+  scale_x_continuous(labels = scales::label_percent()) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  labs(x = &quot;Subscription rate in the month&quot;, y = &quot;Rate in the previous month with calls&quot;,
+       title = &quot;Subscription rate: each month and the month before&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/trend_features-1.png" alt="" width="960" /></p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<div id="all-the-testing-periods-together" class="section level3">
+<h3>All the Testing Periods Together</h3>
+<p>We put the predictions of all the testing periods together, 4,962 calls in total, and measure each model and feature set. We also measure the ROC AUC within each month and take the average. This shows how well a model ranks the clients <em>within</em> a month, which is what a bank needs to decide whom to call that month.</p>
+<pre class="r"><code>dfOverall &lt;- dfSlidingPred %&gt;%
+  group_by(model, feature_set) %&gt;%
+  summarise(roc_auc = roc_auc_vec(y, .pred_yes),
+            pr_auc = pr_auc_vec(y, .pred_yes),
+            mn_log_loss = mn_log_loss_vec(y, .pred_yes),
+            mean_predicted = mean(.pred_yes),
+            actual_rate = mean(y == &quot;yes&quot;),
+            .groups = &quot;drop&quot;) %&gt;%
+  left_join(dfSlidingPred %&gt;%
+              group_by(model, feature_set, year_month) %&gt;%
+              summarise(month_roc_auc = roc_auc_vec(y, .pred_yes), .groups = &quot;drop&quot;) %&gt;%
+              group_by(model, feature_set) %&gt;%
+              summarise(monthly_roc_auc = mean(month_roc_auc), .groups = &quot;drop&quot;),
+            by = c(&quot;model&quot;, &quot;feature_set&quot;)) %&gt;%
+  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets))) %&gt;%
+  arrange(model, feature_set)
+
+dfOverall %&gt;%
+  mutate(across(c(roc_auc, pr_auc, mn_log_loss, monthly_roc_auc), ~ round(.x, 3)),
+         across(c(mean_predicted, actual_rate), ~ scales::label_percent(accuracy = 0.1)(.x))) %&gt;%
+  select(model, feature_set, roc_auc, monthly_roc_auc, pr_auc, mn_log_loss, mean_predicted, actual_rate) %&gt;%
+  knitr::kable(col.names = c(&quot;Model&quot;, &quot;Features&quot;, &quot;ROC AUC&quot;, &quot;Average ROC AUC within a month&quot;, &quot;PR AUC&quot;, &quot;Log loss&quot;,
+                             &quot;Average predicted probability&quot;, &quot;Actual subscription rate&quot;))</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="5%" />
+<col width="14%" />
+<col width="5%" />
+<col width="22%" />
+<col width="5%" />
+<col width="6%" />
+<col width="21%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="left">Features</th>
+<th align="right">ROC AUC</th>
+<th align="right">Average ROC AUC within a month</th>
+<th align="right">PR AUC</th>
+<th align="right">Log loss</th>
+<th align="left">Average predicted probability</th>
+<th align="left">Actual subscription rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">glmnet</td>
+<td align="left">client and campaign</td>
+<td align="right">0.655</td>
+<td align="right">0.678</td>
+<td align="right">0.621</td>
+<td align="right">0.762</td>
+<td align="left">27.4%</td>
+<td align="left">44.5%</td>
+</tr>
+<tr class="even">
+<td align="left">glmnet</td>
+<td align="left">+ economic levels</td>
+<td align="right">0.596</td>
+<td align="right">0.683</td>
+<td align="right">0.519</td>
+<td align="right">1.337</td>
+<td align="left">50.7%</td>
+<td align="left">44.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">glmnet</td>
+<td align="left">+ economic trends</td>
+<td align="right">0.588</td>
+<td align="right">0.678</td>
+<td align="right">0.521</td>
+<td align="right">0.902</td>
+<td align="left">45.9%</td>
+<td align="left">44.5%</td>
+</tr>
+<tr class="even">
+<td align="left">xgboost</td>
+<td align="left">client and campaign</td>
+<td align="right">0.650</td>
+<td align="right">0.677</td>
+<td align="right">0.615</td>
+<td align="right">0.764</td>
+<td align="left">27.7%</td>
+<td align="left">44.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">xgboost</td>
+<td align="left">+ economic levels</td>
+<td align="right">0.638</td>
+<td align="right">0.669</td>
+<td align="right">0.598</td>
+<td align="right">0.721</td>
+<td align="left">31.7%</td>
+<td align="left">44.5%</td>
+</tr>
+<tr class="even">
+<td align="left">xgboost</td>
+<td align="left">+ economic trends</td>
+<td align="right">0.573</td>
+<td align="right">0.650</td>
+<td align="right">0.519</td>
+<td align="right">0.716</td>
+<td align="left">47.1%</td>
+<td align="left">44.5%</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>overall &lt;- function(model, feature_set, metric) dfOverall[[metric]][dfOverall$model == model &amp; dfOverall$feature_set == feature_set]
+# the best model and feature set, by ROC AUC over all the testing periods together
+best_row &lt;- dfOverall %&gt;% slice_max(roc_auc, n = 1)</code></pre>
+<div id="whats-notable-1" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>On calls that they have not seen, from the next 3 months, the models do much worse than in Part 2. The best ROC AUC is 0.655, for glmnet with the client and campaign features, compared with about 0.80 on the random testing set of Part 2.</li>
+<li>Within a month, all the models and feature sets rank the clients about equally well, with an average ROC AUC of 0.650 to 0.683. The differences in the overall ROC AUC come mostly from how well the models predict the level of each month: a model that gives every client in a good month a higher probability ranks them higher overall.</li>
+<li>The economic features do not help. With their levels, <code>glmnet</code> has an overall ROC AUC of only 0.596 and the worst log loss, 1.337. The trend features do not help either.</li>
+<li>Without the economic features, the models expect far fewer subscribers than there are: an average predicted probability of about 27%, compared with the actual rate of 44%. They learned from windows with lower subscription rates.</li>
+</ul>
+</div>
+</div>
+<div id="cycle-by-cycle" class="section level3">
+<h3>Cycle by Cycle</h3>
+<pre class="r"><code>dfCycleResults &lt;- dfSlidingPred %&gt;%
+  group_by(cycle, model, feature_set) %&gt;%
+  summarise(roc_auc = roc_auc_vec(y, .pred_yes), .groups = &quot;drop&quot;) %&gt;%
+  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets)))
+
+ggplot(dfCycleResults, aes(x = cycle, y = roc_auc, color = feature_set)) +
+  geom_hline(yintercept = 0.5, lty = 2) +
+  geom_line() + geom_point(size = 2) +
+  facet_wrap(~ model) +
+  scale_x_continuous(breaks = dfCycles$cycle) +
+  scale_color_quant(palette = &quot;metro&quot;, name = &quot;Features&quot;) +
+  labs(x = &quot;Cycle&quot;, y = &quot;ROC AUC on the testing period&quot;, title = &quot;ROC AUC in each testing period&quot;,
+       subtitle = &quot;The dashed line is a random ranking&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/cycle_results-1.png" alt="" width="960" /></p>
+<div id="whats-notable-2" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>In every cycle, the models and feature sets have similar ROC AUCs. The period matters much more than the model or the features.</li>
+<li>The ROC AUC rises from about 0.57 in cycle 1 to about 0.76 in the last cycle. In the first cycle, the training window is mostly calls from 2008, when few clients said yes. In the last cycles, the training window is from the same situation as the testing period, so what the models learned still applies.</li>
+</ul>
+</div>
+</div>
+<div id="predicted-and-actual-subscription-rates" class="section level3">
+<h3>Predicted and Actual Subscription Rates</h3>
+<p>A bank also needs to know how many subscribers to expect, for example to plan its staff. Here is the average predicted probability in each testing month, compared with the actual subscription rate:</p>
+<pre class="r"><code>dfSlidingPred %&gt;%
+  mutate(feature_set = factor(feature_set, levels = names(lFeatureSets))) %&gt;%
+  group_by(model, feature_set, year_month) %&gt;%
+  summarise(predicted = mean(.pred_yes), actual = mean(y == &quot;yes&quot;), .groups = &quot;drop&quot;) %&gt;%
+  ggplot(aes(x = year_month)) +
+  geom_line(aes(y = actual), color = &quot;black&quot;, linewidth = 1) +
+  geom_line(aes(y = predicted, color = feature_set)) +
+  geom_point(aes(y = predicted, color = feature_set), size = 1.5) +
+  facet_wrap(~ model) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  scale_color_quant(palette = &quot;metro&quot;, name = &quot;Features&quot;) +
+  labs(x = NULL, y = &quot;Subscription rate&quot;, title = &quot;Predicted (colors) and actual (black) subscription rate in each testing month&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/index_files/figure-html/calibration-1.png" alt="" width="960" /></p>
+<div id="whats-notable-3" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>Without the economic features, the models predict too few subscribers in the first cycles, and catch up as the training windows include more months with high rates.</li>
+<li>With the levels of the economic features, <code>glmnet</code> swings widely: in September to November 2009, it predicts that almost every client will say yes. In those months, interest rates were lower than in any month of its training window, so it extended a straight-line trend that no longer applied (as in Part 2).</li>
+<li>With the trend features, the average prediction is closer to the actual rate over the whole period, but it jumps from one cycle to the next, because the change of the economy and last month’s rate are only a rough guide to the next 3 months.</li>
+</ul>
+</div>
+</div>
+<div id="the-hyperparameters-change-from-cycle-to-cycle" class="section level3">
+<h3>The Hyperparameters Change from Cycle to Cycle</h3>
+<p>These are the hyperparameters of <code>xgboost</code> chosen in each cycle, with the client and campaign features:</p>
+<pre class="r"><code>dfCycleParams %&gt;%
+  filter(model == &quot;xgboost&quot;, feature_set == best_row$feature_set) %&gt;%
+  unnest(params) %&gt;%
+  transmute(Cycle = cycle, min_n, tree_depth, learn_rate = signif(learn_rate, 3),
+            `Cross validated ROC AUC in the training window` = round(cv_roc_auc, 3)) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="7%" />
+<col width="13%" />
+<col width="13%" />
+<col width="58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Cycle</th>
+<th align="right">min_n</th>
+<th align="right">tree_depth</th>
+<th align="right">learn_rate</th>
+<th align="right">Cross validated ROC AUC in the training window</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">23</td>
+<td align="right">2</td>
+<td align="right">0.0032</td>
+<td align="right">0.619</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">40</td>
+<td align="right">1</td>
+<td align="right">0.0395</td>
+<td align="right">0.692</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">39</td>
+<td align="right">12</td>
+<td align="right">0.0035</td>
+<td align="right">0.755</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">39</td>
+<td align="right">12</td>
+<td align="right">0.0035</td>
+<td align="right">0.759</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">23</td>
+<td align="right">2</td>
+<td align="right">0.0032</td>
+<td align="right">0.634</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="right">23</td>
+<td align="right">15</td>
+<td align="right">0.0089</td>
+<td align="right">0.693</td>
+</tr>
+</tbody>
+</table>
+<div id="whats-notable-4" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>The best hyperparameters change from cycle to cycle, from very shallow trees (a depth of 1 or 2) to deep trees (a depth of 12 or more). This is why we must choose them again in each cycle, on the training window only, rather than reuse the hyperparameters of Part 2, which were chosen on calls from the whole period.</li>
+<li>The cross validated ROC AUC within a training window does not tell us how well the model will do on the next 3 months: sometimes it is higher, and sometimes lower. Cross validation within a window measures how well a model fits that period, not the next one.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="comparison-with-part-2" class="section level2">
+<h2>Comparison with Part 2</h2>
+<p>The three ways of testing the models give very different answers:</p>
+<ul>
+<li>On a random testing set from the same period (Part 2), the best models had a ROC AUC of about 0.80.</li>
+<li>When we trained on the first 75% of the calls and tested on the last 25% (Part 2), the ROC AUC was between 0.28 and 0.71, depending on the model and the features. But the hyperparameters had been chosen on calls from the whole period.</li>
+<li>With sliding windows, where every choice is made on past calls only, the ROC AUC over all the testing periods is between 0.573 and 0.655.</li>
+</ul>
+<p>The testing periods are not exactly the same (the later calls of Part 2 start in May 2009, and the testing periods here start in June 2009), so the numbers cannot be compared exactly. But the message is clear: the random testing set of Part 2 gave a much too good picture of how the models would predict future calls.</p>
+</div>
+<div id="how-a-bank-could-use-the-models" class="section level2">
+<h2>How a Bank Could Use the Models</h2>
+<p>Even with modest ROC AUCs, the models are useful within a month. If the bank calls the 20% of each month’s clients with the highest probabilities, using the glmnet model with the client and campaign features:</p>
+<pre class="r"><code>dfTopCalls &lt;- dfSlidingPred %&gt;%
+  filter(model == best_row$model, feature_set == best_row$feature_set) %&gt;%
+  group_by(year_month) %&gt;%
+  arrange(desc(.pred_yes), .by_group = TRUE) %&gt;%
+  mutate(called = row_number() &lt;= ceiling(0.2 * n())) %&gt;%
+  ungroup()
+
+top_reach &lt;- sum(dfTopCalls$y == &quot;yes&quot; &amp; dfTopCalls$called) / sum(dfTopCalls$y == &quot;yes&quot;)
+top_rate &lt;- mean(dfTopCalls$y[dfTopCalls$called] == &quot;yes&quot;)
+all_rate &lt;- mean(dfTopCalls$y == &quot;yes&quot;)</code></pre>
+<ul>
+<li>It reaches 31% of the subscribers with 20% of the calls.</li>
+<li>68% of these calls end with a <em>yes</em>, compared with 44% of all the calls in the testing periods: 1.5 times as many.</li>
+</ul>
+<p>This is a smaller gain than in Part 2, where the top 20% reached about two thirds of the subscribers. But it is an honest estimate of what the bank could expect from a model trained on the past.</p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<ul>
+<li>When the data covers a period of time, the way we test a model matters as much as the model itself. A random testing set lets the model learn from the same period that it is tested on, and it gives a much too good picture.</li>
+<li>In a sliding window, every step that learns from data, including the choice of the hyperparameters, the preparation of the features and the features that describe the recent past, must use the training window only. Then the testing period is truly unseen.</li>
+<li>On truly unseen calls, the models rank the clients within a month moderately well (an average ROC AUC of about 0.67), and calling the top 20% of each month gives about 1.5 times the success rate of calling at random.</li>
+<li>The economic features, which looked so useful in Part 2, do not help a model that predicts the future: the economy of the next months is outside what the model has seen.</li>
+<li>The models do better when the recent past is like the near future. In practice, a bank should train its models again often, and watch how well they predict each new month.</li>
+</ul>
+</div>
+<div id="appendix-sliding-window-code" class="section level2">
+<h2>Appendix: Sliding Window Code</h2>
+<p>This code runs the sliding windows. It takes several minutes, so it does not run each time we build this page. Instead, the page saves the results in the file <code>Bank_Sliding.Rda</code>, together with a fingerprint (a hash) of the inputs: the clean data from <a href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">Part 1</a> and the code itself. When we build the page again, it calculates the fingerprint again:</p>
+<ul>
+<li>If the fingerprint is the same, the page loads the saved results in a few seconds.</li>
+<li>If the data or any part of the code has changed, the page runs the sliding windows again and saves the new results.</li>
+</ul>
+<p>Changes to the comments or the spacing of the code do not count as changes. To run the sliding windows again without any change, delete <code>Bank_Sliding.Rda</code>.</p>
+<pre class="r"><code># How the sliding window code is built:
+#   1. Each cycle has a training window of 12 calendar months and a testing period of the next 3 months. Then the
+#      window moves forward by 3 months. Hyperparameters are tuned within each training window only, so no information
+#      from the testing period or later is used (no lookahead). The Part 2 hyperparameters are not reused, because they
+#      were tuned on calls from the whole period.
+#   2. Within a training window, the hyperparameters are tuned by racing with 5-fold cross validation, as in Part 2.
+#      The folds are random within the window: they do not need to respect time, because all of them come before the
+#      testing period.
+#   3. Three feature sets are compared: the client and campaign features only, these plus the five economic features
+#      (their levels, as in Part 2), and these plus three trend features that describe how the economy and the campaign
+#      changed (see &quot;Trend features&quot;).
+#   4. Two models are compared: glmnet (regularized logistic regression) and xgboost. Plain logistic regression is not
+#      used, because the later training windows have only a few thousand calls and ~50 predictors, where an
+#      unregularized model is unstable. ranger is not used, because it was the slowest to tune in Part 2, and it did
+#      not do better than xgboost.
+#   5. The cycles run one after another; within a cycle, the tuning runs in parallel (see &quot;Parallel backend&quot;).
+
+# load the clean dataset and the dates of the calls from Part 1 (bank_data_file is set in the &quot;sliding_cache&quot; chunk)
+load(bank_data_file)
+
+dfCalls &lt;- dfClean %&gt;%
+    inner_join(dfCallDates, by = &quot;Id&quot;) %&gt;%
+    arrange(Id)
+
+# Trend features
+########################################################################################################################################################
+# Calculated from past months only:
+#   euribor_change:  the 3 month Euribor on the day of the call, minus its average in a reference month.
+#   employed_change: the number of employees (nr.employed) at the time of the call, minus its average in the
+#                    reference month.
+#   prev_month_rate: the subscription rate in the reference month.
+# For the calls in a training window, the reference month is the previous month with calls (some months have no calls:
+# January, February and September 2008). For the calls in a testing period, it is the last month of the training
+# window, for all 3 testing months (see &quot;Run the cycles&quot;). Otherwise, in the 2nd and 3rd testing months,
+# prev_month_rate would use the results of calls in the testing period, which the model must not see.
+# Euribor and employment on the day of a call are published economic data, known at the time of the call.
+# The first month, May 2008, has no previous month, so its calls are left out.
+dfMonthly &lt;- dfCalls %&gt;%
+    group_by(year_month) %&gt;%
+    summarise(calls = n(), rate = mean(y == &quot;yes&quot;), euribor_mean = mean(euribor3m), employed_mean = mean(nr.employed)) %&gt;%
+    arrange(year_month) %&gt;%
+    mutate(prev_euribor = lag(euribor_mean), prev_employed = lag(employed_mean), prev_month_rate = lag(rate))
+
+dfCalls &lt;- dfCalls %&gt;%
+    inner_join(dfMonthly %&gt;% select(year_month, prev_euribor, prev_employed, prev_month_rate), by = &quot;year_month&quot;) %&gt;%
+    mutate(euribor_change = euribor3m - prev_euribor,
+           employed_change = nr.employed - prev_employed) %&gt;%
+    select(-prev_euribor, -prev_employed) %&gt;%
+    filter(!is.na(prev_month_rate))
+
+vFeaturesEconomic &lt;- c(&quot;emp.var.rate&quot;, &quot;cons.price.idx&quot;, &quot;cons.conf.idx&quot;, &quot;euribor3m&quot;, &quot;nr.employed&quot;)
+vFeaturesTrend &lt;- c(&quot;euribor_change&quot;, &quot;employed_change&quot;, &quot;prev_month_rate&quot;)
+
+# predictors left out of each feature set (Id, year and year_month are never predictors)
+lFeatureSets &lt;- list(&quot;client and campaign&quot; = c(vFeaturesEconomic, vFeaturesTrend),
+                     &quot;+ economic levels&quot; = vFeaturesTrend,
+                     &quot;+ economic trends&quot; = vFeaturesEconomic)
+
+
+# Cycles
+########################################################################################################################################################
+# The first testing period starts 12 calendar months after the first usable month (June 2008), so that every training
+# window has 12 full months. Each cycle tests the next 3 months, and the next cycle starts 3 months later, until the
+# last month of the data.
+first_month &lt;- min(dfCalls$year_month)
+last_month &lt;- max(dfCalls$year_month)
+dfCycles &lt;- tibble(test_start = seq(first_month %m+% months(12), last_month, by = &quot;3 months&quot;)) %&gt;%
+    mutate(train_start = test_start %m-% months(12),
+           train_end = test_start %m-% months(1),
+           test_end = test_start %m+% months(2),
+           cycle = row_number(),
+           train_first = as.Date(NA), train_last = as.Date(NA), test_first = as.Date(NA), test_last = as.Date(NA),
+           train_calls = NA_integer_, train_rate = NA_real_, test_calls = NA_integer_, test_rate = NA_real_)
+
+# Preprocessing Recipe
+########################################################################################################################################################
+# As in Part 2: dummy variables, log of right-skewed features, and removal of single-value predictors and exact linear
+# combinations. It is prepared on the training window of each cycle only, and so is the choice of the skewed features.
+vFeaturesClientNum &lt;- c(&quot;age&quot;, &quot;campaign&quot;, &quot;previous&quot;)
+get_preprocessing_recipe &lt;- function(df) {
+
+    vFeaturesSkew &lt;- df %&gt;%
+        select(all_of(vFeaturesClientNum)) %&gt;%
+        select_if(function(Z) timeDate::skewness(Z, na.rm = T) &gt; 0.75) %&gt;%
+        colnames()
+
+    recipe(y ~ ., data = df) %&gt;%
+        update_role(Id, year, year_month, new_role = &quot;ID&quot;) %&gt;%
+        step_mutate_at(all_of(vFeaturesSkew), fn = ~ log(. + 1)) %&gt;%
+        step_dummy(all_nominal_predictors()) %&gt;%
+        step_zv(all_predictors()) %&gt;%
+        step_intercept() %&gt;%
+        step_lincomb(all_numeric_predictors()) %&gt;%
+        step_rm(any_of(&quot;intercept&quot;)) %&gt;%
+        prep()
+}
+
+# Models and grids
+########################################################################################################################################################
+class_metrics &lt;- metric_set(roc_auc, pr_auc, mn_log_loss)
+
+get_model_spec &lt;- function(modelType) {
+    switch(modelType,
+           glmnet = logistic_reg(mode = &quot;classification&quot;, penalty = tune(), mixture = tune()) %&gt;%
+               set_engine(&quot;glmnet&quot;),
+           xgboost = boost_tree(mode = &quot;classification&quot;, trees = 1000, min_n = tune(), tree_depth = tune(),
+                                learn_rate = tune()) %&gt;%
+               set_engine(&quot;xgboost&quot;, nthread = 1))
+}
+
+# The same grids as in Part 2 (glmnet: 20 penalties x 5 mixtures; xgboost: a space-filling grid over the same ranges),
+# with 10 instead of 25 xgboost combinations, because the tuning runs 18 times (6 cycles x 3 feature sets). In a test
+# run with 4 xgboost combinations, xgboost already took 9 minutes over the 18 tuning runs. The ranges are not narrowed
+# with what Part 2 found, because Part 2 tuned on calls from the whole period (that would be a lookahead).
+get_model_param_grid &lt;- function(modelType, randomSeed = 2300) {
+    if(modelType == &quot;glmnet&quot;) {
+        return(grid_regular(penalty(), mixture(), levels = c(penalty = 20, mixture = 5)))
+    }
+    set.seed(randomSeed)
+    grid_space_filling(parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))), size = 10, type = &quot;max_entropy&quot;)
+}
+
+# !! puts the names in vExclude into the workflow itself. Without it, the workflow keeps a reference to the variable,
+# which the parallel workers cannot find.
+get_workflow &lt;- function(model_spec, vExclude) {
+    workflow() %&gt;%
+        add_variables(outcomes = y, predictors = c(-Id, -year, -year_month, -any_of(!!vExclude))) %&gt;%
+        add_model(model_spec)
+}
+
+# Tune a model on the training window with racing, train it with the best combination on the whole window, and
+# predict the testing period
+tune_fit_predict &lt;- function(dfTrain_Proc, dfTest_Proc, modelType, vExclude, randomSeed = 2300) {
+
+    model_spec &lt;- get_model_spec(modelType)
+    set.seed(randomSeed)
+    folds &lt;- vfold_cv(dfTrain_Proc, v = 5, strata = y)
+    race &lt;- get_workflow(model_spec, vExclude) %&gt;%
+        finetune::tune_race_anova(resamples = folds,
+                                  grid = get_model_param_grid(modelType, randomSeed),
+                                  metrics = class_metrics,
+                                  control = finetune::control_race(burn_in = 3, parallel_over = &quot;everything&quot;))
+    params_best &lt;- select_best(race, metric = &quot;roc_auc&quot;)
+    set.seed(randomSeed)
+    model_final &lt;- get_workflow(model_spec, vExclude) %&gt;%
+        finalize_workflow(params_best) %&gt;%
+        fit(data = dfTrain_Proc)
+
+    list(params = params_best %&gt;% select(-.config),
+         cv_roc_auc = show_best(race, metric = &quot;roc_auc&quot;, n = 1)$mean,
+         predictions = dfTest_Proc %&gt;%
+             select(Id, year_month, y) %&gt;%
+             mutate(.pred_yes = predict(model_final, dfTest_Proc, type = &quot;prob&quot;)$.pred_yes))
+}
+
+
+# Parallel backend
+########################################################################################################################################################
+# As in Part 2: workers are capped at cores - 1 and at what fits in 70% of the available RAM, at 0.75 GB per worker.
+gb_per_worker &lt;- 0.75
+gb_available &lt;- ps::ps_system_memory()$avail / 1024^3
+num_workers &lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
+message(sprintf(&quot;Using %d parallel workers (%.1f GB RAM available)&quot;, num_workers, gb_available))
+plan(multisession, workers = num_workers)
+
+
+# Run the cycles
+########################################################################################################################################################
+lResults &lt;- list()
+dfTimings &lt;- tibble(cycle = integer(), model = character(), feature_set = character(), seconds = numeric())
+for (i in seq_len(nrow(dfCycles))) {
+
+    cycle &lt;- dfCycles[i, ]
+    dfTrain &lt;- dfCalls %&gt;% filter(year_month &gt;= cycle$train_start, year_month &lt;= cycle$train_end)
+    dfTest &lt;- dfCalls %&gt;% filter(year_month &gt;= cycle$test_start, year_month &lt;= cycle$test_end)
+
+    # The testing period must be unseen: every training call comes before every testing call, and no call is in both
+    stopifnot(max(dfTrain$year_month) &lt; min(dfTest$year_month),
+              length(intersect(dfTrain$Id, dfTest$Id)) == 0)
+
+    # Trend features of the testing calls, relative to the last month of the training window (see &quot;Trend features&quot;)
+    reference_month &lt;- dfMonthly %&gt;% filter(year_month == max(dfTrain$year_month))
+    dfTest &lt;- dfTest %&gt;%
+        mutate(euribor_change = euribor3m - reference_month$euribor_mean,
+               employed_change = nr.employed - reference_month$employed_mean,
+               prev_month_rate = reference_month$rate)
+
+    preprocessing_recipe &lt;- get_preprocessing_recipe(dfTrain)
+    dfTrain_Proc &lt;- bake(preprocessing_recipe, new_data = NULL)
+    dfTest_Proc &lt;- bake(preprocessing_recipe, new_data = dfTest)
+
+    for (feature_set in names(lFeatureSets)) {
+        for (modelType in c(&quot;glmnet&quot;, &quot;xgboost&quot;)) {
+            t0 &lt;- Sys.time()
+            result &lt;- tune_fit_predict(dfTrain_Proc, dfTest_Proc, modelType, lFeatureSets[[feature_set]])
+            dfTimings &lt;- dfTimings %&gt;% add_row(cycle = cycle$cycle, model = modelType, feature_set = feature_set,
+                                               seconds = as.numeric(difftime(Sys.time(), t0, units = &quot;secs&quot;)))
+            lResults[[length(lResults) + 1]] &lt;- list(cycle = cycle$cycle, model = modelType, feature_set = feature_set,
+                                                     params = result$params, cv_roc_auc = result$cv_roc_auc,
+                                                     predictions = result$predictions)
+        }
+    }
+    dfCycles$train_first[i] &lt;- min(dfTrain$year_month)
+    dfCycles$train_last[i] &lt;- max(dfTrain$year_month)
+    dfCycles$test_first[i] &lt;- min(dfTest$year_month)
+    dfCycles$test_last[i] &lt;- max(dfTest$year_month)
+    dfCycles$train_calls[i] &lt;- nrow(dfTrain)
+    dfCycles$train_rate[i] &lt;- mean(dfTrain$y == &quot;yes&quot;)
+    dfCycles$test_calls[i] &lt;- nrow(dfTest)
+    dfCycles$test_rate[i] &lt;- mean(dfTest$y == &quot;yes&quot;)
+}
+
+plan(sequential)
+
+# predictions for every call of every testing period, by model and feature set
+dfSlidingPred &lt;- map_dfr(lResults, ~ .x$predictions %&gt;% mutate(cycle = .x$cycle, model = .x$model, feature_set = .x$feature_set))
+
+# the hyperparameters chosen in each cycle, with their cross validated ROC AUC within the training window
+dfCycleParams &lt;- map_dfr(lResults, ~ tibble(cycle = .x$cycle, model = .x$model, feature_set = .x$feature_set,
+                                            cv_roc_auc = .x$cv_roc_auc, params = list(.x$params)))
+
+# the results that the post uses, which are saved to Bank_Sliding.Rda
+vSlidingResults &lt;- c(&quot;dfSlidingPred&quot;, &quot;dfCycleParams&quot;, &quot;dfCycles&quot;, &quot;dfMonthly&quot;, &quot;dfTimings&quot;, &quot;num_workers&quot;,
+                     &quot;vFeaturesEconomic&quot;, &quot;vFeaturesTrend&quot;, &quot;lFeatureSets&quot;)</code></pre>
+<p>And this code decides whether to load the saved results or to run the sliding windows:</p>
+<pre class="r"><code># The clean dataset and the dates of the calls from Part 1
+bank_data_file &lt;- &quot;../bank-marketing-part1-eda/Bank_Marketing_Clean.Rda&quot;
+
+# Fingerprint (hash) of the inputs: the data that the code uses, and the code of the &quot;sliding_steps&quot; chunk.
+# Comments and spacing are removed from the code first, so editing them does not start a new run.
+envData &lt;- new.env()
+load(bank_data_file, envir = envData)
+sliding_steps &lt;- knitr::knit_code$get(&quot;sliding_steps&quot;)
+sliding_hash &lt;- rlang::hash(list(data = list(envData$dfClean, envData$dfCallDates),
+                                 code = deparse(parse(text = sliding_steps, keep.source = FALSE))))
+
+# If the saved results were made from the same inputs, load them. Otherwise, run the sliding windows again and save
+# the new results together with the fingerprint of their inputs.
+envSaved &lt;- new.env()
+if (file.exists(&quot;Bank_Sliding.Rda&quot;)) load(&quot;Bank_Sliding.Rda&quot;, envir = envSaved)
+if (identical(envSaved$sliding_hash, sliding_hash)) {
+  list2env(as.list(envSaved), envir = environment())
+} else {
+  eval(parse(text = sliding_steps))
+  save(list = c(vSlidingResults, &quot;sliding_hash&quot;), file = &quot;Bank_Sliding.Rda&quot;)
+}
+rm(envData, envSaved)</code></pre>
+</div>
+
+    </div>
+
+    
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/rstats/">rstats</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot2/">ggplot2</a>
+  
+  <a class="badge badge-light" href="/tags/models/">models</a>
+  
+  <a class="badge badge-light" href="/tags/classification/">classification</a>
+  
+  <a class="badge badge-light" href="/tags/time-series/">time series</a>
+  
+  <a class="badge badge-light" href="/tags/glmnet/">glmnet</a>
+  
+  <a class="badge badge-light" href="/tags/xgboost/">xgboost</a>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/casestudies/bank-marketing-part2-models/">Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</a></li>
+      
+      <li><a href="/casestudies/ames-housing-part3-models/">Ames Housing - Part 3 - Closing the deal - Building Models</a></li>
+      
+      <li><a href="/casestudies/diamonds-part3-non-linear-models/">Diamonds - Part 3 - A polished gem - Building Non-linear Models</a></li>
+      
+      <li><a href="/casestudies/bank-marketing-part1-eda/">Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</a></li>
+      
+      <li><a href="/casestudies/diamonds-part2-linear-models/">Diamonds - Part 2 - A cut above - Building Linear Models</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.2a3ba37e65a1405fe07f4e2fee5289d0.js"></script>
+
+    
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var article = document.querySelector('.article-style');
+    if (!article) return;
+    var blocks = article.querySelectorAll('pre.r');
+    if (!blocks.length) return;
+
+    var folds = [];
+    blocks.forEach(function (pre) {
+      var details = document.createElement('details');
+      details.className = 'code-fold';
+      var summary = document.createElement('summary');
+      summary.textContent = 'Show code';
+      pre.parentNode.insertBefore(details, pre);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      details.addEventListener('toggle', function () {
+        summary.textContent = details.open ? 'Hide code' : 'Show code';
+      });
+      folds.push(details);
+    });
+
+    
+    var toggleAll = document.createElement('button');
+    toggleAll.type = 'button';
+    toggleAll.className = 'btn btn-outline-primary btn-sm code-fold-all';
+    toggleAll.textContent = 'Show all code';
+    toggleAll.addEventListener('click', function () {
+      var open = !folds.every(function (d) { return d.open; });
+      folds.forEach(function (d) { d.open = open; });
+      toggleAll.textContent = open ? 'Hide all code' : 'Show all code';
+    });
+    article.insertBefore(toggleAll, article.firstChild);
+  });
+</script>
+
+
+
+
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    © Nitin Gupta. All Rights Reserved. &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

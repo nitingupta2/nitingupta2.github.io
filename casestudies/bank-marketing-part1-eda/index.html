@@ -32,6 +32,7 @@
 Other posts in this series:
 
 Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
 
 A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.">
 
@@ -135,14 +136,15 @@ A Portuguese bank ran a series of telemarketing campaigns between May 2008 and N
 Other posts in this series:
 
 Bank Marketing - Part 2 - Who will say yes? - Building Classification Models
+Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
 
 A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The Bank Marketing dataset (Moro, Cortez and Rita, 2014) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
-      <meta property="article:published_time" content="2026-10-17T00:00:00&#43;00:00">
+      <meta property="article:published_time" content="2026-10-16T00:00:00&#43;00:00">
     
-    <meta property="article:modified_time" content="2026-10-17T00:00:00&#43;00:00">
+    <meta property="article:modified_time" content="2026-10-16T00:00:00&#43;00:00">
   
 
   
@@ -430,7 +432,7 @@ A Portuguese bank ran a series of telemarketing campaigns between May 2008 and N
     
       
     
-    Oct 17, 2026
+    Oct 16, 2026
   </span>
   
 
@@ -481,12 +483,14 @@ A Portuguese bank ran a series of telemarketing campaigns between May 2008 and N
 <h4>Other posts in this series:</h4>
 <ul>
 <li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models</a></li>
 </ul>
 <p>A Portuguese bank ran a series of telemarketing campaigns between May 2008 and November 2010. Its staff called clients and asked them to open a term deposit, a savings account that pays a fixed interest rate for a fixed period. The <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">Bank Marketing dataset</a> (<a href="http://dx.doi.org/10.1016/j.dss.2014.03.001">Moro, Cortez and Rita, 2014</a>) records 41,188 of these calls: who the client was, how and when they were called, the state of the economy at the time, and whether the client said yes.</p>
-<p>In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, <em>yes</em> or <em>no</em>? This kind of problem is called classification. The case study has two posts:</p>
+<p>In the Ames Housing and Diamonds case studies, we predicted a number (a price). Here, we predict a category: will a client subscribe, <em>yes</em> or <em>no</em>? This kind of problem is called classification. The case study has three posts:</p>
 <ol style="list-style-type: decimal">
 <li>In this post, we explore the data to find which features affect whether a client subscribes, and we prepare the data for models. An exploratory data analysis (EDA) is the first study of a dataset before we build models.</li>
 <li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we build models that predict which clients will subscribe, and we find out how a bank could use them to decide whom to call.</li>
+<li>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we train the models on a sliding window of recent months and predict the next month, as a bank would do in practice.</li>
 </ol>
 </div>
 <div id="data-description" class="section level2">
@@ -880,6 +884,73 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</co
 </ul>
 </div>
 </div>
+<div id="when-was-each-call-made" class="section level3">
+<h3>When Was Each Call Made?</h3>
+<p>The data gives the month and the day of the week of each call, but not the year. We can recover the year from the order of the calls. There are no calls in January or February, so a new year starts wherever the month goes back to an earlier month (for example, from December to March). The first call was made in May 2008.</p>
+<pre class="r"><code>dfDates &lt;- dfRaw %&gt;%
+  mutate(Id = row_number(),
+         month_num = match(month, tolower(month.abb)),
+         year = 2008 + cumsum(c(0, diff(month_num) &lt; 0)),
+         year_month = as.Date(sprintf(&quot;%d-%02d-01&quot;, year, month_num)))
+
+# the rows where a new year starts
+dfDates %&gt;%
+  filter(c(FALSE, diff(month_num) &lt; 0)) %&gt;%
+  transmute(`Call number` = Id, `Month` = month, `Year` = year) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Call number</th>
+<th align="left">Month</th>
+<th align="right">Year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">27691</td>
+<td align="left">mar</td>
+<td align="right">2009</td>
+</tr>
+<tr class="even">
+<td align="right">39131</td>
+<td align="left">mar</td>
+<td align="right">2010</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># the consumer price and confidence indices change once a month: check that each reconstructed month has a single
+# value of each, and that each month has a different value
+dfMonthCheck &lt;- dfDates %&gt;%
+  group_by(year_month) %&gt;%
+  summarise(calls = n(), rate = mean(y == &quot;yes&quot;),
+            price_values = n_distinct(cons.price.idx), confidence_values = n_distinct(cons.conf.idx),
+            cons.price.idx = first(cons.price.idx))</code></pre>
+<p>There are 3 years and 26 months, from May 2008 to November 2010, as in the description of the dataset. We can check the result with the monthly economic features. In each of the 26 months, <code>cons.price.idx</code> and <code>cons.conf.idx</code> have exactly one value, and the 26 months have 26 different consumer price indices. So the years are right.</p>
+<pre class="r"><code>p1 &lt;- ggplot(dfMonthCheck, aes(x = year_month, y = calls)) +
+  geom_col(fill = &quot;#00AED8&quot;) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  labs(x = NULL, y = &quot;Calls&quot;, title = &quot;Number of calls in each month&quot;)
+p2 &lt;- ggplot(dfMonthCheck, aes(x = year_month, y = rate)) +
+  geom_line(color = &quot;#F37735&quot;) + geom_point(aes(size = calls), color = &quot;#F37735&quot;, show.legend = FALSE) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_x_date(date_breaks = &quot;3 months&quot;, date_labels = &quot;%b %Y&quot;) +
+  labs(x = NULL, y = &quot;Subscription rate&quot;, title = &quot;Subscription rate in each month (point size: number of calls)&quot;)
+cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</code></pre>
+<p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/calls_by_month-1.png" alt="" width="960" /></p>
+<pre class="r"><code># share of the calls made in 2008, and the calls in October and December 2008
+pct_2008 &lt;- round(100 * mean(dfDates$year == 2008))
+calls_oct_dec_2008 &lt;- sum(dfMonthCheck$calls[dfMonthCheck$year_month %in% as.Date(c(&quot;2008-10-01&quot;, &quot;2008-12-01&quot;))])</code></pre>
+<div id="whats-notable-8" class="section level4">
+<h4>What’s notable?</h4>
+<ul>
+<li>67% of the calls were made in 2008, when fewer than 1 in 15 calls succeeded, except in October and December, which had only 77 calls between them.</li>
+<li>From the middle of 2009, the bank made far fewer calls, and more of them succeeded: in 2010, about half of the calls ended with a <em>yes</em>. Part of this change may come from the economy, and part from the bank calling different clients. The data cannot separate the two.</li>
+<li>So the behavior of clients changed over time. A model that learns from the past should give more weight to the recent past. In Part 3, we train the models on a sliding window of recent months, and predict the next month.</li>
+</ul>
+</div>
+</div>
 </div>
 <div id="associations-between-features" class="section level2">
 <h2>Associations Between Features</h2>
@@ -889,7 +960,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 1, align = &quot;v&quot;)</co
   mutate(across(where(is.character), as.factor))
 eda_plot_association_matrix(dfAssoc, outlineVar = &quot;y&quot;, plotTitle = &quot;Association of features with each other and with y&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/index_files/figure-html/association_matrix-1.png" alt="" width="960" /></p>
-<div id="whats-notable-8" class="section level4">
+<div id="whats-notable-9" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>The target <code>y</code> is most strongly associated with the economic features (about 0.3), with <code>poutcome</code>, <code>pdays</code> and <code>previous</code> (the history of previous campaigns), and with <code>month</code>. <code>job</code> and <code>contact</code> follow, with about 0.15.</li>
@@ -911,6 +982,7 @@ eda_plot_association_matrix(dfAssoc, outlineVar = &quot;y&quot;, plotTitle = &qu
 <li>Keep <em>unknown</em> as a category in the other features, because it is informative: for example, clients whose education is unknown subscribe more often than average.</li>
 <li>Put the months and the days of the week in calendar order.</li>
 <li>Add an <code>Id</code> that keeps the order of the calls, so that in Part 2 we can test the models on later calls. The models do not use it as a feature.</li>
+<li>Keep the year and the month of each call in a separate table, <code>dfCallDates</code>, for the sliding windows of Part 3. They are not features either, because they would tell a model directly when a call was made.</li>
 </ul>
 <p>Then we set aside 25% of the calls as a testing set, which the models will not see while they learn. We use stratified sampling, so that the testing set has the same subscription rate as the training set.</p>
 <pre class="r"><code>dfClean &lt;- dfRaw %&gt;%
@@ -963,7 +1035,12 @@ knitr::kable(dfSplit, col.names = c(&quot;Set&quot;, &quot;Calls&quot;, &quot;Su
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, file = &quot;Bank_Marketing_Clean.Rda&quot;)</code></pre>
+<pre class="r"><code># the year and month of each call that is kept, for the sliding windows of Part 3
+dfCallDates &lt;- dfDates %&gt;%
+  filter(Id %in% dfClean$Id) %&gt;%
+  select(Id, year, year_month)
+
+save(dfClean, vTestIDs, vFeaturesNum, vFeaturesCat, dfCallDates, file = &quot;Bank_Marketing_Clean.Rda&quot;)</code></pre>
 <p>The finalized dataset has 41,176 calls and 19 features: 8 numerical and 11 categorical.</p>
 </div>
 <div id="next-steps" class="section level2">
@@ -975,7 +1052,7 @@ knitr::kable(dfSplit, col.names = c(&quot;Set&quot;, &quot;Calls&quot;, &quot;Su
 <li>Age and job matter, but less.</li>
 <li><code>duration</code> must not be used, even though it looks like the best predictor.</li>
 </ul>
-<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we use this dataset to build models that predict which clients will subscribe.</p>
+<p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/">Part 2</a>, we use this dataset to build models that predict which clients will subscribe. In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we use the dates of the calls to train the models on recent months only.</p>
 </div>
 
     </div>

@@ -32,6 +32,7 @@
 Other posts in this series:
 
 Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis
+Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
 
 In Part 1, we explored the Bank Marketing dataset: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.
 In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer yes or no: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.">
@@ -136,15 +137,16 @@ In this post, we build models that predict whether a client will subscribe. A mo
 Other posts in this series:
 
 Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis
+Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models
 
 In Part 1, we explored the Bank Marketing dataset: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.
 In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer yes or no: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first."><meta property="og:image" content="https://www.nitingupta.com/img/icon-192.png">
   <meta property="twitter:image" content="https://www.nitingupta.com/img/icon-192.png"><meta property="og:locale" content="en-us">
   
     
-      <meta property="article:published_time" content="2026-10-18T00:00:00&#43;00:00">
+      <meta property="article:published_time" content="2026-10-17T00:00:00&#43;00:00">
     
-    <meta property="article:modified_time" content="2026-10-18T00:00:00&#43;00:00">
+    <meta property="article:modified_time" content="2026-10-17T00:00:00&#43;00:00">
   
 
   
@@ -432,7 +434,7 @@ In this post, we build models that predict whether a client will subscribe. A mo
     
       
     
-    Oct 18, 2026
+    Oct 17, 2026
   </span>
   
 
@@ -483,6 +485,7 @@ In this post, we build models that predict whether a client will subscribe. A mo
 <h4>Other posts in this series:</h4>
 <ul>
 <li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis</a></li>
+<li><a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models</a></li>
 </ul>
 <p>In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/">Part 1</a>, we explored the <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing">Bank Marketing dataset</a>: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.</p>
 <p>In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer <em>yes</em> or <em>no</em>: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.</p>
@@ -1039,6 +1042,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)</code></pre>
 <h2>Testing on Later Calls</h2>
 <p>In Part 1, we saw that the economic features tell a model <em>when</em> a call was made, and that the subscription rate changed a lot over time. The testing set above has calls from the same period as the training set. But a bank would use the model to plan <em>future</em> calls.</p>
 <p>So we train the best model (xgboost) again, with the same hyperparameters, on the first 75% of the calls in time order, and we test it on the last 25%. We do the same with logistic regression, the simplest model. We train each model twice: with all the features, and without the five economic features.</p>
+<p>This check is still a little optimistic for xgboost: its hyperparameters were chosen by cross validation on a random sample of calls from the whole period, which includes calls from the later period (a lookahead). In <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>, we also choose the hyperparameters on past calls only.</p>
 <pre class="r"><code>dfEarlyLateRates %&gt;%
   mutate(rate = scales::label_percent(accuracy = 0.1)(rate)) %&gt;%
   knitr::kable(col.names = c(&quot;Period&quot;, &quot;Calls&quot;, &quot;Subscription rate&quot;))</code></pre>
@@ -1159,7 +1163,7 @@ share_prev_success &lt;- c(earlier = mean(dfEarly_Proc$poutcome_success == 1), l
 <li>All the models do much worse on the later calls than on the random testing set. With all the features, xgboost has a ROC AUC of 0.611, compared with 0.803 on the random testing set. Without the economic features, its ROC AUC of 0.503 is no better than chance.</li>
 <li>Logistic regression with all the features does even worse: its ROC AUC of 0.275 is below 0.5, so it ranks the clients in the wrong order. In the later calls, the economic features have values that the model never saw in training, such as interest rates below 1%. A linear model extends the straight-line trend that it learned, and here that trend points the wrong way.</li>
 <li>Logistic regression <em>without</em> the economic features does best, with a ROC AUC of 0.707. In the earlier calls, only 0.4% of the clients had a successful previous campaign, compared with 12% in the later calls. The tree models saw too few of these clients to learn much from them, but logistic regression still learned one coefficient for them, and it carries over to the later calls.</li>
-<li>So the random testing set gives a much too good picture of how the models would do in a future campaign. A bank should train the models again often, on its most recent calls, and test them on the calls that came after.</li>
+<li>So the random testing set gives a much too good picture of how the models would do in a future campaign. A bank should train the models again often, on its most recent calls, and test them on the calls that came after. We do this in <a href="https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/">Part 3</a>.</li>
 </ul>
 </div>
 </div>

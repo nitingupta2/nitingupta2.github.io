@@ -5,7 +5,7 @@
     <link>https://www.nitingupta.com/tags/logistic-regression/</link>
       <atom:link href="https://www.nitingupta.com/tags/logistic-regression/index.xml" rel="self" type="application/rss+xml" />
     <description>Logistic Regression</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sun, 18 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Nitin Gupta. All Rights Reserved.</copyright><lastBuildDate>Sat, 17 Oct 2026 00:00:00 +0000</lastBuildDate>
     <image>
       <url>https://www.nitingupta.com/img/icon-192.png</url>
       <title>Logistic Regression</title>
@@ -15,7 +15,7 @@
     <item>
       <title>Bank Marketing - Part 2 - Who will say yes? - Building Classification Models</title>
       <link>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</link>
-      <pubDate>Sun, 18 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 17 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://www.nitingupta.com/casestudies/bank-marketing-part2-models/</guid>
       <description>
 
@@ -24,6 +24,7 @@
 &lt;h4&gt;Other posts in this series:&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Bank Marketing - Part 1 - Making the call - An Exploratory Data Analysis&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Bank Marketing - Part 3 - Keeping up with the times - Sliding Window Models&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part1-eda/&#34;&gt;Part 1&lt;/a&gt;, we explored the &lt;a href=&#34;https://archive.ics.uci.edu/dataset/222/bank+marketing&#34;&gt;Bank Marketing dataset&lt;/a&gt;: 41,188 calls in which a Portuguese bank asked its clients to open a term deposit. Only about 1 in 9 clients said yes.&lt;/p&gt;
 &lt;p&gt;In this post, we build models that predict whether a client will subscribe. A model is a formula that a computer learns from examples. A classification model does not just answer &lt;em&gt;yes&lt;/em&gt; or &lt;em&gt;no&lt;/em&gt;: it gives each client a probability of saying yes. A bank can use these probabilities to call the most promising clients first.&lt;/p&gt;
@@ -580,6 +581,7 @@ cowplot::plot_grid(plotlist = list(p1, p2), ncol = 2)&lt;/code&gt;&lt;/pre&gt;
 &lt;h2&gt;Testing on Later Calls&lt;/h2&gt;
 &lt;p&gt;In Part 1, we saw that the economic features tell a model &lt;em&gt;when&lt;/em&gt; a call was made, and that the subscription rate changed a lot over time. The testing set above has calls from the same period as the training set. But a bank would use the model to plan &lt;em&gt;future&lt;/em&gt; calls.&lt;/p&gt;
 &lt;p&gt;So we train the best model (xgboost) again, with the same hyperparameters, on the first 75% of the calls in time order, and we test it on the last 25%. We do the same with logistic regression, the simplest model. We train each model twice: with all the features, and without the five economic features.&lt;/p&gt;
+&lt;p&gt;This check is still a little optimistic for xgboost: its hyperparameters were chosen by cross validation on a random sample of calls from the whole period, which includes calls from the later period (a lookahead). In &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;, we also choose the hyperparameters on past calls only.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dfEarlyLateRates %&amp;gt;%
   mutate(rate = scales::label_percent(accuracy = 0.1)(rate)) %&amp;gt;%
   knitr::kable(col.names = c(&amp;quot;Period&amp;quot;, &amp;quot;Calls&amp;quot;, &amp;quot;Subscription rate&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
@@ -700,7 +702,7 @@ share_prev_success &amp;lt;- c(earlier = mean(dfEarly_Proc$poutcome_success == 1
 &lt;li&gt;All the models do much worse on the later calls than on the random testing set. With all the features, xgboost has a ROC AUC of 0.611, compared with 0.803 on the random testing set. Without the economic features, its ROC AUC of 0.503 is no better than chance.&lt;/li&gt;
 &lt;li&gt;Logistic regression with all the features does even worse: its ROC AUC of 0.275 is below 0.5, so it ranks the clients in the wrong order. In the later calls, the economic features have values that the model never saw in training, such as interest rates below 1%. A linear model extends the straight-line trend that it learned, and here that trend points the wrong way.&lt;/li&gt;
 &lt;li&gt;Logistic regression &lt;em&gt;without&lt;/em&gt; the economic features does best, with a ROC AUC of 0.707. In the earlier calls, only 0.4% of the clients had a successful previous campaign, compared with 12% in the later calls. The tree models saw too few of these clients to learn much from them, but logistic regression still learned one coefficient for them, and it carries over to the later calls.&lt;/li&gt;
-&lt;li&gt;So the random testing set gives a much too good picture of how the models would do in a future campaign. A bank should train the models again often, on its most recent calls, and test them on the calls that came after.&lt;/li&gt;
+&lt;li&gt;So the random testing set gives a much too good picture of how the models would do in a future campaign. A bank should train the models again often, on its most recent calls, and test them on the calls that came after. We do this in &lt;a href=&#34;https://www.nitingupta.com/casestudies/bank-marketing-part3-sliding-window/&#34;&gt;Part 3&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
