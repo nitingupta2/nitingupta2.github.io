@@ -502,9 +502,9 @@ In this post, we build models that predict whether a client will subscribe. A mo
 <ul>
 <li>Change the categorical features into numbers that a model can use.</li>
 <li>Split the training data into K parts (folds). Each time, the model learns from all the folds except one (the training part), and we check its predictions on the remaining fold (the validation part). Each fold has the same subscription rate (stratified sampling).</li>
-<li>For each model, make a set (a grid) of hyperparameter combinations that covers the possible values evenly (a space-filling grid).</li>
-<li>For each combination, train the model on the training part and make predictions on the validation part. Repeat this for all the folds.</li>
-<li>Choose the combination with the highest ROC AUC.</li>
+<li>For each model, make a set (a grid) of hyperparameter combinations that covers the possible values evenly.</li>
+<li>For each combination, train the model on the training part and make predictions on the validation part. To save time, we use racing: after the first 3 folds, we drop the combinations that are clearly worse than the best one (by a statistical test), and only the others go on to the remaining folds.</li>
+<li>Choose the combination with the highest ROC AUC over all the folds.</li>
 <li>Train each model again, with its best combination, on the complete training set.</li>
 <li>Measure each final model on the testing set, which has clients that the models have not seen.</li>
 </ul>
@@ -585,7 +585,7 @@ Computational engine: glm </code></pre>
 <h4>What’s notable?</h4>
 <ul>
 <li>Logistic regression has a cross validated ROC AUC of 0.789 and a PR AUC of 0.446. Its PR AUC is about 4 times the 0.113 of a random ranking.</li>
-<li>It takes about 11 seconds to cross validate.</li>
+<li>It takes about 21 seconds to cross validate.</li>
 </ul>
 </div>
 </div>
@@ -596,6 +596,7 @@ Computational engine: glm </code></pre>
 <li><code>penalty</code>: The total amount of regularization in the model.</li>
 <li><code>mixture</code>: The proportion of L1 regularization (LASSO), which can set coefficients to exactly 0, versus L2 regularization (Ridge), which only shrinks them.</li>
 </ul>
+<p>We try 20 penalties for each of 5 mixtures. <code>glmnet</code> calculates the model for a whole series of penalties at once, so this costs only one fit per mixture.</p>
 <pre class="r"><code>model_spec_glmnet</code></pre>
 <pre><code>Logistic Regression Model Specification (classification)
 
@@ -604,33 +605,37 @@ Main Arguments:
   mixture = tune()
 
 Computational engine: glmnet </code></pre>
-<p>Let’s take a look at the top 10 hyperparameter combinations, in order of ROC AUC:</p>
+<p>Let’s take a look at the top 10 hyperparameter combinations, in order of ROC AUC. The <code>folds</code> column is the number of folds that a combination completed before racing dropped it, if it did:</p>
 <pre class="r"><code>cv_results_glmnet %&gt;% head(10)</code></pre>
-<pre><code># A tibble: 10 × 5
-    penalty mixture mn_log_loss pr_auc roc_auc
-      &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
- 1 2.07e- 9   0.950       0.278  0.445   0.790
- 2 3.47e- 4   0.992       0.279  0.445   0.790
- 3 5.26e- 7   0.976       0.279  0.445   0.790
- 4 3.70e- 8   0.441       0.278  0.445   0.790
- 5 5.82e-10   0.536       0.278  0.446   0.790
- 6 4.72e- 9   0.797       0.278  0.445   0.790
- 7 2.31e- 6   0.716       0.278  0.445   0.790
- 8 1.23e-10   0.333       0.278  0.446   0.790
- 9 2.01e- 5   0.274       0.278  0.446   0.790
-10 6.54e- 9   0.141       0.278  0.446   0.790</code></pre>
+<pre><code># A tibble: 10 × 6
+    penalty mixture folds mn_log_loss pr_auc roc_auc
+      &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+ 1 1   e-10       1     5       0.278  0.445   0.790
+ 2 3.36e-10       1     5       0.278  0.445   0.790
+ 3 1.13e- 9       1     5       0.278  0.445   0.790
+ 4 3.79e- 9       1     5       0.278  0.445   0.790
+ 5 1.27e- 8       1     5       0.278  0.445   0.790
+ 6 4.28e- 8       1     5       0.278  0.445   0.790
+ 7 1.44e- 7       1     5       0.278  0.445   0.790
+ 8 4.83e- 7       1     5       0.278  0.445   0.790
+ 9 1.62e- 6       1     5       0.278  0.445   0.790
+10 5.46e- 6       1     5       0.278  0.445   0.790</code></pre>
 <div id="whats-notable-1" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>The best <code>glmnet</code> model has a ROC AUC of 0.790, with penalty = 2.07e-09 and mixture = 0.95. This penalty is so small that the model is practically the same as logistic regression, and so is its ROC AUC. With 30,881 calls and only 50 features, a linear model does not learn noise (overfit), so regularization has little to fix.</li>
-<li>The combinations with the largest penalties set all the coefficients to 0. Then the model gives every client the same probability, and its ROC AUC is 0.500, no better than chance.</li>
-<li><code>glmnet</code> cross validation takes about 185 seconds.</li>
+<li>The best <code>glmnet</code> model has a ROC AUC of 0.790, with penalty = 1e-10 and mixture = 1. This penalty is so small that the model is practically the same as logistic regression, and so is its ROC AUC. With 30,881 calls and only 50 features, a linear model does not learn noise (overfit), so regularization has little to fix.</li>
+<li>When the mixture includes LASSO (a mixture above 0), the largest penalties set all the coefficients to 0. Then the model gives every client the same probability, and its ROC AUC is 0.500, no better than chance.</li>
+<li>Racing dropped 45 of the 100 combinations after 3 folds, including all the combinations with pure Ridge regularization (a mixture of 0).</li>
+<li><code>glmnet</code> cross validation takes about 39 seconds.</li>
 </ul>
-<pre class="r"><code>ggplot(cv_results_glmnet, aes(x = mixture, y = penalty, color = roc_auc)) +
-  geom_point(size = 3) +
-  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &quot;red&quot;, size = 4, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
+<pre class="r"><code>cv_results_glmnet %&gt;%
+  mutate(racing = if_else(folds == max(folds), &quot;all folds&quot;, &quot;dropped early&quot;)) %&gt;%
+  ggplot(aes(x = mixture, y = penalty, color = roc_auc, shape = racing)) +
+  geom_point(size = 3, stroke = 1) +
+  geom_point(data = param_best_glmnet, aes(x = mixture, y = penalty), color = &quot;red&quot;, size = 5, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
   scale_y_log10(labels = scales::label_scientific()) +
   scale_color_gradient(low = &quot;grey85&quot;, high = &quot;#00AED8&quot;, name = &quot;ROC AUC&quot;) +
+  scale_shape_manual(values = c(&quot;all folds&quot; = 16, &quot;dropped early&quot; = 1), name = &quot;Racing&quot;) +
   labs(title = &quot;glmnet hyperparameter grid&quot;, subtitle = &quot;The best combination is circled in red&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/plot_glmnet-1.png" alt="" width="672" /></p>
 </div>
@@ -660,30 +665,35 @@ Engine-Specific Arguments:
 Computational engine: ranger </code></pre>
 <p>Let’s take a look at the top 10 hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_rf %&gt;% head(10)</code></pre>
-<pre><code># A tibble: 10 × 5
-   min_n  mtry mn_log_loss pr_auc roc_auc
-   &lt;int&gt; &lt;int&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
- 1    39     4       0.274  0.463   0.796
- 2    28     3       0.274  0.461   0.795
- 3     9     4       0.274  0.462   0.795
- 4    22     2       0.278  0.454   0.794
- 5    33     7       0.275  0.463   0.794
- 6     4     2       0.277  0.455   0.794
- 7    39     9       0.276  0.463   0.794
- 8    33     2       0.278  0.453   0.794
- 9    22     6       0.275  0.462   0.794
-10    15     5       0.275  0.461   0.793</code></pre>
+<pre><code># A tibble: 10 × 6
+   min_n  mtry folds mn_log_loss pr_auc roc_auc
+   &lt;int&gt; &lt;int&gt; &lt;int&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+ 1    33     4     5       0.274  0.463   0.795
+ 2    15     3     5       0.274  0.461   0.795
+ 3    39     5     5       0.274  0.463   0.795
+ 4    22     3     5       0.275  0.461   0.794
+ 5    29     5     5       0.274  0.463   0.794
+ 6    33     7     5       0.275  0.462   0.794
+ 7    39     7     5       0.275  0.463   0.794
+ 8    18     6     5       0.276  0.461   0.793
+ 9    40     9     5       0.276  0.463   0.793
+10     2     4     5       0.275  0.460   0.793</code></pre>
 <div id="whats-notable-2" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
-<li>The best <code>ranger</code> model has a ROC AUC of 0.796, with mtry = 4 and min_n = 39. It ranks clients better than the linear models.</li>
-<li>Small values of <code>mtry</code> work best: the top 5 combinations sample only 2 to 7 features at each split. With few features to choose from, the trees are more different from each other, and their average is more reliable.</li>
-<li><code>ranger</code> cross validation takes about 1028 seconds.</li>
+<li>The best <code>ranger</code> model has a ROC AUC of 0.795, with mtry = 4 and min_n = 33. It ranks clients better than the linear models.</li>
+<li>Small values of <code>mtry</code> work best: the top 5 combinations sample only 3 to 5 features at each split. With few features to choose from, the trees are more different from each other, and their average is more reliable.</li>
+<li>Racing dropped 11 of the 25 combinations after 3 folds.</li>
+<li><code>ranger</code> cross validation takes about 10 minutes.</li>
 </ul>
-<pre class="r"><code>ggplot(cv_results_rf, aes(x = min_n, y = mtry, color = roc_auc)) +
-  geom_point(size = 3) +
-  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;, size = 4, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
+<pre class="r"><code>cv_results_rf %&gt;%
+  mutate(racing = if_else(folds == max(folds), &quot;all folds&quot;, &quot;dropped early&quot;)) %&gt;%
+  ggplot(aes(x = min_n, y = mtry, color = roc_auc, shape = racing)) +
+  geom_point(size = 3, stroke = 1) +
+  geom_point(data = param_best_rf, aes(x = min_n, y = mtry), color = &quot;red&quot;, size = 5, shape = 1, stroke = 1.5, inherit.aes = FALSE) +
   scale_color_gradient(low = &quot;grey85&quot;, high = &quot;#00AED8&quot;, name = &quot;ROC AUC&quot;) +
+  scale_shape_manual(values = c(&quot;all folds&quot; = 16, &quot;dropped early&quot; = 1), name = &quot;Racing&quot;) +
+  scale_y_continuous(breaks = 1:10) +
   labs(title = &quot;ranger hyperparameter grid&quot;, subtitle = &quot;The best combination is circled in red&quot;)</code></pre>
 <p><img src="https://www.nitingupta.com/casestudies/bank-marketing-part2-models/index_files/figure-html/plot_ranger-1.png" alt="" width="672" /></p>
 </div>
@@ -711,25 +721,25 @@ Engine-Specific Arguments:
 Computational engine: xgboost </code></pre>
 <p>Let’s take a look at the top 10 hyperparameter combinations:</p>
 <pre class="r"><code>cv_results_xgboost %&gt;% head(10)</code></pre>
-<pre><code># A tibble: 10 × 6
-   min_n tree_depth learn_rate mn_log_loss pr_auc roc_auc
-   &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
- 1    23          4    0.0254        0.274  0.460   0.800
- 2    32          9    0.00605       0.273  0.461   0.799
- 3     3          4    0.00418       0.274  0.462   0.799
- 4    20          4    0.00401       0.275  0.457   0.798
- 5    33          2    0.0289        0.275  0.457   0.797
- 6     3          2    0.0171        0.275  0.457   0.797
- 7    19         11    0.00482       0.274  0.461   0.797
- 8    24          1    0.190         0.275  0.454   0.797
- 9    29         15    0.00387       0.274  0.459   0.797
-10     4          1    0.0872        0.277  0.451   0.795</code></pre>
+<pre><code># A tibble: 10 × 7
+   min_n tree_depth learn_rate folds mn_log_loss pr_auc roc_auc
+   &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt; &lt;int&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+ 1    23          4    0.0254      5       0.274  0.460   0.800
+ 2    32          9    0.00605     5       0.273  0.461   0.799
+ 3     3          4    0.00418     5       0.274  0.462   0.799
+ 4    20          4    0.00401     5       0.275  0.457   0.798
+ 5    33          2    0.0289      5       0.275  0.457   0.797
+ 6     3          2    0.0171      5       0.275  0.457   0.797
+ 7    19         11    0.00482     5       0.274  0.461   0.797
+ 8    24          1    0.190       5       0.275  0.454   0.797
+ 9    29         15    0.00387     5       0.274  0.459   0.797
+10     4          1    0.0872      4       0.276  0.457   0.797</code></pre>
 <div id="whats-notable-3" class="section level4">
 <h4>What’s notable?</h4>
 <ul>
 <li>The best <code>xgboost</code> model has a ROC AUC of 0.800, with min_n = 23, tree_depth = 4 and learn_rate = 0.0254.</li>
-<li>7 of the top 10 combinations have shallow trees, with a depth of 4 or less. Small trees, added slowly, are enough for this data.</li>
-<li><code>xgboost</code> cross validation takes about 370 seconds.</li>
+<li>Racing dropped 16 of the 25 combinations after 3 folds. Of the 9 combinations that completed all the folds, 6 have shallow trees, with a depth of 4 or less. Small trees, added slowly, are enough for this data.</li>
+<li><code>xgboost</code> cross validation takes about 4 minutes.</li>
 </ul>
 </div>
 </div>
@@ -762,28 +772,28 @@ dfCVSummary %&gt;%
 <td align="right">0.7894</td>
 <td align="right">0.4462</td>
 <td align="right">0.2783</td>
-<td align="right">11</td>
+<td align="right">21</td>
 </tr>
 <tr class="even">
 <td align="left">glmnet</td>
 <td align="right">0.7899</td>
-<td align="right">0.4451</td>
+<td align="right">0.4454</td>
 <td align="right">0.2785</td>
-<td align="right">185</td>
+<td align="right">39</td>
 </tr>
 <tr class="odd">
 <td align="left">ranger</td>
-<td align="right">0.7956</td>
-<td align="right">0.4631</td>
-<td align="right">0.2739</td>
-<td align="right">1028</td>
+<td align="right">0.7950</td>
+<td align="right">0.4627</td>
+<td align="right">0.2741</td>
+<td align="right">613</td>
 </tr>
 <tr class="even">
 <td align="left">xgboost</td>
 <td align="right">0.7997</td>
 <td align="right">0.4595</td>
 <td align="right">0.2738</td>
-<td align="right">370</td>
+<td align="right">266</td>
 </tr>
 </tbody>
 </table>
@@ -792,7 +802,7 @@ dfCVSummary %&gt;%
 <ul>
 <li>xgboost has the best ROC AUC, 0.800, and ranger has the best PR AUC, 0.463. The two tree models rank clients better than the two linear models, but only a little: the difference in ROC AUC is about 0.010.</li>
 <li>So simple logistic regression gets most of the way. Most of the information is in a few strong features, which a linear model can use as well as a tree model.</li>
-<li>The tree models take much longer to tune. <code>ranger</code> takes about 17 minutes, compared with 11 seconds for logistic regression.</li>
+<li>The tree models take much longer to tune. <code>ranger</code> takes about 10 minutes, compared with 21 seconds for logistic regression.</li>
 </ul>
 </div>
 </div>
@@ -847,17 +857,17 @@ dfTestMetrics %&gt;%
 </tr>
 <tr class="even">
 <td align="left">glmnet</td>
-<td align="right">0.7955</td>
-<td align="right">0.4644</td>
+<td align="right">0.7956</td>
+<td align="right">0.4643</td>
 <td align="right">0.2751</td>
 <td align="right">0.7899</td>
 </tr>
 <tr class="odd">
 <td align="left">ranger</td>
-<td align="right">0.8034</td>
-<td align="right">0.4785</td>
-<td align="right">0.2692</td>
-<td align="right">0.7956</td>
+<td align="right">0.8029</td>
+<td align="right">0.4780</td>
+<td align="right">0.2695</td>
+<td align="right">0.7950</td>
 </tr>
 <tr class="even">
 <td align="left">xgboost</td>
@@ -1173,7 +1183,9 @@ share_prev_success &lt;- c(earlier = mean(dfEarly_Proc$poutcome_success == 1), l
 <p>These are the tuning steps:</p>
 <pre class="r"><code># How the tuning code is built:
 # It follows the tuning code of the Ames Housing case study (Part 3), adapted for classification:
-#   1. tune_grid() parallelises over every fold x grid-point combination (&quot;everything&quot;), so all workers stay busy.
+#   1. The hyperparameters are tuned by racing (finetune::tune_race_anova), not by fitting every combination on every
+#      fold: after 3 of the 5 folds, combinations that are clearly worse than the best are dropped (see &quot;Cross
+#      Validation Results&quot;). Each (fold, combination) fit is a separate parallel task, so all workers stay busy.
 #   2. The number of parallel workers is capped by available RAM as well as CPU cores (see &quot;Parallel backend&quot;).
 #   3. Models are compared by ROC AUC (see &quot;Metrics&quot;). Accuracy is not used: with 11% of clients subscribing, a model
 #      that always predicts &quot;no&quot; is 89% accurate.
@@ -1186,8 +1198,15 @@ share_prev_success &lt;- c(earlier = mean(dfEarly_Proc$poutcome_success == 1), l
 #      later calls&quot;), because the economic features tell the model when a call was made (see Part 1). The post adds
 #      logistic regression to this check outside the tuning steps, because it takes only seconds.
 #
-# A full run takes ~28 minutes with 4 workers: logistic regression 11s, glmnet 3 minutes, ranger 17 minutes and
-# xgboost 6 minutes, plus the final fits. All R processes together peaked at 3.4 GB.
+# Run time: the first version of this code fitted every combination on every fold, with mtry up to 20, a 25-point
+# space-filling grid for glmnet and a 1 GB memory budget per worker (4 workers on this machine). A full run took ~28
+# minutes: logistic regression 11s, glmnet 3 minutes, ranger 17 minutes and xgboost 6 minutes, plus the final fits.
+# The changes in this version (racing, a regular grid for glmnet, mtry up to 10, 0.75 GB per worker) are explained
+# where they are made. This version took ~17 minutes with 5 workers: logistic regression 21s (including starting the
+# workers), glmnet 39s, ranger 10 minutes and xgboost 4.4 minutes, plus the final fits. Racing dropped 45 of the 100
+# glmnet combinations, 11 of the 25 ranger combinations and 16 of the 25 xgboost combinations, and it kept the same
+# best xgboost combination. The saving is less than the share of dropped combinations, because every combination is
+# fitted on 3 of the 5 folds before any is dropped. All R processes together peaked at 4.9 GB.
 
 # load the clean dataset from Part 1 (bank_data_file is set in the &quot;tuning_cache&quot; chunk)
 load(bank_data_file)
@@ -1272,17 +1291,25 @@ get_model_spec &lt;- function(modelType) {
 ########################################################################################################################################################
 get_model_param_grid &lt;- function(df, modelType, numParams, randomSeed) {
 
+    # glmnet gets a regular grid: 20 penalties for each of 5 mixtures. glmnet calculates the coefficients for a whole
+    # sequence of penalties in one fit, and tune uses this when the grid has several penalties for the same mixture
+    # (penalty is a &quot;submodel&quot; parameter). So 100 combinations need only 5 fits per fold, while the 25-point
+    # space-filling grid, with a different mixture in every point, needed 25.
+    if(modelType == &quot;glmnet&quot;) {
+        return(grid_regular(penalty(), mixture(), levels = c(penalty = 20, mixture = 5)))
+    }
+
     set.seed(randomSeed)
     param_spec &lt;- switch(modelType,
-                         glmnet = parameters(penalty(), mixture()),
                          # learn_rate is on a log10 scale; ~0.003 to ~0.3 covers the useful range for 1,000 trees (see the
                          # Ames case study, where the dials default spent most of the grid on rates that never converged).
                          xgboost = parameters(min_n(), tree_depth(), learn_rate(range = c(-2.5, -0.5))),
-                         # mtry is limited to 1-20 of the ~50 predictors. In a test run, small values won (mtry 6 and 2 had
-                         # ROC AUC 0.794 and 0.793, mtry 35-37 had 0.781-0.788), and the time of a fit grows with mtry. On one
-                         # fold, with 500 trees and min_n = 10: mtry 6 took 14.4s (ROC AUC 0.788), mtry 20 took 30.7s (0.784)
-                         # and mtry 35 took 46.2s (0.780). The full range made ranger ~85% of the tuning time.
-                         ranger = parameters(min_n(), mtry(range = c(1, 20))))
+                         # mtry is limited to 1-10 of the ~50 predictors. Small values win, and the time of a fit grows with
+                         # mtry. In a test run over the full range, mtry 6 and 2 had ROC AUC 0.794 and 0.793, and mtry 35-37
+                         # had 0.781-0.788. On one fold, with 500 trees and min_n = 10: mtry 6 took 14.4s (ROC AUC 0.788),
+                         # mtry 20 took 30.7s (0.784) and mtry 35 took 46.2s (0.780). In a full run with mtry up to 20, all
+                         # 5 best combinations had mtry 2 to 7, and ranger still took 62% of the tuning time.
+                         ranger = parameters(min_n(), mtry(range = c(1, 10))))
 
     dfParamGrid &lt;- grid_space_filling(param_spec, size = numParams, type = &quot;max_entropy&quot;)
     return(dfParamGrid)
@@ -1303,22 +1330,26 @@ get_workflow &lt;- function(model_spec, vExclude = character()) {
 
 # Cross Validation Results
 ########################################################################################################################################################
-# tune_grid() fits every grid point on every fold. With parallel_over = &quot;everything&quot;, each (fold, grid point)
-# combination is a separate task, so all workers stay busy until the end of the run.
-# The results have one row per grid point, with the mean of each metric across the folds, best ROC AUC first.
+# Racing (finetune::tune_race_anova): every combination is first fitted on 3 folds (the burn-in). Then a statistical
+# test (ANOVA) on the ROC AUC, the first metric in class_metrics, drops the combinations that are clearly worse than the
+# best one, and only the remaining combinations are fitted on the next fold, and so on. With parallel_over =
+# &quot;everything&quot;, each (fold, combination) fit is a separate task, so all workers stay busy.
+# The results have one row per combination, with the mean of each metric over the folds that it completed. The
+# combinations that completed all the folds come first, best ROC AUC first; the dropped ones follow.
 cross_validate_model &lt;- function(cv_folds, model_spec, param_grid) {
 
     tune_results &lt;- get_workflow(model_spec) %&gt;%
-        tune_grid(resamples = cv_folds,
-                  grid = param_grid,
-                  metrics = class_metrics,
-                  control = control_grid(parallel_over = &quot;everything&quot;))
+        finetune::tune_race_anova(resamples = cv_folds,
+                                  grid = param_grid,
+                                  metrics = class_metrics,
+                                  control = finetune::control_race(burn_in = 3, parallel_over = &quot;everything&quot;))
 
+    # all_configs = TRUE keeps the dropped combinations, which collect_metrics() leaves out of race results by default
     dfResults &lt;- tune_results %&gt;%
-        collect_metrics() %&gt;%
-        select(all_of(names(param_grid)), .metric, mean) %&gt;%
+        collect_metrics(all_configs = TRUE) %&gt;%
+        select(all_of(names(param_grid)), .metric, mean, folds = n) %&gt;%
         pivot_wider(names_from = .metric, values_from = mean) %&gt;%
-        arrange(desc(roc_auc))
+        arrange(desc(folds), desc(roc_auc))
     return(dfResults)
 }
 
@@ -1339,12 +1370,13 @@ get_fitted_model &lt;- function(df, model_spec, dfParams, randomSeed = 2300, vEx
 # Parallel backend
 ########################################################################################################################################################
 # Each worker is a separate R session with tidymodels and the model packages loaded. The training set here is 21 times
-# the size of the Ames training set, and one ranger probability forest of 500 trees takes ~150 MB. In a test run with
-# 2 workers, all R processes together peaked at 2.3 GB, and the largest one (the main session, which holds the data and
-# the final models) at 1.0 GB, so each worker used ~0.6 GB. Budgeting 1 GB per worker leaves headroom. Workers are
-# capped at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM available when the run
-# starts, so the run cannot push the machine into swapping.
-gb_per_worker &lt;- 1
+# the size of the Ames training set, and one ranger probability forest of 500 trees takes ~150 MB. In a full run with
+# 4 workers, all R processes together peaked at 3.4 GB, of which the main session (which holds the data and the final
+# models) used 1.1 GB, so each worker used ~0.6 GB. Budgeting 0.75 GB per worker leaves headroom. Workers are capped
+# at cores - 1 (to keep the machine responsive) and at what fits in 70% of the RAM available when the run starts, so
+# the run cannot push the machine into swapping. On a CPU with 4 cores and 8 threads (hyperthreading), workers beyond
+# 4 share cores, so they add less than a full core each.
+gb_per_worker &lt;- 0.75
 gb_available &lt;- ps::ps_system_memory()$avail / 1024^3
 num_workers &lt;- max(1, min(parallel::detectCores() - 1, floor(0.7 * gb_available / gb_per_worker)))
 message(sprintf(&quot;Using %d parallel workers (%.1f GB RAM available)&quot;, num_workers, gb_available))

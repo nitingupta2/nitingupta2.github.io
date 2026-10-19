@@ -1438,7 +1438,7 @@ ALL Years
 &lt;div id=&#34;further-ideas&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Further Ideas&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Scaling: Create weekly tranches, check signals and rebalance weekly instead of monthly. This way only 25% of the portfolio is exposed to whipsaw risk. Also, the trade sizes are reduced at any given point. I wrote about these ideas in a &lt;a href=&#34;../luck-in-rebalance-timing/&#34;&gt;prior post&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Scaling: Create weekly tranches, check signals and rebalance weekly instead of monthly. This way only 25% of the portfolio is exposed to whipsaw risk. Also, the trade sizes are reduced at any given point. I wrote about these ideas in a &lt;a href=&#34;https://www.nitingupta.com/investing/luck-in-rebalance-timing/&#34;&gt;prior post&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Risk Management: From the weights plot of the blended strategy, it is evident that during some periods, 100% of the portfolio risk is concentrated in SPY. A prudent risk management strategy would limit the concentration on any single asset in a portfolio. So sudden unfavorable movements have less of an impact.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Add more uncorrelated strategies: Instead of being all-in on momentum only, value strategies could be added to the mix, which exhibit low correlation to momentum strategies.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;Alternative Implementation: Implement this strategy using futures products which provide greater control over margins to scale up or down.&lt;/p&gt;&lt;/li&gt;

@@ -21,7 +21,7 @@
 
 
 &lt;hr&gt;
-&lt;p&gt;In my &lt;a href=&#34;../a-deep-dive-in-analyzing-swimming-data/&#34;&gt;previous post&lt;/a&gt;, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But how much impact does practice and coaching have? As I mentioned in my previous post, coaches do not keep a record of attendance during practice. There are daily hour long practice sessions during the summers. But even though it isn’t known how regular the kids are in attending practice, the number of meets that a kid participates in during the season, can be a good proxy. Afterall, it’s highly unlikely that a kid participates in meets while mostly skipping practice.&lt;/p&gt;
+&lt;p&gt;In my &lt;a href=&#34;https://www.nitingupta.com/post/a-deep-dive-in-analyzing-swimming-data/&#34;&gt;previous post&lt;/a&gt;, we’ve seen how kids improve year-by-year in swimming. Certainly kids get stronger and faster as they grow. But how much impact does practice and coaching have? As I mentioned in my previous post, coaches do not keep a record of attendance during practice. There are daily hour long practice sessions during the summers. But even though it isn’t known how regular the kids are in attending practice, the number of meets that a kid participates in during the season, can be a good proxy. Afterall, it’s highly unlikely that a kid participates in meets while mostly skipping practice.&lt;/p&gt;
 &lt;p&gt;To judge improvement in a stroke, we’d like to see whether a kid got enough opportunities to practice as well as participate in meets. The summer league lasts for about 2 months. So, a reasonable start would be to take the data of kids whose first and last meet participations in a stroke were spaced at least 4 weeks apart.&lt;/p&gt;
 &lt;p&gt;Let’s see the distribution of the number of meets those kids participate in a season:&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;https://www.nitingupta.com/post/how-much-do-swimmers-improve-in-a-season/index_files/figure-html/number_of_meets-1.png&#34; width=&#34;672&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
@@ -524,7 +524,7 @@ The latest one from 2016 pertains to the Day 1 and Day 2 narrative and the quick
 
 
 &lt;hr&gt;
-&lt;p&gt;Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my &lt;a href=&#34;../top-batsmen-in-cricket/&#34;&gt;last post&lt;/a&gt;, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.&lt;/p&gt;
+&lt;p&gt;Who’re the best batsmen in cricket today? Is there a way to define a set of objective criteria that provides an unbiased conclusion? In my &lt;a href=&#34;https://www.nitingupta.com/post/top-batsmen-in-cricket/&#34;&gt;last post&lt;/a&gt;, I selected a list of top batsmen in the history of cricket, by simply filtering all batsmen who have had a career batting average of 50 or more in any format. Prior to that I eliminated newcomers, specialist bowlers and unsuccessful players by another set of filters.&lt;/p&gt;
 &lt;p&gt;I got a list of 42 batsmen who have consistently performed well throughout their career. Now the question is how could we select the best of the best who have had the most well-rounded performances. A post on &lt;a href=&#34;https://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/&#34;&gt;fivethirtyeight&lt;/a&gt; has been a strong inspiration to arrive at the answers below.&lt;/p&gt;
 &lt;div id=&#34;best-batsmen-at-present&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Best batsmen at present&lt;/h3&gt;
@@ -1157,7 +1157,7 @@ V Kohli
 
 
 &lt;hr&gt;
-&lt;p&gt;In a &lt;a href=&#34;../a-brief-history-of-cricket/&#34;&gt;previous post&lt;/a&gt;, I used data from &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt; and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.&lt;/p&gt;
+&lt;p&gt;In a &lt;a href=&#34;https://www.nitingupta.com/post/a-brief-history-of-cricket/&#34;&gt;previous post&lt;/a&gt;, I used data from &lt;a href=&#34;http://stats.espncricinfo.com/ci/engine/stats/index.html&#34;&gt;Statsguru&lt;/a&gt; and looked at a brief history of cricket with respect to debut years and career spans of players. In this post, I use detailed player statistics from the same dataset to select top batsmen who have played this game.&lt;/p&gt;
 &lt;div id=&#34;distribution-of-matches-played-by-all-players&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Distribution of matches played by all players&lt;/h3&gt;
 &lt;p&gt;Let’s take a look at the summary statistics of number of matches played by all players in each format of the game.&lt;/p&gt;
