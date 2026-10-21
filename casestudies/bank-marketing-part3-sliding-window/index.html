@@ -1481,7 +1481,9 @@ xgboost
 <li>The sliding window adapts faster when the behavior of the clients changes, as in the last two cycles, and its predictions of the number of subscribers are generally closer to the actual numbers.</li>
 <li>The sliding window is also cheaper: tuning and training took about 21 minutes for all the cycles, compared with about 40 minutes for the expanding windows, which have more calls.</li>
 </ul>
-<p>So in this dataset, forgetting the old past helps. An expanding window would be the better choice when the past stays relevant, or when there is too little recent data. A middle way, which we have not tried here, is to keep all the past calls but give the recent calls more weight.</p>
+<p>So in this dataset, forgetting the old past helps. An expanding window would be the better choice when the past stays relevant, or when there is too little recent data.</p>
+<p>This comparison looks back at the whole period, so it is a lesson learned with hindsight. A bank in the middle of 2009 could not have known that the sliding window would do better in 2010. It could only have chosen the kind of window from the past results available at the time, just as we chose the hyperparameters from the training window only.</p>
+<p>The same applies to a middle way between the two kinds of windows: keeping all the past calls, but giving the recent calls more weight. How much more weight is another choice that must be made from past data at each point in time, for example by testing a few weights on the last months of the training window. If we chose it knowing how the subscription rate changed later, the model would look better than any model that a bank could have built.</p>
 </div>
 <div id="with-perfect-foresight" class="section level2">
 <h2>With Perfect Foresight</h2>
@@ -1948,7 +1950,7 @@ all_rate &lt;- mean(dfTopCalls$y == &quot;yes&quot;)</code></pre>
 <li>On truly unseen calls, the models rank the clients within a month moderately well, and calling the top 20% of each month gives about 1.5 times the success rate of calling at random.</li>
 <li>The economic features, which looked so useful in Part 2, do not help a model that predicts the future: the economy of the next months is outside what the model has seen.</li>
 <li>Even the hyperparameters of Part 2, chosen with perfect foresight, do not make the models better. The models of Part 2 looked good because they learned from the same months that they were tested on, not because of their hyperparameters.</li>
-<li>When the behavior of the clients changes over time, a sliding window of recent months adapts faster than an expanding window of all the past months, ranks the clients within a month better, and costs less to train. In practice, a bank should train its models again often, on recent calls, and watch how well they predict each new month.</li>
+<li>Looking back at this period, a sliding window of recent months adapted faster than an expanding window of all the past months when the behavior of the clients changed, ranked the clients within a month better, and cost less to train. At the time, a bank could not have known this in advance. In practice, it should train its models again often, on recent calls, and watch how well they predict each new month.</li>
 </ul>
 </div>
 <div id="appendix-window-code" class="section level2">
